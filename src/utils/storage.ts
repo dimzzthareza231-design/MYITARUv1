@@ -51,7 +51,7 @@ export const storage = {
   },
   set: (key: string, value: any) => {
     try {
-      const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+      const serialized = JSON.stringify(value);
       memoryStore.set(key, serialized);
       if (typeof window !== 'undefined' && window.localStorage) {
         try {
