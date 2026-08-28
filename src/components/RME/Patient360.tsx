@@ -56,9 +56,9 @@ function InformedConsentModal({ onClose, patient }: { onClose: () => void, patie
       toast.error('Persetujuan dan nama wajib diisi');
       return;
     }
-    const saved = JSON.parse(localStorage.getItem('informed_consent') || '[]');
+    const saved = [];
     saved.push({ ...consent, id: Date.now(), tanggal: new Date().toISOString(), patientId: patient?.id, patientName: patient?.nama });
-    localStorage.setItem('informed_consent', JSON.stringify(saved));
+
     toast.success('Informed Consent berhasil disimpan');
     onClose();
   };
@@ -165,6 +165,7 @@ function InformedConsentModal({ onClose, patient }: { onClose: () => void, patie
   );
 }
 
+
 // ═══════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════
@@ -198,12 +199,7 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
   }, [patient]);
 
   const handleApplyVoiceToSOAP = (data: { s: string; o: string; a: string; p: string; parsed?: any }) => {
-    localStorage.setItem('soap_draft', JSON.stringify({
-      s: data.s,
-      o: data.o,
-      a: data.a,
-      p: data.p
-    }));
+
 
     // If new vitals or problems parsed, update patient state
     if (data.parsed?.vitals && Object.keys(data.parsed.vitals).length > 0) {
@@ -397,11 +393,7 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
           <MedicalSearchGrounding
             context={`Pasien: ${patientData?.nama}, Usia: ${patientData?.umur || 35} tahun, Masalah Aktif: ${patientData?.problem_list?.map((p: any) => p.nama).join(', ') || '-'}`}
             onApplyRecommendation={(rec) => {
-              const currentDraft = JSON.parse(localStorage.getItem('soap_draft') || '{}');
-              localStorage.setItem('soap_draft', JSON.stringify({
-                ...currentDraft,
-                p: (currentDraft.p ? currentDraft.p + '\n\n' : '') + `[Google Search Grounding]:\n${rec}`
-              }));
+              const saved = localStorage.getItem('simrs_soap_draft'); const currentDraft = JSON.parse(saved || '{}'); localStorage.setItem('simrs_soap_draft', JSON.stringify({ ...currentDraft, plan: (currentDraft.plan || '') + `\n\n[Google Search Grounding]:\n${rec}` }));
               toast.success('Rekomendasi diterapkan ke Plan SOAP.');
             }}
           />
@@ -438,6 +430,7 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
   );
 }
 
+
 // ═══════════════════════════════════════════════════════════
 // OVERVIEW TAB (Read-only Summary)
 // ═══════════════════════════════════════════════════════════
@@ -451,10 +444,10 @@ function OverviewTab({ patientData }: { patientData: any }) {
   const immunizations = patientData.immunizations || [];
 
   // Data SOAP terakhir (simulasi - bisa diambil dari localStorage)
-  const lastSOAP = JSON.parse(localStorage.getItem('last_soap') || 'null');
-  const lastResume = JSON.parse(localStorage.getItem('last_resume') || 'null');
-  const lastTriase = JSON.parse(localStorage.getItem('last_triase') || 'null');
-  const lastPhysicalExam = JSON.parse(localStorage.getItem('last_physical_exam') || 'null');
+  const lastSOAP = (() => { try { const s = localStorage.getItem('rme_last_soap'); return s ? JSON.parse(s) : null; } catch { return null; } })();
+  const lastResume = (() => { try { const s = localStorage.getItem('rme_last_resume'); return s ? JSON.parse(s) : null; } catch { return null; } })();
+  const lastTriase = (() => { try { const s = localStorage.getItem('rme_last_triase'); return s ? JSON.parse(s) : null; } catch { return null; } })();
+  const lastPhysicalExam = (() => { try { const s = localStorage.getItem('rme_last_physical_exam'); return s ? JSON.parse(s) : null; } catch { return null; } })();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -1012,7 +1005,7 @@ function FisikTab() {
 // ═══════════════════════════════════════════════════════════
 function SoapTab({ onOpenVoice }: { onOpenVoice?: () => void }) {
   const [soap, setSoap] = useState(() => {
-    const saved = localStorage.getItem('soap_draft');
+    const saved = localStorage.getItem('simrs_rme_soap');
     return saved ? JSON.parse(saved) : { s: '', o: '', a: '', p: '' };
   });
   const [lastSaved, setLastSaved] = useState('');
@@ -1020,7 +1013,7 @@ function SoapTab({ onOpenVoice }: { onOpenVoice?: () => void }) {
   useEffect(() => {
     // Check if soap was updated externally
     const handleStorage = () => {
-      const saved = localStorage.getItem('soap_draft');
+      const saved = localStorage.getItem('simrs_rme_soap');
       if (saved) setSoap(JSON.parse(saved));
     };
     window.addEventListener('storage', handleStorage);
@@ -1029,12 +1022,11 @@ function SoapTab({ onOpenVoice }: { onOpenVoice?: () => void }) {
 
   useEffect(() => {
     const t = setTimeout(() => {
-      localStorage.setItem('soap_draft', JSON.stringify(soap));
+      localStorage.setItem('simrs_rme_soap', JSON.stringify(soap));
       setLastSaved(new Date().toLocaleTimeString('id-ID'));
     }, 1000);
     return () => clearTimeout(t);
   }, [soap]);
-
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap justify-between items-center gap-3 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -1072,6 +1064,7 @@ function SoapTab({ onOpenVoice }: { onOpenVoice?: () => void }) {
     </div>
   );
 }
+
 
 // ═══════════════════════════════════════════════════════════
 // KODEFIKASI TAB (ICD-10, ICD-9-CM, SNOMED-CT)
@@ -1248,13 +1241,13 @@ function CPOETab({ patientData }: { patientData: any }) {
 // LEGAL TAB (Resume, TTE, Locking, Retensi)
 // ═══════════════════════════════════════════════════════════
 function LegalTab({ patientData }: { patientData: any }) {
-  const [locked, setLocked] = useState(() => localStorage.getItem(`rme_lock_${patientData?.id}`) === 'true');
+  const [locked, setLocked] = useState(() => null === 'true');
   const [retensi, setRetensi] = useState('Aktif');
 
   const toggleLock = () => {
     const newVal = !locked;
     setLocked(newVal);
-    localStorage.setItem(`rme_lock_${patientData?.id}`, String(newVal));
+
     toast.success(newVal ? '🔒 RME terkunci (anti-manipulasi PMK 24/2022)' : '🔓 RME dibuka (butuh otorisasi)');
   };
 
@@ -1318,6 +1311,7 @@ function LegalTab({ patientData }: { patientData: any }) {
     </div>
   );
 }
+
 
 // ═══════════════════════════════════════════════════════════
 // AUDIT TAB (RBAC + Audit Trail)

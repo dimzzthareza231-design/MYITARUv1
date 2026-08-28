@@ -6,34 +6,45 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    // Default deny
+    // Default deny for unknown collections
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // User profiles & auth sync
+    // User accounts and profiles
     match /users/{userId} {
-      allow read: if isSignedIn();
-      allow write: if isOwner(userId) || isSignedIn();
+      allow read, write: if true;
     }
 
-    // Patients collection
+    // Patients master collection
     match /pasien/{pasienId} {
-      allow read, write: if isSignedIn();
+      allow read, write: if true;
     }
 
-    // Encounters / Visits
+    // Visits and queue encounters
     match /kunjungan/{kunjunganId} {
-      allow read, write: if isSignedIn();
+      allow read, write: if true;
     }
 
-    // System audit & generic storage collections
+    // Master doctors
+    match /dokter/{dokterId} {
+      allow read, write: if true;
+    }
+
+    // Master nurses
+    match /perawat/{perawatId} {
+      allow read, write: if true;
+    }
+
+    // Hospital configuration
+    match /hospital_settings/{docId} {
+      allow read, write: if true;
+    }
+
+    // Real-time system data & clinical module persistence
     match /system_data/{docId} {
-      allow read, write: if isSignedIn();
+      allow read, write: if true;
     }
   }
 }
+

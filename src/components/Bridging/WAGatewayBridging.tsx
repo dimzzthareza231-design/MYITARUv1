@@ -86,8 +86,8 @@ export function WAGatewayBridging() {
 
 function ManageTab({ onNavigate }: { onNavigate: (tab: string) => void }) {
   const [messages, setMessages] = useState(() => {
-    const saved = localStorage.getItem('hospital_wa_logs');
-    if (saved) return JSON.parse(saved);
+    
+    
     return [
       { id: 'WA-001', recipient: '081234567890 (Budi Santoso)', type: 'Reminder Kontrol', text: 'Yth. Budi Santoso, Anda memiliki jadwal kontrol besok pk 09:00 di Poli Penyakit Dalam.', time: '10:15', status: 'READ' },
       { id: 'WA-002', recipient: '081298765432 (Siti Aminah)', type: 'Tiket Antrean', text: 'Nomor Antrean Anda: A-014 (Poli Kandungan). Silakan datang 15 menit sebelum perkiraan pelayanan.', time: '09:40', status: 'DELIVERED' },
@@ -218,8 +218,8 @@ function SendMessageTab() {
         time: new Date().toLocaleTimeString().slice(0, 5),
         status: 'SENT'
       };
-      const existing = JSON.parse(localStorage.getItem('hospital_wa_logs') || '[]');
-      localStorage.setItem('hospital_wa_logs', JSON.stringify([newLog, ...existing]));
+      const existing = [];
+
       toast.success(`Pesan WhatsApp berhasil dikirim ke ${phone}!`);
       setPhone('');
       setMessage('');
@@ -449,3 +449,4 @@ function PengaturanWATab() {
     </div>
   );
 }
+

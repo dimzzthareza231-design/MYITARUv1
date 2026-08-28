@@ -14,18 +14,18 @@ export function ManajemenSDM() {
 
   const activeTab = outletCtx?.activeTab || internalTab;
 
-  const [shifts, setShifts] = useState<any[]>(() => JSON.parse(localStorage.getItem('shifts') || '[]'));
-  const [kehadiran, setKehadiran] = useState<any[]>(() => JSON.parse(localStorage.getItem('kehadiran') || '[]'));
-  const [cuti, setCuti] = useState<any[]>(() => JSON.parse(localStorage.getItem('cuti') || '[]'));
+  const [shifts, setShifts] = useState<any[]>([]);
+  const [kehadiran, setKehadiran] = useState<any[]>([]);
+  const [cuti, setCuti] = useState<any[]>([]);
   const [kredensial, setKredensial] = useState<any[]>([
     { id: 1, nama: 'dr. Andi Pratama', tipe: 'SIP', no: 'SIP/123/2021', expired: '2026-08-15', status: 'Warning' },
     { id: 2, nama: 'Ns. Siti Aminah', tipe: 'STR', no: 'STR/456/2022', expired: '2027-10-10', status: 'Active' },
     { id: 3, nama: 'Budi Santoso', tipe: 'SIP', no: 'SIP/789/2020', expired: '2026-08-01', status: 'Expired' }
   ]);
 
-  useEffect(() => { localStorage.setItem('shifts', JSON.stringify(shifts)); }, [shifts]);
-  useEffect(() => { localStorage.setItem('kehadiran', JSON.stringify(kehadiran)); }, [kehadiran]);
-  useEffect(() => { localStorage.setItem('cuti', JSON.stringify(cuti)); }, [cuti]);
+  
+  
+  
 
   const tabs = [
     { id: 'Data Pegawai', label: 'Data Pegawai', icon: Users },
@@ -99,7 +99,7 @@ export function ManajemenSDM() {
       </div>
     </div>
   );
-}
+
 
 // --- SUB COMPONENTS ---
 
@@ -442,4 +442,6 @@ function KredensialTab({ kredensial, setKredensial }: { kredensial: any[], setKr
       </table>
     </div>
   );
+}
+
 }

@@ -111,11 +111,11 @@ function BuilderTab() {
 }
 
 function TrackingTab() {
-  const [patients, setPatients] = useState<any[]>(() => JSON.parse(localStorage.getItem('cp_patients') || JSON.stringify([
+  const [patients, setPatients] = useState<any[]>([
     { id: 'RM-001', name: 'Budi Santoso', cp: 'Appendisitis Akut', day: 2, tasks: [{name:'Visite DPJP', done:true}, {name:'Injeksi Ceftriaxone', done:false}, {name:'Diet Lunak', done:false}] }
-  ])));
+  ]);
   
-  useEffect(() => { localStorage.setItem('cp_patients', JSON.stringify(patients)); }, [patients]);
+  
 
   const toggleTask = (pId: string, taskIdx: number) => {
     setPatients(patients.map(p => {
@@ -173,10 +173,10 @@ function TrackingTab() {
 }
 
 function VarianceTab() {
-  const [variances, setVariances] = useState<any[]>(() => JSON.parse(localStorage.getItem('cp_variances') || '[]'));
+  const [variances, setVariances] = useState<any[]>([]);
   const [form, setForm] = useState({ rm: '', cp: 'Appendisitis Akut', day: 2, type: 'Medis', reason: '' });
 
-  useEffect(() => { localStorage.setItem('cp_variances', JSON.stringify(variances)); }, [variances]);
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

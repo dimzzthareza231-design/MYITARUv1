@@ -19,14 +19,15 @@ export function GenerateSEP() {
   }, []);
 
   const loadSepData = () => {
-    setSepList(JSON.parse(localStorage.getItem(BPJS_KEYS.SEP) || '[]'));
+    setSepList([]);
   };
 
   const handleSearchPasien = (e: React.FormEvent) => {
     e.preventDefault();
     const term = (pasienSearch || '').trim();
     if (!term) return;
-    const allPasien = JSON.parse(localStorage.getItem(BPJS_KEYS.PESERTA) || '[]');
+    const raw = localStorage.getItem('hospital_patients');
+    const allPasien: any[] = raw ? JSON.parse(raw) : [];
     const found = allPasien.find((p: any) => {
       if (!p) return false;
       const noKartu = String(p.noKartu || p.no_kartu || '');
@@ -57,7 +58,7 @@ export function GenerateSEP() {
         status: 'Tercetak'
       };
       const updatedList = [newSep, ...sepList];
-      localStorage.setItem(BPJS_KEYS.SEP, JSON.stringify(updatedList));
+
       setSepList(updatedList);
       toast.success(`Berhasil Generate SEP: ${newSep.noSep}`);
       setStep(4); // Success step
@@ -303,4 +304,6 @@ export function GenerateSEP() {
       </div>
     </div>
   );
+
+
 }

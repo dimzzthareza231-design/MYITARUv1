@@ -6,7 +6,7 @@ export function PengaduanLayanan() {
   const [form, setForm] = useState({ jenis: 'Pengaduan', faskes: '', judul: '', deskripsi: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pengaduanList, setPengaduanList] = useState<any[]>(() => {
-    const saved = localStorage.getItem('jkn_pengaduan');
+    const saved = localStorage.getItem('simrs_jkn_pengaduan');
     return saved ? JSON.parse(saved) : [
       { id: 'ADU-001', jenis: 'Pengaduan', faskes: 'RS MyItaru Pusat', judul: 'Antrean terlalu lama', status: 'Ditanggapi', tanggal: '10 Jul 2026' },
       { id: 'ADU-002', jenis: 'Saran', faskes: 'Puskesmas Melati', judul: 'Tambah jam operasional', status: 'Open', tanggal: '05 Jul 2026' }
@@ -14,9 +14,8 @@ export function PengaduanLayanan() {
   });
 
   useEffect(() => {
-    localStorage.setItem('jkn_pengaduan', JSON.stringify(pengaduanList));
+    localStorage.setItem('simrs_jkn_pengaduan', JSON.stringify(pengaduanList));
   }, [pengaduanList]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.faskes || !form.judul || !form.deskripsi) {
@@ -147,4 +146,6 @@ export function PengaduanLayanan() {
       </div>
     </div>
   );
+
+
 }

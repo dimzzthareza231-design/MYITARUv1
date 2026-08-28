@@ -92,7 +92,6 @@ export function KamarOperasi() {
   useEffect(() => {
     localStorage.setItem('hospital_ok_obat_v2', JSON.stringify(obatList));
   }, [obatList]);
-
   // Handle Tab Switch via internal navigation
   const switchToTab = (tabName: string) => {
     setSearchParams({ tab: tabName });
@@ -144,4 +143,5 @@ export function KamarOperasi() {
         />
       );
   }
+
 }

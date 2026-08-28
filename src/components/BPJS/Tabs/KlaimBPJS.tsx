@@ -15,7 +15,7 @@ export function KlaimBPJS() {
 
   const loadKlaimData = () => {
     try {
-      const saved = localStorage.getItem('bpjs_klaim');
+      const saved = localStorage.getItem('simrs_bpjs_klaim');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -41,7 +41,7 @@ export function KlaimBPJS() {
       }
     ];
     setKlaimList(dummyData);
-    localStorage.setItem('bpjs_klaim', JSON.stringify(dummyData));
+
   };
 
   const handleViewDetail = (klaim: any) => {
@@ -171,7 +171,7 @@ export function KlaimBPJS() {
       )}
     </div>
   );
-}
+
 
 function ModalDetailKlaim({ klaim, onClose }: { klaim: any, onClose: () => void }) {
   const [activeTab, setActiveTab] = useState('data');
@@ -423,4 +423,6 @@ function ModalDetailKlaim({ klaim, onClose }: { klaim: any, onClose: () => void 
       </div>
     </div>
   );
+}
+
 }

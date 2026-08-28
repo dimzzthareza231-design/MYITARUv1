@@ -1,32 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script>
-      // Ensure window.fetch has both getter and setter so polyfills and wrappers can attach safely
-      (function () {
-        try {
-          var origFetch = typeof window !== 'undefined' && window.fetch ? window.fetch.bind(window) : undefined;
-          var currentFetch = origFetch;
-          Object.defineProperty(window, 'fetch', {
-            get: function () {
-              return currentFetch;
-            },
-            set: function (fn) {
-              currentFetch = fn;
-            },
-            configurable: true,
-            enumerable: true
-          });
-        } catch (e) {
-          // Silently continue if environment disallows redefining fetch
-        }
-      })();
-    </script>
-    <title>My Google AI Studio App</title>
+    <title>MY ITARU - Sistem Informasi Rumah Sakit</title>
   </head>
-  <body>
+  <body class="bg-slate-900 text-slate-50 antialiased min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

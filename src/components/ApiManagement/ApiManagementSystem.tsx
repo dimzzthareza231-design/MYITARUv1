@@ -106,12 +106,12 @@ function DashboardTab() {
 }
 
 function ClientsTab() {
-  const [clients, setClients] = useState<any[]>(() => JSON.parse(localStorage.getItem('api_clients') || JSON.stringify([
+  const [clients, setClients] = useState<any[]>([
     { id: 'cli_abc123', name: 'Mobile App V2', env: 'Production', created: '2025-01-10' }
-  ])));
+  ]);
   const [form, setForm] = useState({ name: '', env: 'Production' });
 
-  useEffect(() => { localStorage.setItem('api_clients', JSON.stringify(clients)); }, [clients]);
+  
 
   const addClient = (e: React.FormEvent) => {
     e.preventDefault();
@@ -217,12 +217,12 @@ function DocsTab() {
 }
 
 function WebhooksTab() {
-  const [hooks, setHooks] = useState<any[]>(() => JSON.parse(localStorage.getItem('api_webhooks') || JSON.stringify([
+  const [hooks, setHooks] = useState<any[]>([
     { id: 1, url: 'https://external-crm.com/webhook/his', events: 'patient.created', status: 'Active' }
-  ])));
+  ]);
   const [form, setForm] = useState({ url: '', events: 'patient.created' });
 
-  useEffect(() => { localStorage.setItem('api_webhooks', JSON.stringify(hooks)); }, [hooks]);
+  
 
   const addHook = (e: React.FormEvent) => {
     e.preventDefault();
@@ -278,3 +278,4 @@ function WebhooksTab() {
     </div>
   );
 }
+

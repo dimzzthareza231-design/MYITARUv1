@@ -24,7 +24,7 @@ function CommandPalette() {
   };
   
   useEffect(() => {
-    const saved = localStorage.getItem('command_recent');
+    const saved = localStorage.getItem('hospital_recent_commands');
     if (saved) {
       // Need to re-map actions since they can't be serialized
       try {

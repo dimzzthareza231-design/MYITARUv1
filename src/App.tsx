@@ -64,7 +64,7 @@ import { OrthancBridging } from './components/Bridging/OrthancBridging';
 import { ApiGatewayBridging } from './components/Bridging/ApiGatewayBridging';
 
 function AppContent() {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, loading } = useAuth();
   const { isDarkMode } = useHospital();
 
   useEffect(() => {
@@ -74,6 +74,16 @@ function AppContent() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
+        <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-white font-semibold text-sm">Memverifikasi Sesi Keamanan Firebase...</p>
+        <p className="text-slate-400 text-xs mt-1">Menggunakan persistensi sesi cloud aman</p>
+      </div>
+    );
+  }
 
   if (!currentUser) {
     return (

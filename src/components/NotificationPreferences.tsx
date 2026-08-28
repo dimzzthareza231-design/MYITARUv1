@@ -14,7 +14,7 @@ export function NotificationPreferences() {
 
   // Extended local event preferences
   const [eventSettings, setEventSettings] = useState(() => {
-    const saved = localStorage.getItem('hospital_notification_events');
+    const saved = localStorage.getItem('simrs_event_notifs');
     return saved ? JSON.parse(saved) : {
       criticalLab: true,
       newQueue: true,
@@ -37,14 +37,13 @@ export function NotificationPreferences() {
   const handleEventToggle = (key: string) => {
     const updated = { ...eventSettings, [key]: !eventSettings[key] };
     setEventSettings(updated);
-    localStorage.setItem('hospital_notification_events', JSON.stringify(updated));
+
     toast.success('Pengaturan trigger notifikasi disimpan');
   };
 
   const handleTimeChange = (key: string, val: string) => {
     const updated = { ...eventSettings, [key]: val };
     setEventSettings(updated);
-    localStorage.setItem('hospital_notification_events', JSON.stringify(updated));
   };
 
   const handleSendTest = () => {
@@ -66,7 +65,7 @@ export function NotificationPreferences() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* Header */}
+      {/* Header */}/
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
@@ -281,7 +280,6 @@ export function NotificationPreferences() {
               </div>
             </div>
           </div>
-
           {/* Test Sender */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border border-slate-200 dark:border-slate-700 space-y-4">
             <h2 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-base">

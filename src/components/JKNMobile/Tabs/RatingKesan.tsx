@@ -10,7 +10,7 @@ export function RatingKesan() {
   const [komentar, setKomentar] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [riwayatRating, setRiwayatRating] = useState<any[]>(() => {
-    const saved = localStorage.getItem('jkn_rating');
+    const saved = localStorage.getItem('simrs_jkn_rating');
     return saved ? JSON.parse(saved) : [
       { id: 1, faskes: 'RS MyItaru Pusat', rating: 5, kategori: 'Pelayanan Dokter', komentar: 'Dokter sangat ramah dan menjelaskan dengan detail', tanggal: '15 Jul 2026' },
       { id: 2, faskes: 'Puskesmas Melati', rating: 4, kategori: 'Kebersihan', komentar: 'Fasilitas bersih dan nyaman', tanggal: '20 Jun 2026' }
@@ -18,9 +18,8 @@ export function RatingKesan() {
   });
 
   useEffect(() => {
-    localStorage.setItem('jkn_rating', JSON.stringify(riwayatRating));
+    localStorage.setItem('simrs_jkn_rating', JSON.stringify(riwayatRating));
   }, [riwayatRating]);
-
   const kategoriList = [
     'Pelayanan Dokter', 'Pelayanan Perawat', 'Kecepatan Pelayanan',
     'Kebersihan Fasilitas', 'Keramahan Petugas', 'Kelengkapan Fasilitas'
@@ -166,4 +165,6 @@ export function RatingKesan() {
       </div>
     </div>
   );
+
+
 }

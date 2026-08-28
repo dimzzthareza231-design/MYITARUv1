@@ -1,39 +1,36 @@
 import toast from "react-hot-toast";
-import { useToast } from "../contexts/ToastContext";
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useAuditTrail } from '../contexts/AuditTrailContext';
 
 export default function LogoutButton({ onLogout }: { onLogout?: () => void }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { logout, currentUser } = useAuth();
+  const { logActivity } = useAuditTrail();
   
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    await new Promise(r => setTimeout(r, 1000));
-    
-    localStorage.removeItem('user_token');
-    localStorage.removeItem('user_session');
-    localStorage.removeItem('current_user');
-    localStorage.removeItem('hospital_auth');
-    
-    // Log ke audit trail
-    const logs = JSON.parse(localStorage.getItem('audit_logs') || '[]');
-    logs.unshift({
-      id: Date.now(),
-      username: 'current_user',
-      action: 'LOGOUT',
-      module: 'Authentication',
-      timestamp: new Date().toISOString()
-    });
-    localStorage.setItem('audit_logs', JSON.stringify(logs));
-    
-    setIsLoggingOut(false);
-    setShowConfirm(false);
-    toast.success('Anda berhasil logout');
-    
-    if (onLogout) {
-      onLogout();
-    } else {
-      window.location.reload();
+    try {
+      if (logActivity) {
+        logActivity(
+          currentUser?.username || 'user',
+          'LOGOUT',
+          'Authentication',
+          'AuthSession',
+          currentUser?.id || 'session'
+        );
+      }
+      await logout();
+      toast.success('Anda berhasil logout');
+      if (onLogout) {
+        onLogout();
+      }
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setIsLoggingOut(false);
+      setShowConfirm(false);
     }
   };
   

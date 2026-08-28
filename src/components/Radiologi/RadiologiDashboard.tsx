@@ -18,7 +18,7 @@ export function RadiologiDashboard() {
 
   // Master persistent state for radiology orders/studies
   const [radiologiList, setRadiologiList] = useState<RadiologiItem[]>(() => {
-    const saved = localStorage.getItem('hospital_radiologi_list');
+    const saved = localStorage.getItem('simrs_radiologi_list');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -32,7 +32,7 @@ export function RadiologiDashboard() {
 
   const saveRadiologiList = (newList: RadiologiItem[]) => {
     setRadiologiList(newList);
-    localStorage.setItem('hospital_radiologi_list', JSON.stringify(newList));
+    localStorage.setItem('simrs_radiologi_list', JSON.stringify(newList));
   };
 
   // Active study for PACS or Expertise navigation
@@ -208,4 +208,6 @@ export function RadiologiDashboard() {
       </div>
     </div>
   );
+
+
 }

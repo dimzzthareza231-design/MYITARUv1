@@ -18,7 +18,8 @@ export function RujukanBPJS() {
   }, []);
 
   const loadData = () => {
-    const data = JSON.parse(localStorage.getItem(BPJS_KEYS.RUJUKAN) || '[]');
+    const raw = localStorage.getItem(BPJS_KEYS.RUJUKAN);
+    const data = raw ? JSON.parse(raw) : [];
     setRujukanList(data);
   };
 
@@ -30,6 +31,7 @@ export function RujukanBPJS() {
       toast.success('Rujukan dihapus');
     }
   };
+
 
   const handleCekRujukan = () => {
     setIsChecking(true);
@@ -187,3 +189,4 @@ export function RujukanBPJS() {
     </div>
   );
 }
+

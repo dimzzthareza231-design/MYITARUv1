@@ -137,7 +137,8 @@ function VClaimDashboard({ onNavigate }: { onNavigate: (tab: string) => void }) 
     setIsSearching(true);
     setTimeout(() => {
       setIsSearching(false);
-      const peserta = JSON.parse(localStorage.getItem(BPJS_KEYS.PESERTA) || '[]');
+      const raw = localStorage.getItem(BPJS_KEYS.PESERTA);
+      const peserta: any[] = raw ? JSON.parse(raw) : [];
       const found = peserta.find((p: any) => 
         p.noKartu?.includes(quickSearch) || p.nik?.includes(quickSearch) || p.nama?.toLowerCase().includes(quickSearch.toLowerCase())
       );

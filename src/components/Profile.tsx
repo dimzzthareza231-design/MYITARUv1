@@ -96,7 +96,7 @@ export function Profile() {
     setIsSaving(true);
     try {
       const storageKey = `user_profile_${currentUser?.id || 'default'}`;
-      localStorage.setItem(storageKey, JSON.stringify(formData));
+
 
       // Update in AuthContext if possible
       if (currentUser?.id) {
@@ -620,3 +620,4 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+

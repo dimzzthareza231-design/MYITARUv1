@@ -52,10 +52,10 @@ export function PatientSafety() {
 }
 
 function IncidentTab() {
-  const [reports, setReports] = useState<any[]>(() => JSON.parse(localStorage.getItem('safety_reports') || '[]'));
+  const [reports, setReports] = useState<any[]>([]);
   const [form, setForm] = useState({ date: '', location: '', patientId: '', type: 'KNC (Kejadian Nyaris Cedera)', desc: '', action: '' });
 
-  useEffect(() => { localStorage.setItem('safety_reports', JSON.stringify(reports)); }, [reports]);
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -216,13 +216,13 @@ function InvestigationTab() {
 }
 
 function RiskTab() {
-  const [risks, setRisks] = useState<any[]>(() => JSON.parse(localStorage.getItem('safety_risks') || JSON.stringify([
+  const [risks, setRisks] = useState<any[]>([
     { id: 'R01', desc: 'Kesalahan identifikasi', L: 3, I: 4, category: 'Clinical' },
     { id: 'R02', desc: 'Pasien jatuh dari tempat tidur', L: 2, I: 3, category: 'Clinical' },
     { id: 'R03', desc: 'Genset gagal menyala', L: 1, I: 5, category: 'Facility' }
-  ])));
+  ]);
   
-  useEffect(() => { localStorage.setItem('safety_risks', JSON.stringify(risks)); }, [risks]);
+  
 
   // Matrix is 5x5 (L x I)
   const getCellRisks = (L: number, I: number) => risks.filter(r => r.L === L && r.I === I);
@@ -287,3 +287,4 @@ function RiskTab() {
     </div>
   );
 }
+

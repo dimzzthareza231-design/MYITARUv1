@@ -54,12 +54,12 @@ export function Telemedicine() {
 }
 
 function AppointmentsTab() {
-  const [apps, setApps] = useState(() => JSON.parse(localStorage.getItem('telemed_apps') || JSON.stringify([
+  const [apps, setApps] = useState<any[]>([
     { id: 'TM-001', name: 'Budi Santoso', date: '2026-08-05', time: '14:00', status: 'Scheduled' }
-  ])));
+  ]);
   const [form, setForm] = useState({ name: '', date: '', time: '' });
 
-  useEffect(() => { localStorage.setItem('telemed_apps', JSON.stringify(apps)); }, [apps]);
+  
 
   const handleBook = (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,10 +172,10 @@ function ConsultationTab() {
 }
 
 function PrescriptionTab() {
-  const [rx, setRx] = useState<any[]>(() => JSON.parse(localStorage.getItem('telemed_rx') || '[]'));
+  const [rx, setRx] = useState<any[]>([]);
   const [form, setForm] = useState({ patient: 'Budi Santoso', med: '', dose: '', notes: '' });
 
-  useEffect(() => { localStorage.setItem('telemed_rx', JSON.stringify(rx)); }, [rx]);
+  
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();

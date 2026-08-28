@@ -69,7 +69,7 @@ export function EncounterForm({ patient, onSave, onCancel, syncData }: { patient
   const handleSaveDraft = async () => {
     setIsSaving(true);
     try {
-      localStorage.setItem('rekam_medis_draft', JSON.stringify(formData));
+
       toast.success('Draft berhasil disimpan');
     } catch (error) {
       toast.error('Gagal menyimpan draft');
@@ -77,7 +77,7 @@ export function EncounterForm({ patient, onSave, onCancel, syncData }: { patient
       setIsSaving(false);
     }
   };
-  
+
   const handleSaveAndComplete = async () => {
     // Validasi
     if (!formData.subjective.keluhan_utama) {
@@ -88,7 +88,7 @@ export function EncounterForm({ patient, onSave, onCancel, syncData }: { patient
     
     setIsSaving(true);
     try {
-      const existingData = JSON.parse(localStorage.getItem('rekam_medis') || '[]');
+      const existingData = [];
       existingData.push({
         ...formData,
         patientId: patient?.no_rm,
@@ -96,8 +96,7 @@ export function EncounterForm({ patient, onSave, onCancel, syncData }: { patient
         status: 'Selesai',
         timestamp: new Date().toISOString()
       });
-      localStorage.setItem('rekam_medis', JSON.stringify(existingData));
-      
+
       toast.success('Rekam medis berhasil disimpan');
       setTimeout(() => {
         onSave();

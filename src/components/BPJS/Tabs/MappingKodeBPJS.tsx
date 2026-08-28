@@ -21,7 +21,7 @@ export function MappingKodeBPJS() {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('bpjs_mapping');
+    const saved = localStorage.getItem('simrs_bpjs_mapping');
     if (saved) {
       setMappingData(JSON.parse(saved));
     } else {
@@ -37,10 +37,8 @@ export function MappingKodeBPJS() {
         tindakan: []
       };
       setMappingData(dummyData);
-      localStorage.setItem('bpjs_mapping', JSON.stringify(dummyData));
     }
   }, []);
-
   const tabs = [
     { id: 'poli', label: 'Poli' },
     { id: 'dokter', label: 'Dokter' },
@@ -67,7 +65,7 @@ export function MappingKodeBPJS() {
     }
 
     setMappingData(newData);
-    localStorage.setItem('bpjs_mapping', JSON.stringify(newData));
+
     setShowAddModal(false);
     setEditItem(null);
     setFormData({ kode_internal: '', nama_internal: '', kode_bpjs: '', nama_bpjs: '' });
@@ -78,7 +76,6 @@ export function MappingKodeBPJS() {
       const newData = { ...mappingData };
       newData[activeTab] = newData[activeTab].filter((item: any) => item.id !== id);
       setMappingData(newData);
-      localStorage.setItem('bpjs_mapping', JSON.stringify(newData));
       toast.success('Mapping berhasil dihapus');
     }
   };

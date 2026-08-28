@@ -11,7 +11,7 @@ import { ResponsiveContainer, LineChart as RechartsLineChart, Line, XAxis, YAxis
 export function ICUMonitoring() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'monitoring' | 'ventilator' | 'scoring' | 'fluid'>('dashboard');
 
-  const [patients, setPatients] = useState<any[]>(() => JSON.parse(localStorage.getItem('icu_patients') || '[]'));
+  const [patients, setPatients] = useState<any[]>([]);
   if (patients.length === 0) {
     setPatients([
       { id: 'ICU-1', bed: 'Bed 1', name: 'Tn. Budi Santoso', diagnosis: 'Post-CABG', hr: 92, bp: '120/80', spo2: 98, map: 93, vent: 'PCV' },
@@ -19,7 +19,7 @@ export function ICUMonitoring() {
       { id: 'ICU-3', bed: 'Bed 3', name: 'Kosong', diagnosis: '-', hr: 0, bp: '-', spo2: 0, map: 0, vent: '-' }
     ]);
   }
-  const [vitals, setVitals] = useState<any[]>(() => JSON.parse(localStorage.getItem('icu_vitals') || '[]'));
+  const [vitals, setVitals] = useState<any[]>([]);
   if (vitals.length === 0) {
     setVitals([
       { time: '08:00', hr: 90, bp_sys: 110, bp_dia: 70, spo2: 98 },
@@ -28,15 +28,24 @@ export function ICUMonitoring() {
     ]);
   }
 
-  const [scores, setScores] = useState<any>(() => JSON.parse(localStorage.getItem('icu_scores') || '{}'));
-  const [vents, setVents] = useState<any>(() => JSON.parse(localStorage.getItem('icu_vents') || '{}'));
-  const [fluids, setFluids] = useState<any>(() => JSON.parse(localStorage.getItem('icu_fluids') || '{}'));
+  const [scores, setScores] = useState<any>(() => {
+    const saved = localStorage.getItem('simrs_icu_scores');
+    return saved ? JSON.parse(saved) : {};
+  });
+  const [vents, setVents] = useState<any>(() => {
+    const saved = localStorage.getItem('simrs_icu_vents');
+    return saved ? JSON.parse(saved) : {};
+  });
+  const [fluids, setFluids] = useState<any>(() => {
+    const saved = localStorage.getItem('simrs_icu_fluids');
+    return saved ? JSON.parse(saved) : {};
+  });
 
-  useEffect(() => { localStorage.setItem('icu_patients', JSON.stringify(patients)); }, [patients]);
-  useEffect(() => { localStorage.setItem('icu_vitals', JSON.stringify(vitals)); }, [vitals]);
-  useEffect(() => { localStorage.setItem('icu_scores', JSON.stringify(scores)); }, [scores]);
-  useEffect(() => { localStorage.setItem('icu_vents', JSON.stringify(vents)); }, [vents]);
-  useEffect(() => { localStorage.setItem('icu_fluids', JSON.stringify(fluids)); }, [fluids]);
+  
+  
+  
+  
+  
 
   const tabs = [
     { id: 'dashboard', label: 'Bed Map & Dashboard', icon: Activity },
@@ -84,7 +93,7 @@ export function ICUMonitoring() {
       </div>
     </div>
   );
-}
+
 
 function DashboardTab({ patients, setActiveTab }: { patients: any[], setActiveTab: any }) {
   return (
@@ -340,4 +349,6 @@ function FluidTab({ patients, fluids, setFluids }: { patients: any[], fluids: an
       </div>
     </div>
   );
+}
+
 }

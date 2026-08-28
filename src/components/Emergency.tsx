@@ -31,7 +31,6 @@ export function Emergency() {
   useEffect(() => {
     localStorage.setItem('hospital_emergency_triage', JSON.stringify(triagePatients));
   }, [triagePatients]);
-
   const [filterTriage, setFilterTriage] = useState<string | null>(null);
 
   const [isTriageModalOpen, setIsTriageModalOpen] = useState(false);
@@ -480,4 +479,5 @@ export function Emergency() {
       </Modal>
     </div>
   );
+
 }

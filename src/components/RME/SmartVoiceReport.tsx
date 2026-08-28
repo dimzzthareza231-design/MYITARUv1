@@ -385,7 +385,7 @@ export function SmartVoiceReport({
 
     // 2. Also persist to localStorage for full persistence
     try {
-      const savedReports = JSON.parse(localStorage.getItem('smart_voice_reports') || '[]');
+      const savedReports = [];
       const newReport = {
         id: Date.now(),
         patientId: patient?.id || patient?.no_rm || 'RM-UNKNOWN',
@@ -396,21 +396,12 @@ export function SmartVoiceReport({
         verifiedBy: 'dr. Verifikator (Sp.PD / Dokter Jaga)'
       };
       savedReports.unshift(newReport);
-      localStorage.setItem('smart_voice_reports', JSON.stringify(savedReports));
+
 
       // Update draft SOAP in localStorage
-      localStorage.setItem('soap_draft', JSON.stringify({
-        s: verifiedSOAP.subjective,
-        o: verifiedSOAP.objective,
-        a: verifiedSOAP.assessment,
-        p: verifiedSOAP.plan
-      }));
 
-      // Update last resume
-      localStorage.setItem('last_resume', JSON.stringify({
-        ringkasan: verifiedSOAP.resume,
-        tanggal: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
-      }));
+
+      // Update last resume)
 
       if (onApplyToRecord) {
         onApplyToRecord(newReport);
@@ -940,3 +931,4 @@ export function SmartVoiceReport({
     </div>
   );
 }
+

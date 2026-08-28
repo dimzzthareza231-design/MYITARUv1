@@ -12,7 +12,7 @@ export function AntreanOnline() {
   }, []);
 
   const loadData = () => {
-    const saved = localStorage.getItem('jkn_antrean');
+    const saved = localStorage.getItem('simrs_jkn_antrean');
     if (saved) {
       setAntreanList(JSON.parse(saved));
     } else {
@@ -28,7 +28,6 @@ export function AntreanOnline() {
         }
       ];
       setAntreanList(dummyData);
-      localStorage.setItem('jkn_antrean', JSON.stringify(dummyData));
     }
   };
 
@@ -48,9 +47,10 @@ export function AntreanOnline() {
     };
     const updated = [newAntrean, ...antreanList];
     setAntreanList(updated);
-    localStorage.setItem('jkn_antrean', JSON.stringify(updated));
+    localStorage.setItem('simrs_jkn_antrean', JSON.stringify(updated));
     toast.success(`Antrean berhasil diambil: ${newAntrean.noAntrean}`);
   };
+
 
   return (
     <div className="p-6 space-y-6">

@@ -57,7 +57,8 @@ export function FormPasien({ initialData, onSubmit, onCancel }: any) {
     
     await new Promise(r => setTimeout(r, 1000));
     
-    const pasien = JSON.parse(localStorage.getItem('pasien') || '[]');
+    const savedPasien = localStorage.getItem('hospital_patients');
+    const pasien: any[] = savedPasien ? JSON.parse(savedPasien) : [];
     const newData = {
       ...formData,
       id: initialData?.id || Date.now().toString(),
@@ -66,9 +67,9 @@ export function FormPasien({ initialData, onSubmit, onCancel }: any) {
     
     if (initialData) {
       const updated = pasien.map((p: any) => p.id === initialData.id ? newData : p);
-      localStorage.setItem('pasien', JSON.stringify(updated));
+      localStorage.setItem('hospital_patients', JSON.stringify(updated));
     } else {
-      localStorage.setItem('pasien', JSON.stringify([...pasien, newData]));
+      localStorage.setItem('hospital_patients', JSON.stringify([...pasien, newData]));
     }
     
     setIsSubmitting(false);

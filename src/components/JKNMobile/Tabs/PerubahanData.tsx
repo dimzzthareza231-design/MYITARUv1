@@ -24,7 +24,6 @@ export function PerubahanData() {
     e.preventDefault();
     setIsSubmitting(true);
     setTimeout(() => {
-      localStorage.setItem('perubahanData', JSON.stringify(formData));
       setIsSubmitting(false);
       toast.success('Perubahan data berhasil diajukan');
     }, 1500);

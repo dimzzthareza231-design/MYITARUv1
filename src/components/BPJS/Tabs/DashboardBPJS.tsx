@@ -10,7 +10,8 @@ export function DashboardBPJS({ onNavigate }: { onNavigate?: (tab: string) => vo
   
   useEffect(() => {
     // Load stats dari localStorage
-    const klaim = JSON.parse(localStorage.getItem('bpjs_klaim') || '[]');
+    const raw = localStorage.getItem('simrs_bpjs_klaim');
+    const klaim: any[] = raw ? JSON.parse(raw) : [];
     setStats({
       totalKlaim: klaim.length,
       pending: klaim.filter((k: any) => k.status === 'Pending').length,

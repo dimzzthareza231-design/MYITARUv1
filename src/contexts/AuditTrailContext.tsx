@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { storage } from '../utils/storage';
 
 export interface AuditLog {
   id: number;
@@ -29,16 +30,10 @@ export function AuditTrailProvider({ children }: { children: React.ReactNode }) 
   const [logs, setLogs] = useState<AuditLog[]>([]);
   
   useEffect(() => {
-    const saved = localStorage.getItem('audit_logs');
-    if (saved) {
-      try {
-        setLogs(JSON.parse(saved));
-      } catch (e) {
-        console.warn('Error parsing audit_logs from localStorage', e);
-      }
-    }
-    
-    if (!saved) {
+    const saved = storage.get('audit_logs', null);
+    if (saved && Array.isArray(saved) && saved.length > 0) {
+      setLogs(saved);
+    } else {
       // Data dummy awal
       const dummyLogs: AuditLog[] = [
         {
@@ -85,7 +80,7 @@ export function AuditTrailProvider({ children }: { children: React.ReactNode }) 
         }
       ];
       setLogs(dummyLogs);
-      localStorage.setItem('audit_logs', JSON.stringify(dummyLogs));
+      storage.set('audit_logs', dummyLogs);
     }
   }, []);
   
@@ -95,20 +90,20 @@ export function AuditTrailProvider({ children }: { children: React.ReactNode }) 
       id: Date.now(),
       user_id: actionData.user_id || 1,
       username: actionData.username || 'current_user',
-      action: actionData.action, // CREATE, UPDATE, DELETE, VIEW, PRINT, EXPORT, LOGIN, LOGOUT
+      action: actionData.action,
       module: actionData.module,
       entity_type: actionData.entity_type,
       entity_id: actionData.entity_id,
       old_value: actionData.old_value || null,
       new_value: actionData.new_value || null,
       ip_address: '192.168.1.' + Math.floor(Math.random() * 255),
-      user_agent: navigator.userAgent,
+      user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'Server',
       timestamp: new Date().toISOString()
     };
     
     setLogs(prevLogs => {
-      const updated = [newLog, ...prevLogs];
-      localStorage.setItem('audit_logs', JSON.stringify(updated));
+      const updated = [newLog, ...prevLogs].slice(0, 100);
+      storage.set('audit_logs', updated);
       return updated;
     });
     
@@ -138,14 +133,14 @@ export function AuditTrailProvider({ children }: { children: React.ReactNode }) 
   const deleteLog = (id: number) => {
     setLogs(prevLogs => {
       const updated = prevLogs.filter(l => l.id !== id);
-      localStorage.setItem('audit_logs', JSON.stringify(updated));
+      storage.set('audit_logs', updated);
       return updated;
     });
   };
   
   const clearAllLogs = () => {
     setLogs([]);
-    localStorage.setItem('audit_logs', JSON.stringify([]));
+    storage.set('audit_logs', []);
   };
   
   return (

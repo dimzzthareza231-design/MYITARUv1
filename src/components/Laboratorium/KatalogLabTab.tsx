@@ -10,7 +10,7 @@ import { useToast } from '../../contexts/ToastContext';
 export function KatalogLabTab() {
   const toast = useToast();
   const [catalogList, setCatalogList] = useState<LabCatalogTest[]>(() => {
-    const saved = localStorage.getItem('hospital_lab_catalog_master');
+    const saved = localStorage.getItem('simrs_lab_catalog');
     return saved ? JSON.parse(saved) : KATALOG_LAB_MASTER;
   });
 
@@ -105,7 +105,7 @@ export function KatalogLabTab() {
 
     const updated = [newItem, ...catalogList];
     setCatalogList(updated);
-    localStorage.setItem('hospital_lab_catalog_master', JSON.stringify(updated));
+
     setIsAddModalOpen(false);
     toast.success(`Pemeriksaan baru ${newNama} (${newKode}) berhasil ditambahkan ke katalog!`);
   };
@@ -457,4 +457,6 @@ export function KatalogLabTab() {
       )}
     </div>
   );
+
+
 }

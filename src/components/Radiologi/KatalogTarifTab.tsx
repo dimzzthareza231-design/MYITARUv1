@@ -12,7 +12,7 @@ export function KatalogTarifTab() {
   const toast = useToast();
 
   const [tarifs, setTarifs] = useState<TarifRadiologiItem[]>(() => {
-    const saved = localStorage.getItem('hospital_radiologi_tarifs');
+    const saved = localStorage.getItem('simrs_radiologi_tarifs');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -26,7 +26,7 @@ export function KatalogTarifTab() {
 
   const saveTarifs = (newList: TarifRadiologiItem[]) => {
     setTarifs(newList);
-    localStorage.setItem('hospital_radiologi_tarifs', JSON.stringify(newList));
+    localStorage.setItem('simrs_radiologi_tarifs', JSON.stringify(newList));
   };
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -483,4 +483,6 @@ export function KatalogTarifTab() {
       </Modal>
     </div>
   );
+
+
 }

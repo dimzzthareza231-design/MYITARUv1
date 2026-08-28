@@ -56,10 +56,10 @@ export function CRMManagement() {
 }
 
 function CampaignTab() {
-  const [campaigns, setCampaigns] = useState<any[]>(() => JSON.parse(localStorage.getItem('crm_campaigns') || '[]'));
+  const [campaigns, setCampaigns] = useState<any[]>([]);
   const [form, setForm] = useState({ title: '', target: 'Semua Pasien Poli', channel: 'WhatsApp', date: '', time: '', message: '' });
 
-  useEffect(() => { localStorage.setItem('crm_campaigns', JSON.stringify(campaigns)); }, [campaigns]);
+  
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -231,9 +231,12 @@ function SurveyTab() {
 }
 
 function ComplaintTab() {
-  const [complaints, setComplaints] = useState<any[]>(() => JSON.parse(localStorage.getItem('crm_complaints') || JSON.stringify([
-    { id: 'TKT-001', name: 'Bpk. Ahmad', category: 'Pelayanan (Farmasi)', desc: 'Menunggu obat lebih dari 2 jam', status: 'Open' }
-  ])));
+  const [complaints, setComplaints] = useState<any[]>(() => {
+    const saved = localStorage.getItem('simrs_crm_complaints');
+    return saved ? JSON.parse(saved) : [
+      { id: 'TKT-001', name: 'Bpk. Ahmad', category: 'Pelayanan (Farmasi)', desc: 'Menunggu obat lebih dari 2 jam', status: 'Open' }
+    ];
+  });
   
   const resolveTicket = (id: string) => {
     setComplaints(complaints.map(c => c.id === id ? { ...c, status: 'Resolved' } : c));
@@ -326,3 +329,4 @@ function LoyaltyTab() {
     </div>
   );
 }
+

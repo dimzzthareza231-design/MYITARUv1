@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { storage } from '../utils/storage';
 
 const PatientFlowContext = createContext<any>(null);
 
@@ -34,16 +35,10 @@ export function PatientFlowProvider({ children }: { children: React.ReactNode })
   const [notifications, setNotifications] = useState<any[]>([]);
   
   useEffect(() => {
-    const saved = localStorage.getItem('patient_flow');
-    if (saved) {
-      try {
-        setKunjungan(JSON.parse(saved));
-      } catch (e) {
-        console.warn('Error parsing patient_flow from localStorage', e);
-      }
-    }
-    
-    if (!saved) {
+    const saved = storage.get('patient_flow', null);
+    if (saved && Array.isArray(saved) && saved.length > 0) {
+      setKunjungan(saved);
+    } else {
       const dummy = [
         {
           id: 1,
@@ -87,16 +82,12 @@ export function PatientFlowProvider({ children }: { children: React.ReactNode })
         }
       ];
       setKunjungan(dummy);
-      localStorage.setItem('patient_flow', JSON.stringify(dummy));
+      storage.set('patient_flow', dummy);
     }
     
-    const savedNotif = localStorage.getItem('patient_notifications');
-    if (savedNotif) {
-      try {
-        setNotifications(JSON.parse(savedNotif));
-      } catch (e) {
-        console.warn('Error parsing patient_notifications from localStorage', e);
-      }
+    const savedNotif = storage.get('patient_notifications', null);
+    if (savedNotif && Array.isArray(savedNotif)) {
+      setNotifications(savedNotif);
     }
   }, []);
   
@@ -123,7 +114,7 @@ export function PatientFlowProvider({ children }: { children: React.ReactNode })
         
         newNotifToSave = [notif, ...notifications];
         setNotifications(newNotifToSave);
-        localStorage.setItem('patient_notifications', JSON.stringify(newNotifToSave));
+        storage.set('patient_notifications', newNotifToSave);
         
         return {
           ...k,
@@ -136,7 +127,7 @@ export function PatientFlowProvider({ children }: { children: React.ReactNode })
     });
     
     setKunjungan(updated);
-    localStorage.setItem('patient_flow', JSON.stringify(updated));
+    storage.set('patient_flow', updated);
   };
   
   const addKunjungan = (data: any) => {
@@ -155,7 +146,7 @@ export function PatientFlowProvider({ children }: { children: React.ReactNode })
     
     const updated = [newKunjungan, ...kunjungan];
     setKunjungan(updated);
-    localStorage.setItem('patient_flow', JSON.stringify(updated));
+    storage.set('patient_flow', updated);
     return newKunjungan;
   };
   
@@ -164,13 +155,13 @@ export function PatientFlowProvider({ children }: { children: React.ReactNode })
   const markNotifRead = (id: number) => {
     const updated = notifications.map(n => n.id === id ? { ...n, read: true } : n);
     setNotifications(updated);
-    localStorage.setItem('patient_notifications', JSON.stringify(updated));
+    storage.set('patient_notifications', updated);
   };
   
   const markAllNotifRead = () => {
     const updated = notifications.map(n => ({ ...n, read: true }));
     setNotifications(updated);
-    localStorage.setItem('patient_notifications', JSON.stringify(updated));
+    storage.set('patient_notifications', updated);
   };
   
   return (

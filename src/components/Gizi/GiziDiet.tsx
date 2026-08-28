@@ -12,13 +12,13 @@ export function GiziDiet() {
     { id: 'RM-002', name: 'Ny. Siti Aminah', ruangan: 'Melati 03' },
   ]);
 
-  const [screenings, setScreenings] = useState<any[]>(() => JSON.parse(localStorage.getItem('gizi_screenings') || '[]'));
-  const [prescriptions, setPrescriptions] = useState<any[]>(() => JSON.parse(localStorage.getItem('gizi_prescriptions') || '[]'));
-  const [intakes, setIntakes] = useState<any[]>(() => JSON.parse(localStorage.getItem('gizi_intakes') || '[]'));
+  const [screenings, setScreenings] = useState<any[]>([]);
+  const [prescriptions, setPrescriptions] = useState<any[]>([]);
+  const [intakes, setIntakes] = useState<any[]>([]);
 
-  useEffect(() => { localStorage.setItem('gizi_screenings', JSON.stringify(screenings)); }, [screenings]);
-  useEffect(() => { localStorage.setItem('gizi_prescriptions', JSON.stringify(prescriptions)); }, [prescriptions]);
-  useEffect(() => { localStorage.setItem('gizi_intakes', JSON.stringify(intakes)); }, [intakes]);
+  
+  
+  
 
   const tabs = [
     { id: 'screening', label: 'Screening Gizi (MST)', icon: ClipboardList },
@@ -64,7 +64,7 @@ export function GiziDiet() {
       </div>
     </div>
   );
-}
+
 
 function ScreeningTab({ patients, screenings, setScreenings }: { patients: any[], screenings: any[], setScreenings: any }) {
   const [patient, setPatient] = useState('');
@@ -340,4 +340,6 @@ function EdukasiTab() {
       </div>
     </div>
   );
+}
+
 }

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { storage } from '../utils/storage';
 
 export interface Notification {
   id: number;
@@ -42,16 +43,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   });
   
   useEffect(() => {
-    const saved = localStorage.getItem('notifications');
-    if (saved) {
-      try {
-        setNotifications(JSON.parse(saved));
-      } catch (e) {
-        console.warn('Error parsing notifications from localStorage', e);
-      }
-    }
-    
-    if (!saved) {
+    const saved = storage.get('notifications', null);
+    if (saved && Array.isArray(saved) && saved.length > 0) {
+      setNotifications(saved);
+    } else {
       const dummy: Notification[] = [
         {
           id: 1,
@@ -105,16 +100,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         }
       ];
       setNotifications(dummy);
-      localStorage.setItem('notifications', JSON.stringify(dummy));
+      storage.set('notifications', dummy);
     }
     
-    const savedPrefs = localStorage.getItem('notification_preferences');
+    const savedPrefs = storage.get('notification_preferences', null);
     if (savedPrefs) {
-      try {
-        setPreferences(JSON.parse(savedPrefs));
-      } catch (e) {
-        console.warn('Error parsing notification_preferences from localStorage', e);
-      }
+      setPreferences(savedPrefs);
     }
   }, []);
   
@@ -127,7 +118,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     };
     const updated = [newNotif, ...notifications];
     setNotifications(updated);
-    localStorage.setItem('notifications', JSON.stringify(updated));
+    storage.set('notifications', updated);
     
     // Simulasi kirim ke channel lain
     if (preferences.email) console.log('📧 Email sent:', notification);
@@ -140,30 +131,30 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const markAsRead = (id: number) => {
     const updated = notifications.map(n => n.id === id ? { ...n, read: true } : n);
     setNotifications(updated);
-    localStorage.setItem('notifications', JSON.stringify(updated));
+    storage.set('notifications', updated);
   };
   
   const markAllAsRead = () => {
     const updated = notifications.map(n => ({ ...n, read: true }));
     setNotifications(updated);
-    localStorage.setItem('notifications', JSON.stringify(updated));
+    storage.set('notifications', updated);
   };
   
   const deleteNotification = (id: number) => {
     const updated = notifications.filter(n => n.id !== id);
     setNotifications(updated);
-    localStorage.setItem('notifications', JSON.stringify(updated));
+    storage.set('notifications', updated);
   };
   
   const clearAll = () => {
     setNotifications([]);
-    localStorage.setItem('notifications', JSON.stringify([]));
+    storage.set('notifications', []);
   };
   
   const updatePreferences = (newPrefs: Partial<NotificationPreferences>) => {
     const updated = { ...preferences, ...newPrefs };
     setPreferences(updated);
-    localStorage.setItem('notification_preferences', JSON.stringify(updated));
+    storage.set('notification_preferences', updated);
   };
   
   const unreadCount = notifications.filter(n => !n.read).length;

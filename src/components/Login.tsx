@@ -13,7 +13,7 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!username.trim() || !password.trim()) {
@@ -23,8 +23,8 @@ export function Login() {
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      const result = login(username, password);
+    try {
+      const result = await login(username, password);
       if (result.success) {
         toast.success(result.message);
         setUsername('');
@@ -32,8 +32,11 @@ export function Login() {
       } else {
         toast.error(result.message);
       }
+    } catch (err: any) {
+      toast.error(err?.message || 'Gagal masuk');
+    } finally {
       setIsLoading(false);
-    }, 400);
+    }
   };
 
   const handleGoogleSignIn = async () => {

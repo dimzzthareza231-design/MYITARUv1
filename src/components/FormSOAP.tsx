@@ -31,7 +31,8 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
     setIsSaving(true);
     await new Promise(r => setTimeout(r, 1000));
     
-    const saved = JSON.parse(localStorage.getItem('rekam_medis') || '[]');
+    const raw = localStorage.getItem('hospital_soap_records');
+    const saved: any[] = raw ? JSON.parse(raw) : [];
     const existingIndex = saved.findIndex((r: any) => r.kunjungan_id === kunjunganId);
     
     const data = { kunjungan_id: kunjunganId, ...soap, updated_at: new Date().toISOString() };
@@ -39,7 +40,8 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
     if (existingIndex >= 0) saved[existingIndex] = data;
     else saved.push(data);
     
-    localStorage.setItem('rekam_medis', JSON.stringify(saved));
+    localStorage.setItem('hospital_soap_records', JSON.stringify(saved));
+
     setIsSaving(false);
     toast.success('Rekam medis berhasil disimpan');
     if (onClose) onClose();
@@ -240,4 +242,6 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
       </div>
     </div>
   );
+
+
 }

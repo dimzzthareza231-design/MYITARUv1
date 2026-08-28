@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 export function AntreanOnlineBPJS() {
   const [antreanList, setAntreanList] = useState<any[]>(() => {
-    const saved = localStorage.getItem('bpjs_antrean_online');
+    const saved = localStorage.getItem('simrs_bpjs_antrean_online');
     return saved ? JSON.parse(saved) : [
       {
         id: 'ANT-001',
@@ -41,9 +41,8 @@ export function AntreanOnlineBPJS() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('bpjs_antrean_online', JSON.stringify(antreanList));
-  }, [antreanList]);
 
+  }, [antreanList]);
   const handlePanggil = (id: string) => {
     setAntreanList(antreanList.map(a =>
       a.id === id ? { ...a, status: 'Dipanggil' } : a
@@ -234,4 +233,6 @@ export function AntreanOnlineBPJS() {
       </div>
     </div>
   );
+
+
 }

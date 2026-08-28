@@ -24,7 +24,7 @@ export function LaboratoriumDashboard() {
 
   // Persistence for Lab Orders
   const [orders, setOrders] = useState<LabOrder[]>(() => {
-    const saved = localStorage.getItem('hospital_laboratorium_orders_v2');
+    const saved = localStorage.getItem('simrs_lab_orders');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -37,9 +37,8 @@ export function LaboratoriumDashboard() {
   });
 
   useEffect(() => {
-    localStorage.setItem('hospital_laboratorium_orders_v2', JSON.stringify(orders));
-  }, [orders]);
 
+  }, [orders]);
   // Active selected order for cross-tab workflows
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
@@ -116,7 +115,7 @@ export function LaboratoriumDashboard() {
           <button
             onClick={() => {
               setOrders(INITIAL_LAB_ORDERS_MOCK);
-              localStorage.setItem('hospital_laboratorium_orders_v2', JSON.stringify(INITIAL_LAB_ORDERS_MOCK));
+
               toast.success('Data contoh laboratorium & bank darah berhasil direset!');
             }}
             className="px-3.5 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition-all"
@@ -268,4 +267,6 @@ export function LaboratoriumDashboard() {
       />
     </div>
   );
+
+
 }

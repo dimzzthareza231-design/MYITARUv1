@@ -6,7 +6,7 @@ export function RiwayatPelayanan() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const saved = localStorage.getItem('riwayatPelayanan');
+    const saved = localStorage.getItem('simrs_jkn_riwayat_pelayanan');
     if (saved) {
       setRiwayat(JSON.parse(saved));
     } else {
@@ -34,10 +34,9 @@ export function RiwayatPelayanan() {
         }
       ];
       setRiwayat(initialData);
-      localStorage.setItem('riwayatPelayanan', JSON.stringify(initialData));
+
     }
   }, []);
-
   const filteredRiwayat = riwayat.filter(r => 
     r.diagnosa.toLowerCase().includes(searchTerm.toLowerCase()) || 
     r.faskes.toLowerCase().includes(searchTerm.toLowerCase())
@@ -117,4 +116,6 @@ export function RiwayatPelayanan() {
       </div>
     </div>
   );
+
+
 }

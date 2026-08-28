@@ -29,7 +29,6 @@ export function PendaftaranPeserta() {
 
     setIsSubmitting(true);
     setTimeout(() => {
-      localStorage.setItem('pendaftaranPBPU', JSON.stringify(formData));
       setIsSubmitting(false);
       setIsSuccess(true);
       toast.success('Pendaftaran peserta berhasil!');

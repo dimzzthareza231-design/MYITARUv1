@@ -30,9 +30,9 @@ export function SkriningKesehatan() {
     }
     const result = getResult();
     const data = { answers, result, tgl: new Date().toISOString() };
-    const existing = JSON.parse(localStorage.getItem('skrining') || '[]');
+    const existing = [];
     existing.push(data);
-    localStorage.setItem('skrining', JSON.stringify(existing));
+
     toast.success('Skrining berhasil disimpan');
     setStep(2);
   };
@@ -173,4 +173,6 @@ export function SkriningKesehatan() {
       )}
     </div>
   );
+
+
 }

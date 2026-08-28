@@ -23,6 +23,9 @@ export interface Pasien {
   golongan_darah?: string;
   penjamin?: string;
   status?: string;
+  keluhan_utama?: string;
+  diagnosa_primer?: string;
+  resume_medis?: any;
 }
 
 export interface PasienKeluarga {

@@ -111,13 +111,11 @@ function LoginSimulator() {
 }
 
 function UserManagementTab() {
-  const [users, setUsers] = useState<any[]>(() => JSON.parse(localStorage.getItem('auth_users') || JSON.stringify([
+  const [users, setUsers] = useState<any[]>([
     { id: 'U-001', name: 'Dr. Andi', role: 'Dokter', status: 'Active' },
     { id: 'U-002', name: 'Siti Aminah', role: 'Perawat', status: 'Active' }
-  ])));
+  ]);
   const [form, setForm] = useState({ name: '', role: 'Admin' });
-
-  useEffect(() => { localStorage.setItem('auth_users', JSON.stringify(users)); }, [users]);
 
   const addUser = (e: React.FormEvent) => {
     e.preventDefault();

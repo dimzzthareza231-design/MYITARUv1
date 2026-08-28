@@ -4,18 +4,18 @@ import toast from 'react-hot-toast';
 
 export function ProgramREHAB() {
   const [step, setStep] = useState(() => {
-    const isRegistered = localStorage.getItem('rehabRegistered');
+    const isRegistered = localStorage.getItem('simrs_jkn_rehab_registered') === 'true';
     return isRegistered ? 2 : 0;
   });
 
   const handleDaftar = () => {
-    localStorage.setItem('rehabRegistered', 'true');
+    localStorage.setItem('simrs_jkn_rehab_registered', 'true');
     toast.success('Pendaftaran program REHAB berhasil diajukan');
     setStep(2);
   };
 
   const handleReset = () => {
-    localStorage.removeItem('rehabRegistered');
+    localStorage.removeItem('simrs_jkn_rehab_registered');
     setStep(0);
   };
 

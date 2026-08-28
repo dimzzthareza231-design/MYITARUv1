@@ -126,17 +126,16 @@ export function RegistrationForm({ initialData, onClose }: { initialData?: any, 
   // Auto-save draft
   useEffect(() => {
     const interval = setInterval(() => {
-      localStorage.setItem('registration_draft', JSON.stringify(formData));
+
     }, 30000);
     return () => clearInterval(interval);
   }, [formData]);
-
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const saveDraft = () => {
-    localStorage.setItem('registration_draft', JSON.stringify(formData));
+    localStorage.setItem('simrs_registration_draft', JSON.stringify(formData));
     toast.success('Draft berhasil disimpan');
   };
 
@@ -225,7 +224,7 @@ export function RegistrationForm({ initialData, onClose }: { initialData?: any, 
       });
     }
 
-    localStorage.removeItem('registration_draft');
+    
     if (onClose) {
         setTimeout(onClose, 1000);
     }
@@ -330,3 +329,4 @@ export function RegistrationForm({ initialData, onClose }: { initialData?: any, 
     </div>
   );
 }
+

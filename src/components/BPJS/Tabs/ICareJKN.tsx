@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 export function ICareJKN() {
   const [searchTerm, setSearchTerm] = useState('');
   const [riwayatList, setRiwayatList] = useState<any[]>(() => {
-    const saved = localStorage.getItem('bpjs_icare_riwayat');
+    const saved = localStorage.getItem('simrs_icare_jkn');
     return saved ? JSON.parse(saved) : [
       {
         id: 'ICARE-001',
@@ -42,9 +42,8 @@ export function ICareJKN() {
   const [hasAccess, setHasAccess] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem('bpjs_icare_riwayat', JSON.stringify(riwayatList));
-  }, [riwayatList]);
 
+  }, [riwayatList]);
   const filtered = (riwayatList || []).filter(r => {
     if (!r) return false;
     const term = (searchTerm || '').trim().toLowerCase();
@@ -237,4 +236,6 @@ export function ICareJKN() {
       )}
     </div>
   );
+
+
 }

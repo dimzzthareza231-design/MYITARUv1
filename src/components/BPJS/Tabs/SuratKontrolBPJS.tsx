@@ -8,7 +8,7 @@ export function SuratKontrolBPJS() {
   const [showAddModal, setShowAddModal] = useState(false);
   
   useEffect(() => {
-    const saved = localStorage.getItem('bpjs_surat_kontrol');
+    const saved = localStorage.getItem('simrs_bpjs_surat_kontrol');
     if (saved) {
       setSuratKontrolList(JSON.parse(saved));
     } else {
@@ -36,10 +36,8 @@ export function SuratKontrolBPJS() {
         }
       ];
       setSuratKontrolList(dummyData);
-      localStorage.setItem('bpjs_surat_kontrol', JSON.stringify(dummyData));
     }
   }, []);
-  
   const handleAdd = () => {
     setShowAddModal(true);
   };
@@ -53,16 +51,16 @@ export function SuratKontrolBPJS() {
     };
     const updated = [...suratKontrolList, newSurat];
     setSuratKontrolList(updated);
-    localStorage.setItem('bpjs_surat_kontrol', JSON.stringify(updated));
+    localStorage.setItem('simrs_bpjs_surat_kontrol', JSON.stringify(updated));
     setShowAddModal(false);
     toast.success('Surat kontrol berhasil ditambahkan');
   };
   
   const handleDelete = (id: number) => {
-    if (true) {
+    if (window.confirm('Yakin ingin menghapus surat kontrol ini?')) {
       const updated = suratKontrolList.filter(s => s.id !== id);
       setSuratKontrolList(updated);
-      localStorage.setItem('bpjs_surat_kontrol', JSON.stringify(updated));
+      localStorage.setItem('simrs_bpjs_surat_kontrol', JSON.stringify(updated));
       toast.success('Surat kontrol berhasil dihapus');
     }
   };

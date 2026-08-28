@@ -14,7 +14,7 @@ export function PengaturanVClaim() {
   const [testResult, setTestResult] = useState<any>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('bpjs_config');
+    const saved = localStorage.getItem('simrs_vclaim_config');
     if (saved) {
       setConfig(JSON.parse(saved));
     }
@@ -25,7 +25,7 @@ export function PengaturanVClaim() {
       toast.error('Client ID dan Client Secret wajib diisi');
       return;
     }
-    localStorage.setItem('bpjs_config', JSON.stringify(config));
+
     toast.success('Konfigurasi berhasil disimpan');
   };
 
@@ -144,4 +144,6 @@ export function PengaturanVClaim() {
       </div>
     </div>
   );
+
+
 }

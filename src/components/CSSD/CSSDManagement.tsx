@@ -54,13 +54,13 @@ export function CSSDManagement() {
 }
 
 function TrackingTab() {
-  const [packs, setPacks] = useState<any[]>(() => JSON.parse(localStorage.getItem('cssd_packs') || JSON.stringify([
+  const [packs, setPacks] = useState<any[]>([
     { id: 'PK-001', name: 'Set Minor Surgery', status: 'Sterile', expDate: '2026-08-30', history: [{date: '2026-08-01 10:00', action: 'Sterilized'}] },
     { id: 'PK-002', name: 'Set Hecting', status: 'In Wash', expDate: '-', history: [{date: '2026-08-05 08:00', action: 'Washing'}] }
-  ])));
+  ]);
   const [search, setSearch] = useState('');
   
-  useEffect(() => { localStorage.setItem('cssd_packs', JSON.stringify(packs)); }, [packs]);
+  
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,10 +135,10 @@ function TrackingTab() {
 }
 
 function SterilizationRunTab() {
-  const [runs, setRuns] = useState<any[]>(() => JSON.parse(localStorage.getItem('cssd_runs') || '[]'));
+  const [runs, setRuns] = useState<any[]>([]);
   const [form, setForm] = useState({ machine: 'Autoclave 1', cycleType: 'Standard 134°C', temperature: '134', pressure: '2.1', duration: '45' });
 
-  useEffect(() => { localStorage.setItem('cssd_runs', JSON.stringify(runs)); }, [runs]);
+  
 
   const handleStartRun = (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,10 +225,10 @@ function SterilizationRunTab() {
 }
 
 function DistributionTab() {
-  const [dists, setDists] = useState<any[]>(() => JSON.parse(localStorage.getItem('cssd_dists') || '[]'));
+  const [dists, setDists] = useState<any[]>([]);
   const [form, setForm] = useState({ room: 'Kamar Operasi (OK 1)', receiver: '', packs: '' });
 
-  useEffect(() => { localStorage.setItem('cssd_dists', JSON.stringify(dists)); }, [dists]);
+  
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -299,10 +299,10 @@ function DistributionTab() {
 }
 
 function IncidentTab() {
-  const [incidents, setIncidents] = useState<any[]>(() => JSON.parse(localStorage.getItem('cssd_incidents') || '[]'));
+  const [incidents, setIncidents] = useState<any[]>([]);
   const [form, setForm] = useState({ type: 'Wet Pack (Pack Basah)', refId: '', desc: '', action: '' });
 
-  useEffect(() => { localStorage.setItem('cssd_incidents', JSON.stringify(incidents)); }, [incidents]);
+  
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();

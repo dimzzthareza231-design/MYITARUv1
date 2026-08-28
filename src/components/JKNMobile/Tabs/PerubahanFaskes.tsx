@@ -3,7 +3,7 @@ import { MapPin, Save, Search, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function PerubahanFaskes() {
-  const [faskesSaatIni, setFaskesSaatIni] = useState(() => localStorage.getItem('faskesPeserta') || 'Klinik Sehat Utama');
+  const [faskesSaatIni, setFaskesSaatIni] = useState(() => localStorage.getItem('simrs_jkn_faskes') || 'Klinik Sehat Utama');
   const [faskesBaru, setFaskesBaru] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +26,7 @@ export function PerubahanFaskes() {
     if (!faskesBaru) { toast.error('Pilih FKTP baru terlebih dahulu'); return; }
     setIsSubmitting(true);
     setTimeout(() => {
-      localStorage.setItem('faskesPeserta', faskesBaru);
+      
       setIsSubmitting(false);
       setFaskesSaatIni(faskesBaru);
       setFaskesBaru('');

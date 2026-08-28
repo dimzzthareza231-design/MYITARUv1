@@ -13,13 +13,13 @@ export function RehabMedik() {
     { id: 'RM-002', name: 'Ny. Siti Aminah', diagnosis: 'Osteoarthritis Genu' },
   ]);
 
-  const [assessments, setAssessments] = useState<any[]>(() => JSON.parse(localStorage.getItem('rehab_assessments') || '[]'));
-  const [sessions, setSessions] = useState<any[]>(() => JSON.parse(localStorage.getItem('rehab_sessions') || '[]'));
-  const [programs, setPrograms] = useState<any[]>(() => JSON.parse(localStorage.getItem('rehab_programs') || '[]'));
+  const [assessments, setAssessments] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [programs, setPrograms] = useState<any[]>([]);
 
-  useEffect(() => { localStorage.setItem('rehab_assessments', JSON.stringify(assessments)); }, [assessments]);
-  useEffect(() => { localStorage.setItem('rehab_sessions', JSON.stringify(sessions)); }, [sessions]);
-  useEffect(() => { localStorage.setItem('rehab_programs', JSON.stringify(programs)); }, [programs]);
+  
+  
+  
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
@@ -67,7 +67,7 @@ export function RehabMedik() {
       </div>
     </div>
   );
-}
+
 
 function DashboardTab({ patients, setActiveTab }: { patients: any[], setActiveTab: any }) {
   return (
@@ -373,4 +373,6 @@ function HomeProgramTab({ patients, programs, setPrograms }: { patients: any[], 
       </div>
     </div>
   );
+}
+
 }

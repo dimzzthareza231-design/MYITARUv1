@@ -16,7 +16,7 @@ export function GlobalHeader({
   onLogout: () => void,
   onNavigate: (view: string) => void
 }) {
-  const { isDarkMode, toggleDarkMode, activeUser, hospitalSettings } = useHospital();
+  const { isDarkMode, toggleDarkMode, activeUser, hospitalSettings, isFirestoreSyncing, cloudStatus } = useHospital();
   const [showProfile, setShowProfile] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -130,7 +130,20 @@ export function GlobalHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-4">
+      <div className="flex items-center gap-2 md:gap-3">
+        <div 
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60"
+          title="Database Cloud Firebase Firestore aktif dan tersinkronisasi otomatis secara real-time"
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Cloud DB: Firebase</span>
+          {isFirestoreSyncing && (
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal">
+              (Syncing...)
+            </span>
+          )}
+        </div>
+
         <button 
           onClick={toggleDarkMode}
           className="p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"

@@ -7,7 +7,7 @@ export function ProgramRujukBalikBPJS() {
   const [showAddModal, setShowAddModal] = useState(false);
   
   useEffect(() => {
-    const saved = localStorage.getItem('bpjs_prb');
+    const saved = localStorage.getItem('simrs_bpjs_prb');
     if (saved) {
       setPrbList(JSON.parse(saved));
     } else {
@@ -23,10 +23,8 @@ export function ProgramRujukBalikBPJS() {
         }
       ];
       setPrbList(dummyData);
-      localStorage.setItem('bpjs_prb', JSON.stringify(dummyData));
     }
   }, []);
-  
   const handleAdd = () => setShowAddModal(true);
   
   const handleSave = (data: any) => {
@@ -39,16 +37,16 @@ export function ProgramRujukBalikBPJS() {
     };
     const updated = [...prbList, newPRB];
     setPrbList(updated);
-    localStorage.setItem('bpjs_prb', JSON.stringify(updated));
+    localStorage.setItem('simrs_bpjs_prb', JSON.stringify(updated));
     setShowAddModal(false);
     toast.success('PRB berhasil ditambahkan');
   };
   
   const handleDelete = (id: number) => {
-    if (true) {
+    if (window.confirm('Yakin ingin menghapus PRB ini?')) {
       const updated = prbList.filter(p => p.id !== id);
       setPrbList(updated);
-      localStorage.setItem('bpjs_prb', JSON.stringify(updated));
+      localStorage.setItem('simrs_bpjs_prb', JSON.stringify(updated));
       toast.success('PRB berhasil dihapus');
     }
   };

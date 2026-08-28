@@ -11,7 +11,7 @@ export function MesinRadiologiTab() {
   const toast = useToast();
 
   const [mesinList, setMesinList] = useState<MesinRadiologiStatus[]>(() => {
-    const saved = localStorage.getItem('hospital_radiologi_mesin');
+    const saved = localStorage.getItem('simrs_radiologi_mesin');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -25,7 +25,7 @@ export function MesinRadiologiTab() {
 
   const saveMesin = (newList: MesinRadiologiStatus[]) => {
     setMesinList(newList);
-    localStorage.setItem('hospital_radiologi_mesin', JSON.stringify(newList));
+    localStorage.setItem('simrs_radiologi_mesin', JSON.stringify(newList));
   };
 
   const handleRunCalibration = (mesin: MesinRadiologiStatus) => {
@@ -190,4 +190,6 @@ export function MesinRadiologiTab() {
       </div>
     </div>
   );
+
+
 }

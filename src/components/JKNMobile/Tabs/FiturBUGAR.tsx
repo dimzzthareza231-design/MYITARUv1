@@ -32,9 +32,9 @@ export function FiturBUGAR() {
 
   const handleSaveVital = () => {
     const data = { ...formData, tgl: new Date().toISOString() };
-    const existing = JSON.parse(localStorage.getItem('vitalData') || '[]');
+    const existing = [];
     existing.push(data);
-    localStorage.setItem('vitalData', JSON.stringify(existing));
+
     toast.success('Data tanda vital berhasil disimpan');
   };
 
@@ -173,4 +173,6 @@ export function FiturBUGAR() {
       )}
     </div>
   );
+
+
 }

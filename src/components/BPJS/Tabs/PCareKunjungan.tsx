@@ -27,7 +27,7 @@ const KFA_DATA = [
 
 export function PCareKunjungan() {
   const [kunjunganList, setKunjunganList] = useState<any[]>(() => {
-    const saved = localStorage.getItem('bpjs_pcare_kunjungan');
+    const saved = localStorage.getItem('simrs_pcare_kunjungan');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -48,9 +48,8 @@ export function PCareKunjungan() {
   const [filteredObat, setFilteredObat] = useState<any[]>([]);
 
   useEffect(() => {
-    localStorage.setItem('bpjs_pcare_kunjungan', JSON.stringify(kunjunganList));
-  }, [kunjunganList]);
 
+  }, [kunjunganList]);
   useEffect(() => {
     if (searchICD.length >= 2) {
       setFilteredICD(ICD10_DATA.filter(d =>
@@ -337,4 +336,6 @@ export function PCareKunjungan() {
       )}
     </div>
   );
+
+
 }

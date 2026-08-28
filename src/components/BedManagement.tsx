@@ -15,7 +15,7 @@ export function BedManagement() {
   const { pasien } = useHospital();
   
   const [beds, setBeds] = useState(() => {
-    const saved = localStorage.getItem('hospital_beds');
+    const saved = localStorage.getItem('simrs_bed_management');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -30,9 +30,8 @@ export function BedManagement() {
   const toast = useToast();
   
   useEffect(() => {
-    localStorage.setItem('hospital_beds', JSON.stringify(beds));
-  }, [beds]);
 
+  }, [beds]);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [isIsiBedModalOpen, setIsIsiBedModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -352,4 +351,5 @@ export function BedManagement() {
       </Modal>
     </div>
   );
+
 }

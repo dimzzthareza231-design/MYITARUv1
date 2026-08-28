@@ -10,12 +10,12 @@ import { useToast } from '../../contexts/ToastContext';
 export function BankDarahTab() {
   const toast = useToast();
   const [bloodStock, setBloodStock] = useState<BloodBankStock[]>(() => {
-    const saved = localStorage.getItem('hospital_bdrs_stock');
+    const saved = localStorage.getItem('simrs_blood_stock');
     return saved ? JSON.parse(saved) : BLOOD_STOCK_MOCK;
   });
 
   const [crossmatchList, setCrossmatchList] = useState<CrossmatchOrder[]>(() => {
-    const saved = localStorage.getItem('hospital_bdrs_crossmatch');
+    const saved = localStorage.getItem('simrs_crossmatch_orders');
     return saved ? JSON.parse(saved) : CROSSMATCH_ORDERS_MOCK;
   });
 
@@ -66,7 +66,7 @@ export function BankDarahTab() {
     });
 
     setCrossmatchList(updated);
-    localStorage.setItem('hospital_bdrs_crossmatch', JSON.stringify(updated));
+
     toast.success(`Kantong darah untuk ${order.nama_pasien || order.pasien_nama} berhasil dikeluarkan ke ${order.ruangan}!`);
   };
 
@@ -113,7 +113,7 @@ export function BankDarahTab() {
 
     const updated = [newOrder, ...crossmatchList];
     setCrossmatchList(updated);
-    localStorage.setItem('hospital_bdrs_crossmatch', JSON.stringify(updated));
+
 
     setIsCrossmatchModalOpen(false);
     setPatientName('');

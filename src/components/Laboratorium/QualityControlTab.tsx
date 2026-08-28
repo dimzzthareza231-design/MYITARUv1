@@ -11,12 +11,12 @@ import { useToast } from '../../contexts/ToastContext';
 export function QualityControlTab() {
   const toast = useToast();
   const [analyzers, setAnalyzers] = useState<AnalyzerMachine[]>(() => {
-    const saved = localStorage.getItem('hospital_lab_analyzers');
+    const saved = localStorage.getItem('simrs_lab_analyzers');
     return saved ? JSON.parse(saved) : ANALYZER_MACHINES_MOCK;
   });
 
   const [qcData, setQcData] = useState<LeveyJenningsPoint[]>(() => {
-    const saved = localStorage.getItem('hospital_lab_qc_points');
+    const saved = localStorage.getItem('simrs_lab_qc_data');
     return saved ? JSON.parse(saved) : LEVEY_JENNINGS_MOCK;
   });
 
@@ -56,7 +56,6 @@ export function QualityControlTab() {
 
       const updatedPoints = [...qcData, newPoint];
       setQcData(updatedPoints);
-      localStorage.setItem('hospital_lab_qc_points', JSON.stringify(updatedPoints));
 
       const updatedAnalyzers = analyzers.map(a => ({
         ...a,
@@ -65,12 +64,12 @@ export function QualityControlTab() {
         last_qc: `${today} 08:00 WIB`
       }));
       setAnalyzers(updatedAnalyzers);
-      localStorage.setItem('hospital_lab_analyzers', JSON.stringify(updatedAnalyzers));
 
       setIsRunningQC(false);
       toast.success('Siklus QC Internal harian berhasil dijalankan! Semua instrumen In-Control (Westgard Valid).');
     }, 1500);
   };
+
 
   return (
     <div className="space-y-6 text-left">

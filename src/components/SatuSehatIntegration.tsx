@@ -119,15 +119,15 @@ function DashboardTab() {
 }
 
 function ConfigTab() {
-  const [form, setForm] = useState(() => JSON.parse(localStorage.getItem('satusehat_config') || JSON.stringify({
+  const [form, setForm] = useState({
     clientId: 'KEMENKES-XXXX-XXXX',
     clientSecret: '********',
     orgId: 'ORG-1002345',
     env: 'Production',
     autoSync: true
-  })));
+  });
 
-  useEffect(() => { localStorage.setItem('satusehat_config', JSON.stringify(form)); }, [form]);
+  
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,13 +174,16 @@ function ConfigTab() {
 }
 
 function MappingTab() {
-  const [maps, setMaps] = useState(() => JSON.parse(localStorage.getItem('satusehat_maps') || JSON.stringify([
-    { id: 1, type: 'Poli / Klinik', local: 'Poli Penyakit Dalam', satusehat: 'Ruang Rawat Jalan - Penyakit Dalam' },
-    { id: 2, type: 'Dokter', local: 'dr. Andi (D-001)', satusehat: 'IHS-10002131' }
-  ])));
+  const [maps, setMaps] = useState<any[]>(() => {
+    const saved = localStorage.getItem('simrs_satusehat_maps');
+    return saved ? JSON.parse(saved) : [
+      { id: 1, type: 'Poli / Klinik', local: 'Poli Penyakit Dalam', satusehat: 'Ruang Rawat Jalan - Penyakit Dalam' },
+      { id: 2, type: 'Dokter', local: 'dr. Andi (D-001)', satusehat: 'IHS-10002131' }
+    ];
+  });
   const [form, setForm] = useState({ type: 'Poli / Klinik', local: '', satusehat: '' });
 
-  useEffect(() => { localStorage.setItem('satusehat_maps', JSON.stringify(maps)); }, [maps]);
+  
 
   const addMap = (e: React.FormEvent) => {
     e.preventDefault();
@@ -272,3 +275,4 @@ function LogsTab() {
     </div>
   );
 }
+

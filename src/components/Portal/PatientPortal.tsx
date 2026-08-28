@@ -83,10 +83,10 @@ function DashboardTab({ setTab }: { setTab: any }) {
 }
 
 function BookingTab() {
-  const [apps, setApps] = useState<any[]>(() => JSON.parse(localStorage.getItem('portal_apps') || '[]'));
+  const [apps, setApps] = useState<any[]>([]);
   const [form, setForm] = useState({ poli: 'Poli Umum', date: '', time: '09:00' });
 
-  useEffect(() => { localStorage.setItem('portal_apps', JSON.stringify(apps)); }, [apps]);
+  
 
   const handleBook = (e: React.FormEvent) => {
     e.preventDefault();

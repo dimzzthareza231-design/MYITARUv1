@@ -261,7 +261,7 @@ export const getRoleById = (roleId: string): Role | undefined => {
 // Helper: dapatkan custom permission override dari localStorage jika ada
 export const getCustomPermissions = (): Record<string, string[]> => {
   try {
-    const saved = localStorage.getItem('hospital_custom_role_permissions');
+    const saved = localStorage.getItem('simrs_role_custom_permissions');
     return saved ? JSON.parse(saved) : {};
   } catch (e) {
     console.warn('Error reading custom role permissions:', e);
@@ -272,41 +272,34 @@ export const getCustomPermissions = (): Record<string, string[]> => {
 // Helper: simpan custom permission override ke localStorage
 export const saveCustomPermissions = (permissions: Record<string, string[]>) => {
   try {
-    localStorage.setItem('hospital_custom_role_permissions', JSON.stringify(permissions));
+    localStorage.setItem('simrs_role_custom_permissions', JSON.stringify(permissions));
   } catch (e) {
     console.warn('Error saving custom role permissions:', e);
   }
 };
 
-// Helper: cek apakah role punya akses ke modul tertentu dengan logika normalisasi & alias
+// Helper: cek apakah role memiliki akses ke modul tertentu
 export const hasModuleAccess = (roleId: string, moduleId: string): boolean => {
-  if (!roleId || !moduleId) return false;
-
-  // 1. Super Admin selalu punya akses 100% tanpa batas
   if (roleId === 'super_admin') return true;
+  if (COMMON_MODULES.includes(moduleId)) return true;
 
-  // 2. Modul common selalu terbuka untuk semua user terautentikasi
-  const cleanModuleId = moduleId.toLowerCase().trim();
-  if (COMMON_MODULES.includes(cleanModuleId)) return true;
+  const custom = getCustomPermissions();
+  if (custom[roleId] && Array.isArray(custom[roleId])) {
+    const list = custom[roleId];
+    if (list.includes(moduleId)) return true;
+    for (const [canonical, aliases] of Object.entries(MODULE_ALIASES)) {
+      if (canonical === moduleId && aliases.some(a => list.includes(a))) return true;
+      if (aliases.includes(moduleId) && (list.includes(canonical) || aliases.some(a => list.includes(a)))) return true;
+    }
+  }
 
   const role = getRoleById(roleId);
   if (!role) return false;
+  if (role.moduleAccess.includes(moduleId)) return true;
 
-  // 3. Cek custom permissions dari storage jika telah dikonfigurasi admin
-  const customPermissions = getCustomPermissions();
-  const allowedList = customPermissions[roleId] || role.moduleAccess;
-
-  // Cek langsung
-  if (allowedList.includes(cleanModuleId)) return true;
-
-  // 4. Cek alias mapping (misal: 'master-data' -> 'rekam-medis', 'bpjs' -> 'vclaim')
-  for (const [primaryId, aliases] of Object.entries(MODULE_ALIASES)) {
-    if (cleanModuleId === primaryId && aliases.some(a => allowedList.includes(a))) {
-      return true;
-    }
-    if (aliases.includes(cleanModuleId) && allowedList.includes(primaryId)) {
-      return true;
-    }
+  for (const [canonical, aliases] of Object.entries(MODULE_ALIASES)) {
+    if (canonical === moduleId && aliases.some(a => role.moduleAccess.includes(a))) return true;
+    if (aliases.includes(moduleId) && (role.moduleAccess.includes(canonical) || aliases.some(a => role.moduleAccess.includes(a)))) return true;
   }
 
   return false;

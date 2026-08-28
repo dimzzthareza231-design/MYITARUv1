@@ -5,8 +5,8 @@ export function KetersediaanBed() {
   const [searchTerm, setSearchTerm] = useState('');
   
   const [bedData, setBedData] = useState(() => {
-    const saved = localStorage.getItem('ketersediaanBed');
-    if (saved) return JSON.parse(saved);
+    
+    
     const initial = [
       {
         id: 1,
@@ -35,7 +35,7 @@ export function KetersediaanBed() {
         ]
       }
     ];
-    localStorage.setItem('ketersediaanBed', JSON.stringify(initial));
+
     return initial;
   });
 
@@ -107,4 +107,6 @@ export function KetersediaanBed() {
       </div>
     </div>
   );
+
+
 }

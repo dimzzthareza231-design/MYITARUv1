@@ -9,7 +9,7 @@ import { Modal } from './Modal';
 export function InventoryManagement() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'master' | 'stok' | 'po' | 'opname'>('dashboard');
 
-  const [items, setItems] = useState<any[]>(() => JSON.parse(localStorage.getItem('inv_items') || '[]'));
+  const [items, setItems] = useState<any[]>([]);
   if (items.length === 0) {
     setItems([
       { id: 'ITM-001', nama: 'Paracetamol 500mg', kategori: 'Obat', stok: 1500, min: 200, unit: 'Tablet', harga: 1500 },
@@ -17,12 +17,12 @@ export function InventoryManagement() {
     ]);
   }
   
-  const [poList, setPoList] = useState<any[]>(() => JSON.parse(localStorage.getItem('inv_po') || '[]'));
-  const [opnameList, setOpnameList] = useState<any[]>(() => JSON.parse(localStorage.getItem('inv_opname') || '[]'));
+  const [poList, setPoList] = useState<any[]>([]);
+  const [opnameList, setOpnameList] = useState<any[]>([]);
 
-  useEffect(() => { localStorage.setItem('inv_items', JSON.stringify(items)); }, [items]);
-  useEffect(() => { localStorage.setItem('inv_po', JSON.stringify(poList)); }, [poList]);
-  useEffect(() => { localStorage.setItem('inv_opname', JSON.stringify(opnameList)); }, [opnameList]);
+  
+  
+  
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Box },
@@ -70,7 +70,7 @@ export function InventoryManagement() {
       </div>
     </div>
   );
-}
+
 
 // --- SUB COMPONENTS ---
 
@@ -489,4 +489,6 @@ function OpnameTab({ opnameList, setOpnameList, items, setItems }: { opnameList:
       </div>
     </div>
   );
+}
+
 }

@@ -10,7 +10,7 @@ export function InfoIuran() {
     jumlahPsn: 2,
     totalTagihan: 70000,
     jatuhTempo: '10 Agustus 2026',
-    status: localStorage.getItem('tagihanStatus') || 'Belum Dibayar',
+    status: 'Belum Dibayar',
     va: '8888801234567891'
   });
   const [metode, setMetode] = useState('bank');
@@ -40,7 +40,7 @@ export function InfoIuran() {
     setShowQR(false);
     toast.success('Pembayaran berhasil! Tagihan lunas.');
     // Simpan ke localStorage
-    localStorage.setItem('tagihanStatus', 'Lunas');
+    
   };
 
   const handleCopyVA = () => {

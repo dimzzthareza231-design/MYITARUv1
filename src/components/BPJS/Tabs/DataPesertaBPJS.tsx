@@ -18,7 +18,8 @@ export function DataPesertaBPJS() {
   }, []);
 
   const loadData = () => {
-    const data = JSON.parse(localStorage.getItem(BPJS_KEYS.PESERTA) || '[]');
+    const raw = localStorage.getItem(BPJS_KEYS.PESERTA);
+    const data = raw ? JSON.parse(raw) : [];
     setPesertaList(data);
   };
 
@@ -39,6 +40,7 @@ export function DataPesertaBPJS() {
       toast.success('Data peserta dihapus');
     }
   };
+
 
   const filteredPeserta = (pesertaList || []).filter(p => {
     if (!p) return false;
@@ -231,3 +233,4 @@ export function DataPesertaBPJS() {
     </div>
   );
 }
+

@@ -352,8 +352,8 @@ function ReferensiPasienTab() {
 
 function MappingGenericTab({ title, type }: { title: string; type: string }) {
   const [items, setItems] = useState(() => {
-    const saved = localStorage.getItem(`satusehat_map_${type}`);
-    if (saved) return JSON.parse(saved);
+    
+    
     if (type === 'organization') {
       return [
         { id: '1', local: 'Instalasi Rawat Jalan', fhir: 'ORG-RJ-1002', status: 'Mapped' },
@@ -389,7 +389,7 @@ function MappingGenericTab({ title, type }: { title: string; type: string }) {
     if (!localInput || !fhirInput) return;
     const newItems = [...items, { id: String(Date.now()), local: localInput, fhir: fhirInput, status: 'Mapped' }];
     setItems(newItems);
-    localStorage.setItem(`satusehat_map_${type}`, JSON.stringify(newItems));
+
     setLocalInput('');
     setFhirInput('');
     toast.success('Mapping berhasil ditambahkan!');
@@ -450,7 +450,7 @@ function MappingGenericTab({ title, type }: { title: string; type: string }) {
                     onClick={() => {
                       const updated = items.filter((x: any) => x.id !== item.id);
                       setItems(updated);
-                      localStorage.setItem(`satusehat_map_${type}`, JSON.stringify(updated));
+
                       toast.success('Mapping dihapus');
                     }}
                     className="text-rose-500 hover:underline text-xs"
@@ -546,18 +546,18 @@ function VerifikasiKYCTab() {
 }
 
 function PengaturanSatuSehatTab() {
-  const [form, setForm] = useState(() => JSON.parse(localStorage.getItem('satusehat_config') || JSON.stringify({
+  const [form, setForm] = useState({
     clientId: 'KEMENKES-PROD-99821-X',
     clientSecret: '****************',
     orgId: 'ORG-1002345',
     authUrl: 'https://api-satusehat.kemkes.go.id/oauth2/v1',
     fhirUrl: 'https://api-satusehat.kemkes.go.id/fhir-r4/v1',
     env: 'Production'
-  })));
+  });
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('satusehat_config', JSON.stringify(form));
+    localStorage.setItem('simrs_satusehat_config', JSON.stringify(form));
     toast.success('Konfigurasi SatuSehat Kemenkes berhasil disimpan!');
   };
 
@@ -624,3 +624,4 @@ function PengaturanSatuSehatTab() {
     </div>
   );
 }
+
