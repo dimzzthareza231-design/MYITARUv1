@@ -158,18 +158,12 @@ export function Login() {
             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
           >
             <LogIn className="w-4 h-4" />
-            {isLoading ? 'Memvalidasi Akun...' : 'Masuk SIMRS'}
+            {isLoading ? 'Memvalidasi Akun...' : 'Masuk'}
           </button>
         </form>
 
-        <div className="mt-5 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-700/60 text-[11px] text-slate-500 dark:text-slate-400">
-          <p className="font-semibold text-slate-700 dark:text-slate-300 mb-1">💡 Info Akses Instan:</p>
-          <p>• Google Login: Otomatis masuk dengan hak akses Super Admin</p>
-          <p>• Akun Demo: <span className="font-mono font-bold text-blue-600 dark:text-blue-400">mhs001</span> (pass: <span className="font-mono">mahasiswa001</span>), <span className="font-mono font-bold text-blue-600 dark:text-blue-400">rekammedis</span> (pass: <span className="font-mono">rm123</span>) atau <span className="font-mono font-bold text-blue-600 dark:text-blue-400">dokter</span> (pass: <span className="font-mono">dokter123</span>)</p>
-        </div>
-
         <p className="text-center text-[10px] text-slate-400 mt-6 font-semibold tracking-widest uppercase opacity-70">
-          © DIMAS PANGESTU P.A • ITARU SIMRS
+          © DIMAS PANGESTU P.A • ITARU SIK
         </p>
       </div>
     </div>
