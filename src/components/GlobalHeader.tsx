@@ -16,7 +16,7 @@ export function GlobalHeader({
   onLogout: () => void,
   onNavigate: (view: string) => void
 }) {
-  const { isDarkMode, toggleDarkMode, activeUser } = useHospital();
+  const { isDarkMode, toggleDarkMode, activeUser, hospitalSettings } = useHospital();
   const [showProfile, setShowProfile] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -69,12 +69,17 @@ export function GlobalHeader({
         )}
         
         <div className="hidden lg:flex items-center text-sm font-medium text-slate-500 dark:text-slate-400">
-           <span 
-             className="text-slate-800 dark:text-slate-200 cursor-pointer hover:text-[var(--color-primary-blue)] transition-colors"
+           <div 
+             className="flex items-center gap-2 cursor-pointer hover:text-[var(--color-primary-blue)] transition-colors"
              onClick={() => onNavigate('dashboard')}
            >
-             MYITARU
-           </span>
+             {hospitalSettings?.logoUrl && (
+               <img src={hospitalSettings.logoUrl} alt="Logo RS" className="w-5 h-5 object-contain rounded" />
+             )}
+             <span className="text-slate-800 dark:text-slate-200 font-bold">
+               {hospitalSettings?.name || 'MYITARU'}
+             </span>
+           </div>
            <ChevronRight className="w-4 h-4 mx-1" />
            <span className="text-[var(--color-primary-blue)] cursor-default">{formatViewName(currentView)}</span>
         </div>

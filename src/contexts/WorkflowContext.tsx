@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { storage } from '../utils/storage';
 
 export interface WorkflowStage {
   id: number;
@@ -56,26 +57,18 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
   const [approvalRequests, setApprovalRequests] = useState<ApprovalRequest[]>([]);
   
   useEffect(() => {
-    const savedWorkflows = localStorage.getItem('workflows');
-    const savedRequests = localStorage.getItem('approval_requests');
+    const savedWorkflows = storage.get('workflows');
+    const savedRequests = storage.get('approval_requests');
     
-    if (savedWorkflows) {
-      try {
-        setWorkflows(JSON.parse(savedWorkflows));
-      } catch (e) {
-        console.warn('Error parsing workflows from localStorage', e);
-      }
+    if (savedWorkflows && Array.isArray(savedWorkflows)) {
+      setWorkflows(savedWorkflows);
     }
     
-    if (savedRequests) {
-      try {
-        setApprovalRequests(JSON.parse(savedRequests));
-      } catch (e) {
-        console.warn('Error parsing approval_requests from localStorage', e);
-      }
+    if (savedRequests && Array.isArray(savedRequests)) {
+      setApprovalRequests(savedRequests);
     }
     
-    if (!savedWorkflows) {
+    if (!savedWorkflows || !Array.isArray(savedWorkflows)) {
       // Data dummy workflow templates
       const dummyWorkflows: Workflow[] = [
         {
@@ -115,10 +108,10 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
         }
       ];
       setWorkflows(dummyWorkflows);
-      localStorage.setItem('workflows', JSON.stringify(dummyWorkflows));
+      storage.set('workflows', dummyWorkflows);
     }
     
-    if (!savedRequests) {
+    if (!savedRequests || !Array.isArray(savedRequests)) {
       // Data dummy approval requests
       const dummyRequests: ApprovalRequest[] = [
         {
@@ -208,7 +201,7 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
         }
       ];
       setApprovalRequests(dummyRequests);
-      localStorage.setItem('approval_requests', JSON.stringify(dummyRequests));
+      storage.set('approval_requests', dummyRequests);
     }
   }, []);
   
@@ -238,7 +231,7 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     
     const updated = [newRequest, ...approvalRequests];
     setApprovalRequests(updated);
-    localStorage.setItem('approval_requests', JSON.stringify(updated));
+    storage.set('approval_requests', updated);
     
     return newRequest;
   };
@@ -275,7 +268,7 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     });
     
     setApprovalRequests(updated);
-    localStorage.setItem('approval_requests', JSON.stringify(updated));
+    storage.set('approval_requests', updated);
   };
   
   const rejectRequest = (requestId: number, actor: string, comment: string) => {
@@ -306,7 +299,7 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     });
     
     setApprovalRequests(updated);
-    localStorage.setItem('approval_requests', JSON.stringify(updated));
+    storage.set('approval_requests', updated);
   };
   
   const getMyPendingApprovals = (userRole: string) => {
@@ -339,3 +332,4 @@ export const useWorkflow = () => {
     }
     return context;
 };
+

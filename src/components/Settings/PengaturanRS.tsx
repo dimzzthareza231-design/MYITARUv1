@@ -92,7 +92,7 @@ export function PengaturanRS() {
   const handleSave = () => {
     updateHospitalSettings({
       ...formData,
-      logoUrl: logoPreview || undefined
+      logoUrl: logoPreview || ''
     });
     toast.success('Pengaturan profil & legalitas Rumah Sakit berhasil disimpan ke sistem');
   };

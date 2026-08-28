@@ -246,20 +246,42 @@ Instructions:
     }
   });
 
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
+  // Vite middleware for development vs static serving in production
+  const isProd = process.env.NODE_ENV === 'production';
+  if (isProd) {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.sendFile(path.join(distPath, 'index.html'), (err) => {
+        if (err && !res.headersSent) {
+          res.status(500).send("Gagal memuat index.html. Silakan build ulang aplikasi.");
+        }
+      });
     });
+  } else {
+    try {
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      });
+      app.use(vite.middlewares);
+    } catch (err) {
+      console.error('Vite dev server failed to start, falling back to static:', err);
+      const distPath = path.join(process.cwd(), 'dist');
+      app.use(express.static(distPath));
+      app.get('*', (req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+      });
+    }
   }
+
+  // Global Error Handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('Global Server Error:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: err?.message || 'Terjadi kesalahan pada server.' });
+    }
+  });
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log("Server running on port " + PORT);

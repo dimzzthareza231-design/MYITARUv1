@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Activity, Eye, EyeOff, LogIn, User as UserIcon, Lock, Sparkles, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
+import { useHospital } from '../contexts/HospitalContext';
 
 export function Login() {
   const { login, signInWithGoogle, loading } = useAuth();
+  const { hospitalSettings } = useHospital();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -56,14 +58,18 @@ export function Login() {
 
         {/* Logo */}
         <div className="text-center mb-6 relative">
-          <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/25">
-            <Activity className="text-white w-8 h-8" />
+          <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/25 overflow-hidden p-1">
+            {hospitalSettings?.logoUrl ? (
+              <img src={hospitalSettings.logoUrl} alt="Logo RS" className="w-full h-full object-contain rounded-xl bg-white/10" />
+            ) : (
+              <Activity className="text-white w-8 h-8" />
+            )}
           </div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white leading-tight">
-            MYITARU
+            {hospitalSettings?.name || 'MYITARU'}
           </h1>
           <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1 flex items-center justify-center gap-1">
-            <ShieldCheck className="w-4 h-4" /> Cloud Hospital Intelligence Platform
+            <ShieldCheck className="w-4 h-4" /> {hospitalSettings?.subname || 'Cloud Hospital Intelligence Platform'}
           </p>
         </div>
 

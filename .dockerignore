@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.gitignore
+*.log
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+MYITARU_FULL_PROMPT.md

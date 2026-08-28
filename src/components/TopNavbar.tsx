@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MODULE_REGISTRY } from '../data/moduleRegistry';
 import { useAuth } from '../contexts/AuthContext';
+import { useHospital } from '../contexts/HospitalContext';
 import UserMenu from './UserMenu';
 import { Activity, Globe, Sparkles } from 'lucide-react';
 import { MedicalSearchGrounding } from './MedicalSearchGrounding';
@@ -9,6 +10,7 @@ import { MedicalSearchGrounding } from './MedicalSearchGrounding';
 export default function TopNavbar({ currentTime }: { currentTime: Date }) {
   const navigate = useNavigate();
   const { hasAccess, currentUser } = useAuth();
+  const { hospitalSettings } = useHospital();
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -50,15 +52,23 @@ export default function TopNavbar({ currentTime }: { currentTime: Date }) {
           onClick={() => navigate('/dashboard')}
           className="flex items-center gap-3 h-full hover:opacity-90 transition-opacity group"
         >
-          <div className="w-10 h-10 bg-gradient-to-br from-[#0F3B5E] via-[#1A4F7A] to-[#C9A94E] rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(201,169,78,0.3)] border border-[#C9A94E]/40 group-hover:scale-105 transition-transform">
-            <Activity className="text-white w-5 h-5 drop-shadow-md" />
+          <div className="w-10 h-10 bg-gradient-to-br from-[#0F3B5E] via-[#1A4F7A] to-[#C9A94E] rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(201,169,78,0.3)] border border-[#C9A94E]/40 group-hover:scale-105 transition-transform overflow-hidden p-0.5">
+            {hospitalSettings?.logoUrl ? (
+              <img src={hospitalSettings.logoUrl} alt="Logo RS" className="w-full h-full object-contain rounded-lg bg-white/10" />
+            ) : (
+              <Activity className="text-white w-5 h-5 drop-shadow-md" />
+            )}
           </div>
           <div className="text-left hidden sm:block">
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-[#C9A94E] leading-tight tracking-wider">MYITARU</h1>
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#C9A94E]/20 text-[#E5CA78] border border-[#C9A94E]/30 uppercase tracking-wider">PRO</span>
+              <h1 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-[#C9A94E] leading-tight tracking-wider truncate max-w-[220px]">
+                {hospitalSettings?.name || 'MYITARU'}
+              </h1>
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#C9A94E]/20 text-[#E5CA78] border border-[#C9A94E]/30 uppercase tracking-wider shrink-0">PRO</span>
             </div>
-            <p className="text-[9px] text-slate-300 uppercase tracking-widest font-medium">Sistem Informasi Klinik</p>
+            <p className="text-[9px] text-slate-300 uppercase tracking-widest font-medium truncate max-w-[240px]">
+              {hospitalSettings?.subname || 'Sistem Informasi Klinik'}
+            </p>
           </div>
         </button>
         
