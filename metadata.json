@@ -1,5 +1,5 @@
 {
-  "name": "MYITARU AI",
+  "name": "MY ITARU",
   "description": "The First AI Medical Intelligence Platform. Next-generation EMR with AI-powered clinical decision support.",
   "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

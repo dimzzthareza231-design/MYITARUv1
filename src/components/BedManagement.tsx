@@ -1,353 +1,355 @@
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Bed, User, Activity, AlertTriangle, Plus, Search, Filter, Info, Phone, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { BedDouble, RefreshCw, Activity, ArrowRightLeft, Save, Clock, Stethoscope, UserCheck, ShieldCheck, PhoneCall, Calendar } from 'lucide-react';
+import { useOutletContext } from 'react-router-dom';
+import { Modal } from './Modal';
+import { useToast } from '../contexts/ToastContext';
+import { ProfessionalTable } from './ProfessionalTable';
+import SmartTable from './SmartTable';
 import { useHospital } from '../contexts/HospitalContext';
-import { cn } from '../lib/utils';
-import { Patient } from '../types';
+import { generate50InpatientBeds } from '../data/patientPelayananData';
+import { DATA_DOKTER_JAGA_LENGKAP } from '../data/dataDokterJagaLengkap';
+import PrintPDFButton from './PrintPDFButton';
 
 export function BedManagement() {
-  const { patients } = useHospital();
+  const { activeTab } = useOutletContext<{ activeTab: string }>();
+  const { pasien } = useHospital();
   
-  const wards = [
-    { id: 'icu', name: 'ICU', capacity: 50, type: 'Critical Care' },
-    { id: 'vip', name: 'VIP Pavilion', capacity: 100, type: 'Premium' },
-    { id: 'melati', name: 'Melati (Maternity)', capacity: 150, type: 'General' },
-    { id: 'mawar', name: 'Mawar (Surgical)', capacity: 200, type: 'General' },
-    { id: 'anggrek', name: 'Anggrek (Pediatrics)', capacity: 150, type: 'General' },
-    { id: 'dahlia', name: 'Dahlia (Internal Med)', capacity: 200, type: 'General' },
-  ];
-
-  const bedsByWard = useMemo(() => {
-    // In a real app, patients would already have valid room assignments
-    // For demo purposes, we will deterministically place some patients into beds
-    const inpatients = patients.filter(p => p.patientType === 'Inpatient' || p.status === 'Critical' || parseInt(p.id.split('-')[2] || '0') % 5 === 0);
-    const bedAssignments: Record<string, { bedId: string, patient?: Patient }[]> = {};
-    
-    let inpatientIndex = 0;
-    
-    wards.forEach(ward => {
-      bedAssignments[ward.id] = [];
-      for (let i = 1; i <= ward.capacity; i++) {
-        const bedId = `${ward.id.toUpperCase()}-${i.toString().padStart(3, '0')}`;
-        
-        let patient = inpatients.find(p => p.roomNumber === bedId);
-        
-        if (!patient && inpatientIndex < inpatients.length && (i % 3 !== 0)) {
-            patient = inpatients[inpatientIndex++];
-            patient = {...patient, roomNumber: bedId, patientType: 'Inpatient'};
-        }
-        
-        bedAssignments[ward.id].push({
-          bedId,
-          patient
-        });
+  const [beds, setBeds] = useState(() => {
+    const saved = localStorage.getItem('hospital_beds');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 20) return parsed;
+      } catch (e) {
+        console.warn(e);
       }
-    });
-    
-    return bedAssignments;
-  }, [patients]);
-
-  const [selectedWard, setSelectedWard] = useState(wards[0].id);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedBed, setSelectedBed] = useState<{bedId: string, patient?: Patient} | null>(null);
-
-  const currentBeds = bedsByWard[selectedWard] || [];
-  
-  const filteredBeds = currentBeds.filter(bed => {
-    if (!searchTerm) return true;
-    const matchBed = bed.bedId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchPatient = bed.patient?.fullName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchRM = bed.patient?.rmNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchBed || matchPatient || matchRM;
+    }
+    return generate50InpatientBeds();
   });
+  
+  const toast = useToast();
+  
+  useEffect(() => {
+    localStorage.setItem('hospital_beds', JSON.stringify(beds));
+  }, [beds]);
 
-  const getOccupancyStats = () => {
-    let total = 0;
-    let occupied = 0;
-    let critical = 0;
-    wards.forEach(w => {
-      total += w.capacity;
-      const wardBeds = bedsByWard[w.id] || [];
-      occupied += wardBeds.filter(b => b.patient).length;
-      critical += wardBeds.filter(b => b.patient?.status === 'Critical').length;
-    });
-    return { total, occupied, available: total - occupied, rate: Math.round((occupied/total)*100) || 0, critical };
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [isIsiBedModalOpen, setIsIsiBedModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedBed, setSelectedBed] = useState<any>(null);
+  const [targetBedId, setTargetBedId] = useState('');
+  const [selectedPasienId, setSelectedPasienId] = useState('');
+
+  const stats = {
+    total: beds.length,
+    kosong: beds.filter((b: any) => b.status === 'Kosong').length,
+    terisi: beds.filter((b: any) => b.status === 'Terisi').length,
+    dibersihkan: beds.filter((b: any) => b.status === 'Dibersihkan').length,
   };
-  const stats = getOccupancyStats();
 
-  return (
-    <div className="h-full flex flex-col gap-6">
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Bed Management</h1>
-          <p className="text-sm text-white/40">Real-time room occupancy and patient assignment</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-            <input 
-              type="text" 
-              placeholder="Search bed, patient, RM..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-4 py-2 glass-input rounded-xl text-sm w-64"
-            />
-          </div>
-        </div>
-      </div>
+  if (activeTab === 'Dokter Ranap' || activeTab === 'Visite') {
+    const ranapDoctors = DATA_DOKTER_JAGA_LENGKAP.filter(d => d.layanan_utama === 'Rawat Inap (Bangsal & DPJP)' || d.unit_tugas.toLowerCase().includes('inap') || d.peran.toLowerCase().includes('dpjp') || d.peran.toLowerCase().includes('visite'));
 
-      {/* Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 shrink-0">
-        <div className="glass-panel p-4 flex items-center justify-between">
+    return (
+      <div className="p-6 h-full space-y-6 overflow-y-auto custom-scrollbar">
+        <div className="flex flex-wrap justify-between items-center gap-4 bg-slate-800 p-5 rounded-xl border border-slate-700">
           <div>
-            <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold mb-1">Total Beds</p>
-            <p className="text-2xl font-bold text-white">{stats.total}</p>
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Stethoscope className="w-6 h-6 text-indigo-400" />
+              Dokter Penanggung Jawab Pelayanan (DPJP) & Dokter Jaga Bangsal
+            </h2>
+            <p className="text-sm text-slate-400 mt-1">
+              Jadwal Visite Pagi (06:30 - 08:30 WIB) & Sore (16:30 - 18:00 WIB) beserta Dokter Jaga Bangsal 24 Jam.
+            </p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
-            <Bed className="w-5 h-5 text-white/60" />
+          <div className="flex items-center gap-3">
+            <span className="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1.5 rounded-full border border-indigo-500/30 font-semibold flex items-center gap-1.5">
+              <Clock className="w-4 h-4" /> Sesi: Visite Pagi DPJP & Shift Siang Bangsal
+            </span>
+            <span className="text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-full border border-emerald-500/30 font-semibold flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4" /> {ranapDoctors.length} Dokter DPJP Terjadwal
+            </span>
           </div>
         </div>
-        <div className="glass-panel p-4 flex items-center justify-between">
-          <div>
-            <p className="text-[10px] text-primary-emerald uppercase tracking-widest font-bold mb-1">Available</p>
-            <p className="text-2xl font-bold text-primary-emerald">{stats.available}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-primary-emerald/10 flex items-center justify-center border border-primary-emerald/20">
-            <Bed className="w-5 h-5 text-primary-emerald" />
-          </div>
-        </div>
-        <div className="glass-panel p-4 flex items-center justify-between">
-          <div>
-            <p className="text-[10px] text-primary-blue uppercase tracking-widest font-bold mb-1">Occupancy Rate</p>
-            <p className="text-2xl font-bold text-primary-blue">{stats.rate}%</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-primary-blue/10 flex items-center justify-center border border-primary-blue/20">
-            <Activity className="w-5 h-5 text-primary-blue" />
-          </div>
-        </div>
-        <div className="glass-panel p-4 flex items-center justify-between">
-          <div>
-            <p className="text-[10px] text-orange-400 uppercase tracking-widest font-bold mb-1">Critical Patients</p>
-            <p className="text-2xl font-bold text-orange-400">{stats.critical}</p>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
-            <AlertTriangle className="w-5 h-5 text-orange-400" />
-          </div>
-        </div>
-      </div>
 
-      <div className="flex-1 flex gap-6 min-h-0">
-        {/* Ward Selection */}
-        <div className="w-64 shrink-0 glass-panel border border-white/5 p-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
-          {wards.map((ward) => {
-            const wardBeds = bedsByWard[ward.id] || [];
-            const occupied = wardBeds.filter(b => b.patient).length;
-            const rate = Math.round((occupied / ward.capacity) * 100);
-            return (
-              <button 
-                key={ward.id}
-                onClick={() => { setSelectedWard(ward.id); setSelectedBed(null); }}
-                className={cn(
-                  "w-full text-left p-4 rounded-xl border transition-all",
-                  selectedWard === ward.id 
-                    ? "bg-primary-emerald/10 border-primary-emerald/30 shadow-lg" 
-                    : "bg-white/5 border-transparent hover:bg-white/10"
-                )}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className={cn("font-bold text-sm", selectedWard === ward.id ? "text-primary-emerald" : "text-white")}>{ward.name}</span>
-                  <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-bold", rate > 80 ? "bg-orange-500/20 text-orange-400" : "bg-primary-emerald/20 text-primary-emerald")}>
-                    {rate}%
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {ranapDoctors.map((doc) => (
+            <div key={doc.id} className="bg-slate-800/90 border border-slate-700 hover:border-indigo-500/50 p-5 rounded-xl transition-all shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <span className="text-xs font-bold text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 px-2.5 py-1 rounded">
+                    {doc.spesialisasi}
+                  </span>
+                  <span className={`text-[11px] px-2 py-0.5 rounded font-semibold ${
+                    doc.status_kehadiran === 'Sedang Jaga / Praktik' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-700 text-slate-300'
+                  }`}>
+                    {doc.status_kehadiran}
                   </span>
                 </div>
-                <div className="text-xs text-white/40 flex justify-between">
-                  <span>{ward.type}</span>
-                  <span>{occupied}/{ward.capacity}</span>
-                </div>
-                {/* Progress bar */}
-                <div className="w-full h-1.5 bg-black/40 rounded-full mt-3 overflow-hidden">
-                  <div 
-                    className={cn("h-full rounded-full transition-all", rate > 80 ? "bg-orange-400" : "bg-primary-emerald")} 
-                    style={{ width: `${rate}%` }}
-                  />
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                <h3 className="font-bold text-white text-base mt-1">{doc.nama}</h3>
+                <p className="text-xs text-slate-400 mt-0.5">{doc.peran}</p>
 
-        {/* Bed Grid & Detail */}
-        <div className="flex-1 flex gap-6 min-h-0">
-          <div className={cn("flex-1 glass-panel border border-white/5 p-6 overflow-y-auto custom-scrollbar transition-all", selectedBed ? 'lg:flex-none lg:w-2/3' : '')}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-white">{wards.find(w => w.id === selectedWard)?.name} - Layout</h2>
-              <div className="flex gap-4 text-xs font-medium text-white/40">
-                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-primary-emerald/20 border border-primary-emerald/40 block"></span> Available</div>
-                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-blue-500/20 border border-blue-500/40 block"></span> Occupied</div>
-                <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-orange-500/20 border border-orange-500/40 block"></span> Critical</div>
+                <div className="mt-3.5 text-xs text-slate-300 space-y-2 bg-slate-900/50 p-3 rounded-lg border border-slate-700/50">
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <Clock className="w-4 h-4 text-indigo-400" />
+                    <span>Jam Visite: <strong className="text-slate-200">{doc.jam_praktik}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <Calendar className="w-4 h-4 text-cyan-400" />
+                    <span>Hari: <strong className="text-slate-200">{doc.hari_praktik}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <BedDouble className="w-4 h-4 text-emerald-400" />
+                    <span>Bangsal: <strong className="text-slate-200">{doc.ruangan}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <PhoneCall className="w-4 h-4 text-amber-400" />
+                    <span>Kontak Pager: <strong className="text-slate-200">{doc.kontak_darurat}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-700/60 flex justify-between items-center text-xs">
+                <span className="text-slate-400 font-mono">SIP: {doc.sip}</span>
+                <span className="text-indigo-400 font-semibold">{doc.shift}</span>
               </div>
             </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-              {filteredBeds.map(bed => {
-                const isOccupied = !!bed.patient;
-                const isCritical = bed.patient?.status === 'Critical';
-                const isSelected = selectedBed?.bedId === bed.bedId;
-
-                return (
-                  <button
-                    key={bed.bedId}
-                    onClick={() => setSelectedBed(bed)}
-                    className={cn(
-                      "p-4 rounded-xl border text-left transition-all relative overflow-hidden group",
-                      isSelected ? "ring-2 ring-white/20" : "",
-                      isCritical 
-                        ? "bg-orange-500/10 border-orange-500/30 hover:bg-orange-500/20" 
-                        : isOccupied 
-                          ? "bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20" 
-                          : "bg-primary-emerald/5 border-primary-emerald/20 hover:bg-primary-emerald/10"
-                    )}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className={cn(
-                        "text-xs font-bold px-2 py-1 rounded-md bg-black/40",
-                        isCritical ? "text-orange-400" : isOccupied ? "text-blue-400" : "text-primary-emerald"
-                      )}>
-                        {bed.bedId}
-                      </span>
-                      {isOccupied ? (
-                        <User className={cn("w-4 h-4", isCritical ? "text-orange-400" : "text-blue-400")} />
-                      ) : (
-                        <Bed className="w-4 h-4 text-primary-emerald" />
-                      )}
-                    </div>
-                    {isOccupied ? (
-                      <div>
-                        <div className="text-sm font-bold text-white truncate">{bed.patient?.fullName}</div>
-                        <div className="text-[10px] text-white/60 truncate mt-1">{bed.patient?.rmNumber}</div>
-                        {bed.patient?.history.diseases.length ? (
-                          <div className="text-[10px] text-white/40 truncate mt-1 italic">
-                            {bed.patient.history.diseases[0]}
-                          </div>
-                        ) : null}
-                      </div>
-                    ) : (
-                      <div className="mt-2 text-sm font-medium text-white/40">Available</div>
-                    )}
-                  </button>
-                )
-              })}
-              {filteredBeds.length === 0 && (
-                <div className="col-span-full py-12 text-center text-white/40">
-                  No beds found matching your search.
-                </div>
-              )}
-            </div>
-          </div>
-
-          <AnimatePresence>
-            {selectedBed && (
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                className="flex-1 glass-panel border border-white/5 p-6 overflow-y-auto custom-scrollbar hidden lg:block"
-              >
-                <div className="flex items-center justify-between mb-6 pb-6 border-b border-white/5">
-                  <h3 className="text-xl font-bold text-white">Bed {selectedBed.bedId}</h3>
-                  <button onClick={() => setSelectedBed(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                    <User className="w-5 h-5 text-white/40" />
-                  </button>
-                </div>
-
-                {selectedBed.patient ? (
-                  <div className="space-y-6">
-                    <div className="flex items-start gap-4">
-                      <img src={selectedBed.patient.photoUrl} alt="Patient" className="w-16 h-16 rounded-xl object-cover border border-white/10" />
-                      <div>
-                        <h4 className="text-lg font-bold text-white">{selectedBed.patient.fullName}</h4>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-xs font-mono bg-white/10 px-2 py-0.5 rounded text-white/70">{selectedBed.patient.rmNumber}</span>
-                          <span className={cn(
-                            "text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-full",
-                            selectedBed.patient.status === 'Critical' ? "bg-orange-500/20 text-orange-400" : "bg-blue-500/20 text-blue-400"
-                          )}>
-                            {selectedBed.patient.status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
-                      <div>
-                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-1">Age / Gender</p>
-                        <p className="text-sm text-white">{selectedBed.patient.age} / {selectedBed.patient.gender}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-1">Blood Type</p>
-                        <p className="text-sm text-white font-bold text-red-400">{selectedBed.patient.bloodType}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-1 flex items-center gap-1"><Phone className="w-3 h-3"/> Contact</p>
-                        <p className="text-sm text-white truncate">{selectedBed.patient.contact}</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] text-white/40 uppercase font-bold tracking-wider mb-1">BPJS Status</p>
-                        <p className={cn("text-sm font-medium", selectedBed.patient.bpjsStatus === 'Active' ? 'text-primary-emerald' : 'text-white/40')}>{selectedBed.patient.bpjsStatus}</p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h5 className="text-xs font-bold text-white/60 uppercase tracking-widest mb-3">Primary Diagnoses</h5>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedBed.patient.history.diseases.length > 0 ? (
-                          selectedBed.patient.history.diseases.map((d, i) => (
-                            <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-white/5 text-white/80 border border-white/10">{d}</span>
-                          ))
-                        ) : (
-                          <span className="text-xs text-white/40">No recorded diagnoses.</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h5 className="text-xs font-bold text-white/60 uppercase tracking-widest mb-3">Active Medications</h5>
-                      <div className="space-y-2">
-                        {selectedBed.patient.history.medications.length > 0 ? (
-                          selectedBed.patient.history.medications.map((m, i) => (
-                            <div key={i} className="text-xs p-2 rounded-lg bg-blue-500/5 text-blue-200 border border-blue-500/10 flex items-start gap-2">
-                              <Activity className="w-3 h-3 mt-0.5 shrink-0" />
-                              <span>{m}</span>
-                            </div>
-                          ))
-                        ) : (
-                          <span className="text-xs text-white/40">No active medications.</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t border-white/5 flex gap-3">
-                      <button className="flex-1 btn-primary py-2 text-xs">View Full Record</button>
-                      <button className="flex-1 px-4 py-2 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-xs font-medium text-white/80">Transfer Patient</button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-full flex flex-col items-center justify-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-primary-emerald/10 border border-primary-emerald/20 flex items-center justify-center mb-4">
-                      <Bed className="w-8 h-8 text-primary-emerald" />
-                    </div>
-                    <h4 className="text-lg font-bold text-white mb-2">Bed is Available</h4>
-                    <p className="text-sm text-white/40 max-w-[200px] mb-6">This bed is currently unassigned and ready for a new patient.</p>
-                    <button className="btn-primary flex items-center gap-2">
-                      <Plus className="w-4 h-4" /> Assign Patient
-                    </button>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+          ))}
         </div>
       </div>
+    );
+  }
+
+  if (activeTab && activeTab !== 'Ketersediaan Bed') {
+    return (
+      <div className="p-6 h-full">
+        <SmartTable 
+          storageKey={`hospital_ranap_${activeTab}`}
+          columns={[
+            { key: 'tanggal', label: 'Tanggal' },
+            { key: 'nama_pasien', label: 'Nama Pasien' },
+            { key: 'ruangan', label: 'Ruangan/Bed' },
+            { key: 'keterangan', label: 'Keterangan' },
+            { key: 'status', label: 'Status', badge: true }
+          ]}
+          title={activeTab}
+        />
+      </div>
+    );
+  }
+
+  const handleKosongkan = (id: string) => {
+    if (true) {
+      setBeds(beds.map((b: any) => b.id === id ? { ...b, status: 'Dibersihkan', patient: '-' } : b));
+      toast.success('Bed dikosongkan dan sedang dibersihkan');
+    }
+  };
+
+  const handleIsiBed = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => {
+      const px = pasien.find(p => String(p.id) === String(selectedPasienId));
+      setBeds(beds.map((b: any) => b.id === selectedBed.id ? { ...b, status: 'Terisi', patient: px ? px.nama : '-' } : b));
+      setIsSubmitting(false);
+      setIsIsiBedModalOpen(false);
+      setSelectedPasienId('');
+      toast.success('Bed berhasil diisi');
+    }, 500);
+  };
+
+  const handleSelesaiBersih = (id: string) => {
+    setBeds(beds.map((b: any) => b.id === id ? { ...b, status: 'Kosong' } : b));
+    toast.success('Bed siap digunakan');
+  };
+
+  const handleMoveSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!targetBedId) return toast.error('Pilih bed tujuan');
+    
+    setIsSubmitting(true);
+    await new Promise(r => setTimeout(r, 800));
+    
+    setBeds(beds.map((b: any) => {
+      if (b.id === selectedBed.id) return { ...b, status: 'Dibersihkan', patient: '-' };
+      if (b.id === targetBedId) return { ...b, status: 'Terisi', patient: selectedBed.patient };
+      return b;
+    }));
+    
+    toast.success('Pasien berhasil dipindahkan');
+    setIsSubmitting(false);
+    setIsMoveModalOpen(false);
+  };
+
+  const availableBeds = beds.filter((b: any) => b.status === 'Kosong' && b.id !== selectedBed?.id);
+
+  const columns = [
+    { key: 'id', label: 'ID Bed', sortable: true },
+    { key: 'room', label: 'Ruangan', sortable: true, filterable: true },
+    { key: 'class', label: 'Kelas', sortable: true, filterable: true },
+    { 
+      key: 'status', label: 'Status', sortable: true, filterable: true,
+      render: (val: string) => (
+        <span className={`px-2 py-1 rounded text-xs font-semibold ${
+          val === 'Kosong' ? 'bg-emerald-100 text-emerald-700' :
+          val === 'Terisi' ? 'bg-rose-100 text-rose-700' :
+          'bg-amber-100 text-amber-700'
+        }`}>
+          {val}
+        </span>
+      )
+    },
+    { key: 'patient', label: 'Pasien' },
+    {
+      key: 'actions', label: 'Aksi & Dokumen',
+      render: (_: any, row: any) => (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {row.patient && (
+            <PrintPDFButton
+              documentData={{
+                nama: row.patient,
+                no_rm: row.no_rm || `RM-RANAP-${row.id}`,
+                unit_pelayanan: `Instalasi Rawat Inap - ${row.room} (${row.class})`,
+                ruangan: `${row.room} - Bed ${row.id}`,
+                tipe_kunjungan: 'Rawat Inap',
+                penjamin: row.penjamin || 'BPJS Kesehatan',
+                keluhan: 'Perawatan Rawat Inap',
+                diagnosis_utama: row.diagnosis || 'Penyakit Dalam / Rawat Inap',
+                edukasi_instruksi: 'Instruksi rawat inap, monitoring tanda vital per shift, dan jadwal visite dokter DPJP.'
+              }}
+              docType="resume_medis"
+              filename={`Admisi_Ranap_${row.id}_${row.patient}`}
+              label="PDF"
+              title="SURAT ADMISI & LEMBAR RESUME RAWAT INAP"
+              className="py-1 px-2 text-xs font-semibold"
+            />
+          )}
+          {row.status === 'Kosong' && (
+            <button onClick={(e) => { e.stopPropagation(); setSelectedBed(row); setIsIsiBedModalOpen(true); }} className="bg-emerald-600 text-white px-2 py-1 rounded text-xs hover:bg-emerald-700">Isi Bed</button>
+          )}
+          {row.status === 'Terisi' && (
+            <>
+              <button onClick={(e) => { e.stopPropagation(); setSelectedBed(row); setIsMoveModalOpen(true); }} className="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">Pindah Bed</button>
+              <button onClick={(e) => { e.stopPropagation(); handleKosongkan(row.id); }} className="bg-rose-600 text-white px-2 py-1 rounded text-xs hover:bg-rose-700">Kosongkan</button>
+            </>
+          )}
+          {row.status === 'Dibersihkan' && (
+            <button onClick={(e) => { e.stopPropagation(); handleSelesaiBersih(row.id); }} className="bg-amber-600 text-white px-2 py-1 rounded text-xs hover:bg-amber-700">Selesai Bersih</button>
+          )}
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">Manajemen Tempat Tidur</h1>
+          <p className="text-slate-500 dark:text-slate-400">Monitoring dan alokasi bed rawat inap secara real-time</p>
+        </div>
+        <button className="btn-secondary flex items-center gap-2">
+          <RefreshCw className="w-4 h-4" /> Sinkronisasi
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 flex flex-col justify-center items-center text-center shadow-sm">
+          <div className="text-slate-500 mb-1">Total Bed</div>
+          <div className="text-3xl font-bold text-slate-800 dark:text-white">{stats.total}</div>
+        </div>
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800 flex flex-col justify-center items-center text-center shadow-sm">
+          <div className="text-emerald-600 dark:text-emerald-400 mb-1">Kosong (Tersedia)</div>
+          <div className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">{stats.kosong}</div>
+        </div>
+        <div className="bg-rose-50 dark:bg-rose-900/20 rounded-xl p-4 border border-rose-200 dark:border-rose-800 flex flex-col justify-center items-center text-center shadow-sm">
+          <div className="text-rose-600 dark:text-rose-400 mb-1">Terisi</div>
+          <div className="text-3xl font-bold text-rose-700 dark:text-rose-300">{stats.terisi}</div>
+        </div>
+        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800 flex flex-col justify-center items-center text-center shadow-sm">
+          <div className="text-amber-600 dark:text-amber-400 mb-1">Dibersihkan</div>
+          <div className="text-3xl font-bold text-amber-700 dark:text-amber-300">{stats.dibersihkan}</div>
+        </div>
+      </div>
+
+      <ProfessionalTable 
+        title="Daftar Bed"
+        columns={columns}
+        data={beds}
+      />
+
+      <Modal isOpen={isIsiBedModalOpen} onClose={() => setIsIsiBedModalOpen(false)} title="Isi Bed (Registrasi Inap)">
+        <form onSubmit={handleIsiBed} className="space-y-4">
+          <div className="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800 flex items-center justify-between mb-4">
+            <div>
+              <div className="text-sm text-emerald-700 dark:text-emerald-400">Bed Tujuan</div>
+              <div className="font-bold text-emerald-900 dark:text-emerald-200">{selectedBed?.id} - {selectedBed?.room} ({selectedBed?.class})</div>
+            </div>
+            <BedDouble className="w-8 h-8 text-emerald-500 opacity-50" />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">Pilih Pasien</label>
+            <select required className="input-field" value={selectedPasienId} onChange={e => setSelectedPasienId(e.target.value)}>
+              <option value="">-- Pilih Pasien --</option>
+              {pasien.map((p: any) => (
+                <option key={p.id} value={p.id}>{p.no_rm} - {p.nama}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <button type="button" onClick={() => setIsIsiBedModalOpen(false)} className="btn-secondary">Batal</button>
+            <button type="submit" disabled={isSubmitting} className="btn-primary bg-emerald-600 hover:bg-emerald-700 border-emerald-600">
+              {isSubmitting ? <Activity className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {isSubmitting ? 'Memproses...' : 'Isi Bed'}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal isOpen={isMoveModalOpen} onClose={() => setIsMoveModalOpen(false)} title="Pindah Bed Pasien">
+        <form onSubmit={handleMoveSubmit} className="space-y-4">
+          <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="text-center">
+              <div className="text-xs text-slate-500 mb-1">Bed Saat Ini</div>
+              <div className="font-bold text-lg text-slate-800 dark:text-slate-200">{selectedBed?.id}</div>
+              <div className="text-xs font-medium text-slate-600">{selectedBed?.room} ({selectedBed?.class})</div>
+            </div>
+            <div className="text-slate-300">
+              <ArrowRightLeft className="w-6 h-6" />
+            </div>
+            <div className="text-center">
+              <div className="text-xs text-slate-500 mb-1">Pasien</div>
+              <div className="font-bold text-slate-800 dark:text-slate-200">{selectedBed?.patient}</div>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">Pilih Bed Tujuan (Hanya Kosong)</label>
+            <select required className="input-field" value={targetBedId} onChange={e => setTargetBedId(e.target.value)}>
+              <option value="">-- Pilih Bed Kosong --</option>
+              {availableBeds.map((b: any) => (
+                <option key={b.id} value={b.id}>{b.id} - {b.room} ({b.class})</option>
+              ))}
+            </select>
+          </div>
+          
+          {availableBeds.length === 0 && (
+            <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+              Tidak ada bed kosong yang tersedia saat ini.
+            </div>
+          )}
+          
+          <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <button type="button" onClick={() => setIsMoveModalOpen(false)} className="btn-secondary">Batal</button>
+            <button type="submit" disabled={isSubmitting || availableBeds.length === 0} className="btn-primary bg-blue-600 hover:bg-blue-700 border-blue-600">
+              {isSubmitting ? <Activity className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {isSubmitting ? 'Memindahkan...' : 'Pindah Bed'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

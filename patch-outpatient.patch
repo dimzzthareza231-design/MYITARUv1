@@ -1,0 +1,106 @@
+--- src/components/Outpatient.tsx
++++ src/components/Outpatient.tsx
+@@ -4,6 +4,7 @@
+ import { useHospital } from '../contexts/HospitalContext';
+ import { useToast } from '../contexts/ToastContext';
+ import SmartTable from './SmartTable';
++import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+ import PatientFlowDashboard from './PatientFlowDashboard';
+ 
+ export function Outpatient() {
+@@ -14,14 +15,15 @@
+   const [activeQueue, setActiveQueue] = useState<string | null>(null);
+   
+   // AI Features State
+-  const [isRecording, setIsRecording] = useState(false);
+   const [soapData, setSoapData] = useState({ s: '', o: '', a: '', p: '' });
+   const [icdSearch, setIcdSearch] = useState('');
+   const [showIcdSuggestions, setShowIcdSuggestions] = useState(false);
+   
+-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+-  const audioChunksRef = useRef<Blob[]>([]);
+-  const streamRef = useRef<MediaStream | null>(null);
++  const { isRecording, startRecording, stopRecording, isSupported } = useSpeechRecognition({
++    onResult: (text) => {
++      setSoapData(prev => ({ ...prev, s: (prev.s ? prev.s + ' ' : '') + text }));
++    }
++  });
+   
+   const [newDrug, setNewDrug] = useState({ name: '', qty: '', rules: '' });
+   const [prescriptions, setPrescriptions] = useState<{name: string, qty: string, rules: string}[]>([]);
+@@ -87,60 +89,17 @@
+   const activeDoctor = activeVisit ? dokter.find(d => d.id === activeVisit.dokter_id) : null;
+ 
+-  const handleMicrophoneClick = async () => {
+-    if (isRecording) {
+-      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+-        mediaRecorderRef.current.stop();
+-        setIsRecording(false);
+-      }
+-    } else {
+-      try {
+-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+-        streamRef.current = stream;
+-        audioChunksRef.current = [];
+-        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+-        const mediaRecorder = new MediaRecorder(stream, { mimeType });
+-        mediaRecorderRef.current = mediaRecorder;
+-
+-        mediaRecorder.ondataavailable = (event) => {
+-          if (event.data.size > 0) audioChunksRef.current.push(event.data);
+-        };
+-
+-        mediaRecorder.onstop = async () => {
+-          streamRef.current?.getTracks().forEach(track => track.stop());
+-          streamRef.current = null;
+-          if (audioChunksRef.current.length === 0) return;
+-          const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+-          toast.loading('AI sedang mentranskripsi suara...', { id: 'ai-scribe' });
+-          try {
+-            const reader = new FileReader();
+-            reader.readAsDataURL(audioBlob);
+-            reader.onloadend = async () => {
+-              const base64Audio = (reader.result as string).split(',')[1];
+-              const response = await fetch('/api/ai/transcribe', {
+-                method: 'POST',
+-                headers: { 'Content-Type': 'application/json' },
+-                body: JSON.stringify({ audioBase64: base64Audio, mimeType })
+-              });
+-              if (!response.ok) throw new Error('Transkripsi gagal');
+-              const data = await response.json();
+-              const text = data.transcript;
+-              if (text && text !== 'TIDAK_ADA_SUARA') {
+-                setSoapData(prev => ({ ...prev, s: (prev.s ? prev.s + ' ' : '') + text }));
+-                toast.success('Transkripsi ke form SOAP berhasil!', { id: 'ai-scribe' });
+-              } else {
+-                toast.dismiss('ai-scribe');
+-              }
+-            };
+-          } catch (error) {
+-            toast.error('Gagal memproses suara', { id: 'ai-scribe' });
+-          }
+-        };
+-        mediaRecorder.start(100);
+-        setIsRecording(true);
+-        toast.info('Mendengarkan percakapan (AI Scribe aktif)...');
+-      } catch (err) {
+-        toast.error('Izin mikrofon ditolak atau gagal akses');
+-      }
+-    }
+-  };
++  const handleMicrophoneClick = () => {
++    if (!isSupported) {
++      toast.error('Browser Anda tidak mendukung Web Speech API (Gunakan Chrome).');
++      return;
++    }
++    
++    if (isRecording) {
++      stopRecording();
++    } else {
++      if (startRecording()) {
++        toast.info('Mendengarkan percakapan (AI Scribe aktif)...');
++      } else {
++        toast.error('Gagal mengakses mikrofon.');
++      }
++    }
++  };

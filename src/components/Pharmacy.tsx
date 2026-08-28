@@ -1,252 +1,442 @@
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Search, FlaskConical, Filter, FileText, CheckCircle2, AlertTriangle, Pill, User, Clock, ArrowRight } from 'lucide-react';
-import { cn } from '../lib/utils';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useOutletContext, useParams } from 'react-router-dom';
 import { useHospital } from '../contexts/HospitalContext';
+import { useToast } from '../contexts/ToastContext';
+import { storage } from '../utils/storage';
+
+// TYPES & MOCK DATA
+import { 
+  MedicationStock, 
+  PrescriptionOrder, 
+  PrescriptionItem,
+  UDDSchedule, 
+  DrugReconciliation, 
+  DrugReturn, 
+  PurchaseOrderDefecta, 
+  SIPNAPReport,
+  DefectaItem
+} from './Pharmacy/types';
+
+import { 
+  INITIAL_MEDICATIONS, 
+  INITIAL_PRESCRIPTIONS, 
+  INITIAL_UDD_SCHEDULES, 
+  INITIAL_RECONCILIATIONS, 
+  INITIAL_RETURNS, 
+  INITIAL_PURCHASE_ORDERS, 
+  INITIAL_SIPNAP, 
+  INITIAL_HIGH_ALERT, 
+  INITIAL_DEFECTA 
+} from './Pharmacy/data';
+
+// SUB-COMPONENTS
+import { ApotekRalanTab } from './Pharmacy/ApotekRalanTab';
+import { ApotekRanapTab } from './Pharmacy/ApotekRanapTab';
+import { StokInventoriTab } from './Pharmacy/StokInventoriTab';
+import { DefectaProcurementTab } from './Pharmacy/DefectaProcurementTab';
+import { NarkotikaLasaTab } from './Pharmacy/NarkotikaLasaTab';
+import { KatalogFornasKfaTab } from './Pharmacy/KatalogFornasKfaTab';
+
+import { 
+  Pill, 
+  Building2, 
+  Boxes, 
+  ShoppingCart, 
+  ShieldAlert, 
+  BookOpen, 
+  Activity, 
+  CheckCircle,
+  Truck,
+  RotateCcw
+} from 'lucide-react';
 
 export function Pharmacy() {
-  const { patients } = useHospital();
-  const [activeTab, setActiveTab] = useState<'inventory' | 'prescriptions'>('prescriptions');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const location = useLocation();
+  const { kunjungan, updateKunjunganStatus } = useHospital();
+  const toast = useToast();
+  
+  // URL Module detection: /modul/apotek-ralan, /modul/apotek-ranap, /modul/stok-obat
+  const pathname = location.pathname;
+  let initialTab: 'ralan' | 'ranap' | 'stok' | 'defecta' | 'narkotika' | 'fornas' = 'ralan';
 
-  // Extract all unique medications from all patients to build a mock inventory
-  const inventory = useMemo(() => {
-    const medsMap = new Map<string, { count: number, stock: number, category: string }>();
-    
-    patients.forEach(p => {
-      p.history.medications.forEach(med => {
-        if (!medsMap.has(med)) {
-          // Generate a mock stock level based on the name hash or just random
-          const stock = Math.floor(Math.random() * 500) + 10;
-          medsMap.set(med, { count: 0, stock, category: med.includes('mg') ? 'Tablet' : 'Syrup/Liquid' });
+  if (pathname.includes('apotek-ranap')) {
+    initialTab = 'ranap';
+  } else if (pathname.includes('stok-obat')) {
+    initialTab = 'stok';
+  }
+
+  const [activeMainTab, setActiveMainTab] = useState<'ralan' | 'ranap' | 'stok' | 'defecta' | 'narkotika' | 'fornas'>(initialTab);
+
+  // Sync tab if URL changes
+  useEffect(() => {
+    if (pathname.includes('apotek-ranap')) {
+      setActiveMainTab('ranap');
+    } else if (pathname.includes('stok-obat')) {
+      setActiveMainTab('stok');
+    } else if (pathname.includes('apotek-ralan')) {
+      setActiveMainTab('ralan');
+    }
+  }, [pathname]);
+
+  // PERSISTENT STORAGE WITH RESILIENT FALLBACK
+  const [stocks, setStocks] = useState<MedicationStock[]>(() => {
+    return storage.get<MedicationStock[]>('hospital_pharmacy_stocks', INITIAL_MEDICATIONS);
+  });
+
+  const [prescriptions, setPrescriptions] = useState<PrescriptionOrder[]>(() => {
+    return storage.get<PrescriptionOrder[]>('hospital_pharmacy_prescriptions', INITIAL_PRESCRIPTIONS);
+  });
+
+  const [uddSchedules, setUddSchedules] = useState<UDDSchedule[]>(() => {
+    return storage.get<UDDSchedule[]>('hospital_pharmacy_udd', INITIAL_UDD_SCHEDULES);
+  });
+
+  const [reconciliations, setReconciliations] = useState<DrugReconciliation[]>(() => {
+    return storage.get<DrugReconciliation[]>('hospital_pharmacy_reconciliations', INITIAL_RECONCILIATIONS);
+  });
+
+  const [returns, setReturns] = useState<DrugReturn[]>(() => {
+    return storage.get<DrugReturn[]>('hospital_pharmacy_returns', INITIAL_RETURNS);
+  });
+
+  const [poList, setPoList] = useState<PurchaseOrderDefecta[]>(() => {
+    return storage.get<PurchaseOrderDefecta[]>('hospital_pharmacy_po', INITIAL_PURCHASE_ORDERS);
+  });
+
+  const [sipnapList, setSipnapList] = useState<SIPNAPReport[]>(() => {
+    return storage.get<SIPNAPReport[]>('hospital_pharmacy_sipnap', INITIAL_SIPNAP);
+  });
+
+  // SAVE VIA STORAGE WRAPPER
+  useEffect(() => {
+    storage.set('hospital_pharmacy_stocks', stocks);
+  }, [stocks]);
+
+  useEffect(() => {
+    storage.set('hospital_pharmacy_prescriptions', prescriptions);
+  }, [prescriptions]);
+
+  useEffect(() => {
+    storage.set('hospital_pharmacy_udd', uddSchedules);
+  }, [uddSchedules]);
+
+  useEffect(() => {
+    storage.set('hospital_pharmacy_reconciliations', reconciliations);
+  }, [reconciliations]);
+
+  useEffect(() => {
+    storage.set('hospital_pharmacy_returns', returns);
+  }, [returns]);
+
+  useEffect(() => {
+    storage.set('hospital_pharmacy_po', poList);
+  }, [poList]);
+
+  useEffect(() => {
+    storage.set('hospital_pharmacy_sipnap', sipnapList);
+  }, [sipnapList]);
+
+  // SYNC WITH HOSPITAL CONTEXT KUNJUNGAN (Auto import prescriptions with status 'Farmasi')
+  useEffect(() => {
+    const farmasiKunjungan = kunjungan.filter(k => k.status === 'Farmasi');
+    if (farmasiKunjungan.length === 0) return;
+
+    setPrescriptions(prev => {
+      const newItemsToAdd: PrescriptionOrder[] = [];
+      farmasiKunjungan.forEach(k => {
+        const patientName = (k as any).nama_pasien || '';
+        const existing = prev.find(p => p.no_rm === k.pasien_id || (patientName && p.nama_pasien.toLowerCase() === patientName.toLowerCase()));
+        if (!existing && patientName) {
+          const newRXP: PrescriptionOrder = {
+            id: `RXP-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            no_resep: `RXP-RALAN-${Math.floor(1000 + Math.random() * 9000)}`,
+            tanggal_resep: k.tanggal || new Date().toISOString().split('T')[0],
+            waktu_resep: 'Baru Saja',
+            kunjungan_id: k.id || `KJ-${Date.now()}`,
+            no_rm: k.pasien_id || 'RM-260800-001',
+            nama_pasien: patientName || 'Pasien Ralan',
+            umur: '42 Thn',
+            jenis_kelamin: 'L',
+            berat_badan_kg: 65,
+            riwayat_alergi: [],
+            dokter_penulis: (k as any).dokter || 'dr. Bambang Irawan, Sp.PD',
+            sip_dokter: 'SIP.503/442/DU/2022',
+            poli_ruangan: (k as any).poli || 'Poli Penyakit Dalam',
+            jenis_layanan: 'Rawat Jalan',
+            penjamin: (k as any).penjamin || 'BPJS Kesehatan',
+            diagnosis_primer: (k as any).diagnosa || 'Pemeriksaan Rutin Poli',
+            kode_icd10: 'Z00.0',
+            tipe_resep: 'Non-Racikan',
+            status: 'Menunggu Telaah',
+            telaah_resep: {
+              administratif: {
+                keabsahan_resep: true,
+                identitas_pasien: true,
+                identitas_dokter: true,
+                paraf_dokter: true,
+                tanggal_resep: true,
+                ruangan_poli: true
+              },
+              farmasetik: {
+                bentuk_sediaan: true,
+                dosis_kekuatan: true,
+                stabilitas_inkompatibilitas: true,
+                aturan_pakai_rute: true,
+                jumlah_obat: true
+              },
+              klinis: {
+                ketepatan_indikasi: true,
+                duplikasi_terapi: false,
+                alergi_reaksi_silang: false,
+                interaksi_obat: false,
+                kontraindikasi: false,
+                penyesuaian_dosis_organ: false
+              },
+              status_telaah: 'Belum Ditelaah',
+              apoteker_penelaah: '-',
+              waktu_telaah: '-'
+            },
+            ai_clinical_check: {
+              status_keamanan: 'Aman',
+              interaksi_terdeteksi: [],
+              peringatan_alergi: [],
+              ringkasan_ai: 'Resep tunggal Paracetamol aman diberikan.'
+            },
+            dispensing: {
+              jenis_etiket_dicetak: ['Putih (Oral)'],
+              catatan_dispensing: 'Disiapkan dari Depo Ralan'
+            },
+            items: [
+              {
+                id: 'ITEM-PCT-001',
+                kode_obat: 'MED-001',
+                nama_obat: 'Paracetamol 500 mg Tablet',
+                nama_generik: 'Paracetamol',
+                bentuk_sediaan: 'Tablet',
+                kekuatan: '500 mg',
+                dosis: '500 mg',
+                frekuensi: '3 x sehari 1 tablet',
+                aturan_pakai: 'Sesudah Makan (Bila Nyeri/Demam)',
+                rute_pemberian: 'Oral',
+                signa: '3 x 1 Tab dc / pc',
+                jumlah: 15,
+                satuan: 'Tablet',
+                harga_satuan: 1200,
+                total_harga: 18000,
+                tipe_item: 'Non-Racikan'
+              }
+            ],
+            total_biaya_obat: 18000,
+            jasa_embalase: 2000,
+            total_tagihan: 20000
+          };
+          newItemsToAdd.push(newRXP);
         }
-        medsMap.get(med)!.count += 1;
       });
+      return newItemsToAdd.length > 0 ? [...newItemsToAdd, ...prev] : prev;
     });
+  }, [kunjungan]);
 
-    return Array.from(medsMap.entries()).map(([name, data]) => ({
-      name,
-      ...data,
-      status: data.stock > 100 ? 'Good' : data.stock > 30 ? 'Low' : 'Critical'
-    })).sort((a, b) => a.name.localeCompare(b.name));
-  }, [patients]);
+  // STOCK DEDUCTION UPON DISPENSING
+  const handleDispenseDeductStock = (items: PrescriptionItem[], depoKey: 'depo_ralan' | 'depo_ranap' | 'depo_igd' = 'depo_ralan') => {
+    const updatedStocks = [...stocks];
+    items.forEach(it => {
+      const targetMed = updatedStocks.find(s => s.id === it.kode_obat || s.nama_obat === it.nama_obat);
+      if (targetMed) {
+        targetMed.stok_total = Math.max(0, targetMed.stok_total - it.jumlah);
+        targetMed.lokasi_depo[depoKey] = Math.max(0, (targetMed.lokasi_depo[depoKey] || 0) - it.jumlah);
+        if (targetMed.stok_total <= targetMed.stok_minimum) {
+          targetMed.status = 'Stok Kritis';
+        }
+      }
+    });
+    setStocks(updatedStocks);
+  };
 
-  const patientsWithMeds = useMemo(() => {
-    return patients
-      .filter(p => p.history.medications.length > 0)
-      .filter(p => p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || p.rmNumber.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [patients, searchQuery]);
-
-  const selectedPatient = patientsWithMeds.find(p => p.id === selectedPatientId);
+  // RESTORE STOCK FROM RETURN
+  const handleRestoreStockFromReturn = (ret: DrugReturn) => {
+    const updatedStocks = [...stocks];
+    ret.items.forEach(it => {
+      const target = updatedStocks.find(s => s.id === it.kode_obat || s.nama_obat === it.nama_obat);
+      if (target) {
+        target.stok_total += it.jumlah_retur;
+        target.lokasi_depo.depo_ranap += it.jumlah_retur;
+        if (target.stok_total > target.stok_minimum) {
+          target.status = 'Tersedia';
+        }
+      }
+    });
+    setStocks(updatedStocks);
+  };
 
   return (
-    <div className="h-full flex flex-col gap-6">
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Pharmacy</h1>
-          <p className="text-sm text-white/40">Manage inventory and patient prescriptions</p>
+    <div className="p-4 sm:p-6 space-y-6 max-w-[1600px] mx-auto min-h-screen">
+      {/* 1. TOP HEADER & MAIN MODULE NAVIGATION TABS */}
+      <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-gradient-to-tr from-purple-600 to-indigo-600 text-white rounded-2xl shadow-md">
+            <Pill className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+              Sistem Informasi Farmasi &amp; Apotek RS
+              <span className="px-2 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 rounded-full text-[10px] font-extrabold uppercase">
+                GPP / Permenkes 72
+              </span>
+            </h1>
+            <p className="text-xs text-slate-500">
+              Instalasi Farmasi RS ITARU Medika • E-Prescribing, Clinical Screening, UDD Ranap, Multi-Depo &amp; SIPNAP
+            </p>
+          </div>
         </div>
-      </div>
-      
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
-        <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl w-fit">
+
+        {/* TOP TAB SWITCHER */}
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto p-1 bg-slate-100 dark:bg-slate-900 rounded-xl">
           <button
-            onClick={() => setActiveTab('prescriptions')}
-            className={cn(
-              "px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2",
-              activeTab === 'prescriptions' ? "bg-primary-emerald/20 text-primary-emerald" : "text-white/40 hover:text-white"
-            )}
+            onClick={() => setActiveMainTab('ralan')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-black flex items-center gap-2 whitespace-nowrap transition-all ${
+              activeMainTab === 'ralan'
+                ? 'bg-purple-600 text-white shadow'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800'
+            }`}
           >
-            <FileText className="w-4 h-4" /> Prescriptions
+            <Pill className="w-3.5 h-3.5" />
+            <span>Apotek Ralan</span>
           </button>
+
           <button
-            onClick={() => setActiveTab('inventory')}
-            className={cn(
-              "px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2",
-              activeTab === 'inventory' ? "bg-blue-500/20 text-blue-400" : "text-white/40 hover:text-white"
-            )}
+            onClick={() => setActiveMainTab('ranap')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-black flex items-center gap-2 whitespace-nowrap transition-all ${
+              activeMainTab === 'ranap'
+                ? 'bg-violet-600 text-white shadow'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800'
+            }`}
           >
-            <FlaskConical className="w-4 h-4" /> Inventory ({inventory.length})
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Apotek Ranap (UDD)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveMainTab('stok')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-black flex items-center gap-2 whitespace-nowrap transition-all ${
+              activeMainTab === 'stok'
+                ? 'bg-blue-600 text-white shadow'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Boxes className="w-3.5 h-3.5" />
+            <span>Stok Multi-Depo</span>
+          </button>
+
+          <button
+            onClick={() => setActiveMainTab('defecta')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-black flex items-center gap-2 whitespace-nowrap transition-all ${
+              activeMainTab === 'defecta'
+                ? 'bg-indigo-600 text-white shadow'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800'
+            }`}
+          >
+            <ShoppingCart className="w-3.5 h-3.5" />
+            <span>Defecta &amp; SP</span>
+          </button>
+
+          <button
+            onClick={() => setActiveMainTab('narkotika')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-black flex items-center gap-2 whitespace-nowrap transition-all ${
+              activeMainTab === 'narkotika'
+                ? 'bg-red-600 text-white shadow'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800'
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            <span>SIPNAP &amp; LASA</span>
+          </button>
+
+          <button
+            onClick={() => setActiveMainTab('fornas')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-black flex items-center gap-2 whitespace-nowrap transition-all ${
+              activeMainTab === 'fornas'
+                ? 'bg-emerald-600 text-white shadow'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800'
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Fornas &amp; KFA</span>
           </button>
         </div>
-        
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-white/40" />
-          <input 
-            type="text" 
-            placeholder={activeTab === 'prescriptions' ? "Search patient..." : "Search medication..."}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-4 py-2 glass-input rounded-xl text-sm w-full sm:w-64"
-          />
-        </div>
       </div>
 
-      <div className="flex-1 min-h-0">
-        <AnimatePresence mode="wait">
-          {activeTab === 'prescriptions' ? (
-            <motion.div 
-              key="prescriptions"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="h-full flex gap-6"
-            >
-              <div className="w-1/3 glass-panel border border-white/5 flex flex-col overflow-hidden">
-                <div className="p-4 border-b border-white/5 font-bold text-white/60 uppercase tracking-widest text-xs flex justify-between">
-                  <span>Pending Queue</span>
-                  <span>{patientsWithMeds.length} Patients</span>
-                </div>
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-2">
-                  {patientsWithMeds.map(patient => (
-                    <button
-                      key={patient.id}
-                      onClick={() => setSelectedPatientId(patient.id)}
-                      className={cn(
-                        "w-full text-left p-3 rounded-xl transition-all border",
-                        selectedPatientId === patient.id 
-                          ? "bg-primary-emerald/10 border-primary-emerald/30 shadow-lg"
-                          : "bg-white/5 border-transparent hover:bg-white/10"
-                      )}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={cn("font-bold text-sm truncate", selectedPatientId === patient.id ? "text-primary-emerald" : "text-white")}>{patient.fullName}</span>
-                        <span className="text-[10px] bg-white/10 px-2 py-0.5 rounded text-white/60">{patient.rmNumber}</span>
-                      </div>
-                      <div className="text-xs text-white/40 flex items-center gap-1">
-                        <Pill className="w-3 h-3" /> {patient.history.medications.length} Medications
-                      </div>
-                    </button>
-                  ))}
-                  {patientsWithMeds.length === 0 && (
-                    <div className="p-8 text-center text-white/40 text-sm">
-                      No prescriptions found.
-                    </div>
-                  )}
-                </div>
-              </div>
+      {/* 2. RENDER ACTIVE TAB CONTENT */}
+      {activeMainTab === 'ralan' && (
+        <ApotekRalanTab
+          prescriptions={prescriptions}
+          stocks={stocks}
+          onUpdatePrescription={(p) => {
+            setPrescriptions(prev => prev.map(item => item.id === p.id ? p : item));
+          }}
+          onAddPrescription={(newP) => {
+            setPrescriptions(prev => [newP, ...prev]);
+          }}
+          onDeductStock={handleDispenseDeductStock}
+        />
+      )}
 
-              <div className="w-2/3 glass-panel border border-white/5 flex flex-col overflow-hidden relative">
-                {selectedPatient ? (
-                  <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-                    <div className="flex items-start justify-between mb-8 pb-6 border-b border-white/5">
-                      <div className="flex items-center gap-4">
-                        <img src={selectedPatient.photoUrl} alt="Patient" className="w-16 h-16 rounded-xl object-cover border border-white/10" />
-                        <div>
-                          <h2 className="text-xl font-bold text-white mb-1">{selectedPatient.fullName}</h2>
-                          <div className="flex gap-3 text-xs text-white/60">
-                            <span className="flex items-center gap-1"><User className="w-3 h-3" /> {selectedPatient.age} yo, {selectedPatient.gender}</span>
-                            <span className="flex items-center gap-1 font-mono">{selectedPatient.rmNumber}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className={cn(
-                        "px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-widest border",
-                        selectedPatient.bpjsStatus === 'Active' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/5 text-white/40 border-white/10"
-                      )}>
-                        BPJS: {selectedPatient.bpjsStatus}
-                      </div>
-                    </div>
+      {activeMainTab === 'ranap' && (
+        <ApotekRanapTab
+          prescriptions={prescriptions}
+          uddSchedules={uddSchedules}
+          reconciliations={reconciliations}
+          returns={returns}
+          stocks={stocks}
+          onUpdateUDD={(u) => {
+            setUddSchedules(prev => prev.map(item => item.id === u.id ? u : item));
+          }}
+          onAddUDD={(u) => {
+            setUddSchedules(prev => [u, ...prev]);
+          }}
+          onAddReconciliation={(r) => {
+            setReconciliations(prev => [r, ...prev]);
+          }}
+          onAddReturn={(ret) => {
+            setReturns(prev => [ret, ...prev]);
+          }}
+          onRestoreStockFromReturn={handleRestoreStockFromReturn}
+        />
+      )}
 
-                    <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">Prescribed Medications</h3>
-                    <div className="space-y-4">
-                      {selectedPatient.history.medications.map((med, idx) => (
-                        <div key={idx} className="bg-white/5 border border-white/10 p-4 rounded-xl flex items-center justify-between group hover:bg-white/10 transition-colors">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                              <Pill className="w-5 h-5 text-blue-400" />
-                            </div>
-                            <div>
-                              <div className="font-bold text-white text-sm">{med}</div>
-                              <div className="text-xs text-white/40 mt-1 flex items-center gap-3">
-                                <span>1x a day</span>
-                                <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                                <span>After meal</span>
-                              </div>
-                            </div>
-                          </div>
-                          <button className="opacity-0 group-hover:opacity-100 transition-opacity btn-primary py-1.5 px-4 text-xs flex items-center gap-2">
-                            Dispense <CheckCircle2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <div className="mt-8 pt-6 border-t border-white/5">
-                      <button className="w-full btn-primary py-3 flex justify-center items-center gap-2">
-                        Dispense All <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex-1 flex flex-col items-center justify-center text-white/20">
-                    <FileText className="w-16 h-16 mb-4 opacity-50" />
-                    <p>Select a patient to view prescriptions</p>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div 
-              key="inventory"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="h-full glass-panel border border-white/5 overflow-hidden flex flex-col"
-            >
-              <div className="overflow-x-auto flex-1 custom-scrollbar">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-white/5 sticky top-0 z-10 backdrop-blur-md">
-                    <tr>
-                      <th className="px-6 py-4 font-bold text-white/40 uppercase tracking-widest text-[10px]">Medication Name</th>
-                      <th className="px-6 py-4 font-bold text-white/40 uppercase tracking-widest text-[10px]">Category</th>
-                      <th className="px-6 py-4 font-bold text-white/40 uppercase tracking-widest text-[10px]">Prescribed To</th>
-                      <th className="px-6 py-4 font-bold text-white/40 uppercase tracking-widest text-[10px]">Stock Level</th>
-                      <th className="px-6 py-4 font-bold text-white/40 uppercase tracking-widest text-[10px]">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {inventory.filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase())).map((item, idx) => (
-                      <tr key={idx} className="hover:bg-white/5 transition-colors">
-                        <td className="px-6 py-4 font-medium text-white">{item.name}</td>
-                        <td className="px-6 py-4 text-white/60">{item.category}</td>
-                        <td className="px-6 py-4 text-white/60">{item.count} Patients</td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-full h-1.5 bg-black/40 rounded-full max-w-[100px] overflow-hidden">
-                              <div 
-                                className={cn("h-full rounded-full", item.status === 'Critical' ? 'bg-red-400' : item.status === 'Low' ? 'bg-orange-400' : 'bg-primary-emerald')}
-                                style={{ width: `${Math.min(100, (item.stock / 500) * 100)}%` }}
-                              />
-                            </div>
-                            <span className="text-xs text-white/60 font-mono">{item.stock}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={cn(
-                            "px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider",
-                            item.status === 'Critical' ? "bg-red-500/20 text-red-400" :
-                            item.status === 'Low' ? "bg-orange-500/20 text-orange-400" :
-                            "bg-emerald-500/20 text-emerald-400"
-                          )}>
-                            {item.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                    {inventory.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="px-6 py-12 text-center text-white/40">No inventory data found.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      {activeMainTab === 'stok' && (
+        <StokInventoriTab
+          stocks={stocks}
+          onUpdateStocks={(stks) => setStocks(stks)}
+          onAddStock={(newMed) => setStocks(prev => [newMed, ...prev])}
+        />
+      )}
+
+      {activeMainTab === 'defecta' && (
+        <DefectaProcurementTab
+          stocks={stocks}
+          poList={poList}
+          defectaList={INITIAL_DEFECTA}
+          onAddPO={(po) => setPoList(prev => [po, ...prev])}
+          onUpdatePO={(po) => setPoList(prev => prev.map(item => item.id === po.id ? po : item))}
+        />
+      )}
+
+      {activeMainTab === 'narkotika' && (
+        <NarkotikaLasaTab
+          sipnapList={sipnapList}
+          highAlertList={INITIAL_HIGH_ALERT}
+          onAddSipnap={(entry) => setSipnapList(prev => [entry, ...prev])}
+        />
+      )}
+
+      {activeMainTab === 'fornas' && (
+        <KatalogFornasKfaTab
+          stocks={stocks}
+        />
+      )}
     </div>
   );
 }
+
+export default Pharmacy;

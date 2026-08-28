@@ -1,0 +1,149 @@
+--- src/components/TalkToText.tsx
++++ src/components/TalkToText.tsx
+@@ -1,99 +1,28 @@
+ import { useToast } from "../contexts/ToastContext";
+ import React, { useState, useRef } from 'react';
++import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+ 
+ export default function TalkToText({ onTranscriptReady, currentSOAP, setCurrentSOAP }: any) {
+   const toast = useToast();
+-  const [isRecording, setIsRecording] = useState(false);
+   const [transcript, setTranscript] = useState('');
+   const [isProcessing, setIsProcessing] = useState(false);
+   const [showResult, setShowResult] = useState(false);
+   const [parsedResult, setParsedResult] = useState<any>(null);
+ 
+-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+-  const audioChunksRef = useRef<Blob[]>([]);
+-  const streamRef = useRef<MediaStream | null>(null);
+-
+-  const startRecording = async () => {
+-    try {
+-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+-      streamRef.current = stream;
+-      audioChunksRef.current = [];
+-
+-      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+-        ? 'audio/webm;codecs=opus'
+-        : MediaRecorder.isTypeSupported('audio/webm')
+-          ? 'audio/webm'
+-          : 'audio/mp4';
+-
+-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
+-      mediaRecorderRef.current = mediaRecorder;
+-
+-      mediaRecorder.ondataavailable = (event) => {
+-        if (event.data.size > 0) {
+-          audioChunksRef.current.push(event.data);
+-        }
+-      };
+-
+-      mediaRecorder.onstop = async () => {
+-        streamRef.current?.getTracks().forEach(track => track.stop());
+-        streamRef.current = null;
+-
+-        if (audioChunksRef.current.length === 0) {
+-          toast.warning('Tidak ada audio yang terekam');
+-          return;
+-        }
+-
+-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+-        if (audioBlob.size < 1000) {
+-          toast.warning('Rekaman terlalu pendek. Bicara lebih lama.');
+-          return;
+-        }
+-
+-        setIsProcessing(true);
+-        toast.info('🤖 AI sedang mentranskripsi...');
+-
+-        try {
+-          const reader = new FileReader();
+-          reader.readAsDataURL(audioBlob);
+-          reader.onloadend = async () => {
+-            try {
+-              const base64Audio = (reader.result as string).split(',')[1];
+-              const response = await fetch('/api/ai/transcribe', {
+-                method: 'POST',
+-                headers: { 'Content-Type': 'application/json' },
+-                body: JSON.stringify({
+-                  audioBase64: base64Audio,
+-                  mimeType: mimeType
+-                })
+-              });
+-
+-              if (!response.ok) throw new Error('Transkripsi gagal');
+-              const data = await response.json();
+-              const text = data.transcript;
+-
+-              if (!text || text === 'TIDAK_ADA_SUARA') {
+-                toast.warning('Tidak ada suara terdeteksi. Coba lagi.');
+-                setIsProcessing(false);
+-                return;
+-              }
+-
+-              setTranscript(text);
+-              toast.success('Transkripsi berhasil!');
+-              
+-              // Auto-analyze
+-              await analyzeWithAI(text);
+-            } catch (err) {
+-              console.error('Error:', err);
+-              toast.error('Gagal mentranskripsi');
+-              setIsProcessing(false);
+-            }
+-          };
+-        } catch (err) {
+-          console.error('Error:', err);
+-          toast.error('Terjadi kesalahan');
+-          setIsProcessing(false);
+-        }
+-      };
+-
+-      mediaRecorder.start(100);
+-      setIsRecording(true);
+-      toast.info('🎤 Mikrofon aktif. Mulai bicara...');
+-    } catch (error: any) {
+-      console.error('Mic error:', error);
+-      if (error.name === 'NotAllowedError') {
+-        toast.error('Izin mikrofon ditolak. Izinkan di pengaturan browser.');
+-      } else {
+-        toast.error('Gagal mengakses mikrofon');
+-      }
+-    }
++  const { isRecording, startRecording, stopRecording, isSupported } = useSpeechRecognition({
++    onResult: (text) => {
++      setTranscript(prev => (prev ? prev + ' ' : '') + text);
++    }
++  });
++
++  const handleStartRecording = () => {
++    if (!isSupported) {
++      toast.error('Browser Anda tidak mendukung Web Speech API (Gunakan Chrome).');
++      return;
++    }
++    if (startRecording()) {
++      toast.info('🎤 Mikrofon aktif. Mulai bicara...');
++    } else {
++      toast.error('Gagal mengakses mikrofon.');
++    }
+   };
+ 
+@@ -141,12 +70,5 @@
+       setIsProcessing(false);
+     }
+-  };
+-
+-  const stopRecording = () => {
+-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+-      mediaRecorderRef.current.stop();
+-      setIsRecording(false);
+-    }
+   };
+ 
+@@ -211,7 +133,7 @@
+         {!isRecording ? (
+           <button
+-            onClick={startRecording}
++            onClick={handleStartRecording}
+             className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 font-semibold"
+           >

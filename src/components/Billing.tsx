@@ -1,205 +1,355 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Search, Plus, FileText, CheckCircle2, Clock, CreditCard, DollarSign, XCircle, Printer } from 'lucide-react';
-import { AnimatePresence } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
+import { 
+  CreditCard, FileText, CheckCircle, AlertTriangle, ShieldCheck, 
+  Download, Sparkles, Tag, Clock, Layers, DollarSign, Wallet, TrendingUp,
+  UserCheck, Activity, RefreshCw
+} from 'lucide-react';
 import { useHospital } from '../contexts/HospitalContext';
-import { cn } from '../lib/utils';
+import { useToast } from '../contexts/ToastContext';
+import { storage } from '../utils/storage';
 
-export interface Invoice {
-  id: string;
-  patientName: string;
-  patientId: string;
-  date: string;
-  amount: number;
-  status: 'Paid' | 'Unpaid' | 'Pending';
-  type: 'BPJS' | 'Umum' | 'Asuransi';
-}
+import { BillingRecord, MasterTarifItem, ShiftKasirRecord, PaymentMethod } from './Finance/types';
+import { INITIAL_BILLINGS, INITIAL_MASTER_TARIF, INITIAL_SHIFTS } from './Finance/mockFinanceData';
+
+import { BillingRalanTab } from './Finance/BillingRalanTab';
+import { BillingRanapTab } from './Finance/BillingRanapTab';
+import { PembayaranTab } from './Finance/PembayaranTab';
+import { KwitansiTab } from './Finance/KwitansiTab';
+import { MasterTarifTab } from './Finance/MasterTarifTab';
+import { RekapShiftKasirTab } from './Finance/RekapShiftKasirTab';
 
 export function Billing() {
-  const { patients } = useHospital();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const toast = useToast();
+  const { kunjungan, pasien, penjamin, dokter } = useHospital();
+  
+  // Outlet context from ModuleLayout or query param
+  const outletCtx = useOutletContext<{ activeTab?: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryTab = searchParams.get('tab');
 
-  // Generate some dummy invoices based on patients
-  const [invoices] = useState<Invoice[]>(() => {
-    return patients.map((p, i) => {
-      const statuses: ('Paid' | 'Unpaid' | 'Pending')[] = ['Paid', 'Unpaid', 'Pending'];
-      const types: ('BPJS' | 'Umum' | 'Asuransi')[] = ['BPJS', 'Umum', 'Asuransi'];
-      return {
-        id: `INV-2023-${(i + 1).toString().padStart(4, '0')}`,
-        patientName: p.fullName,
-        patientId: p.id,
-        date: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString().split('T')[0],
-        amount: Math.floor(Math.random() * 5000000) + 150000,
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        type: p.bpjsStatus === 'Active' ? 'BPJS' : types[Math.floor(Math.random() * types.length)]
-      };
-    });
-  });
-
-  const filteredInvoices = invoices.filter(inv => 
-    inv.patientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    inv.id.toLowerCase().includes(searchQuery.toLowerCase())
+  const [activeTab, setActiveTab] = useState<string>(
+    queryTab || outletCtx?.activeTab || 'Billing Ralan'
   );
 
-  return (
-    <div className="h-full flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Billing & Invoices</h1>
-          <p className="text-sm text-white/40">Manage patient billing and payments</p>
-        </div>
-        <button className="btn-primary">
-          <Plus className="w-4 h-4" />
-          <span>New Invoice</span>
-        </button>
-      </div>
+  // Synchronize when URL or outlet context changes
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    } else if (outletCtx?.activeTab) {
+      setActiveTab(outletCtx.activeTab);
+    }
+  }, [searchParams, outletCtx?.activeTab]);
 
-      <div className="flex-1 glass-panel flex flex-col overflow-hidden border border-white/5">
-        <div className="p-4 border-b border-white/5 flex gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-            <input
-              type="text"
-              placeholder="Search by Patient Name or Invoice ID..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 glass-input text-sm"
-            />
+  // Persistent States using storage wrapper
+  const [billings, setBillings] = useState<BillingRecord[]>(() => {
+    return storage.getItem<BillingRecord[]>('hospital_finance_billings', INITIAL_BILLINGS);
+  });
+
+  const [tarifs, setTarifs] = useState<MasterTarifItem[]>(() => {
+    return storage.getItem<MasterTarifItem[]>('hospital_finance_tarifs', INITIAL_MASTER_TARIF);
+  });
+
+  const [shifts, setShifts] = useState<ShiftKasirRecord[]>(() => {
+    return storage.getItem<ShiftKasirRecord[]>('hospital_finance_shifts', INITIAL_SHIFTS);
+  });
+
+  // Target billing for direct payment or kwitansi
+  const [activeBillingForPayment, setActiveBillingForPayment] = useState<BillingRecord | null>(null);
+  const [activeKwitansiBilling, setActiveKwitansiBilling] = useState<BillingRecord | null>(null);
+
+  // Sync back to storage on update
+  useEffect(() => {
+    storage.setItem('hospital_finance_billings', billings);
+  }, [billings]);
+
+  useEffect(() => {
+    storage.setItem('hospital_finance_tarifs', tarifs);
+  }, [tarifs]);
+
+  useEffect(() => {
+    storage.setItem('hospital_finance_shifts', shifts);
+  }, [shifts]);
+
+  // Sync new visits from HospitalContext into billings if not already present
+  const handleSyncFromKunjungan = () => {
+    let addedCount = 0;
+    const existingKunjunganIds = new Set(billings.map(b => b.kunjunganId).filter(Boolean));
+
+    const newBillingsFromKunjungan: BillingRecord[] = [];
+
+    kunjungan.forEach(k => {
+      if (existingKunjunganIds.has(k.id)) return;
+
+      const p = pasien.find(px => String(px.id) === String(k.pasien_id));
+      const pj = penjamin.find(pjx => pjx.id === k.penjamin_id);
+      const doc = dokter.find(dx => dx.id === k.dokter_id);
+
+      if (!p) return;
+
+      const isRanap = k.tipe === 'Rawat Inap';
+      const isBPJS = pj?.nama.toUpperCase().includes('BPJS') || pj?.tipe === 'BPJS';
+
+      const autoItems = [
+        {
+          id: `ITM-REG-${Date.now()}-${Math.random()}`,
+          kategori: 'Pendaftaran' as const,
+          deskripsi: isRanap ? 'Administrasi Rawat Inap' : 'Pendaftaran Pasien Poli',
+          jumlah: 1,
+          hargaSatuan: isRanap ? 50000 : 25000,
+          total: isRanap ? 50000 : 25000,
+          penjaminCovered: isBPJS
+        },
+        {
+          id: `ITM-DOC-${Date.now()}-${Math.random()}`,
+          kategori: 'Konsultasi' as const,
+          deskripsi: `Konsultasi & Pemeriksaan ${doc?.nama || 'Dokter Spesialis'}`,
+          jumlah: 1,
+          hargaSatuan: 100000,
+          total: 100000,
+          penjaminCovered: isBPJS
+        }
+      ];
+
+      const subtotal = autoItems.reduce((acc, curr) => acc + curr.total, 0);
+
+      newBillingsFromKunjungan.push({
+        id: `BIL-AUTOSYNC-${Date.now()}-${k.id}`,
+        noBilling: `BIL-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`,
+        kunjunganId: k.id,
+        pasienId: String(p.id),
+        namaPasien: p.nama,
+        noRm: p.no_rm,
+        tipeLayanan: isRanap ? 'Rawat Inap' : 'Rawat Jalan',
+        poliRuangan: k.poli_id || (isRanap ? 'Bangsal Mawar Kelas 2' : 'Poli Umum'),
+        namaDokter: doc?.nama || 'dr. Pratama Sp.PD',
+        penjaminId: k.penjamin_id,
+        namaPenjamin: pj?.nama || 'Umum Mandiri',
+        tipePenjamin: isBPJS ? 'BPJS' : 'Umum',
+        noSep: isBPJS ? `SEP-${Date.now().toString().slice(-8)}` : undefined,
+        status: k.status === 'Selesai' ? 'Lunas' : 'Belum Lunas',
+        tanggalMasuk: k.tanggal || new Date().toISOString().slice(0, 10),
+        items: autoItems,
+        subtotal: subtotal,
+        diskonTotal: 0,
+        pajak: 0,
+        biayaAdministrasi: 10000,
+        totalTagihan: subtotal + 10000,
+        uangMukaDeposit: 0,
+        sisaTagihan: k.status === 'Selesai' ? 0 : subtotal + 10000,
+        jumlahDibayar: k.status === 'Selesai' ? subtotal + 10000 : 0,
+        kembalian: 0,
+        kasirNama: 'Siti Rahmawati, S.E.',
+        jenisKelamin: p.jenis_kelamin || 'L',
+        metodePembayaran: k.status === 'Selesai' ? (isBPJS ? 'BPJS' : 'Tunai') : ('Tunai' as PaymentMethod)
+      });
+      addedCount++;
+    });
+
+    if (addedCount > 0) {
+      setBillings(prev => [...newBillingsFromKunjungan, ...prev]);
+      toast.success(`Berhasil menarik ${addedCount} data tagihan baru dari antrian kunjungan`);
+    } else {
+      toast.info('Semua data kunjungan poli & ranap sudah terintegrasi ke billing');
+    }
+  };
+
+  // Actions passed to children
+  const handleSelectForPayment = (billing: BillingRecord) => {
+    setActiveBillingForPayment(billing);
+    setActiveTab('Pembayaran');
+    setSearchParams({ tab: 'Pembayaran' });
+  };
+
+  const handleViewKwitansi = (billing: BillingRecord) => {
+    setActiveKwitansiBilling(billing);
+    setActiveTab('Kwitansi');
+    setSearchParams({ tab: 'Kwitansi' });
+  };
+
+  const handleUpdateBilling = (updated: BillingRecord) => {
+    setBillings(prev => prev.map(b => b.id === updated.id ? updated : b));
+  };
+
+  const handlePaymentSuccess = (updatedBilling: BillingRecord) => {
+    setBillings(prev => prev.map(b => b.id === updatedBilling.id ? updatedBilling : b));
+    setActiveBillingForPayment(null);
+    setActiveKwitansiBilling(updatedBilling);
+  };
+
+  // Financial KPI Metrics calculation
+  const totalRevenue = billings.filter(b => b.status === 'Lunas').reduce((sum, b) => sum + (b.jumlahDibayar || b.totalTagihan), 0);
+  const totalPiutang = billings.filter(b => b.status !== 'Lunas').reduce((sum, b) => sum + b.sisaTagihan, 0);
+  const totalTunai = billings.filter(b => b.status === 'Lunas' && b.metodePembayaran === 'Tunai').reduce((sum, b) => sum + (b.jumlahDibayar || b.totalTagihan), 0);
+  const totalNonTunai = totalRevenue - totalTunai;
+
+  const tabOptions = [
+    { id: 'Billing Ralan', label: 'Billing Rawat Jalan', icon: CreditCard },
+    { id: 'Billing Ranap', label: 'Billing Rawat Inap', icon: Layers },
+    { id: 'Pembayaran', label: 'Kasir Pembayaran', icon: Wallet },
+    { id: 'Kwitansi', label: 'Kwitansi & Invoice', icon: FileText },
+    { id: 'Master Tarif', label: 'Master Tarif RS', icon: Tag },
+    { id: 'Rekap Shift Kasir', label: 'Rekap Shift Kasir', icon: Clock }
+  ];
+
+  return (
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6">
+      
+      {/* Top Financial Dashboard KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Penerimaan Lunas</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center">
+              <DollarSign className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-2">
+            Rp {totalRevenue.toLocaleString('id-ID')}
+          </div>
+          <div className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span>{billings.filter(b => b.status === 'Lunas').length} Transaksi Terbayar</span>
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/5 text-xs uppercase tracking-wider text-white/40">
-                <th className="p-4 font-bold">Invoice ID</th>
-                <th className="p-4 font-bold">Patient</th>
-                <th className="p-4 font-bold">Date</th>
-                <th className="p-4 font-bold">Type</th>
-                <th className="p-4 font-bold">Amount</th>
-                <th className="p-4 font-bold">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredInvoices.slice(0, 100).map(inv => (
-                <tr key={inv.id} onClick={() => setSelectedInvoice(inv)} className="border-b border-white/5 hover:bg-white/5 transition-colors group cursor-pointer">
-                  <td className="p-4 text-sm font-medium text-white/80">{inv.id}</td>
-                  <td className="p-4">
-                    <div className="text-sm text-white font-medium">{inv.patientName}</div>
-                    <div className="text-xs text-white/40">{inv.patientId}</div>
-                  </td>
-                  <td className="p-4 text-sm text-white/60">{inv.date}</td>
-                  <td className="p-4 text-sm text-white/80">{inv.type}</td>
-                  <td className="p-4 text-sm font-mono text-white">
-                    Rp {inv.amount.toLocaleString('id-ID')}
-                  </td>
-                  <td className="p-4">
-                    <span className={cn(
-                      "px-2 py-1 rounded text-xs font-bold border",
-                      inv.status === 'Paid' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                      inv.status === 'Pending' ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
-                      "bg-orange-500/10 text-orange-400 border-orange-500/20"
-                    )}>
-                      {inv.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Piutang Berjalan</span>
+            <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-600 flex items-center justify-center">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 mt-2">
+            Rp {totalPiutang.toLocaleString('id-ID')}
+          </div>
+          <div className="text-[11px] text-slate-500 mt-1">
+            {billings.filter(b => b.status !== 'Lunas').length} Pasien Belum Lunas
+          </div>
         </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kas Tunai (Drawer)</span>
+            <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 flex items-center justify-center">
+              <Wallet className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400 mt-2">
+            Rp {totalTunai.toLocaleString('id-ID')}
+          </div>
+          <div className="text-[11px] text-slate-500 mt-1">
+            Uang fisik di laci kasir
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Non-Tunai / Klaim</span>
+            <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-600 flex items-center justify-center">
+              <CreditCard className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-purple-600 dark:text-purple-400 mt-2">
+            Rp {totalNonTunai.toLocaleString('id-ID')}
+          </div>
+          <div className="text-[11px] text-slate-500 mt-1">
+            EDC / QRIS / Asuransi / BPJS
+          </div>
+        </div>
+
       </div>
 
-      <AnimatePresence>
-      {selectedInvoice && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="glass-panel p-8 w-full max-w-2xl mx-4 border border-white/10 shadow-2xl relative"
-          >
-            <button onClick={() => setSelectedInvoice(null)} className="absolute top-4 right-4 text-white/40 hover:text-white">
-              <XCircle className="w-6 h-6" />
+      {/* Main Tab Navigation Bar */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-2 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-2 overflow-x-auto custom-scrollbar">
+        {tabOptions.map((t) => {
+          const Icon = t.icon;
+          const isSelected = activeTab.toLowerCase().includes(t.id.toLowerCase()) || 
+                             (t.id === 'Kwitansi' && activeTab.toLowerCase().includes('kwitansi')) ||
+                             activeTab === t.label;
+
+          return (
+            <button
+              key={t.id}
+              onClick={() => {
+                setActiveTab(t.id);
+                setSearchParams({ tab: t.id });
+              }}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all flex items-center gap-2 ${
+                isSelected
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{t.label}</span>
             </button>
-            <div className="flex justify-between items-start border-b border-white/10 pb-6 mb-6">
-              <div>
-                <h2 className="text-3xl font-bold text-white mb-2">INVOICE</h2>
-                <div className="text-white/60 font-mono">{selectedInvoice.id}</div>
-              </div>
-              <div className="text-right">
-                <div className="text-xl font-bold text-white">MYITARU Hospital</div>
-                <div className="text-sm text-white/40">123 Health Avenue, Jakarta</div>
-                <div className="text-sm text-white/40">Tel: +62 21 555 0123</div>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-8 mb-8">
-              <div>
-                <div className="text-xs text-white/40 uppercase tracking-widest font-bold mb-2">Billed To</div>
-                <div className="text-lg font-bold text-white">{selectedInvoice.patientName}</div>
-                <div className="text-sm text-white/60">Patient ID: {selectedInvoice.patientId}</div>
-              </div>
-              <div className="text-right">
-                <div className="text-xs text-white/40 uppercase tracking-widest font-bold mb-2">Invoice Details</div>
-                <div className="text-sm text-white">Date: <span className="font-mono">{selectedInvoice.date}</span></div>
-                <div className="text-sm text-white">Type: <span>{selectedInvoice.type}</span></div>
-                <div className="text-sm text-white mt-2">
-                  Status: 
-                  <span className={cn(
-                      "ml-2 px-2 py-1 rounded text-xs font-bold border",
-                      selectedInvoice.status === 'Paid' ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                      selectedInvoice.status === 'Pending' ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
-                      "bg-orange-500/10 text-orange-400 border-orange-500/20"
-                    )}>
-                    {selectedInvoice.status}
-                  </span>
-                </div>
-              </div>
-            </div>
+          );
+        })}
+      </div>
 
-            <div className="border border-white/10 rounded-lg overflow-hidden mb-8">
-              <table className="w-full text-left">
-                <thead className="bg-white/5 border-b border-white/10">
-                  <tr>
-                    <th className="p-3 text-xs uppercase tracking-wider text-white/60">Description</th>
-                    <th className="p-3 text-xs uppercase tracking-wider text-white/60 text-right">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-white/5">
-                    <td className="p-3 text-sm text-white">Medical Services & Consultation</td>
-                    <td className="p-3 text-sm text-white font-mono text-right">Rp {(selectedInvoice.amount * 0.4).toLocaleString('id-ID')}</td>
-                  </tr>
-                  <tr className="border-b border-white/5">
-                    <td className="p-3 text-sm text-white">Laboratory & Diagnostics</td>
-                    <td className="p-3 text-sm text-white font-mono text-right">Rp {(selectedInvoice.amount * 0.3).toLocaleString('id-ID')}</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-sm text-white">Medication & Pharmacy</td>
-                    <td className="p-3 text-sm text-white font-mono text-right">Rp {(selectedInvoice.amount * 0.3).toLocaleString('id-ID')}</td>
-                  </tr>
-                </tbody>
-                <tfoot className="bg-white/5 border-t border-white/10">
-                  <tr>
-                    <td className="p-4 text-lg font-bold text-white text-right">Total Amount</td>
-                    <td className="p-4 text-xl font-bold text-primary-emerald font-mono text-right">Rp {selectedInvoice.amount.toLocaleString('id-ID')}</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+      {/* Tab Renderers */}
+      <div className="min-h-[500px]">
+        {/* Tab 1: Billing Ralan */}
+        {(activeTab === 'Billing Ralan' || activeTab.toLowerCase().includes('ralan')) && (
+          <BillingRalanTab
+            billings={billings}
+            onSelectForPayment={handleSelectForPayment}
+            onViewKwitansi={handleViewKwitansi}
+            onUpdateBilling={handleUpdateBilling}
+            onRefreshFromKunjungan={handleSyncFromKunjungan}
+          />
+        )}
 
-            <div className="flex justify-end gap-4">
-              <button onClick={() => window.print()} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg flex items-center gap-2 transition-colors">
-                <Printer className="w-4 h-4" /> Print Invoice
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-      </AnimatePresence>
+        {/* Tab 2: Billing Ranap */}
+        {(activeTab === 'Billing Ranap' || activeTab.toLowerCase().includes('ranap')) && (
+          <BillingRanapTab
+            billings={billings}
+            onSelectForPayment={handleSelectForPayment}
+            onViewKwitansi={handleViewKwitansi}
+            onUpdateBilling={handleUpdateBilling}
+          />
+        )}
+
+        {/* Tab 3: Pembayaran */}
+        {(activeTab === 'Pembayaran' || activeTab.toLowerCase().includes('bayar')) && (
+          <PembayaranTab
+            billings={billings}
+            activeBillingForPayment={activeBillingForPayment}
+            onPaymentSuccess={handlePaymentSuccess}
+            onViewKwitansi={handleViewKwitansi}
+          />
+        )}
+
+        {/* Tab 4: Kwitansi & Invoice */}
+        {(activeTab === 'Kwitansi' || activeTab.toLowerCase().includes('kwitansi') || activeTab.toLowerCase().includes('invoice')) && (
+          <KwitansiTab
+            billings={billings}
+            activeKwitansiBilling={activeKwitansiBilling}
+          />
+        )}
+
+        {/* Tab 5: Master Tarif */}
+        {(activeTab === 'Master Tarif' || activeTab.toLowerCase().includes('tarif')) && (
+          <MasterTarifTab
+            tarifs={tarifs}
+            onSaveTarifs={setTarifs}
+          />
+        )}
+
+        {/* Tab 6: Rekap Shift Kasir */}
+        {(activeTab === 'Rekap Shift Kasir' || activeTab.toLowerCase().includes('shift')) && (
+          <RekapShiftKasirTab
+            shifts={shifts}
+            billings={billings}
+            onSaveShifts={setShifts}
+          />
+        )}
+      </div>
+
     </div>
   );
 }
-
+export default Billing;

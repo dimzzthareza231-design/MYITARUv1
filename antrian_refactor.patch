@@ -1,0 +1,147 @@
+--- src/contexts/AntrianContext.tsx
++++ src/contexts/AntrianContext.tsx
+@@ -4,6 +4,7 @@
+ // ============================================
+ // DEFINISI POLI
+ // ============================================
++import { useHospital } from './HospitalContext';
+ 
+ export interface Poli {
+   id: string;
+@@ -40,111 +41,75 @@
+ }
+ 
+ const AntrianContext = createContext<AntrianContextType | undefined>(undefined);
+ 
+ const getTanggalHariIni = () => new Date().toISOString().split('T')[0];
+ 
+ export function AntrianProvider({ children }: { children: ReactNode }) {
+-  const [antrianList, setAntrianList] = useState<Antrian[]>(() => {
+-    const saved = localStorage.getItem('antrian_data');
+-    if (!saved) return [];
+-    const data = JSON.parse(saved);
+-    // Cek apakah data masih untuk hari ini (auto reset harian)
+-    if (data.tanggal === getTanggalHariIni()) {
+-      return data.list || [];
+-    }
+-    // Jika beda hari, reset (kembalikan array kosong)
+-    return [];
+-  });
++  const { kunjungan, pasien, updateKunjunganStatus } = useHospital();
+ 
+-  // Simpan ke localStorage setiap kali berubah
+-  useEffect(() => {
+-    localStorage.setItem('antrian_data', JSON.stringify({
+-      tanggal: getTanggalHariIni(),
+-      list: antrianList
+-    }));
+-  }, [antrianList]);
++  const antrianList: Antrian[] = kunjungan
++    .filter(k => k.tipe === 'Rawat Jalan')
++    .map(k => {
++      const p = pasien.find(x => x.id === k.pasien_id);
++      const poliObject = DAFTAR_POLI.find(x => x.id === k.poli_id) || DAFTAR_POLI.find(x => k.poli_id.includes(x.kode)) || DAFTAR_POLI[0];
++      
++      let antrianStatus: StatusAntrian = 'Menunggu';
++      if (k.status === 'Panggil') antrianStatus = 'Dipanggil';
++      else if (k.status === 'Diperiksa') antrianStatus = 'Dilayani';
++      else if (k.status === 'Selesai' || k.status === 'Farmasi' || k.status === 'Kasir') antrianStatus = 'Selesai';
++      else if (k.status === 'Batal') antrianStatus = 'Batal';
+ 
+-  // Generate nomor antrian berikutnya untuk poli tertentu
+-  const getNomorBerikutnya = (poliId: string): string => {
+-    const poli = DAFTAR_POLI.find(p => p.id === poliId);
+-    if (!poli) return 'X-000';
+-    const jumlahHariIni = antrianList.filter(a => a.poliId === poliId).length;
+-    const nomor = jumlahHariIni + 1;
+-    return `${poli.kode}-${String(nomor).padStart(3, '0')}`;
+-  };
++      return {
++        id: k.id,
++        nomorAntrian: k.nomor_antrian,
++        pasienId: k.pasien_id,
++        namaPasien: p?.nama || 'Unknown',
++        noRm: p?.no_rm || '-',
++        poliId: poliObject.id,
++        poliNama: poliObject.nama,
++        status: antrianStatus,
++        jamDaftar: k.tanggal.includes('T') ? new Date(k.tanggal).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '08:00',
++        keluhan: k.keluhan_utama,
++        penjamin: k.penjamin_id
++      };
++    });
+ 
+-  const daftarkanAntrian = (data: { pasienId: string; namaPasien: string; noRm: string; poliId: string; keluhan?: string; penjamin?: string }): Antrian | null => {
+-    const poli = DAFTAR_POLI.find(p => p.id === data.poliId);
+-    if (!poli) return null;
+-    const nomorAntrian = getNomorBerikutnya(data.poliId);
+-    const newAntrian: Antrian = {
+-      id: `antrian-${Date.now()}`,
+-      nomorAntrian,
+-      pasienId: data.pasienId,
+-      namaPasien: data.namaPasien,
+-      noRm: data.noRm,
+-      poliId: data.poliId,
+-      poliNama: poli.nama,
+-      status: 'Menunggu',
+-      jamDaftar: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+-      keluhan: data.keluhan,
+-      penjamin: data.penjamin
+-    };
+-    setAntrianList(prev => [...prev, newAntrian]);
+-    return newAntrian;
+-  };
++  const getNomorBerikutnya = (poliId: string): string => 'X-000'; // Handled by RegistrationForm logic instead
+ 
+-  const panggilAntrian = (id: string) => {
+-    setAntrianList(prev => prev.map(a =>
+-      a.id === id
+-        ? { ...a, status: 'Dipanggil', jamDipanggil: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }
+-        : a
+-    ));
++  const daftarkanAntrian = (data: any) => null; // Delegated to addKunjungan
++
++  const panggilAntrian = (id: string) => {
++    updateKunjunganStatus(id, 'Panggil');
+   };
+ 
+-  const mulaiLayani = (id: string) => {
+-    setAntrianList(prev => prev.map(a =>
+-      a.id === id ? { ...a, status: 'Dilayani' } : a
+-    ));
++  const mulaiLayani = (id: string) => {
++    updateKunjunganStatus(id, 'Diperiksa');
+   };
+ 
+-  const selesaikanAntrian = (id: string) => {
+-    setAntrianList(prev => prev.map(a =>
+-      a.id === id ? { ...a, status: 'Selesai' } : a
+-    ));
++  const selesaikanAntrian = (id: string) => {
++    updateKunjunganStatus(id, 'Selesai');
+   };
+ 
+-  const batalkanAntrian = (id: string) => {
+-    setAntrianList(prev => prev.map(a =>
+-      a.id === id ? { ...a, status: 'Batal' } : a
+-    ));
++  const batalkanAntrian = (id: string) => {
++    updateKunjunganStatus(id, 'Batal');
+   };
+ 
+-  const resetAntrianHarian = () => {
+-    if (window.confirm('Reset semua antrian hari ini? Tindakan ini tidak bisa dibatalkan.')) {
+-      setAntrianList([]);
+-    }
+-  };
++  const resetAntrianHarian = () => {};
+ 
+-  const getAntrianByPoli = (poliId: string): Antrian[] => {
+-    return antrianList.filter(a => a.poliId === poliId);
+-  };
++  const getAntrianByPoli = (poliId: string) => antrianList.filter(a => a.poliId === poliId);
+ 
+-  const totalPasienHariIni = antrianList.filter(a => a.status !== 'Batal').length;
+-  const totalMenunggu = antrianList.filter(a => a.status === 'Menunggu').length;
+-  const totalDilayani = antrianList.filter(a => a.status === 'Dipanggil' || a.status === 'Dilayani').length;
+-  const totalSelesai = antrianList.filter(a => a.status === 'Selesai').length;

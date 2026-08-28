@@ -3,29 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
     <script>
-      // Fix for "Cannot set property fetch of #<Window> which has only a getter"
-      // This happens when polyfills try to overwrite fetch in environments where it's a read-only getter
-      try {
-        const originalFetch = window.fetch;
-        Object.defineProperty(window, 'fetch', {
-          configurable: true,
-          enumerable: true,
-          get: function() { return originalFetch; },
-          set: function(val) { 
-            Object.defineProperty(window, 'fetch', {
-              value: val,
-              writable: true,
-              configurable: true,
-              enumerable: true
-            });
-          }
-        });
-      } catch (e) {
-        console.warn("Failed to patch window.fetch", e);
-      }
+      // Ensure window.fetch has both getter and setter so polyfills and wrappers can attach safely
+      (function () {
+        try {
+          var origFetch = typeof window !== 'undefined' && window.fetch ? window.fetch.bind(window) : undefined;
+          var currentFetch = origFetch;
+          Object.defineProperty(window, 'fetch', {
+            get: function () {
+              return currentFetch;
+            },
+            set: function (fn) {
+              currentFetch = fn;
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (e) {
+          // Silently continue if environment disallows redefining fetch
+        }
+      })();
     </script>
+    <title>My Google AI Studio App</title>
   </head>
   <body>
     <div id="root"></div>

@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // User profiles & auth sync
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(userId) || isSignedIn();
+    }
+
+    // Patients collection
+    match /pasien/{pasienId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // Encounters / Visits
+    match /kunjungan/{kunjunganId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // System audit & generic storage collections
+    match /system_data/{docId} {
+      allow read, write: if isSignedIn();
+    }
+  }
+}

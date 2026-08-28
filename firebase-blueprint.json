@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "User": {
+      "fields": {
+        "uid": { "type": "string" },
+        "nama": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "roleId": { "type": "string" },
+        "username": { "type": "string" },
+        "aktif": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "Pasien": {
+      "fields": {
+        "id": { "type": "string" },
+        "no_rm": { "type": "string" },
+        "nama": { "type": "string" },
+        "nik": { "type": "string" },
+        "tanggal_lahir": { "type": "string" },
+        "jenis_kelamin": { "type": "string" },
+        "alamat": { "type": "string" },
+        "telepon": { "type": "string" },
+        "golongan_darah": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      }
+    },
+    "Kunjungan": {
+      "fields": {
+        "id": { "type": "string" },
+        "pasien_id": { "type": "string" },
+        "tanggal": { "type": "string" },
+        "poli_id": { "type": "string" },
+        "dokter_id": { "type": "string" },
+        "penjamin_id": { "type": "string" },
+        "status": { "type": "string" },
+        "tipe": { "type": "string" },
+        "nomor_antrian": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "rules": {
+      "users": {
+        "$userId": {
+          "read": "request.auth != null",
+          "write": "request.auth != null && request.auth.uid == $userId"
+        }
+      },
+      "pasien": {
+        "$pasienId": {
+          "read": "request.auth != null",
+          "write": "request.auth != null"
+        }
+      },
+      "kunjungan": {
+        "$kunjunganId": {
+          "read": "request.auth != null",
+          "write": "request.auth != null"
+        }
+      }
+    }
+  }
+}

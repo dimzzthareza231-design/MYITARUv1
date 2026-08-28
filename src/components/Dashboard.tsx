@@ -1,280 +1,226 @@
-import React from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { Users, Activity, Stethoscope, AlertTriangle } from 'lucide-react';
-import { motion } from 'motion/react';
-import { cn } from '../lib/utils';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { MODULE_REGISTRY } from '../data/moduleRegistry';
 import { useHospital } from '../contexts/HospitalContext';
+import { useToast } from '../contexts/ToastContext';
+import { useAuth } from '../contexts/AuthContext';
+import { getRoleById } from '../data/roles';
+import TopNavbar from './TopNavbar';
+import { storage } from '../utils/storage';
+import { DashboardWidgetAntrian } from './DashboardWidgetAntrian';
+import { DashboardNewsWidget } from './DashboardNewsWidget';
+import { DATA_PEGAWAI } from '../data/dataPegawai';
+import { DATA_DOKTER } from '../data/dataDokter';
+import { Sparkles, Quote } from 'lucide-react';
 
-const visitData = [
-  { time: '08:00', patients: 12 },
-  { time: '10:00', patients: 25 },
-  { time: '12:00', patients: 38 },
-  { time: '14:00', patients: 30 },
-  { time: '16:00', patients: 45 },
-  { time: '18:00', patients: 20 },
+// Koleksi Quotes Kesehatan Harian
+const HEALTH_QUOTES = [
+  { text: "Kesehatan yang baik bukanlah sesuatu yang dapat kita beli, melainkan tabungan yang paling berharga.", author: "Anne Wilson Schaef" },
+  { text: "Harta sejati adalah kesehatan fisik dan ketenangan jiwa, bukan sekadar kepingan emas.", author: "Mahatma Gandhi" },
+  { text: "Merawat diri sendiri adalah langkah awal terbaik untuk dapat memberikan pelayanan terbaik bagi sesama.", author: "Eleanor Brown" },
+  { text: "Pencegahan adalah obat terbaik, dan senyum yang tulus adalah terapi paling menenangkan.", author: "Prinsip Kedokteran" },
+  { text: "Kesehatan adalah hubungan harmonis yang menyatukan tubuh, pikiran, dan dedikasi kita.", author: "B.K.S. Iyengar" },
+  { text: "Setiap tindakan medis yang presisi berakar pada ketelitian, empati, dan kepedulian yang mendalam.", author: "Etika Pelayanan Medis" },
+  { text: "Pikiran yang tenang dan fokus adalah kunci ketahanan fisik serta keputusan klinis yang tepat.", author: "Pakar Kesehatan" },
+  { text: "Kebugaran dan kesehatan adalah fondasi utama dari kebahagiaan dan produktivitas hidup sejati.", author: "Joseph Pilates" },
+  { text: "Pelayanan kesehatan yang prima berawal dari komitmen integritas dan kemanusiaan tanpa batas.", author: "Nilai MYITARU" },
+  { text: "Waktu dan kesehatan adalah aset berharga yang harus dijaga dengan penuh kebijaksanaan.", author: "Denis Waitley" }
 ];
 
-const diseaseTrendData = [
-  { name: 'ISPA', cases: 1450 },
-  { name: 'Hipertensi', cases: 1200 },
-  { name: 'Diabetes', cases: 950 },
-  { name: 'TBC', cases: 850 },
-  { name: 'Dengue', cases: 620 },
-  { name: 'Stroke', cases: 410 },
-];
-
-export function Dashboard() {
-  const { patients } = useHospital();
+export default function Dashboard() {
+  const navigate = useNavigate();
+  const { activeUser } = useHospital();
+  const { currentUser, hasAccess } = useAuth();
+  const currentRole = currentUser ? getRoleById(currentUser.roleId) : null;
+  const toast = useToast();
   
-  const [currentTime, setCurrentTime] = React.useState(new Date());
-
-  React.useEffect(() => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const quotes = [
-    "Kesehatan adalah investasi terbaik untuk masa depan Anda.",
-    "Harta yang paling sejati adalah kesehatan, bukan emas dan perak.",
-    "Jaga tubuhmu, itulah satu-satunya tempatmu hidup.",
-    "Waktu dan kesehatan adalah aset berharga yang seringkali baru disadari setelah hilang.",
-    "Pencegahan lebih baik daripada mengobati."
-  ];
-
-  const dailyQuote = React.useMemo(() => {
-    return quotes[new Date().getDay() % quotes.length];
+  // Quotes yang berganti otomatis setiap hari berdasarkan tanggal
+  const dailyQuote = useMemo(() => {
+    const today = new Date();
+    const startOfYear = new Date(today.getFullYear(), 0, 0);
+    const diff = today.getTime() - startOfYear.getTime();
+    const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+    return HEALTH_QUOTES[dayOfYear % HEALTH_QUOTES.length];
   }, []);
   
-  const formattedTime = currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const formattedDate = currentTime.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-  };
-
-  return (
-    <motion.div 
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight mb-1 text-white">Hospital Analytics</h2>
-          <p className="text-white/40 text-xs uppercase tracking-widest">Real-time monitoring and AI prediction overview.</p>
-        </div>
-        <div className="md:text-right flex flex-col md:items-end bg-white/5 p-4 rounded-xl border border-white/10 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary-emerald/10 blur-[40px] rounded-full" />
-          <div className="relative z-10 flex flex-col md:items-end">
-            <div className="text-2xl font-bold text-white font-mono tracking-wider">{formattedTime}</div>
-            <div className="text-primary-emerald text-[10px] font-bold uppercase tracking-widest mb-2">{formattedDate}</div>
-            <p className="text-white/60 text-xs italic max-w-[280px]">"{dailyQuote}"</p>
-          </div>
-        </div>
-      </header>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Patients', value: patients.length.toLocaleString(), trend: '+12%', icon: Users, color: 'text-primary-blue', bg: 'bg-primary-blue/10' },
-          { label: 'Critical Cases', value: '24', trend: '-2%', icon: AlertTriangle, color: 'text-orange-400', bg: 'bg-orange-500/10' },
-          { label: 'AI Diagnoses', value: '845', trend: '+28%', icon: BrainCircuitIcon, color: 'text-primary-emerald', bg: 'bg-primary-emerald/10' },
-          { label: 'Avg Wait Time', value: '14m', trend: '-5m', icon: Activity, color: 'text-secondary-purple', bg: 'bg-secondary-purple/10' },
-        ].map((stat, i) => (
-          <motion.div key={i} variants={itemVariants} className="glass-panel p-5 relative overflow-hidden group">
-            <div className="flex justify-between items-start mb-4 relative z-10">
-              <div className={cn("p-2.5 rounded-lg border border-white/5", stat.bg, stat.color)}>
-                <stat.icon className="w-5 h-5" />
-              </div>
-              <span className={cn("text-[10px] font-mono tracking-wider font-bold px-2 py-0.5 rounded-full border", stat.trend.startsWith('+') ? 'text-primary-emerald border-primary-emerald/20 bg-primary-emerald/10' : 'text-orange-400 border-orange-500/20 bg-orange-500/10')}>
-                {stat.trend}
-              </span>
-            </div>
-            <div className="relative z-10">
-              <h3 className="text-2xl font-bold mb-0.5 text-white">{stat.value}</h3>
-              <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">{stat.label}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Vital Signs Trend Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div variants={itemVariants} className="glass-panel p-6">
-          <h3 className="text-[10px] text-orange-400 uppercase tracking-widest font-bold mb-4">Real-time Heart Rate Trend</h3>
-          <SparklineChart data={[72, 74, 75, 71, 78, 85, 82, 79, 76, 75, 74]} color="#f97316" title="Current Avg" value="76" unit="BPM" />
-        </motion.div>
-        
-        <motion.div variants={itemVariants} className="glass-panel p-6">
-          <h3 className="text-[10px] text-secondary-purple uppercase tracking-widest font-bold mb-4">Blood Pressure Trend (Systolic)</h3>
-          <SparklineChart data={[120, 122, 121, 125, 128, 130, 126, 124, 121, 120]} color="#a855f7" title="Current Sys" value="120" unit="mmHg" />
-        </motion.div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart */}
-        <motion.div variants={itemVariants} className="glass-panel p-6 lg:col-span-2">
-          <h3 className="text-[10px] text-primary-emerald uppercase tracking-widest font-bold mb-6">Patient Flow Prediction (AI)</h3>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={visitData}>
-                <defs>
-                  <linearGradient id="colorPatients" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                <XAxis dataKey="time" stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', backdropFilter: 'blur(8px)' }}
-                  itemStyle={{ color: '#fff' }}
-                />
-                <Area type="monotone" dataKey="patients" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorPatients)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-
-        {/* Secondary Chart */}
-        <motion.div variants={itemVariants} className="glass-panel p-6">
-          <h3 className="text-[10px] text-primary-blue uppercase tracking-widest font-bold mb-6">Disease Mapping</h3>
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={diseaseTrendData} layout="vertical" margin={{ top: 0, right: 0, left: 30, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
-                <XAxis type="number" stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis dataKey="name" type="category" stroke="rgba(255,255,255,0.6)" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'rgba(2, 6, 23, 0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                />
-                <Bar dataKey="cases" fill="#3b82f6" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* 2026 Health News Dashboard */}
-      <motion.div variants={itemVariants} className="glass-panel p-6 mt-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-orange-500/10 text-orange-400 border border-orange-500/20">
-            <Activity className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-white">Indonesia Health Updates 2026</h3>
-            <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Latest National Medical News & Directives</p>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            {
-              title: 'Integrasi Rekam Medis Elektronik (RME) Nasional Mencapai 98%',
-              date: '24 Jul 2026',
-              source: 'Kemenkes RI',
-              summary: 'Seluruh fasilitas kesehatan tingkat pertama dan lanjutan kini terhubung dengan platform SATUSEHAT, mempermudah rujukan lintas provinsi.',
-              tag: 'Technology'
-            },
-            {
-              title: 'Vaksinasi Demam Berdarah Dengue (DBD) Jadi Program Nasional Gratis',
-              date: '20 Jul 2026',
-              source: 'Ditjen P2P',
-              summary: 'Merespon siklus lima tahunan, pemerintah menetapkan vaksinasi DBD sebagai imunisasi rutin untuk anak usia sekolah dasar.',
-              tag: 'Public Health'
-            },
-            {
-              title: 'Penurunan Signifikan Kasus Stunting ke Angka 8.5%',
-              date: '15 Jul 2026',
-              source: 'BKKBN',
-              summary: 'Program intervensi gizi spesifik sejak 2021 berhasil menekan angka stunting nasional di bawah target SDGs.',
-              tag: 'Pediatrics'
-            },
-            {
-              title: 'Penerapan AI dalam Deteksi Dini TBC Meningkatkan Kesembuhan 40%',
-              date: '10 Jul 2026',
-              source: 'IDI',
-              summary: 'Penggunaan kecerdasan buatan pada pembacaan foto toraks rontgen di puskesmas mempercepat penanganan kasus tuberkulosis paru.',
-              tag: 'Innovation'
-            }
-          ].map((news, i) => (
-            <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-primary-emerald">{news.tag}</span>
-                <span className="text-[10px] text-white/40">{news.date}</span>
-              </div>
-              <h4 className="text-sm font-bold text-white mb-2 leading-snug">{news.title}</h4>
-              <p className="text-xs text-white/60 mb-4 line-clamp-3">{news.summary}</p>
-              <div className="text-[10px] text-white/40 font-semibold">Sumber: {news.source}</div>
-            </div>
-          ))}
-        </div>
-      </motion.div>
-
-    </motion.div>
-  );
-}
-
-// Temporary icon component since we used BrainCircuitIcon but it's not imported directly with that name
-function BrainCircuitIcon(props: any) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M12 4.5a2.5 2.5 0 0 0-4.96-.46 2.5 2.5 0 0 0-1.98 3 2.5 2.5 0 0 0-1.32 4.24 3 3 0 0 0 .34 5.58 2.5 2.5 0 0 0 2.96 3.08 2.5 2.5 0 0 0 4.91.05L12 20V4.5Z" />
-      <path d="M16 8V5c0-1.1.9-2 2-2" />
-      <path d="M12 13h4" />
-      <path d="M12 18h6a2 2 0 0 1 2 2v1" />
-      <path d="M19 18v-4" />
-      <path d="M22 14h-4" />
-      <path d="M16 11v3" />
-    </svg>
-  );
-}
-
-function SparklineChart({ data, color, title, value, unit }: { data: number[], color: string, title: string, value: string, unit: string }) {
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min;
-  const padding = 10;
-  const width = 200;
-  const height = 60;
+  const totalPasien = storage.get('db_pasien', []).length;
+  const totalIgd = storage.get('myitaru_igd_triase', []).length;
+  const totalPoli = storage.get('hospital_kunjungan', []).filter((k: any) => k.tipe === 'Rawat Jalan' && (k.status === 'Menunggu' || k.status === 'Antri' || k.status === 'Diperiksa')).length;
   
-  const points = data.map((d, i) => {
-    const x = (i / (data.length - 1)) * (width - padding * 2) + padding;
-    const y = height - padding - ((d - min) / (range || 1)) * (height - padding * 2);
-    return `${x},${y}`;
-  }).join(' ');
-
+  const formatDate = (d: Date) => d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  
   return (
-    <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl">
-      <div>
-        <div className="text-[10px] text-white/40 uppercase tracking-widest font-bold mb-1">{title}</div>
-        <div className="text-xl font-bold text-white flex items-baseline gap-1">
-          {value} <span className="text-xs text-white/40 font-normal">{unit}</span>
+    <div className="min-h-screen bg-[#071322] relative flex flex-col selection:bg-[#C9A94E]/30 selection:text-white">
+      
+      {/* WATERMARK */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0">
+        <div className="text-[14rem] font-black text-white opacity-[0.015] rotate-[-15deg] whitespace-nowrap">
+          Dimas Pangestu
         </div>
       </div>
-      <svg width={width} height={height} className="overflow-visible">
-        <polyline
-          points={points}
-          fill="none"
-          stroke={color}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <circle cx={(width - padding * 2) + padding} cy={height - padding - ((data[data.length - 1] - min) / (range || 1)) * (height - padding * 2)} r="3" fill={color} />
-      </svg>
+      
+      {/* NAVBAR */}
+      <TopNavbar currentTime={currentTime} />
+      
+      <main className="relative z-10 p-4 sm:p-6 max-w-[1600px] w-full mx-auto flex-1">
+        
+        {/* TOP SECTION: WELCOME & WIDGET */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 items-stretch">
+          
+          {/* WELCOME CARD -> LUXURY DASHBOARD INFO */}
+          <div className="md:col-span-2 bg-gradient-to-r from-[#0B1E36] via-[#102D52] to-[#184270] rounded-2xl shadow-[0_10px_35px_rgba(11,30,54,0.7)] p-6 md:p-8 text-white border border-[#C9A94E]/35 h-full flex flex-col justify-between relative overflow-hidden animate-fade-in-up">
+            {/* Top gold accent line */}
+            <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-[#0F3B5E] via-[#E5CA78] to-[#C9A94E]"></div>
+            
+            {/* Animated Background Elements */}
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-[#C9A94E] opacity-10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-48 h-48 bg-blue-400 opacity-15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+            
+            <div className="relative z-10 flex flex-col xl:flex-row xl:items-center h-full justify-between gap-6">
+              <div className="flex flex-col gap-3 flex-1">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#C9A94E]/15 border border-[#C9A94E]/30 text-[#E5CA78] text-[10px] font-bold uppercase tracking-wider mb-2">
+                    <Sparkles className="w-3 h-3 text-[#E5CA78]" />
+                    Sistem Informasi Klinik
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-[#E5CA78] tracking-wide">
+                    Selamat Datang Di MY ITARU
+                  </h2>
+                </div>
+
+                <div className="flex items-end gap-3 mt-1">
+                  <div className="text-4xl md:text-6xl font-extrabold tracking-tight tabular-nums text-transparent bg-clip-text bg-gradient-to-br from-white via-cyan-100 to-[#E5CA78] drop-shadow-md">
+                    {currentTime.getHours().toString().padStart(2, '0')}<span className="animate-[pulse_1s_ease-in-out_infinite] text-[#E5CA78]">:</span>{currentTime.getMinutes().toString().padStart(2, '0')}
+                  </div>
+                  <div className="text-sm md:text-base font-medium text-slate-200 flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="bg-white/10 px-3 py-1 rounded-lg backdrop-blur-md shadow-sm border border-white/10">{currentTime.toLocaleDateString('id-ID', { weekday: 'long' })}</span>
+                    <span className="bg-white/10 px-3 py-1 rounded-lg backdrop-blur-md shadow-sm border border-white/10">{currentTime.getDate()} {currentTime.toLocaleDateString('id-ID', { month: 'long' })} {currentTime.getFullYear()}</span>
+                  </div>
+                </div>
+
+                {/* DAILY HEALTH QUOTE */}
+                <div className="mt-2 p-3 bg-white/5 backdrop-blur-md rounded-xl border border-[#C9A94E]/25 shadow-sm flex items-start gap-2.5 max-w-xl">
+                  <Quote className="w-4 h-4 text-[#E5CA78] shrink-0 mt-0.5 rotate-180 opacity-90" />
+                  <div className="flex flex-col">
+                    <p className="text-[11px] md:text-xs text-slate-200 italic font-medium leading-relaxed">
+                      "{dailyQuote.text}"
+                    </p>
+                    <span className="text-[9px] md:text-[10px] text-[#E5CA78] font-semibold mt-1 self-end">
+                      — {dailyQuote.author}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row xl:flex-col gap-3 mt-4 xl:mt-0 xl:min-w-[200px]">
+                <div className="bg-[#08182B]/60 backdrop-blur-md rounded-xl p-3.5 border border-[#C9A94E]/30 transform transition-all duration-300 hover:bg-[#0D2542]/80 hover:border-[#C9A94E]/60 shadow-lg flex-1 flex flex-col justify-center">
+                  <div className="text-[11px] md:text-xs text-slate-300 font-medium truncate">Total Pasien</div>
+                  <div className="text-2xl md:text-3xl font-black mt-0.5 text-white drop-shadow-md">{totalPasien}</div>
+                </div>
+                <div className="bg-[#08182B]/60 backdrop-blur-md rounded-xl p-3.5 border border-[#C9A94E]/30 transform transition-all duration-300 hover:bg-[#0D2542]/80 hover:border-[#C9A94E]/60 shadow-lg flex-1 flex flex-col justify-center">
+                  <div className="text-[11px] md:text-xs text-slate-300 font-medium truncate">Pasien IGD</div>
+                  <div className="text-2xl md:text-3xl font-black mt-0.5 text-rose-400 drop-shadow-md">{totalIgd}</div>
+                </div>
+                <div className="bg-[#08182B]/60 backdrop-blur-md rounded-xl p-3.5 border border-[#C9A94E]/30 transform transition-all duration-300 hover:bg-[#0D2542]/80 hover:border-[#C9A94E]/60 shadow-lg flex-1 flex flex-col justify-center">
+                  <div className="text-[11px] md:text-xs text-slate-300 font-medium truncate">Antrean Poli</div>
+                  <div className="text-2xl md:text-3xl font-black mt-0.5 text-[#E5CA78] drop-shadow-md">{totalPoli}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* WIDGET BERITA KESEHATAN */}
+          <div className="col-span-1 h-full animate-fade-in-up animation-delay-200">
+            <DashboardNewsWidget />
+          </div>
+
+          {/* WIDGET ANTRIAN LIVE */}
+          <div className="col-span-1 h-full animate-fade-in-up animation-delay-300">
+            <DashboardWidgetAntrian />
+          </div>
+        </div>
+        
+        {/* SEARCH */}
+        <div className="mb-8 relative group">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none z-10">
+            <span className="text-xl">🔍</span>
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Cari modul atau layanan... (Contoh: Pasien, IGD, Kasir)"
+            className="w-full pl-12 pr-4 py-4 rounded-2xl bg-[#0B1E36]/60 backdrop-blur-xl border border-[#C9A94E]/30 text-white placeholder-slate-400 focus:border-[#C9A94E] focus:ring-1 focus:ring-[#C9A94E]/50 focus:outline-none transition-all shadow-[0_8px_32px_rgba(0,0,0,0.3)] text-lg"
+          />
+        </div>
+        
+        {/* GRID PER KATEGORI */}
+        <div className="space-y-12 pb-12">
+          {MODULE_REGISTRY.map((cat) => {
+            const matchingModules = cat.modules.filter(m => {
+              // Proteksi berdasarkan role
+              if (!hasAccess(m.id)) return false;
+              // Proteksi security hanya untuk admin (logic lama tetap dipertahankan)
+              if ((m.id === 'security' || m.label === 'Security') && activeUser?.role !== 'Super Admin' && activeUser?.role !== 'Admin') return false;
+              return m.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                     m.submenus.some((s: any) => (typeof s === 'string' ? s : s.label).toLowerCase().includes(searchQuery.toLowerCase()));
+            });
+            
+            if (matchingModules.length === 0) return null;
+            
+            return (
+              <div key={cat.id} className="space-y-4">
+                <div className="flex items-center gap-3 border-b border-[#C9A94E]/20 pb-3">
+                  <span className="text-2xl drop-shadow-sm">{cat.icon}</span>
+                  <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-[#E5CA78] tracking-wide">{cat.label}</h3>
+                  <span className="text-xs font-bold px-3 py-1 bg-[#0B1E36]/80 backdrop-blur-md text-[#E5CA78] rounded-full border border-[#C9A94E]/30 shadow-sm">
+                    {matchingModules.length} Modul
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                  {matchingModules.map((mod) => (
+                    <button
+                      key={mod.id}
+                      onClick={() => navigate(`/modul/${mod.id}`)}
+                      className="group relative bg-[#0B1E36]/60 backdrop-blur-xl rounded-2xl p-5 border border-white/[0.08] hover:border-[#C9A94E]/70 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1 text-left flex flex-col justify-between shadow-[0_8px_25px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_35px_rgba(201,169,78,0.2)] overflow-hidden"
+                    >
+                      {/* Subtle hover gold glow */}
+                      <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#C9A94E]/10 rounded-full blur-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                      <div className="relative z-10">
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${mod.color} flex items-center justify-center text-2xl mb-3 shadow-[0_4px_15px_rgba(0,0,0,0.25)] border border-white/10 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(201,169,78,0.3)] transition-all`}>
+                          {mod.icon}
+                        </div>
+                        <h4 className="font-bold text-white group-hover:text-[#E5CA78] transition-colors text-sm line-clamp-1">
+                          {mod.label}
+                        </h4>
+                        <p className="text-xs text-slate-400 mt-1 line-clamp-1 font-medium">
+                          {mod.submenus.length} Layanan
+                        </p>
+                      </div>
+                      
+                      <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs text-slate-400 group-hover:text-[#E5CA78] relative z-10">
+                        <span className="font-medium">Akses</span>
+                        <span className="group-hover:translate-x-1 transition-transform">→</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+      </main>
     </div>
   );
 }

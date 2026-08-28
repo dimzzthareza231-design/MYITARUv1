@@ -1,181 +1,198 @@
 import React, { useState, useEffect } from 'react';
-import { Sidebar } from './components/Sidebar';
-import { Dashboard } from './components/Dashboard';
-import { AIAssistant } from './components/AIAssistant';
-import { PatientManagement } from './components/PatientManagement';
-import { MedicalRecords } from './components/MedicalRecords';
-import { StaffManagement } from './components/StaffManagement';
-import { Billing } from './components/Billing';
-import { Analytics } from './components/Analytics';
-import { Claims } from './components/Claims';
-import { Security } from './components/Security';
-import { Settings } from './components/Settings';
-import { FormsModule } from './components/FormsModule';
-import { Pharmacy } from './components/Pharmacy';
-import { BedManagement } from './components/BedManagement';
-import { LoginScreen } from './components/LoginScreen';
-import { Wifi, WifiOff, RefreshCw, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { useHospital } from './contexts/HospitalContext';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
+import { HospitalProvider, useHospital } from './contexts/HospitalContext';
+import { AuditTrailProvider } from './contexts/AuditTrailContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { WorkflowProvider } from './contexts/WorkflowContext';
+import { PatientFlowProvider } from './contexts/PatientFlowContext';
+import { KeyboardShortcutsProvider } from './contexts/KeyboardShortcutsContext';
+import { ToastProvider } from './contexts/ToastContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { UserManagement } from './components/Auth/UserManagement';
+import { Login } from './components/Login';
+import Dashboard from './components/Dashboard';
+import ModuleLayout from './layouts/ModuleLayout';
+import { GenericModuleContent } from './components/GenericModuleContent';
+import ErrorBoundary from './components/ErrorBoundary';
 
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState('dashboard');
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncProgress, setSyncProgress] = useState(0);
-  
-  const { activeUser, users, setActiveUser } = useHospital();
-  const [showUserMenu, setShowUserMenu] = useState(false);
+// Existing Modules
+import { Registration } from './components/Registration';
+import { Emergency } from './components/Emergency';
+import { Outpatient } from './components/Outpatient';
+import { BedManagement } from './components/BedManagement';
+import { KamarOperasi } from './components/KamarOperasi';
+import { Laboratorium } from './components/Laboratorium';
+import { RadiologiDashboard } from './components/Radiologi/RadiologiDashboard';
+import { MedicalRecords } from './components/MedicalRecords';
+import { ManajemenSDM } from './components/ManajemenSDM';
+import { InventoryManagement } from './components/InventoryManagement';
+import PatientFlowDashboard from './components/PatientFlowDashboard';
+import { PatientSafety } from './components/Safety/PatientSafety';
+import { Pharmacy } from './components/Pharmacy';
+import { Billing } from './components/Billing';
+import { BPJSModule } from './components/BPJS/BPJSModule';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
+import { SatuSehatIntegration } from './components/SatuSehatIntegration';
+import { ApiManagementSystem } from './components/ApiManagement/ApiManagementSystem';
+import { PanduanModule } from './components/Panduan/PanduanModule';
+import NotificationPreferences from './components/NotificationPreferences';
+import { Profile } from './components/Profile';
+import { AuthManagement } from './components/Auth/AuthManagement';
+import AuditTrail from './components/AuditTrail';
+import { BackupManagement } from './components/Backup/BackupManagement';
+import { MonitoringSystem } from './components/Monitoring/MonitoringSystem';
+import ModulTriase from './components/ModulTriase';
+import { PengaturanRS } from './components/Settings/PengaturanRS';
+import { JKNMobile } from './components/JKNMobile/JKNMobile';
+import { AntrianProvider } from "./contexts/AntrianContext";
+import { PoliPelayanan } from "./components/Poli/PoliPelayanan";
+import { DisplayAntrianPoli } from "./components/Poli/DisplayAntrianPoli";
+
+// Bridging Modules
+import { BridgingHub } from './components/Bridging/BridgingHub';
+import { VClaimBridging } from './components/Bridging/VClaimBridging';
+import { SatuSehatBridging } from './components/Bridging/SatuSehatBridging';
+import { WAGatewayBridging } from './components/Bridging/WAGatewayBridging';
+import { AnjunganBridging } from './components/Bridging/AnjunganBridging';
+import { HFISBridging } from './components/Bridging/HFISBridging';
+import { VedikaBridging } from './components/Bridging/VedikaBridging';
+import { VeronisaBridging } from './components/Bridging/VeronisaBridging';
+import { BPJSEMRBridging } from './components/Bridging/BPJSEMRBridging';
+import { SertisignBridging } from './components/Bridging/SertisignBridging';
+import { OrthancBridging } from './components/Bridging/OrthancBridging';
+import { ApiGatewayBridging } from './components/Bridging/ApiGatewayBridging';
+
+function AppContent() {
+  const { currentUser, logout } = useAuth();
+  const { isDarkMode } = useHospital();
 
   useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true);
-      // Simulate sync upon reconnecting
-      setIsSyncing(true);
-      setSyncProgress(0);
-      
-      const interval = setInterval(() => {
-        setSyncProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setIsSyncing(false);
-            return 100;
-          }
-          return prev + 10;
-        });
-      }, 300);
-    };
-    
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    // Initial sync simulation if online
-    if (navigator.onLine) {
-      handleOnline();
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
+  }, [isDarkMode]);
 
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  if (!isAuthenticated) {
-    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+  if (!currentUser) {
+    return (
+      <>
+        <Toaster position="top-right" />
+        <Login />
+      </>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-midnight text-[#e0e0e0] flex overflow-hidden">
-      <Sidebar currentView={currentView} onViewChange={setCurrentView} onLogout={() => setIsAuthenticated(false)} />
-      
-      <main className="flex-1 ml-64 h-screen overflow-hidden flex flex-col relative z-10">
-        <header className="h-16 border-b border-white/10 px-6 flex items-center justify-between bg-panel/80 backdrop-blur-md z-20">
-          <div className="flex items-center gap-4">
-            <h2 className="text-lg font-semibold tracking-tight capitalize text-white">
-              {currentView.replace('-', ' ')}
-            </h2>
-            
-            {/* Dynamic Status Indicator */}
-            {isSyncing ? (
-               <div className="px-2 py-0.5 rounded-full border border-blue-400/30 bg-blue-500/10 text-[10px] text-blue-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                 <RefreshCw className="w-3 h-3 animate-spin" />
-                 Syncing {syncProgress}%
-               </div>
-            ) : isOnline ? (
-               <div className="px-2 py-0.5 rounded-full border border-primary-emerald/30 bg-primary-emerald/10 text-[10px] text-primary-emerald font-bold uppercase tracking-widest flex items-center gap-1.5">
-                 <Wifi className="w-3 h-3" />
-                 <span className="w-1.5 h-1.5 rounded-full bg-primary-emerald shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                 Online & Synced
-               </div>
-            ) : (
-               <div className="px-2 py-0.5 rounded-full border border-orange-500/30 bg-orange-500/10 text-[10px] text-orange-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                 <WifiOff className="w-3 h-3" />
-                 <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)] animate-pulse" />
-                 Offline Mode
-               </div>
-            )}
-          </div>
-          
-          <div className="relative">
-            <button 
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-4 hover:bg-white/5 p-2 rounded-xl transition-colors text-left"
-            >
-              <div className="hidden md:block">
-                <div className="text-xs font-semibold text-white">{activeUser?.name || 'Unknown User'}</div>
-                <div className="text-[10px] text-white/40 uppercase">{activeUser?.role || 'Staff'} • {activeUser?.department || 'General'}</div>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center">
-                <span className="text-blue-400 text-xs font-bold">{activeUser?.initials || '??'}</span>
-              </div>
-              <ChevronDown className="w-4 h-4 text-white/40 hidden md:block" />
-            </button>
-            
-            <AnimatePresence>
-              {showUserMenu && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute right-0 top-full mt-2 w-64 bg-panel border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden"
-                >
-                  <div className="p-3 border-b border-white/5 bg-white/5">
-                    <p className="text-xs font-bold text-white/60 uppercase tracking-wider">Change Shift / User</p>
-                  </div>
-                  <div className="max-h-64 overflow-y-auto custom-scrollbar p-2 space-y-1">
-                    {users.map((u) => (
-                      <button 
-                        key={u.id}
-                        onClick={() => { setActiveUser(u); setShowUserMenu(false); }}
-                        className={`w-full text-left p-3 rounded-lg flex items-center gap-3 transition-colors ${activeUser?.id === u.id ? 'bg-primary-emerald/10 border-primary-emerald/20 border' : 'hover:bg-white/5 border border-transparent'}`}
-                      >
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0">
-                          <span className="text-[10px] font-bold text-white/60">{u.initials}</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className={`text-sm font-semibold truncate ${activeUser?.id === u.id ? 'text-primary-emerald' : 'text-white'}`}>{u.name}</div>
-                          <div className="text-[10px] text-white/40 truncate">{u.role}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </header>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 font-sans transition-colors duration-300 flex flex-col">
+      <Toaster position="top-right" />
 
-        <div className="flex-1 overflow-auto p-6 relative">
-          {currentView === 'dashboard' && <Dashboard />}
-          {currentView === 'ai-assistant' && <AIAssistant />}
-          {currentView === 'patients' && <PatientManagement />}
-          {currentView === 'records' && <MedicalRecords />}
-          {currentView === 'staff' && <StaffManagement />}
-          {currentView === 'invoices' && <Billing />}
-          {currentView === 'analytics' && <Analytics />}
-          {currentView === 'claims' && <Claims />}
-                    {currentView === 'forms-doctor' && <FormsModule />}
-          {currentView === 'forms-nurse' && <FormsModule />}
-          {currentView === 'forms-medical-record' && <FormsModule />}
-          {currentView === 'beds' && <BedManagement />}
-          {currentView === 'pharmacy' && <Pharmacy />}
-          {currentView === 'security' && <Security />}
-          {currentView === 'settings' && <Settings />}
-          
-          {/* Placeholder for other views */}
-          {[''].includes(currentView) && (
-            <div className="h-full glass-panel flex items-center justify-center text-white/40">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold mb-2 capitalize">{currentView} Module</h3>
-                <p>This module is currently in development.</p>
-              </div>
-            </div>
-          )}
-        </div>
+      {/* Fallback Logout Button for Debugging/Emergency */}
+      <div className="fixed top-4 right-4 z-50">
+        <button
+          onClick={() => {
+            logout();
+            toast.success('Anda telah logout');
+          }}
+          className="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-bold hover:bg-rose-700 shadow-lg"
+        >
+          Logout ({currentUser.nama.split(' ')[0]})
+        </button>
+      </div>
+
+      <main className="flex-1 flex flex-col min-w-0 relative w-full scroll-smooth">
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/modul" element={<ModuleLayout />}>
+              <Route path="pendaftaran" element={<ErrorBoundary><Registration /></ErrorBoundary>} />
+              <Route path="rekam-medis" element={<ErrorBoundary><MedicalRecords /></ErrorBoundary>} />
+              <Route path="igd" element={<ErrorBoundary><Emergency /></ErrorBoundary>} />
+              <Route path="rawat-jalan" element={<ErrorBoundary><Outpatient /></ErrorBoundary>} />
+              <Route path="rawat-inap" element={<ErrorBoundary><BedManagement /></ErrorBoundary>} />
+              <Route path="operasi" element={<ErrorBoundary><KamarOperasi /></ErrorBoundary>} />
+              <Route path="laboratorium" element={<ErrorBoundary><Laboratorium /></ErrorBoundary>} />
+              <Route path="radiologi" element={<ErrorBoundary><RadiologiDashboard /></ErrorBoundary>} />
+              
+              {/* Bridging Modules */}
+              <Route path="bridging-hub" element={<ErrorBoundary><BridgingHub /></ErrorBoundary>} />
+              <Route path="wa-gateway" element={<ErrorBoundary><WAGatewayBridging /></ErrorBoundary>} />
+              <Route path="anjungan" element={<ErrorBoundary><AnjunganBridging /></ErrorBoundary>} />
+              <Route path="api" element={<ErrorBoundary><ApiGatewayBridging /></ErrorBoundary>} />
+              <Route path="vclaim" element={<ErrorBoundary><VClaimBridging /></ErrorBoundary>} />
+              <Route path="vedika" element={<ErrorBoundary><VedikaBridging /></ErrorBoundary>} />
+              <Route path="orthanc" element={<ErrorBoundary><OrthancBridging /></ErrorBoundary>} />
+              <Route path="bpjs-emr" element={<ErrorBoundary><BPJSEMRBridging /></ErrorBoundary>} />
+              <Route path="hfis" element={<ErrorBoundary><HFISBridging /></ErrorBoundary>} />
+              <Route path="veronisa" element={<ErrorBoundary><VeronisaBridging /></ErrorBoundary>} />
+              <Route path="satu-sehat" element={<ErrorBoundary><SatuSehatBridging /></ErrorBoundary>} />
+              <Route path="sertisign" element={<ErrorBoundary><SertisignBridging /></ErrorBoundary>} />
+              
+              <Route path="sdm" element={<ErrorBoundary><ManajemenSDM /></ErrorBoundary>} />
+              <Route path="inventory" element={<ErrorBoundary><InventoryManagement /></ErrorBoundary>} />
+              <Route path="mutu" element={<ErrorBoundary><PatientSafety /></ErrorBoundary>} />
+              <Route path="apotek-ralan" element={<ErrorBoundary><Pharmacy /></ErrorBoundary>} />
+              <Route path="apotek-ranap" element={<ErrorBoundary><Pharmacy /></ErrorBoundary>} />
+              <Route path="stok-obat" element={<ErrorBoundary><Pharmacy /></ErrorBoundary>} />
+              <Route path="kasir" element={<ErrorBoundary><Billing /></ErrorBoundary>} />
+              <Route path="bpjs-klaim" element={<ErrorBoundary><BPJSModule /></ErrorBoundary>} />
+              <Route path="laporan" element={<ErrorBoundary><AnalyticsDashboard /></ErrorBoundary>} />
+              <Route path="bpjs" element={<ErrorBoundary><BPJSModule /></ErrorBoundary>} />
+              <Route path="kemenkes" element={<ErrorBoundary><SatuSehatIntegration /></ErrorBoundary>} />
+              <Route path="integrasi" element={<ErrorBoundary><ApiManagementSystem /></ErrorBoundary>} />
+              <Route path="panduan" element={<ErrorBoundary><PanduanModule /></ErrorBoundary>} />
+              <Route path="pengaturan-rs" element={<ErrorBoundary><PengaturanRS /></ErrorBoundary>} />
+              <Route path="notifikasi" element={<ErrorBoundary><NotificationPreferences /></ErrorBoundary>} />
+              <Route path="profile" element={<ErrorBoundary><Profile /></ErrorBoundary>} />
+              <Route path="security" element={<ErrorBoundary><AuthManagement /></ErrorBoundary>} />
+              <Route path="audit" element={<ErrorBoundary><AuditTrail /></ErrorBoundary>} />
+              <Route path="backup" element={<ErrorBoundary><BackupManagement /></ErrorBoundary>} />
+              <Route path="monitoring" element={<ErrorBoundary><MonitoringSystem /></ErrorBoundary>} />
+              <Route path="triase" element={<ErrorBoundary><ModulTriase /></ErrorBoundary>} />
+              <Route path="jkn-mobile" element={<ErrorBoundary><JKNMobile /></ErrorBoundary>} />
+              <Route path="user-management" element={<ErrorBoundary><UserManagement /></ErrorBoundary>} />
+              <Route path="poli" element={<ErrorBoundary><PoliPelayanan /></ErrorBoundary>} />
+              <Route path="display-antrian" element={<ErrorBoundary><DisplayAntrianPoli /></ErrorBoundary>} />
+              <Route path=":moduleId" element={<ErrorBoundary><GenericModuleContent /></ErrorBoundary>} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
     </div>
   );
 }
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <AuthProvider>
+        <BrowserRouter>
+          <HospitalProvider>
+            <AntrianProvider>
+              <ToastProvider>
+                <NotificationProvider>
+                  <AuditTrailProvider>
+                    <WorkflowProvider>
+                      <PatientFlowProvider>
+                        <KeyboardShortcutsProvider>
+                          <ErrorBoundary>
+                            <AppContent />
+                          </ErrorBoundary>
+                        </KeyboardShortcutsProvider>
+                      </PatientFlowProvider>
+                    </WorkflowProvider>
+                  </AuditTrailProvider>
+                </NotificationProvider>
+              </ToastProvider>
+            </AntrianProvider>
+          </HospitalProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </ErrorBoundary>
+  );
+}
+
+export default App;
