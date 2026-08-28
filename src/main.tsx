@@ -1,3 +1,4 @@
+import './utils/storage'; // Load safe localStorage polyfill first
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
