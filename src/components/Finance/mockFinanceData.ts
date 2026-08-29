@@ -474,7 +474,7 @@ export const INITIAL_JASA_MEDIS: JasaMedisDokterRecord[] = [
     totalTindakanOperatif: 0,
     brutoJasaMedis: 28450000,
     porsiDokter: 19915000, // 70%
-    porsiRumahSakit: 8535000, // 30%
+    porsiKlinik: 8535000, // 30%
     potonganPPh21: 995750, // 5%
     potonganManajemen: 500000,
     nettoDiterima: 18419250,
@@ -492,7 +492,7 @@ export const INITIAL_JASA_MEDIS: JasaMedisDokterRecord[] = [
     totalTindakanOperatif: 18,
     brutoJasaMedis: 46800000,
     porsiDokter: 32760000, // 70%
-    porsiRumahSakit: 14040000, // 30%
+    porsiKlinik: 14040000, // 30%
     potonganPPh21: 1638000,
     potonganManajemen: 500000,
     nettoDiterima: 30622000,
@@ -510,7 +510,7 @@ export const INITIAL_JASA_MEDIS: JasaMedisDokterRecord[] = [
     totalTindakanOperatif: 18,
     brutoJasaMedis: 41200000,
     porsiDokter: 28840000,
-    porsiRumahSakit: 12360000,
+    porsiKlinik: 12360000,
     potonganPPh21: 1442000,
     potonganManajemen: 500000,
     nettoDiterima: 26898000,

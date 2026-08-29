@@ -288,7 +288,7 @@ export function BillingRanapTab({
                 {/* Totals & Deposit summary */}
                 <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700 space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
                   <div className="flex justify-between">
-                    <span>Total Tagihan Rumah Sakit:</span>
+                    <span>Total Tagihan Klinik:</span>
                     <span className="font-bold text-slate-900 dark:text-white">
                       Rp {selectedBilling.totalTagihan.toLocaleString('id-ID')}
                     </span>

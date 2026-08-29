@@ -279,13 +279,13 @@ export function Pharmacy() {
           </div>
           <div>
             <h1 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-              Sistem Informasi Farmasi &amp; Apotek RS
+              Sistem Informasi Farmasi &amp; Apotek Klinik
               <span className="px-2 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 rounded-full text-[10px] font-extrabold uppercase">
                 GPP / Permenkes 72
               </span>
             </h1>
             <p className="text-xs text-slate-500">
-              Instalasi Farmasi RS ITARU Medika • E-Prescribing, Clinical Screening, UDD Ranap, Multi-Depo &amp; SIPNAP
+              Instalasi Farmasi Klinik ITARU Medika • E-Prescribing, Clinical Screening, UDD Ranap, Multi-Depo &amp; SIPNAP
             </p>
           </div>
         </div>

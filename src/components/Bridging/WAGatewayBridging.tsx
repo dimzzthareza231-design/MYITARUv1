@@ -35,7 +35,7 @@ export function WAGatewayBridging() {
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               WA Engine Connected
             </span>
-            <span className="text-xs text-slate-400 font-mono">+62 812-9988-7711 (Server RS)</span>
+            <span className="text-xs text-slate-400 font-mono">+62 812-9988-7711 (Server Klinik)</span>
           </div>
           <h1 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
             <span>💬</span> WhatsApp Gateway & Notifikasi Otomatis
@@ -116,7 +116,7 @@ function ManageTab({ onNavigate }: { onNavigate: (tab: string) => void }) {
         <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <span className="text-xs font-semibold text-slate-400 block mb-1">Sisa Kuota Gateway</span>
           <div className="text-2xl font-black text-blue-600 dark:text-blue-400">9,488 <span className="text-xs font-normal text-slate-400">Pesan</span></div>
-          <span className="text-xs text-slate-400 mt-1 block">Paket Unlimited RS</span>
+          <span className="text-xs text-slate-400 mt-1 block">Paket Unlimited Klinik</span>
         </div>
 
         <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">

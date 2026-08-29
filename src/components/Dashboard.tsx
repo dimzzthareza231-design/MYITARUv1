@@ -169,7 +169,7 @@ export default function Dashboard() {
               // Proteksi berdasarkan role
               if (!hasAccess(m.id)) return false;
               // Proteksi security hanya untuk admin (logic lama tetap dipertahankan)
-              if ((m.id === 'security' || m.label === 'Security') && activeUser?.role !== 'Super Admin' && activeUser?.role !== 'Admin') return false;
+              if ((m.id === 'security' || m.label === 'Security') && currentUser?.roleId !== 'super_admin' && currentUser?.roleId !== 'admin') return false;
               return m.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
                      m.submenus.some((s: any) => (typeof s === 'string' ? s : s.label).toLowerCase().includes(searchQuery.toLowerCase()));
             });

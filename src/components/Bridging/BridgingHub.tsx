@@ -173,6 +173,20 @@ export function BridgingHub() {
       route: '/modul/sertisign'
     },
     {
+      id: 'cloudflare',
+      name: 'Cloudflare Enterprise Security',
+      category: 'External',
+      status: 'ONLINE',
+      latency: 18,
+      lastSync: 'Realtime',
+      description: 'Proteksi DDoS L3/L7, Anti-Bot Turnstile, SSL Full Strict, WAF Rate Limiting & R2 Storage.',
+      endpoint: 'https://api.cloudflare.com/client/v4',
+      syncCountToday: 3840,
+      errorCountToday: 0,
+      icon: '🛡️',
+      route: '/modul/cloudflare'
+    },
+    {
       id: 'api',
       name: 'API & Payment Gateway Duitku',
       category: 'External',
@@ -271,7 +285,7 @@ export function BridgingHub() {
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-black text-white flex items-center gap-2">
-              <span>🔗</span> Pusat Integrasi & Bridging Eksternal RS
+              <span>🔗</span> Pusat Integrasi & Bridging Eksternal Klinik
             </h1>
             <p className="text-slate-300 text-sm mt-1 max-w-2xl leading-relaxed">
               Manajemen dan monitoring terpusat untuk seluruh koneksi bridging: BPJS Kesehatan (V-Claim, HFIS, Vedika, Veronisa, E-MR), Kemenkes SatuSehat FHIR, WhatsApp Gateway, PACS Orthanc, TTE BSrE, dan Payment Gateway.

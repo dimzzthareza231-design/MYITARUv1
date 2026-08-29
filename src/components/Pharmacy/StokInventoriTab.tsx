@@ -194,7 +194,7 @@ export function StokInventoriTab({ stocks, onUpdateStocks, onAddStock }: StokInv
 
     onAddStock(newStock);
     setShowAddMedModal(false);
-    toast.success(`Obat ${newStock.nama_obat} berhasil ditambahkan ke master stok RS!`);
+    toast.success(`Obat ${newStock.nama_obat} berhasil ditambahkan ke master stok Klinik!`);
   };
 
   return (
@@ -267,7 +267,7 @@ export function StokInventoriTab({ stocks, onUpdateStocks, onAddStock }: StokInv
               <Building className="w-3.5 h-3.5" /> Depo:
             </span>
             {[
-              { key: 'semua', label: 'Semua Depo RS' },
+              { key: 'semua', label: 'Semua Depo Klinik' },
               { key: 'depo_ralan', label: 'Apotek Ralan' },
               { key: 'depo_ranap', label: 'Apotek Ranap' },
               { key: 'gudang_utama', label: 'Gudang Utama Farmasi' },

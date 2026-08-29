@@ -41,7 +41,7 @@ export default function TalkToText({ onTranscriptReady, currentSOAP, setCurrentS
       if (response.ok) {
         const result = await response.json();
         const parsed = {
-          keluhan_utama: text,
+          keluhan_utama: result.soap?.subjective || result.resume || text,
           confidence: 90,
           tanda_vital: {},
           diagnosis_suggestion: result.icd10?.map((d: any) => ({
@@ -49,8 +49,8 @@ export default function TalkToText({ onTranscriptReady, currentSOAP, setCurrentS
             name: d.description,
             confidence: 85
           })) || [],
-          obat_suggestion: [],
-          alergi_detected: []
+          obat_suggestion: result.recommendations || [],
+          alergi_detected: result.warnings || []
         };
         setParsedResult(parsed);
         setShowResult(true);

@@ -160,7 +160,7 @@ export function MasterTarifTab({
             </span>
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Katalog tarif resmi RS, pembagian proporsi Jasa RS, Jasa Medis Dokter, Paramedis, dan Bahan Medis Habis Pakai (BMHP).
+            Katalog tarif resmi Klinik, pembagian proporsi Jasa Klinik, Jasa Medis Dokter, Paramedis, dan Bahan Medis Habis Pakai (BMHP).
           </p>
         </div>
 
@@ -228,7 +228,7 @@ export function MasterTarifTab({
                 <th className="p-3.5">Kode & Nama Layanan</th>
                 <th className="p-3.5">Unit / Kelas</th>
                 <th className="p-3.5">Kategori</th>
-                <th className="p-3.5 text-right">Jasa RS</th>
+                <th className="p-3.5 text-right">Jasa Klinik</th>
                 <th className="p-3.5 text-right">Jasa Medis Dokter</th>
                 <th className="p-3.5 text-right">Paramedis / BMHP</th>
                 <th className="p-3.5 text-right font-extrabold">Total Tarif (Rp)</th>
@@ -404,7 +404,7 @@ export function MasterTarifTab({
                 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1">Jasa RS (Sarana & Prasarana)</label>
+                    <label className="block text-[11px] font-medium text-slate-500 mb-1">Jasa Klinik (Sarana & Prasarana)</label>
                     <input
                       type="number"
                       step={1000}

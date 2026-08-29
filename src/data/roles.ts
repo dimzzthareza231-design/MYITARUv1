@@ -29,13 +29,31 @@ export const MODULE_ALIASES: Record<string, string[]> = {
   'sdm': ['pegawai', 'hrd', 'staff'],
   'inventory': ['gudang', 'logistik'],
   'mutu': ['patient-safety', 'safety', 'komite-mutu'],
-  'pengaturan-rs': ['settings', 'pengaturan'],
+  'pengaturan-klinik': ['settings', 'pengaturan'],
   'apotek-ralan': ['farmasi-ralan'],
   'apotek-ranap': ['farmasi-ranap'],
   'stok-obat': ['farmasi-stok', 'obat']
 };
 
 export const ROLES: Role[] = [
+  {
+    id: 'viewer',
+    nama: 'Guest Viewer',
+    icon: '👁️',
+    warna: 'from-gray-400 to-gray-500',
+    deskripsi: 'Akses read-only ke seluruh modul (hanya melihat, tidak dapat mengubah data).',
+    kategori: 'Sistem',
+    moduleAccess: [
+      'rekam-medis', 'pendaftaran', 'igd', 'rawat-jalan', 'rawat-inap', 'operasi', 'laboratorium', 'radiologi',
+      'triase', 'icu', 'cssd', 'rehab', 'telemedicine', 'gizi',
+      'sdm', 'inventory', 'mutu', 'patient-flow',
+      'apotek-ralan', 'apotek-ranap', 'stok-obat',
+      'kasir', 'bpjs-klaim', 'laporan',
+      'bridging-hub', 'wa-gateway', 'anjungan', 'api', 'jkn-mobile', 'vclaim', 'vedika', 'orthanc', 'bpjs-emr', 'hfis', 'veronisa', 'satu-sehat', 'sertisign',
+      'pengaturan-klinik', 'security', 'audit', 'backup', 'monitoring',
+      ...COMMON_MODULES
+    ]
+  },
   {
     id: 'super_admin',
     nama: 'Super Admin',
@@ -57,7 +75,7 @@ export const ROLES: Role[] = [
       // Bridging & Integrasi
       'bridging-hub', 'wa-gateway', 'anjungan', 'api', 'jkn-mobile', 'vclaim', 'vedika', 'orthanc', 'bpjs-emr', 'hfis', 'veronisa', 'satu-sehat', 'sertisign',
       // Sistem & Security
-      'pengaturan-rs', 'security', 'audit', 'backup', 'monitoring',
+      'pengaturan-klinik', 'security', 'audit', 'backup', 'monitoring',
       ...COMMON_MODULES
     ]
   },
@@ -66,13 +84,13 @@ export const ROLES: Role[] = [
     nama: 'Administrator SIMRS',
     icon: '🔧',
     warna: 'from-slate-500 to-slate-700',
-    deskripsi: 'Pengelolaan master data, pegawai, logistik inventory, bridging eksternal, laporan, dan konfigurasi RS.',
+    deskripsi: 'Pengelolaan master data, pegawai, logistik inventory, bridging eksternal, laporan, dan konfigurasi Klinik.',
     kategori: 'Sistem',
     moduleAccess: [
       'rekam-medis', 'pendaftaran', 'sdm', 'inventory', 'mutu', 'laporan', 'patient-flow',
       'apotek-ralan', 'apotek-ranap', 'stok-obat', 'kasir', 'bpjs-klaim',
       'bridging-hub', 'wa-gateway', 'anjungan', 'api', 'jkn-mobile', 'vclaim', 'vedika', 'orthanc', 'bpjs-emr', 'hfis', 'veronisa', 'satu-sehat', 'sertisign',
-      'pengaturan-rs', 'security', 'audit', 'backup', 'monitoring',
+      'pengaturan-klinik', 'security', 'audit', 'backup', 'monitoring',
       ...COMMON_MODULES
     ]
   },
@@ -247,7 +265,7 @@ export const ROLES: Role[] = [
     deskripsi: 'Pemeliharaan server, bridging API, backup & disaster recovery, manajemen sesi, dan error monitoring.',
     kategori: 'Sistem',
     moduleAccess: [
-      'security', 'audit', 'backup', 'monitoring', 'api', 'bridging-hub', 'pengaturan-rs', 'wa-gateway', 'anjungan',
+      'security', 'audit', 'backup', 'monitoring', 'api', 'bridging-hub', 'pengaturan-klinik', 'wa-gateway', 'anjungan',
       ...COMMON_MODULES
     ]
   }

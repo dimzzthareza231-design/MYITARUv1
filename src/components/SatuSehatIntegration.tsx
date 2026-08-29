@@ -207,7 +207,7 @@ function MappingTab() {
                <option>Obat (KFA)</option>
              </select>
           </div>
-          <div className="flex-1"><label className="block text-sm mb-1">Data Lokal RS</label><input type="text" className="input-field" value={form.local} onChange={e=>setForm({...form, local: e.target.value})} required/></div>
+          <div className="flex-1"><label className="block text-sm mb-1">Data Lokal Klinik</label><input type="text" className="input-field" value={form.local} onChange={e=>setForm({...form, local: e.target.value})} required/></div>
           <div className="flex-1"><label className="block text-sm mb-1">Kode SatuSehat</label><input type="text" className="input-field" value={form.satusehat} onChange={e=>setForm({...form, satusehat: e.target.value})} required/></div>
           <button type="submit" className="btn-primary">Add Mapping</button>
         </form>

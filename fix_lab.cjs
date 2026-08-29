@@ -18,7 +18,7 @@ if (docStart !== -1 && docEnd !== -1) {
 ${docContent.substring(docContent.indexOf('>') + 1)}
             {/* LEGAL DISCLAIMER */}
             <div className="text-[9px] text-slate-400 text-center pt-2 border-t border-slate-100">
-              Dokumen ini merupakan rekam medis elektronik resmi RS MYITARU SEHAT UTAMA yang dilindungi oleh undang-undang kerahasiaan medis.
+              Dokumen ini merupakan rekam medis elektronik resmi Klinik MYITARU SEHAT UTAMA yang dilindungi oleh undang-undang kerahasiaan medis.
             </div>
         </div>
     );

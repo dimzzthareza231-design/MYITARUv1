@@ -116,9 +116,9 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
           {activeEtiketTab === 'etiket_oral' && currentItem && (
             <div className="w-96 bg-white text-slate-900 border-2 border-slate-800 rounded-xl p-5 shadow-xl font-sans relative">
               <div className="text-center border-b-2 border-slate-800 pb-2 mb-3">
-                <h4 className="font-extrabold text-sm tracking-wide">INSTALASI FARMASI RS ITARU</h4>
+                <h4 className="font-extrabold text-sm tracking-wide">INSTALASI FARMASI Klinik ITARU</h4>
                 <p className="text-[10px] text-slate-600">Jl. Kesehatan No. 10 Jakarta • Telp (021) 789-0123</p>
-                <p className="text-[9px] text-slate-500 font-mono">SIPA: 19940826/SIPA-RS/2023 • APA: Apt. Dimas Alifia, S.Farm</p>
+                <p className="text-[9px] text-slate-500 font-mono">SIPA: 19940826/SIPA-Klinik/2023 • APA: Apt. Dimas Alifia, S.Farm</p>
               </div>
 
               <div className="flex justify-between text-xs mb-2 pb-2 border-b border-dashed border-slate-400">
@@ -185,7 +185,7 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
           {activeEtiketTab === 'etiket_luar' && currentItem && (
             <div className="w-96 bg-blue-600 text-white rounded-xl p-5 shadow-xl font-sans border-2 border-blue-900 relative">
               <div className="text-center border-b-2 border-blue-400 pb-2 mb-3">
-                <h4 className="font-extrabold text-sm tracking-wide">INSTALASI FARMASI RS ITARU</h4>
+                <h4 className="font-extrabold text-sm tracking-wide">INSTALASI FARMASI Klinik ITARU</h4>
                 <p className="text-[10px] text-blue-200">Jl. Kesehatan No. 10 Jakarta • Telp (021) 789-0123</p>
                 <div className="bg-red-600 text-white text-[11px] font-black uppercase py-0.5 px-2 rounded mt-1 shadow tracking-wider">
                   OBAT LUAR - TIDAK UNTUK DITELAN
@@ -239,7 +239,7 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
                 <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-black text-[10px] uppercase">
                   LABEL OBAT INFUS & SUNTIKAN
                 </span>
-                <h4 className="font-extrabold text-sm tracking-wide mt-1 text-emerald-950">RS ITARU MEDIKA</h4>
+                <h4 className="font-extrabold text-sm tracking-wide mt-1 text-emerald-950">Klinik ITARU MEDIKA</h4>
               </div>
 
               <div className="space-y-1.5 text-xs">
@@ -285,7 +285,7 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
           {activeEtiketTab === 'copy_resep' && (
             <div className="w-[480px] bg-white text-slate-900 border-2 border-slate-800 p-6 rounded-xl shadow-2xl font-serif">
               <div className="text-center border-b-2 border-slate-900 pb-3 mb-4">
-                <h3 className="font-bold text-base tracking-widest uppercase">APOTEK RUMAH SAKIT ITARU</h3>
+                <h3 className="font-bold text-base tracking-widest uppercase">APOTEK KLINIK ITARU</h3>
                 <p className="text-xs font-sans text-slate-600">Jl. Kesehatan No. 10 Jakarta Pusat • Telp: (021) 789-0123</p>
                 <p className="text-[11px] font-sans text-slate-500">Apoteker Pengelola Apotek (APA): Apt. Dimas Alifia, S.Farm., M.Clin.Pharm</p>
                 <h4 className="font-bold text-sm tracking-wider underline mt-2">SALINAN RESEP (APOGRAPH)</h4>
@@ -323,7 +323,7 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
                 <div className="text-[10px] text-slate-500">
                   <p>Cap Apotek Resmi:</p>
                   <div className="w-16 h-16 border border-slate-300 rounded-full flex items-center justify-center text-[8px] font-bold text-slate-400 rotate-12 mt-1">
-                    RS ITARU APOTEK
+                    Klinik ITARU APOTEK
                   </div>
                 </div>
                 <div className="text-center">
@@ -333,7 +333,7 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
                     (Tanda Tangan Apoteker)
                   </div>
                   <p className="font-bold underline text-slate-900">{order.telaah_resep.apoteker_penelaah || 'Apt. Sarah Larasati, S.Farm'}</p>
-                  <p className="text-[10px] text-slate-500 font-mono">SIPA.19940826/SIPA-RS/2023</p>
+                  <p className="text-[10px] text-slate-500 font-mono">SIPA.19940826/SIPA-Klinik/2023</p>
                 </div>
               </div>
             </div>
@@ -378,9 +378,9 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
           {activeEtiketTab === 'etiket_oral' && currentItem && (
             <div className="w-96 bg-white text-slate-900 border-2 border-slate-800 rounded-xl p-5 shadow-xl font-sans relative">
               <div className="text-center border-b-2 border-slate-800 pb-2 mb-3">
-                <h4 className="font-extrabold text-sm tracking-wide">INSTALASI FARMASI RS ITARU</h4>
+                <h4 className="font-extrabold text-sm tracking-wide">INSTALASI FARMASI Klinik ITARU</h4>
                 <p className="text-[10px] text-slate-600">Jl. Kesehatan No. 10 Jakarta • Telp (021) 789-0123</p>
-                <p className="text-[9px] text-slate-500 font-mono">SIPA: 19940826/SIPA-RS/2023 • APA: Apt. Dimas Alifia, S.Farm</p>
+                <p className="text-[9px] text-slate-500 font-mono">SIPA: 19940826/SIPA-Klinik/2023 • APA: Apt. Dimas Alifia, S.Farm</p>
               </div>
 
               <div className="flex justify-between text-xs mb-2 pb-2 border-b border-dashed border-slate-400">
@@ -447,7 +447,7 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
           {activeEtiketTab === 'etiket_luar' && currentItem && (
             <div className="w-96 bg-blue-600 text-white rounded-xl p-5 shadow-xl font-sans border-2 border-blue-900 relative">
               <div className="text-center border-b-2 border-blue-400 pb-2 mb-3">
-                <h4 className="font-extrabold text-sm tracking-wide">INSTALASI FARMASI RS ITARU</h4>
+                <h4 className="font-extrabold text-sm tracking-wide">INSTALASI FARMASI Klinik ITARU</h4>
                 <p className="text-[10px] text-blue-200">Jl. Kesehatan No. 10 Jakarta • Telp (021) 789-0123</p>
                 <div className="bg-red-600 text-white text-[11px] font-black uppercase py-0.5 px-2 rounded mt-1 shadow tracking-wider">
                   OBAT LUAR - TIDAK UNTUK DITELAN
@@ -501,7 +501,7 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
                 <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-black text-[10px] uppercase">
                   LABEL OBAT INFUS & SUNTIKAN
                 </span>
-                <h4 className="font-extrabold text-sm tracking-wide mt-1 text-emerald-950">RS ITARU MEDIKA</h4>
+                <h4 className="font-extrabold text-sm tracking-wide mt-1 text-emerald-950">Klinik ITARU MEDIKA</h4>
               </div>
 
               <div className="space-y-1.5 text-xs">
@@ -547,7 +547,7 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
           {activeEtiketTab === 'copy_resep' && (
             <div className="w-[480px] bg-white text-slate-900 border-2 border-slate-800 p-6 rounded-xl shadow-2xl font-serif">
               <div className="text-center border-b-2 border-slate-900 pb-3 mb-4">
-                <h3 className="font-bold text-base tracking-widest uppercase">APOTEK RUMAH SAKIT ITARU</h3>
+                <h3 className="font-bold text-base tracking-widest uppercase">APOTEK KLINIK ITARU</h3>
                 <p className="text-xs font-sans text-slate-600">Jl. Kesehatan No. 10 Jakarta Pusat • Telp: (021) 789-0123</p>
                 <p className="text-[11px] font-sans text-slate-500">Apoteker Pengelola Apotek (APA): Apt. Dimas Alifia, S.Farm., M.Clin.Pharm</p>
                 <h4 className="font-bold text-sm tracking-wider underline mt-2">SALINAN RESEP (APOGRAPH)</h4>
@@ -585,7 +585,7 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
                 <div className="text-[10px] text-slate-500">
                   <p>Cap Apotek Resmi:</p>
                   <div className="w-16 h-16 border border-slate-300 rounded-full flex items-center justify-center text-[8px] font-bold text-slate-400 rotate-12 mt-1">
-                    RS ITARU APOTEK
+                    Klinik ITARU APOTEK
                   </div>
                 </div>
                 <div className="text-center">
@@ -595,7 +595,7 @@ export function EtiketPrintModal({ order, onClose }: EtiketPrintModalProps) {
                     (Tanda Tangan Apoteker)
                   </div>
                   <p className="font-bold underline text-slate-900">{order.telaah_resep.apoteker_penelaah || 'Apt. Sarah Larasati, S.Farm'}</p>
-                  <p className="text-[10px] text-slate-500 font-mono">SIPA.19940826/SIPA-RS/2023</p>
+                  <p className="text-[10px] text-slate-500 font-mono">SIPA.19940826/SIPA-Klinik/2023</p>
                 </div>
               </div>
             </div>

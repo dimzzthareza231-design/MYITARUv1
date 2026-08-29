@@ -40,7 +40,7 @@ const replacement = `
                       </div>
                       <div>
                         <h2 className="text-xl font-black text-slate-900 uppercase">Kwitansi Pembayaran</h2>
-                        <p className="text-xs text-slate-500">RS MYITARU SEHAT UTAMA</p>
+                        <p className="text-xs text-slate-500">Klinik MYITARU SEHAT UTAMA</p>
                       </div>
                     </div>
                     <div className="text-right">

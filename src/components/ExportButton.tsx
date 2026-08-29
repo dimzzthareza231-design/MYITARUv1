@@ -52,7 +52,7 @@ function ExportButton({ data, filename, title, columns }: ExportButtonProps) {
       title: title || 'Laporan Data SIMRS',
       documentNumber: `EXP/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`,
       date: new Date().toISOString().split('T')[0],
-      department: 'Sistem Informasi Rumah Sakit',
+      department: 'Sistem Informasi Klinik',
       notes: watermark ? `Watermark: ${watermark}. Total ${data.length} baris data.` : `Total ${data.length} baris data diekspor.`,
       signatures: [
         { role: 'Petugas / Operator', name: 'Staf Administrasi SIMRS' },

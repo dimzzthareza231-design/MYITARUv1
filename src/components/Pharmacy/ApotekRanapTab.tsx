@@ -474,7 +474,7 @@ export function ApotekRanapTab({
                 Rekonsiliasi Obat Pasien Rawat Inap (Admisi, Transfer & Discharge)
               </h3>
               <p className="text-xs text-slate-500">
-                Menyelaraskan obat yang dibawa dari rumah dengan terapi terkini rumah sakit untuk mencegah medication error.
+                Menyelaraskan obat yang dibawa dari rumah dengan terapi terkini klinik untuk mencegah medication error.
               </p>
             </div>
             <button

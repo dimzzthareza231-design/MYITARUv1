@@ -25,7 +25,7 @@ export function AdministrasiTab({ formData, updateForm }: { formData: any, updat
       <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Status Akhir Kunjungan</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {['Selesai (Pulang)', 'Rujuk Rawat Inap', 'Rujuk RS Lain', 'Meninggal', 'Pulang APS'].map(status => (
+          {['Selesai (Pulang)', 'Rujuk Rawat Inap', 'Rujuk Klinik Lain', 'Meninggal', 'Pulang APS'].map(status => (
             <label key={status} className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition-colors ${
               formData.status === status 
                 ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 font-bold' 

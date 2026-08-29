@@ -62,7 +62,7 @@ export function RujukanBPJS() {
         </div>
         <div className="flex gap-2">
           <button onClick={() => setIsCekModalOpen(true)} className="px-4 py-2 border border-slate-300 bg-white text-slate-700 rounded-lg text-sm font-bold hover:bg-slate-50 flex items-center gap-2">
-            <Search className="w-4 h-4" /> Cek Rujukan (PCare/RS)
+            <Search className="w-4 h-4" /> Cek Rujukan (PCare/Klinik)
           </button>
           <button onClick={() => setIsFormModalOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 flex items-center gap-2">
             <Plus className="w-4 h-4" /> Tambah Rujukan Manual
@@ -125,7 +125,7 @@ export function RujukanBPJS() {
                           unit_pelayanan: r.poliRujukan,
                           diagnosis_utama: r.diagnosa || 'Pemeriksaan Rujukan Spesialis',
                           penjamin: 'BPJS Kesehatan',
-                          edukasi_instruksi: `Surat Rujukan dari ${r.faskesPerujuk} ditujukan ke ${r.poliRujukan} RS MYITARU.`
+                          edukasi_instruksi: `Surat Rujukan dari ${r.faskesPerujuk} ditujukan ke ${r.poliRujukan} Klinik MYITARU.`
                         }}
                         docType="surat_rujukan"
                         filename={`Rujukan_${r.noRujukan}`}
@@ -161,7 +161,7 @@ export function RujukanBPJS() {
             <label className="block text-sm font-medium text-slate-700 mb-1">Cari Berdasarkan</label>
             <select className="w-full p-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
               <option>No Rujukan PCare</option>
-              <option>No Rujukan RS</option>
+              <option>No Rujukan Klinik</option>
               <option>No Kartu BPJS (Multi Rujukan)</option>
             </select>
           </div>

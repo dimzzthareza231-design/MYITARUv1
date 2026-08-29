@@ -74,7 +74,7 @@ export function GlobalHeader({
              onClick={() => onNavigate('dashboard')}
            >
              {hospitalSettings?.logoUrl && (
-               <img src={hospitalSettings.logoUrl} alt="Logo RS" className="w-5 h-5 object-contain rounded" />
+               <img src={hospitalSettings.logoUrl} alt="Logo Klinik" className="w-5 h-5 object-contain rounded" />
              )}
              <span className="text-slate-800 dark:text-slate-200 font-bold">
                {hospitalSettings?.name || 'MYITARU'}

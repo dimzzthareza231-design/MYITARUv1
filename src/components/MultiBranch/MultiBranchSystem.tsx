@@ -114,7 +114,7 @@ function DashboardTab() {
           <div className="p-4 space-y-4">
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="font-semibold text-gray-800">RS MyItaru Pusat Jakarta</span>
+                <span className="font-semibold text-gray-800">Klinik MyItaru Pusat Jakarta</span>
                 <span className="font-medium text-gray-600">8,000 pts/month</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -123,7 +123,7 @@ function DashboardTab() {
             </div>
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="font-semibold text-gray-800">RS MyItaru Cabang Bandung</span>
+                <span className="font-semibold text-gray-800">Klinik MyItaru Cabang Bandung</span>
                 <span className="font-medium text-gray-600">3,500 pts/month</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -158,7 +158,7 @@ function DashboardTab() {
                 <div className="flex items-center gap-3 mt-2 text-sm text-gray-600">
                    <div className="flex items-center gap-1"><MapPin size={14}/> Klinik Bekasi</div>
                    <ArrowRightLeft size={14} className="text-gray-400"/>
-                   <div className="flex items-center gap-1 font-medium text-indigo-700"><MapPin size={14}/> RS Pusat Jakarta</div>
+                   <div className="flex items-center gap-1 font-medium text-indigo-700"><MapPin size={14}/> Klinik Pusat Jakarta</div>
                 </div>
                 <p className="text-xs text-gray-500 mt-2 italic">Fasilitas ICU penuh, rujukan darurat.</p>
              </div>
@@ -174,7 +174,7 @@ function DashboardTab() {
                 <div className="flex items-center gap-3 mt-2 text-sm text-gray-600">
                    <div className="flex items-center gap-1"><MapPin size={14}/> Cabang Bandung</div>
                    <ArrowRightLeft size={14} className="text-gray-400"/>
-                   <div className="flex items-center gap-1 font-medium text-indigo-700"><MapPin size={14}/> RS Pusat Jakarta</div>
+                   <div className="flex items-center gap-1 font-medium text-indigo-700"><MapPin size={14}/> Klinik Pusat Jakarta</div>
                 </div>
              </div>
           </div>
@@ -199,7 +199,7 @@ function FacilityManagementTab() {
          <div className="bg-white border border-indigo-200 rounded-xl shadow-sm overflow-hidden relative">
             <div className="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">HQ / Pusat</div>
             <div className="p-5">
-               <h3 className="font-bold text-gray-900 text-lg mt-2">RS Pusat Jakarta</h3>
+               <h3 className="font-bold text-gray-900 text-lg mt-2">Klinik Pusat Jakarta</h3>
                <p className="text-sm text-gray-500 font-mono mt-1">HQ-JKT (FAC-001)</p>
                
                <div className="mt-4 space-y-2 text-sm">
@@ -225,7 +225,7 @@ function FacilityManagementTab() {
          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden relative">
             <div className="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">Cabang</div>
             <div className="p-5">
-               <h3 className="font-bold text-gray-900 text-lg mt-2">RS Cabang Bandung</h3>
+               <h3 className="font-bold text-gray-900 text-lg mt-2">Klinik Cabang Bandung</h3>
                <p className="text-sm text-gray-500 font-mono mt-1">BR-BDG (FAC-002)</p>
                
                <div className="mt-4 space-y-2 text-sm">
@@ -407,12 +407,12 @@ function ConsolidatedReportsTab() {
                <p className="text-3xl font-bold text-indigo-700 mt-1">12,500</p>
             </div>
             <div className="bg-green-50 rounded-lg p-4">
-               <p className="text-green-900 text-sm font-medium">RS Pusat Jakarta</p>
+               <p className="text-green-900 text-sm font-medium">Klinik Pusat Jakarta</p>
                <p className="text-2xl font-bold text-green-700 mt-1">8,000</p>
                <p className="text-xs text-green-600 mt-1">64% of total</p>
             </div>
             <div className="bg-blue-50 rounded-lg p-4">
-               <p className="text-blue-900 text-sm font-medium">RS Cabang & Klinik</p>
+               <p className="text-blue-900 text-sm font-medium">Klinik Cabang & Klinik</p>
                <p className="text-2xl font-bold text-blue-700 mt-1">4,500</p>
                <p className="text-xs text-blue-600 mt-1">36% of total</p>
             </div>

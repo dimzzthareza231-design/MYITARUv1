@@ -51,7 +51,7 @@ export function KatalogFornasKfaTab({ stocks }: KatalogFornasKfaTabProps) {
       kode_kfa: '93004088',
       nama_obat: 'Ceftriaxone 1 g Serbuk Injeksi',
       golongan: 'Antibiotik Sefalosporin Generasi III',
-      tingkat_faskes: 'Faskes 2, 3 (Rumah Sakit)',
+      tingkat_faskes: 'Faskes 2, 3 (Klinik)',
       restriksi_fornas: 'Restriksi antibiotik lini 2 (Watch Group PPRA). Untuk infeksi berat yang tidak respon lini 1.',
       ina_cbg_coverage: 'Ditanggung Rawat Inap & IGD'
     },

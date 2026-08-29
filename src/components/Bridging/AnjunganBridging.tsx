@@ -193,7 +193,7 @@ function DisplayMonitorTab() {
       <div className="flex justify-between items-center pb-4 border-b border-slate-800">
         <div>
           <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-300">
-            DISPLAY INFORMASI ANTREAN POLIKLINIK RS MYITARU
+            DISPLAY INFORMASI ANTREAN POLIKLINIK Klinik MYITARU
           </h2>
           <p className="text-xs text-slate-400">RSUD Smart Hospital - Gedung Pelayanan Rawat Jalan Terpadu</p>
         </div>
@@ -230,7 +230,7 @@ function DisplayMonitorTab() {
           <div className="p-4 bg-sky-950/40 border border-sky-800/40 rounded-xl mt-4">
             <span className="text-xs font-bold text-sky-300 block mb-1">💡 Tips Pendaftaran Cepat:</span>
             <span className="text-[11px] text-slate-300 block">
-              Gunakan Mobile JKN untuk booking antrean sebelum datang ke rumah sakit.
+              Gunakan Mobile JKN untuk booking antrean sebelum datang ke klinik.
             </span>
           </div>
         </div>
@@ -253,7 +253,7 @@ function DisplayMonitorTab() {
           INFO
         </span>
         <div className="font-medium truncate">
-          Selamat datang di RS MYITARU. Harap selalu menjaga ketertiban, menjaga jarak, dan mengawasi barang bawaan Anda. Bagi pasien BPJS harap siapkan KTP dan Surat Rujukan / Surat Kontrol.
+          Selamat datang di Klinik MYITARU. Harap selalu menjaga ketertiban, menjaga jarak, dan mengawasi barang bawaan Anda. Bagi pasien BPJS harap siapkan KTP dan Surat Rujukan / Surat Kontrol.
         </div>
       </div>
     </div>

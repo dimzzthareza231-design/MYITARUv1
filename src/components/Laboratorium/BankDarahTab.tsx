@@ -132,7 +132,7 @@ export function BankDarahTab() {
           </span>
           <div>
             <h3 className="font-extrabold text-lg">
-              Bank Darah Rumah Sakit (BDRS) & Uji Cocok Serasi (Crossmatching)
+              Bank Darah Klinik (BDRS) & Uji Cocok Serasi (Crossmatching)
             </h3>
             <p className="text-xs text-rose-100 mt-0.5">
               Penyimpanan Darah Dingin Terpantau Suhu 2°C - 6°C, Gel Test Crossmatch & Integrasi PMI.

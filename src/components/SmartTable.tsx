@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStorage } from '../utils/storage';
 import { useToast } from '../contexts/ToastContext';
+import { useAuth } from '../contexts/AuthContext';
 import { ConfirmationModal } from './ConfirmationModal';
 import { UniversalDetailModal } from './Documents/UniversalDetailModal';
 import { DocumentPreviewModal } from './Documents/DocumentPreviewModal';
@@ -23,6 +24,7 @@ interface SmartTableProps {
 
 export default function SmartTable({ storageKey, columns, title, extraActions, customActions }: SmartTableProps) {
   const toast = useToast();
+  const { isReadOnly } = useAuth();
   const [data, setData] = useStorage<any[]>(storageKey, makeDummy(columns));
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<{ key: string | null, dir: 'asc' | 'desc' }>({ key: null, dir: 'asc' });
@@ -105,13 +107,15 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
             <Download className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Export</span>
           </button>
-          <button 
-            onClick={() => { setForm({}); setModal('add'); }} 
-            className="bg-cyan-600 hover:bg-cyan-500 text-white px-3.5 py-2 rounded-lg text-sm font-bold transition-all shadow-md shadow-cyan-900/30 flex items-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tambah</span>
-          </button>
+          {!isReadOnly && (
+            <button 
+              onClick={() => { setForm({}); setModal('add'); }} 
+              className="bg-cyan-600 hover:bg-cyan-500 text-white px-3.5 py-2 rounded-lg text-sm font-bold transition-all shadow-md shadow-cyan-900/30 flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Tambah</span>
+            </button>
+          )}
         </div>
       </div>
       
@@ -162,23 +166,27 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
                       <span className="hidden lg:inline">Cetak</span>
                     </button>
 
-                    {/* EDIT DATA */}
-                    <button 
-                      onClick={() => { setSelected(r); setForm(r); setModal('edit'); }} 
-                      className="p-1.5 bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-white rounded-lg transition-colors border border-amber-500/30" 
-                      title="Edit Data"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
+                    {!isReadOnly && (
+                      <>
+                        {/* EDIT DATA */}
+                        <button 
+                          onClick={() => { setSelected(r); setForm(r); setModal('edit'); }} 
+                          className="p-1.5 bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-white rounded-lg transition-colors border border-amber-500/30" 
+                          title="Edit Data"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
 
-                    {/* HAPUS DATA */}
-                    <button 
-                      onClick={() => del(r.id !== undefined && r.id !== null ? r.id : rIdx)} 
-                      className="p-1.5 bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white rounded-lg transition-colors border border-rose-500/30" 
-                      title="Hapus Data"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                        {/* HAPUS DATA */}
+                        <button 
+                          onClick={() => del(r.id !== undefined && r.id !== null ? r.id : rIdx)} 
+                          className="p-1.5 bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white rounded-lg transition-colors border border-rose-500/30" 
+                          title="Hapus Data"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>

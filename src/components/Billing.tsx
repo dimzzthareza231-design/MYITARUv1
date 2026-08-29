@@ -189,7 +189,7 @@ export function Billing() {
     { id: 'Billing Ranap', label: 'Billing Rawat Inap', icon: Layers },
     { id: 'Pembayaran', label: 'Kasir Pembayaran', icon: Wallet },
     { id: 'Kwitansi', label: 'Kwitansi & Invoice', icon: FileText },
-    { id: 'Master Tarif', label: 'Master Tarif RS', icon: Tag },
+    { id: 'Master Tarif', label: 'Master Tarif Klinik', icon: Tag },
     { id: 'Rekap Shift Kasir', label: 'Rekap Shift Kasir', icon: Clock }
   ];
 

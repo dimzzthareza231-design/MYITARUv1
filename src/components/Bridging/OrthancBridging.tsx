@@ -34,7 +34,7 @@ export function OrthancBridging() {
             <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 border border-violet-300 dark:border-violet-700">
               ORTHANC PACS & DICOM SERVER
             </span>
-            <span className="text-xs text-slate-400 font-mono">DICOM 3.0 / WADO-RS / OHIF Viewer</span>
+            <span className="text-xs text-slate-400 font-mono">DICOM 3.0 / WADO-Klinik / OHIF Viewer</span>
           </div>
           <h1 className="text-2xl font-black text-slate-800 dark:text-white flex items-center gap-2">
             <span>🩻</span> Bridging PACS Orthanc (Radiologi & DICOM)
@@ -213,7 +213,7 @@ function DicomViewerTab() {
         </div>
 
         <div className="absolute top-4 right-4 text-[11px] font-mono text-emerald-400 text-right space-y-0.5">
-          <div>RS MYITARU RADIOLOGY</div>
+          <div>Klinik MYITARU RADIOLOGY</div>
           <div>ORTHANC PACS SERVER</div>
           <div>FOV: 350mm</div>
           <div>WL: 40 / WW: 400</div>

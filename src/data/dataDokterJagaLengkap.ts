@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// MASTER DATA DOKTER JAGA & ROSTER PELAYANAN RS LENGKAP — MYITARU SIMRS
-// Berdasarkan Standar Operasional Pelayanan Rumah Sakit Terintegrasi
+// MASTER DATA DOKTER JAGA & ROSTER PELAYANAN Klinik LENGKAP — MYITARU SIMRS
+// Berdasarkan Standar Operasional Pelayanan Klinik Terintegrasi
 // ═══════════════════════════════════════════════════════════════════════════
 
 export type LayananRS = 
@@ -98,7 +98,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 18,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-9901-0001 (Ext. 118 / IGD-01)',
-    email: 'fajar.em@myitaru.rs'
+    email: 'fajar.em@myitaru.klinik'
   },
   {
     id: 'DOC-IGD-02',
@@ -121,7 +121,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 14,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-9901-0002 (Ext. 119)',
-    email: 'kevin.alamsyah@myitaru.rs'
+    email: 'kevin.alamsyah@myitaru.klinik'
   },
   {
     id: 'DOC-IGD-03',
@@ -144,7 +144,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 22,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-9901-0003 (Ext. 110)',
-    email: 'amanda.putri@myitaru.rs'
+    email: 'amanda.putri@myitaru.klinik'
   },
   {
     id: 'DOC-IGD-04',
@@ -167,7 +167,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-9901-0004 (Ext. 120)',
-    email: 'rio.ramadhan@myitaru.rs'
+    email: 'rio.ramadhan@myitaru.klinik'
   },
   {
     id: 'DOC-IGD-05',
@@ -190,7 +190,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-9901-0005 (Ext. 110)',
-    email: 'nadia.safitri@myitaru.rs'
+    email: 'nadia.safitri@myitaru.klinik'
   },
   {
     id: 'DOC-IGD-06',
@@ -213,7 +213,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-9901-0006 (Ext. 122)',
-    email: 'reza.fahlevi@myitaru.rs'
+    email: 'reza.fahlevi@myitaru.klinik'
   },
   {
     id: 'DOC-IGD-07',
@@ -236,7 +236,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 4,
     status_kehadiran: 'On-Call Cito',
     kontak_darurat: '0811-9988-1007 (Emergency Pager)',
-    email: 'dimas.bedah@myitaru.rs'
+    email: 'dimas.bedah@myitaru.klinik'
   },
   {
     id: 'DOC-IGD-08',
@@ -259,7 +259,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 5,
     status_kehadiran: 'On-Call Cito',
     kontak_darurat: '0811-9988-1008 (Emergency Pager)',
-    email: 'sarah.obgyn@myitaru.rs'
+    email: 'sarah.obgyn@myitaru.klinik'
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -286,7 +286,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 16,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7001',
-    email: 'ahmad.fauzi@myitaru.rs'
+    email: 'ahmad.fauzi@myitaru.klinik'
   },
   {
     id: 'DOC-POL-01B',
@@ -309,7 +309,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7002',
-    email: 'budi.setiawan@myitaru.rs'
+    email: 'budi.setiawan@myitaru.klinik'
   },
   {
     id: 'DOC-POL-02A',
@@ -333,7 +333,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 14,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7003',
-    email: 'maya.kartika@myitaru.rs'
+    email: 'maya.kartika@myitaru.klinik'
   },
   {
     id: 'DOC-POL-02B',
@@ -356,7 +356,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7004',
-    email: 'citra.obgyn@myitaru.rs'
+    email: 'citra.obgyn@myitaru.klinik'
   },
   {
     id: 'DOC-POL-03A',
@@ -380,7 +380,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 19,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7005',
-    email: 'rina.melati@myitaru.rs'
+    email: 'rina.melati@myitaru.klinik'
   },
   {
     id: 'DOC-POL-03B',
@@ -403,7 +403,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7006',
-    email: 'hendra.pediatri@myitaru.rs'
+    email: 'hendra.pediatri@myitaru.klinik'
   },
   {
     id: 'DOC-POL-04A',
@@ -426,7 +426,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 11,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7007',
-    email: 'joko.widodo@myitaru.rs'
+    email: 'joko.widodo@myitaru.klinik'
   },
   {
     id: 'DOC-POL-04B',
@@ -449,7 +449,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7008',
-    email: 'agung.bedah@myitaru.rs'
+    email: 'agung.bedah@myitaru.klinik'
   },
   {
     id: 'DOC-POL-05A',
@@ -473,7 +473,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 15,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7009',
-    email: 'anton.santoso@myitaru.rs'
+    email: 'anton.santoso@myitaru.klinik'
   },
   {
     id: 'DOC-POL-05B',
@@ -496,7 +496,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7010',
-    email: 'denny.jantung@myitaru.rs'
+    email: 'denny.jantung@myitaru.klinik'
   },
   {
     id: 'DOC-POL-06A',
@@ -519,7 +519,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 12,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7011',
-    email: 'lilis.suryani@myitaru.rs'
+    email: 'lilis.suryani@myitaru.klinik'
   },
   {
     id: 'DOC-POL-06B',
@@ -542,7 +542,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7012',
-    email: 'rizal.saraf@myitaru.rs'
+    email: 'rizal.saraf@myitaru.klinik'
   },
   {
     id: 'DOC-POL-07A',
@@ -565,7 +565,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 17,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7013',
-    email: 'andi.pratama@myitaru.rs'
+    email: 'andi.pratama@myitaru.klinik'
   },
   {
     id: 'DOC-POL-07B',
@@ -588,7 +588,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7014',
-    email: 'nadia.mata@myitaru.rs'
+    email: 'nadia.mata@myitaru.klinik'
   },
   {
     id: 'DOC-POL-08A',
@@ -611,7 +611,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 14,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7015',
-    email: 'hendra.gunawan@myitaru.rs'
+    email: 'hendra.gunawan@myitaru.klinik'
   },
   {
     id: 'DOC-POL-08B',
@@ -634,7 +634,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7016',
-    email: 'ratna.tht@myitaru.rs'
+    email: 'ratna.tht@myitaru.klinik'
   },
   {
     id: 'DOC-POL-09A',
@@ -657,7 +657,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 16,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7017',
-    email: 'sari.indah@myitaru.rs'
+    email: 'sari.indah@myitaru.klinik'
   },
   {
     id: 'DOC-POL-09B',
@@ -680,7 +680,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7018',
-    email: 'farhan.kulit@myitaru.rs'
+    email: 'farhan.kulit@myitaru.klinik'
   },
   {
     id: 'DOC-POL-10A',
@@ -704,7 +704,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 23,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7019',
-    email: 'budi.santoso@myitaru.rs'
+    email: 'budi.santoso@myitaru.klinik'
   },
   {
     id: 'DOC-POL-10B',
@@ -727,7 +727,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7020',
-    email: 'dewi.internis@myitaru.rs'
+    email: 'dewi.internis@myitaru.klinik'
   },
   {
     id: 'DOC-POL-11A',
@@ -751,7 +751,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 14,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7021',
-    email: 'surya.paru@myitaru.rs'
+    email: 'surya.paru@myitaru.klinik'
   },
   {
     id: 'DOC-POL-12A',
@@ -774,7 +774,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 8,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7022',
-    email: 'stephanie.jiwa@myitaru.rs'
+    email: 'stephanie.jiwa@myitaru.klinik'
   },
   {
     id: 'DOC-POL-13A',
@@ -797,7 +797,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 10,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7023',
-    email: 'faisal.urologi@myitaru.rs'
+    email: 'faisal.urologi@myitaru.klinik'
   },
   {
     id: 'DOC-POL-14A',
@@ -821,7 +821,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 13,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7024',
-    email: 'bambang.sutrisno@myitaru.rs'
+    email: 'bambang.sutrisno@myitaru.klinik'
   },
   {
     id: 'DOC-POL-15A',
@@ -844,7 +844,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 9,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7025',
-    email: 'putri.ayu@myitaru.rs'
+    email: 'putri.ayu@myitaru.klinik'
   },
   {
     id: 'DOC-POL-15B',
@@ -867,7 +867,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-3456-7026',
-    email: 'hendra.bedahmulut@myitaru.rs'
+    email: 'hendra.bedahmulut@myitaru.klinik'
   },
   {
     id: 'DOC-POL-16A',
@@ -890,7 +890,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 10,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7027',
-    email: 'bambang.onkologi@myitaru.rs'
+    email: 'bambang.onkologi@myitaru.klinik'
   },
   {
     id: 'DOC-POL-17A',
@@ -913,7 +913,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 7,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7028',
-    email: 'sri.geriatri@myitaru.rs'
+    email: 'sri.geriatri@myitaru.klinik'
   },
   {
     id: 'DOC-POL-18A',
@@ -936,7 +936,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 12,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7029',
-    email: 'indra.endokrin@myitaru.rs'
+    email: 'indra.endokrin@myitaru.klinik'
   },
   {
     id: 'DOC-POL-19A',
@@ -959,7 +959,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 8,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7030',
-    email: 'ratna.fetomaternal@myitaru.rs'
+    email: 'ratna.fetomaternal@myitaru.klinik'
   },
   {
     id: 'DOC-POL-20A',
@@ -982,7 +982,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 18,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7031',
-    email: 'yuliana.rehab@myitaru.rs'
+    email: 'yuliana.rehab@myitaru.klinik'
   },
   {
     id: 'DOC-POL-21A',
@@ -1005,7 +1005,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 9,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7032',
-    email: 'hany.gizi@myitaru.rs'
+    email: 'hany.gizi@myitaru.klinik'
   },
   {
     id: 'DOC-POL-22A',
@@ -1028,7 +1028,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 7,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7033',
-    email: 'fachri.nyeri@myitaru.rs'
+    email: 'fachri.nyeri@myitaru.klinik'
   },
   {
     id: 'DOC-POL-23A',
@@ -1051,7 +1051,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 26,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-3456-7034',
-    email: 'dian.mcu@myitaru.rs'
+    email: 'dian.mcu@myitaru.klinik'
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1076,7 +1076,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 14,
     status_kehadiran: 'Visite Bangsal',
     kontak_darurat: '0812-3456-7019 (DPJP Internis)',
-    email: 'budi.santoso@myitaru.rs'
+    email: 'budi.santoso@myitaru.klinik'
   },
   {
     id: 'DOC-RANAP-02',
@@ -1097,7 +1097,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 12,
     status_kehadiran: 'Visite Bangsal',
     kontak_darurat: '0812-3456-7005 (DPJP Anak)',
-    email: 'rina.melati@myitaru.rs'
+    email: 'rina.melati@myitaru.klinik'
   },
   {
     id: 'DOC-RANAP-03',
@@ -1118,7 +1118,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 38,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-8877-3001 (Duty Ranap-1)',
-    email: 'ilham.ranap@myitaru.rs'
+    email: 'ilham.ranap@myitaru.klinik'
   },
   {
     id: 'DOC-RANAP-04',
@@ -1139,7 +1139,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-8877-3002 (Duty Ranap-2)',
-    email: 'annisa.ranap@myitaru.rs'
+    email: 'annisa.ranap@myitaru.klinik'
   },
   {
     id: 'DOC-RANAP-05',
@@ -1160,7 +1160,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-8877-3003 (Duty Ranap Night)',
-    email: 'danang.ranap@myitaru.rs'
+    email: 'danang.ranap@myitaru.klinik'
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1185,7 +1185,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 4,
     status_kehadiran: 'Tindakan OK',
     kontak_darurat: '0812-3456-7008 (IBS Ext. 201)',
-    email: 'joko.ok@myitaru.rs'
+    email: 'joko.ok@myitaru.klinik'
   },
   {
     id: 'DOC-OK-02',
@@ -1206,7 +1206,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 3,
     status_kehadiran: 'Tindakan OK',
     kontak_darurat: '0812-3456-7024 (IBS Ext. 202)',
-    email: 'bambang.ortho.ok@myitaru.rs'
+    email: 'bambang.ortho.ok@myitaru.klinik'
   },
   {
     id: 'DOC-OK-03',
@@ -1228,7 +1228,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 6,
     status_kehadiran: 'Tindakan OK',
     kontak_darurat: '0811-3322-1038 (Chief Anestesi)',
-    email: 'aris.anestesi@myitaru.rs'
+    email: 'aris.anestesi@myitaru.klinik'
   },
   {
     id: 'DOC-OK-04',
@@ -1249,7 +1249,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 2,
     status_kehadiran: 'Tersedia',
     kontak_darurat: '0811-3322-1039',
-    email: 'citra.anestesi@myitaru.rs'
+    email: 'citra.anestesi@myitaru.klinik'
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1274,7 +1274,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 9,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0811-3322-1038 (ICU Hotline Ext. 300)',
-    email: 'aris.icu@myitaru.rs'
+    email: 'aris.icu@myitaru.klinik'
   },
   {
     id: 'DOC-ICU-02',
@@ -1295,7 +1295,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 8,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-7766-4001 (Duty ICU)',
-    email: 'fariz.icu@myitaru.rs'
+    email: 'fariz.icu@myitaru.klinik'
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1310,7 +1310,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     gelar: 'dr., Sp.PK',
     spesialisasi: 'Spesialis Patologi Klinik (Verifikasi Kritis Lab & Bank Darah)',
     layanan_utama: 'Laboratorium Patologi Klinik',
-    unit_tugas: 'Laboratorium Sentral & Bank Darah RS (BDRS)',
+    unit_tugas: 'Laboratorium Sentral & Bank Darah Klinik (BDRS)',
     ruangan: 'Laboratorium Sentral Lantai 1 - Ruang Verifikasi Medis',
     hari_praktik: 'Senin - Sabtu',
     jam_praktik: '07:30 - 15:00 WIB & On-Call 24 Jam',
@@ -1320,7 +1320,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 46,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-6655-5001 (Lab Ext. 104)',
-    email: 'wahyu.patologi@myitaru.rs'
+    email: 'wahyu.patologi@myitaru.klinik'
   },
   {
     id: 'DOC-RAD-01',
@@ -1341,7 +1341,7 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 32,
     status_kehadiran: 'Sedang Jaga / Praktik',
     kontak_darurat: '0812-6655-5002 (Radiologi Ext. 105)',
-    email: 'indah.radiologi@myitaru.rs'
+    email: 'indah.radiologi@myitaru.klinik'
   },
   {
     id: 'DOC-RAD-02',
@@ -1362,16 +1362,16 @@ export const DATA_DOKTER_JAGA_LENGKAP: DoctorDutyRecord[] = [
     pasien_terlayani: 0,
     status_kehadiran: 'Sesi Berikutnya',
     kontak_darurat: '0812-6655-5003',
-    email: 'taufik.radiologi@myitaru.rs'
+    email: 'taufik.radiologi@myitaru.klinik'
   }
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HELPER FUNCTIONS & LOGIKA JADWAL REALISTIS RUMAH SAKIT
+// HELPER FUNCTIONS & LOGIKA JADWAL REALISTIS KLINIK
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Filter dokter jaga berdasarkan layanan rumah sakit
+ * Filter dokter jaga berdasarkan layanan klinik
  */
 export function getDokterByLayanan(layanan: LayananRS | 'ALL'): DoctorDutyRecord[] {
   if (layanan === 'ALL') return DATA_DOKTER_JAGA_LENGKAP;

@@ -287,16 +287,16 @@ export function Outpatient() {
         const parsed = {
           raw: textToAnalyze,
           confidence: 94,
-          subjective: data.summary || textToAnalyze,
-          objective: data.entities?.find((e: any) => e.type === 'FINDING')?.text || 'Tanda vital dalam batas toleransi. Pemeriksaan fisik sesuai keluhan.',
+          subjective: data.soap?.subjective || data.resume || textToAnalyze,
+          objective: data.soap?.objective || 'Tanda vital dalam batas toleransi. Pemeriksaan fisik sesuai keluhan.',
           diagnosisSuggestions: data.icd10 || [
             { code: 'Z00.0', description: 'General medical examination' },
             { code: 'R50.9', description: 'Fever, unspecified' }
           ],
-          drugSuggestions: data.entities?.filter((e: any) => e.type === 'MEDICATION')?.map((m: any) => ({
-            name: m.text,
+          drugSuggestions: data.recommendations?.map((m: any) => ({
+            name: m,
             qty: '10 Tab',
-            rules: '3 x 1 sesudah makan'
+            rules: 'Sesuai indikasi'
           })) || []
         };
         setAiAnalysisResult(parsed);
@@ -727,7 +727,7 @@ export function Outpatient() {
           <div>
             <h2 className="text-2xl font-black text-white flex items-center gap-3">
               <Stethoscope className="w-7 h-7 text-cyan-400" />
-              Katalog Lengkap 24 Poliklinik Rumah Sakit
+              Katalog Lengkap 24 Poliklinik Klinik
             </h2>
             <p className="text-sm text-slate-400 mt-1">
               Pilih poliklinik di bawah ini untuk melihat daftar pasien aktif dan membuka form rekam medis / SOAP terpadu.
@@ -1609,7 +1609,7 @@ export function Outpatient() {
                   }}
                   className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
                 >
-                  <option value="">-- Pilih dari 100+ Data Pasien Rumah Sakit --</option>
+                  <option value="">-- Pilih dari 100+ Data Pasien Klinik --</option>
                   {pasien.slice(0, 50).map(p => (
                     <option key={p.id} value={p.id}>
                       {p.no_rm} - {p.nama} ({p.penjamin || 'Umum'})

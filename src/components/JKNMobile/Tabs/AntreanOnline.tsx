@@ -73,7 +73,7 @@ export function AntreanOnline() {
               <option value="">-- Pilih Faskes --</option>
               <option value="Klinik Sehat Utama">Klinik Sehat Utama</option>
               <option value="Puskesmas Melati">Puskesmas Melati</option>
-              <option value="RS MyItaru">RS MyItaru</option>
+              <option value="Klinik MyItaru">Klinik MyItaru</option>
             </select>
           </div>
           <div>

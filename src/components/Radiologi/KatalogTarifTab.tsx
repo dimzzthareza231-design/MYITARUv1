@@ -213,7 +213,7 @@ export function KatalogTarifTab() {
                 <th className="p-3.5">Nama Prosedur Radiologi</th>
                 <th className="p-3.5">Modalitas & Kategori</th>
                 <th className="p-3.5 text-right">Rincian Komponen Tarif (Rp)</th>
-                <th className="p-3.5 text-right">Total Tarif RS</th>
+                <th className="p-3.5 text-right">Total Tarif Klinik</th>
                 <th className="p-3.5 text-right">Plafon INA-CBG</th>
                 <th className="p-3.5 text-center">Aksi</th>
               </tr>
@@ -448,7 +448,7 @@ export function KatalogTarifTab() {
             </div>
 
             <div className="p-2.5 bg-pink-100/70 dark:bg-pink-950/40 rounded-lg flex justify-between items-center text-sm font-extrabold text-pink-900 dark:text-pink-200">
-              <span>Total Tarif RS (Dihitung Otomatis):</span>
+              <span>Total Tarif Klinik (Dihitung Otomatis):</span>
               <span className="font-mono text-base">Rp {totalTarifCalc.toLocaleString('id-ID')}</span>
             </div>
           </div>

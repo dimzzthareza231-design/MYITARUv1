@@ -333,7 +333,7 @@ function ModalDetailKlaim({ klaim, onClose }: { klaim: any, onClose: () => void 
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-1 block">Tarif RS Kelas B (Regional 1)</label>
+                    <label className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-1 block">Tarif Klinik Kelas B (Regional 1)</label>
                     <p className="p-3 bg-white dark:bg-slate-800 rounded-lg border border-blue-100 dark:border-blue-700 shadow-sm font-bold text-blue-700 dark:text-blue-400 text-xl">Rp 5.500.000</p>
                   </div>
                 </div>

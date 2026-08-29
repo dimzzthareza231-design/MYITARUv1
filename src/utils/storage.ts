@@ -14,6 +14,13 @@ export function useStorage<T>(key: string, initialValue: T): [T, React.Dispatch<
 
   const setValue: React.Dispatch<React.SetStateAction<T>> = (value) => {
     try {
+      if (typeof window !== 'undefined' && document.body.classList.contains('viewer-mode')) {
+        // Protect business data prefixes from modification in Viewer Mode
+        if (key.startsWith('hospital_') || key.startsWith('klinik_') || key.startsWith('simrs_') || key.startsWith('bpjs_')) {
+          window.dispatchEvent(new CustomEvent('viewer-mode-block'));
+          return;
+        }
+      }
       const valueToStore = value instanceof Function ? (value as (prev: T) => T)(storedValue) : value;
       setStoredValue(valueToStore);
       if (typeof window !== 'undefined') {
@@ -46,6 +53,12 @@ export const storage = {
   },
   set: (key: string, value: any) => {
     try {
+      if (typeof window !== 'undefined' && document.body.classList.contains('viewer-mode')) {
+        if (key.startsWith('hospital_') || key.startsWith('klinik_') || key.startsWith('simrs_') || key.startsWith('bpjs_')) {
+          window.dispatchEvent(new CustomEvent('viewer-mode-block'));
+          return;
+        }
+      }
       if (typeof window !== 'undefined') {
         localStorage.setItem(key, JSON.stringify(value));
       }
@@ -53,6 +66,12 @@ export const storage = {
   },
   setItem: (key: string, value: any) => {
     try {
+      if (typeof window !== 'undefined' && document.body.classList.contains('viewer-mode')) {
+        if (key.startsWith('hospital_') || key.startsWith('klinik_') || key.startsWith('simrs_') || key.startsWith('bpjs_')) {
+          window.dispatchEvent(new CustomEvent('viewer-mode-block'));
+          return;
+        }
+      }
       if (typeof window !== 'undefined') {
         localStorage.setItem(key, JSON.stringify(value));
       }
@@ -60,6 +79,12 @@ export const storage = {
   },
   remove: (key: string) => {
     try {
+      if (typeof window !== 'undefined' && document.body.classList.contains('viewer-mode')) {
+        if (key.startsWith('hospital_') || key.startsWith('klinik_') || key.startsWith('simrs_') || key.startsWith('bpjs_')) {
+          window.dispatchEvent(new CustomEvent('viewer-mode-block'));
+          return;
+        }
+      }
       if (typeof window !== 'undefined') {
         localStorage.removeItem(key);
       }
@@ -67,6 +92,10 @@ export const storage = {
   },
   clear: () => {
     try {
+      if (typeof window !== 'undefined' && document.body.classList.contains('viewer-mode')) {
+        window.dispatchEvent(new CustomEvent('viewer-mode-block'));
+        return;
+      }
       if (typeof window !== 'undefined') {
         localStorage.clear();
       }

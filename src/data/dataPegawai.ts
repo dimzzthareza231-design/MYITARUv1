@@ -22,7 +22,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Keperawatan',
     pendidikan: 'S2 Keperawatan',
     noHp: '081234567890',
-    email: 'siti.aminah@myitaru.rs',
+    email: 'siti.aminah@myitaru.klinik',
     tanggalMasuk: '2015-03-10',
     status: 'Aktif'
   },
@@ -35,7 +35,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Keperawatan',
     pendidikan: 'S1 Keperawatan + Profesi Ners',
     noHp: '081234567891',
-    email: 'budi.hartono@myitaru.rs',
+    email: 'budi.hartono@myitaru.klinik',
     tanggalMasuk: '2018-06-15',
     status: 'Aktif'
   },
@@ -48,7 +48,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Farmasi',
     pendidikan: 'S1 Farmasi + Profesi Apoteker',
     noHp: '081234567892',
-    email: 'dewi.lestari@myitaru.rs',
+    email: 'dewi.lestari@myitaru.klinik',
     tanggalMasuk: '2017-01-20',
     status: 'Aktif'
   },
@@ -61,7 +61,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Farmasi',
     pendidikan: 'D3 Farmasi',
     noHp: '081234567893',
-    email: 'rina.marlina@myitaru.rs',
+    email: 'rina.marlina@myitaru.klinik',
     tanggalMasuk: '2020-08-01',
     status: 'Aktif'
   },
@@ -74,7 +74,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Laboratorium',
     pendidikan: 'D3 Analis Kesehatan',
     noHp: '081234567894',
-    email: 'agus.prasetyo@myitaru.rs',
+    email: 'agus.prasetyo@myitaru.klinik',
     tanggalMasuk: '2019-04-12',
     status: 'Aktif'
   },
@@ -87,7 +87,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Kebidanan',
     pendidikan: 'D4 Kebidanan',
     noHp: '081234567895',
-    email: 'fitri.handayani@myitaru.rs',
+    email: 'fitri.handayani@myitaru.klinik',
     tanggalMasuk: '2018-09-05',
     status: 'Aktif'
   },
@@ -100,7 +100,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Gizi',
     pendidikan: 'S1 Gizi',
     noHp: '081234567896',
-    email: 'yuni.astuti@myitaru.rs',
+    email: 'yuni.astuti@myitaru.klinik',
     tanggalMasuk: '2019-11-20',
     status: 'Aktif'
   },
@@ -113,7 +113,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Rehabilitasi Medik',
     pendidikan: 'D4 Fisioterapi',
     noHp: '081234567897',
-    email: 'hendra.wijaya@myitaru.rs',
+    email: 'hendra.wijaya@myitaru.klinik',
     tanggalMasuk: '2021-02-14',
     status: 'Aktif'
   },
@@ -126,7 +126,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Administrasi & Manajemen',
     pendidikan: 'S2 Manajemen',
     noHp: '081234567898',
-    email: 'ratna.sari@myitaru.rs',
+    email: 'ratna.sari@myitaru.klinik',
     tanggalMasuk: '2014-07-01',
     status: 'Aktif'
   },
@@ -139,7 +139,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Pemeliharaan Sarana',
     pendidikan: 'S1 Teknik Elektro',
     noHp: '081234567899',
-    email: 'joko.susilo@myitaru.rs',
+    email: 'joko.susilo@myitaru.klinik',
     tanggalMasuk: '2019-05-30',
     status: 'Aktif'
   },
@@ -152,7 +152,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'IT & Rekam Medis',
     pendidikan: 'S1 Sistem Informasi',
     noHp: '081234567800',
-    email: 'lia.amelia@myitaru.rs',
+    email: 'lia.amelia@myitaru.klinik',
     tanggalMasuk: '2022-01-10',
     status: 'Aktif'
   },
@@ -165,7 +165,7 @@ export const DATA_PEGAWAI: Pegawai[] = [
     departemen: 'Psikologi',
     pendidikan: 'S2 Psikologi Profesi',
     noHp: '081234567801',
-    email: 'maya.puspita@myitaru.rs',
+    email: 'maya.puspita@myitaru.klinik',
     tanggalMasuk: '2020-10-18',
     status: 'Cuti'
   }

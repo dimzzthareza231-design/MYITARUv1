@@ -2,7 +2,7 @@ const fs = require('fs');
 let c = fs.readFileSync('src/components/Radiologi/LembarHasilPrint.tsx', 'utf8');
 
 c = c.replace(/return \(\s*const customContent = \(/g, 'const customContent = (');
-const splitIdx = c.indexOf('Lembar hasil ini merupakan rekaman medis elektronik sah Rumah Sakit MYITARU dan dapat diverifikasi secara daring.');
+const splitIdx = c.indexOf('Lembar hasil ini merupakan rekaman medis elektronik sah Klinik MYITARU dan dapat diverifikasi secara daring.');
 
 if (splitIdx !== -1) {
     let clean = c.substring(0, splitIdx + 115) + `

@@ -8,7 +8,7 @@ export function PengaduanLayanan() {
   const [pengaduanList, setPengaduanList] = useState<any[]>(() => {
     const saved = localStorage.getItem('simrs_jkn_pengaduan');
     return saved ? JSON.parse(saved) : [
-      { id: 'ADU-001', jenis: 'Pengaduan', faskes: 'RS MyItaru Pusat', judul: 'Antrean terlalu lama', status: 'Ditanggapi', tanggal: '10 Jul 2026' },
+      { id: 'ADU-001', jenis: 'Pengaduan', faskes: 'Klinik MyItaru Pusat', judul: 'Antrean terlalu lama', status: 'Ditanggapi', tanggal: '10 Jul 2026' },
       { id: 'ADU-002', jenis: 'Saran', faskes: 'Puskesmas Melati', judul: 'Tambah jam operasional', status: 'Open', tanggal: '05 Jul 2026' }
     ];
   });
@@ -78,7 +78,7 @@ export function PengaduanLayanan() {
                 onChange={e => setForm({...form, faskes: e.target.value})}
               >
                 <option value="">-- Pilih Faskes --</option>
-                <option value="RS MyItaru Pusat">RS MyItaru Pusat</option>
+                <option value="Klinik MyItaru Pusat">Klinik MyItaru Pusat</option>
                 <option value="Puskesmas Melati">Puskesmas Melati</option>
                 <option value="Klinik Sehat Utama">Klinik Sehat Utama</option>
               </select>

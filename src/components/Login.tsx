@@ -3,6 +3,7 @@ import { Activity, Eye, EyeOff, LogIn, User as UserIcon, Lock, Sparkles, ShieldC
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useHospital } from '../contexts/HospitalContext';
+import { CloudflareTurnstile } from './Common/CloudflareTurnstile';
 
 export function Login() {
   const { login, signInWithGoogle, loading } = useAuth();
@@ -13,11 +14,20 @@ export function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
+  // Cloudflare Turnstile State
+  const [turnstileEnabled] = useState(false); // Forced to false to hide testing watermark
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!username.trim() || !password.trim()) {
       toast.error('Username dan password wajib diisi');
+      return;
+    }
+
+    if (turnstileEnabled && !turnstileToken) {
+      toast.error('Harap selesaikan verifikasi Cloudflare Turnstile terlebih dahulu');
       return;
     }
 
@@ -63,7 +73,7 @@ export function Login() {
         <div className="text-center mb-6 relative">
           <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/25 overflow-hidden p-1">
             {hospitalSettings?.logoUrl ? (
-              <img src={hospitalSettings.logoUrl} alt="Logo RS" className="w-full h-full object-contain rounded-xl bg-white/10" />
+              <img src={hospitalSettings.logoUrl} alt="Logo Klinik" className="w-full h-full object-contain rounded-xl bg-white/10" />
             ) : (
               <Activity className="text-white w-8 h-8" />
             )}
@@ -125,7 +135,7 @@ export function Login() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full p-3 pl-10 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-                placeholder="mhs001, dokter, perawat..."
+                placeholder="Masukkan username"
                 required
               />
             </div>
@@ -155,9 +165,21 @@ export function Login() {
             </div>
           </div>
 
+          {/* Cloudflare Turnstile Bot Protection Widget */}
+          {turnstileEnabled && (
+            <div className="py-1">
+              <CloudflareTurnstile
+                onSuccess={(token) => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken(null)}
+                onError={() => setTurnstileToken(null)}
+                action="login"
+              />
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={isLoading || loading}
+            disabled={isLoading || loading || (turnstileEnabled && !turnstileToken)}
             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
           >
             <LogIn className="w-4 h-4" />

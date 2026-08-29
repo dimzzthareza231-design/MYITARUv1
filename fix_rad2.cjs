@@ -8,7 +8,7 @@ c = c.replace(/<button\s*onClick=\{onClose\}[\s\S]*?Tutup\s*<\/button>/, '');
 // Oh wait, `handlePrint` might be inside the JSX.
 
 // I will just wipe out everything after `);` at line 191 and replace it with a clean return.
-const marker = '        </div>\n        <div className="text-[10px] text-slate-400 text-center pt-2 border-t border-slate-100 print:block">\n          Lembar hasil ini merupakan rekaman medis elektronik sah Rumah Sakit MYITARU dan dapat diverifikasi secara daring.\n        </div>\n      );';
+const marker = '        </div>\n        <div className="text-[10px] text-slate-400 text-center pt-2 border-t border-slate-100 print:block">\n          Lembar hasil ini merupakan rekaman medis elektronik sah Klinik MYITARU dan dapat diverifikasi secara daring.\n        </div>\n      );';
 const splitIdx = c.indexOf(marker);
 
 if (splitIdx !== -1) {

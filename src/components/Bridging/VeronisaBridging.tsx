@@ -194,7 +194,7 @@ function CekEligibilitasTab() {
     <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm max-w-2xl mx-auto space-y-5">
       <div>
         <h3 className="text-lg font-bold text-slate-800 dark:text-white">Pengecekan Eligibilitas Surat Rujukan (Veronisa)</h3>
-        <p className="text-xs text-slate-500">Cek status keabsahan surat rujukan PCARE / Rumah Sakit.</p>
+        <p className="text-xs text-slate-500">Cek status keabsahan surat rujukan PCARE / Klinik.</p>
       </div>
 
       <form onSubmit={handleCheck} className="flex gap-2">

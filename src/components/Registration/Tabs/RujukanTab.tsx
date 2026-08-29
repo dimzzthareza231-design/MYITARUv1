@@ -93,7 +93,7 @@ export function RujukanTab({ data, onChange }: Props) {
             >
               <option value="">- Pilih -</option>
               <option value="Walk-in">Datang Langsung (Walk-in)</option>
-              <option value="Rujukan RS/Klinik">Rujukan RS/Klinik</option>
+              <option value="Rujukan Klinik/Klinik">Rujukan Klinik/Klinik</option>
               <option value="Keluarga/Teman">Keluarga/Teman</option>
               <option value="Website/Internet">Website/Internet</option>
               <option value="Media Sosial">Media Sosial</option>

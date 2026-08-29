@@ -51,7 +51,7 @@ export function KwitansiTab({
         <div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600" />
-            <span>Kwitansi Pembayaran & Invoice Resmi RS</span>
+            <span>Kwitansi Pembayaran & Invoice Resmi Klinik</span>
           </h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Arsip tanda bukti pembayaran sah, kwitansi bermaterai, dan invoice rincian biaya medis.
@@ -158,7 +158,7 @@ export function KwitansiTab({
           <>
             <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg p-8 space-y-6 print:m-0 print:p-0 print:border-none print:shadow-none">
               
-              {/* Header Letterhead (Kop Surat RS) */}
+              {/* Header Letterhead (Kop Surat Klinik) */}
               <div className="flex items-center justify-between pb-6 border-b-2 border-slate-800 dark:border-slate-600">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-2xl shadow-md">
@@ -166,13 +166,13 @@ export function KwitansiTab({
                   </div>
                   <div>
                     <h1 className="text-xl font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
-                      RUMAH SAKIT UMUM MYITARU
+                      KLINIK UMUM MYITARU
                     </h1>
                     <p className="text-xs text-slate-600 dark:text-slate-400">
-                      Jl. Kesehatan Utama No. 88, Jakarta Selatan • Telp: (021) 7890-1234 • Email: info@myitaru.rs.id
+                      Jl. Kesehatan Utama No. 88, Jakarta Selatan • Telp: (021) 7890-1234 • Email: info@myitaru.klinik.id
                     </p>
                     <p className="text-[11px] text-slate-500 font-mono">
-                      Izin Operasional RS No: 445/1092/DINKES/2024 • NPWP: 01.234.567.8-012.000
+                      Izin Operasional Klinik No: 445/1092/DINKES/2024 • NPWP: 01.234.567.8-012.000
                     </p>
                   </div>
                 </div>
@@ -316,7 +316,7 @@ export function KwitansiTab({
 
                 <div className="text-center sm:text-right space-y-1">
                   <p>Jakarta Selatan, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                  <p className="font-semibold text-slate-800 dark:text-slate-200">Bagian Kasir & Keuangan RS</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">Bagian Kasir & Keuangan Klinik</p>
                   <div className="h-10 flex items-center justify-center sm:justify-end text-[10px] text-slate-400 italic">
                     [Tanda Tangan Digital Tersertifikasi]
                   </div>
@@ -342,7 +342,7 @@ export function KwitansiTab({
                       </div>
                       <div>
                         <h2 className="text-xl font-black text-slate-900 uppercase">Kwitansi Pembayaran</h2>
-                        <p className="text-xs text-slate-500">RS MYITARU SEHAT UTAMA</p>
+                        <p className="text-xs text-slate-500">Klinik MYITARU SEHAT UTAMA</p>
                       </div>
                     </div>
                     <div className="text-right">

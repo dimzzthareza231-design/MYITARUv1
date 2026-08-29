@@ -71,7 +71,7 @@ new_logic = """      let prompt = '';
       let requiredFields: string[] = [];
 
       if (req.body.context === 'registration') {
-        prompt = `Anda adalah asisten AI untuk sistem pendaftaran rumah sakit. Analisis percakapan antara petugas pendaftaran, dokter, dan pasien berikut ini.
+        prompt = `Anda adalah asisten AI untuk sistem pendaftaran klinik. Analisis percakapan antara petugas pendaftaran, dokter, dan pasien berikut ini.
 
 Percakapan:
 "${clinicalNote}"

@@ -27,7 +27,7 @@ export function PengaturanRS() {
     kodePpk: hospitalSettings.kodePpk || DEFAULT_HOSPITAL_INFO.kodePpk || '0115R001',
     directorName: hospitalSettings.directorName || DEFAULT_HOSPITAL_INFO.directorName || 'dr. H. Hendra, MARS, Sp.PK',
     directorNip: hospitalSettings.directorNip || DEFAULT_HOSPITAL_INFO.directorNip || '197508122002121001',
-    hospitalType: hospitalSettings.hospitalType || DEFAULT_HOSPITAL_INFO.hospitalType || 'Rumah Sakit Umum (Kelas B Pendidikan)',
+    hospitalType: hospitalSettings.hospitalType || DEFAULT_HOSPITAL_INFO.hospitalType || 'Klinik Umum (Kelas B Pendidikan)',
     ownership: hospitalSettings.ownership || DEFAULT_HOSPITAL_INFO.ownership || 'Yayasan Tarumanagara',
     emergencyHotline: hospitalSettings.emergencyHotline || DEFAULT_HOSPITAL_INFO.emergencyHotline || '(021) 56958999',
     faxNumber: hospitalSettings.faxNumber || DEFAULT_HOSPITAL_INFO.faxNumber || '(021) 56958724',
@@ -94,7 +94,7 @@ export function PengaturanRS() {
       ...formData,
       logoUrl: logoPreview || ''
     });
-    toast.success('Pengaturan profil & legalitas Rumah Sakit berhasil disimpan ke sistem');
+    toast.success('Pengaturan profil & legalitas Klinik berhasil disimpan ke sistem');
   };
 
   return (
@@ -109,7 +109,7 @@ export function PengaturanRS() {
                 <Building className="w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Pengaturan Profil & Legalitas RS</h1>
+                <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Pengaturan Profil & Legalitas Klinik</h1>
                 <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
                   Konfigurasi identitas resmi fasilitas kesehatan, akreditasi, integrasi bridging, dan format kop surat dokumen.
                 </p>
@@ -166,13 +166,13 @@ export function PengaturanRS() {
               <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 w-full flex items-center gap-2 border-b border-slate-100 dark:border-slate-700 pb-2">
                   <ImageIcon className="w-4 h-4 text-blue-500" />
-                  Logo Resmi Rumah Sakit
+                  Logo Resmi Klinik
                 </h3>
                 
                 <div className="w-44 h-44 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center bg-slate-50 dark:bg-slate-900/50 mb-4 overflow-hidden relative group">
                   {logoPreview ? (
                     <>
-                      <img src={logoPreview} alt="Logo RS" className="w-full h-full object-contain p-2" />
+                      <img src={logoPreview} alt="Logo Klinik" className="w-full h-full object-contain p-2" />
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                         <button 
                           onClick={handleRemoveLogo}
@@ -205,7 +205,7 @@ export function PengaturanRS() {
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                 >
-                  {logoPreview ? 'Ganti Logo RS' : 'Upload File Logo'}
+                  {logoPreview ? 'Ganti Logo Klinik' : 'Upload File Logo'}
                 </button>
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 text-center">
                   Logo akan otomatis disematkan pada seluruh cetakan dokumen, kwitansi, dan SEP.
@@ -224,14 +224,14 @@ export function PengaturanRS() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      Nama Utama Rumah Sakit / Faskes *
+                      Nama Utama Klinik / Faskes *
                     </label>
                     <input 
                       type="text" 
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="Contoh: TARUMANAGARA HOSPITAL"
+                      placeholder="Contoh: KLINIK TARUMANAGARA"
                       className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold"
                     />
                   </div>
@@ -245,7 +245,7 @@ export function PengaturanRS() {
                       name="subname"
                       value={formData.subname}
                       onChange={handleInputChange}
-                      placeholder="Contoh: RUMAH SAKIT UMUM PENDIDIKAN TARUMANAGARA"
+                      placeholder="Contoh: KLINIK UMUM PENDIDIKAN TARUMANAGARA"
                       className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                     />
                   </div>
@@ -372,7 +372,7 @@ export function PengaturanRS() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Kode Rumah Sakit Kemenkes (SIRS) *
+                  Kode Klinik Kemenkes (SIRS) *
                 </label>
                 <input 
                   type="text" 
@@ -402,14 +402,14 @@ export function PengaturanRS() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Klasifikasi & Kelas Rumah Sakit
+                  Klasifikasi & Kelas Klinik
                 </label>
                 <input 
                   type="text" 
                   name="hospitalType"
                   value={formData.hospitalType}
                   onChange={handleInputChange}
-                  placeholder="Cth: Rumah Sakit Umum (Kelas B Pendidikan)"
+                  placeholder="Cth: Klinik Umum (Kelas B Pendidikan)"
                   className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
@@ -461,7 +461,7 @@ export function PengaturanRS() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Nama Direktur Utama / Kepala Rumah Sakit *
+                  Nama Direktur Utama / Kepala Klinik *
                 </label>
                 <input 
                   type="text" 
@@ -520,7 +520,7 @@ export function PengaturanRS() {
                   <div className="flex items-center gap-5 pb-4 border-b-2 border-slate-900">
                     <div className="w-20 h-20 shrink-0 flex items-center justify-center">
                       {logoPreview ? (
-                        <img src={logoPreview} alt="Logo RS" className="max-w-full max-h-full object-contain" />
+                        <img src={logoPreview} alt="Logo Klinik" className="max-w-full max-h-full object-contain" />
                       ) : (
                         <div className="w-16 h-16 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-2xl">
                           {formData.name.charAt(0) || 'H'}
@@ -577,7 +577,7 @@ export function PengaturanRS() {
                   {/* Footer Signature */}
                   <div className="flex justify-between pt-6 border-t border-slate-200 text-xs">
                     <div className="text-left text-[10px] text-slate-400">
-                      <p>Kode RS: {formData.kodeRs}</p>
+                      <p>Kode Klinik: {formData.kodeRs}</p>
                       <p>Kode PPK: {formData.kodePpk}</p>
                     </div>
 

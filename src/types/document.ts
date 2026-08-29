@@ -19,8 +19,8 @@ export interface HospitalInfo {
 }
 
 export const DEFAULT_HOSPITAL_INFO: HospitalInfo = {
-  name: 'TARUMANAGARA HOSPITAL',
-  subname: 'RUMAH SAKIT UMUM PENDIDIKAN TARUMANAGARA',
+  name: 'KLINIK TARUMANAGARA',
+  subname: 'KLINIK UMUM PENDIDIKAN TARUMANAGARA',
   address: 'Jl. TB Simatupang, & Jl. Raya Cilandak KKO No.1, RT.1/RW.5, Ragunan, Ps. Minggu, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12550',
   city: 'Jakarta Selatan',
   phone: '(021) 56958723',
@@ -32,7 +32,7 @@ export const DEFAULT_HOSPITAL_INFO: HospitalInfo = {
   kodePpk: '0115R001',
   directorName: 'dr. H. Hendra, MARS, Sp.PK',
   directorNip: '197508122002121001',
-  hospitalType: 'Rumah Sakit Umum (Kelas B Pendidikan)',
+  hospitalType: 'Klinik Umum (Kelas B Pendidikan)',
   ownership: 'Yayasan Tarumanagara',
   emergencyHotline: '(021) 56958999 (IGD 24 Jam)',
   faxNumber: '(021) 56958724'

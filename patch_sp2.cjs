@@ -34,13 +34,13 @@ const replaceBlock = `
                     <div className="bg-white text-slate-900 border border-slate-200 rounded-xl p-8 relative shadow-sm max-w-4xl mx-auto">
                       <div className="text-center border-b-2 border-slate-800 pb-3">
                         <h3 className="font-black text-base uppercase tracking-wider">
-                          RUMAH SAKIT ITARU MEDIKA
+                          KLINIK ITARU MEDIKA
                         </h3>
                         <p className="text-xs text-slate-600">
-                          INSTALASI FARMASI RS ITARU • Jl. Kesehatan No. 10 Jakarta
+                          INSTALASI FARMASI Klinik ITARU • Jl. Kesehatan No. 10 Jakarta
                         </p>
                         <p className="text-[11px] text-slate-500 font-mono">
-                          Izin Operasional RS: 440/12/DINKES/2020 • Telp: (021) 789-0123
+                          Izin Operasional Klinik: 440/12/DINKES/2020 • Telp: (021) 789-0123
                         </p>
                         <div className="mt-2 inline-block px-3 py-0.5 bg-slate-900 text-white font-black text-xs uppercase tracking-widest rounded">
                           {selectedPO.jenis_sp}

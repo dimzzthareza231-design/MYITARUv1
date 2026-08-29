@@ -21,13 +21,13 @@ export function LembarHasilPrint({ item, onClose }: LembarHasilPrintProps) {
             </div>
             <div>
               <h1 className="text-xl font-extrabold tracking-tight text-slate-950">
-                RUMAH SAKIT MYITARU SEHAT
+                KLINIK MYITARU SEHAT
               </h1>
               <p className="text-xs text-slate-600 mt-1 font-medium">
                 Jl. Kesehatan Raya No. 45, Jakarta Selatan 12345
               </p>
               <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-                Telp: (021) 7890-1234 | Email: info@myitaru.id | SIP: 440/123/RS/2022
+                Telp: (021) 7890-1234 | Email: info@myitaru.id | SIP: 440/123/Klinik/2022
               </p>
             </div>
           </div>
@@ -140,7 +140,7 @@ export function LembarHasilPrint({ item, onClose }: LembarHasilPrintProps) {
         </div>
 
         <div className="text-[10px] text-slate-400 text-center pt-4 border-t border-slate-200">
-          Lembar hasil ini merupakan rekaman medis elektronik sah Rumah Sakit MYITARU SEHAT dan dapat diverifikasi secara daring.
+          Lembar hasil ini merupakan rekaman medis elektronik sah Klinik MYITARU SEHAT dan dapat diverifikasi secara daring.
         </div>
       </div>
   );

@@ -74,11 +74,11 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
         {
           id: 1,
           name: 'Klaim BPJS > 10 Juta',
-          description: 'Klaim BPJS dengan nilai di atas 10 juta perlu approval Kepala RS',
+          description: 'Klaim BPJS dengan nilai di atas 10 juta perlu approval Kepala Klinik',
           stages: [
             { id: 1, name: 'Maker', role: 'Staf Billing', order: 1 },
             { id: 2, name: 'Checker', role: 'Supervisor Billing', order: 2 },
-            { id: 3, name: 'Approver', role: 'Kepala RS', order: 3 }
+            { id: 3, name: 'Approver', role: 'Kepala Klinik', order: 3 }
           ],
           sla_hours: 24,
           is_active: true

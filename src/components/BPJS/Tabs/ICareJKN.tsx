@@ -14,7 +14,7 @@ export function ICareJKN() {
         tanggal: '2026-07-15',
         namaPasien: 'Budi Santoso',
         noKartu: '0001234567891',
-        faskes: 'RS MyItaru Pusat',
+        faskes: 'Klinik MyItaru Pusat',
         poli: 'Poli Penyakit Dalam',
         dokter: 'dr. Budi Santoso, Sp.PD',
         diagnosa: 'E11.9 - Type 2 Diabetes Mellitus',

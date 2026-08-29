@@ -62,6 +62,7 @@ import { BPJSEMRBridging } from './components/Bridging/BPJSEMRBridging';
 import { SertisignBridging } from './components/Bridging/SertisignBridging';
 import { OrthancBridging } from './components/Bridging/OrthancBridging';
 import { ApiGatewayBridging } from './components/Bridging/ApiGatewayBridging';
+import { CloudflareBridging } from './components/Bridging/CloudflareBridging';
 
 function AppContent() {
   const { currentUser, logout, loading } = useAuth();
@@ -74,6 +75,16 @@ function AppContent() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  useEffect(() => {
+    const handleViewerBlock = () => {
+      toast.error('Akun Google (Viewer Mode) tidak memiliki izin untuk menyimpan data.', {
+        id: 'viewer-block-toast',
+      });
+    };
+    window.addEventListener('viewer-mode-block', handleViewerBlock);
+    return () => window.removeEventListener('viewer-mode-block', handleViewerBlock);
+  }, []);
 
   if (loading) {
     return (
@@ -139,6 +150,7 @@ function AppContent() {
               <Route path="veronisa" element={<ErrorBoundary><VeronisaBridging /></ErrorBoundary>} />
               <Route path="satu-sehat" element={<ErrorBoundary><SatuSehatBridging /></ErrorBoundary>} />
               <Route path="sertisign" element={<ErrorBoundary><SertisignBridging /></ErrorBoundary>} />
+              <Route path="cloudflare" element={<ErrorBoundary><CloudflareBridging /></ErrorBoundary>} />
               
               <Route path="sdm" element={<ErrorBoundary><ManajemenSDM /></ErrorBoundary>} />
               <Route path="inventory" element={<ErrorBoundary><InventoryManagement /></ErrorBoundary>} />
@@ -153,7 +165,7 @@ function AppContent() {
               <Route path="kemenkes" element={<ErrorBoundary><SatuSehatIntegration /></ErrorBoundary>} />
               <Route path="integrasi" element={<ErrorBoundary><ApiManagementSystem /></ErrorBoundary>} />
               <Route path="panduan" element={<ErrorBoundary><PanduanModule /></ErrorBoundary>} />
-              <Route path="pengaturan-rs" element={<ErrorBoundary><PengaturanRS /></ErrorBoundary>} />
+              <Route path="pengaturan-klinik" element={<ErrorBoundary><PengaturanRS /></ErrorBoundary>} />
               <Route path="notifikasi" element={<ErrorBoundary><NotificationPreferences /></ErrorBoundary>} />
               <Route path="profile" element={<ErrorBoundary><Profile /></ErrorBoundary>} />
               <Route path="security" element={<ErrorBoundary><AuthManagement /></ErrorBoundary>} />

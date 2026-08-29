@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import { useToast } from "../contexts/ToastContext";
 import React, { useState, ReactNode } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { DocumentPreviewModal } from './Documents/DocumentPreviewModal';
 import { generateHospitalDocument } from '../utils/documentGenerator';
 import { Printer, Download, Eye, FileText } from 'lucide-react';
@@ -43,6 +44,7 @@ export function ProfessionalTable<T extends { id?: string | number; [key: string
   emptyMessage = "Tidak ada data",
   title = "Data"
 }: ProfessionalTableProps<T>) {
+  const { isReadOnly } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
   const [filters, setFilters] = useState<Record<string, any>>({});
@@ -136,7 +138,7 @@ export function ProfessionalTable<T extends { id?: string | number; [key: string
       title: `Laporan Data ${title}`,
       documentNumber: `REP/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`,
       date: new Date().toISOString().split('T')[0],
-      department: 'Sistem Informasi Rumah Sakit',
+      department: 'Sistem Informasi Klinik',
       notes: `Total ${filteredData.length} data tercatat dalam sistem. Menampilkan hingga 100 data teratas.`,
       signatures: [
         { role: 'Petugas / Operator', name: 'Staf Administrasi SIMRS' },
@@ -179,7 +181,7 @@ export function ProfessionalTable<T extends { id?: string | number; [key: string
               <Download className="w-4 h-4" />
               CSV
             </button>
-            {actions && actions.map((action, idx) => (
+            {!isReadOnly && actions && actions.map((action, idx) => (
               <button
                 key={idx}
                 onClick={action.onClick}

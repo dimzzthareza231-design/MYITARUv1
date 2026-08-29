@@ -89,7 +89,7 @@ export function DefectaProcurementTab({
     const totalNilai = spItems.reduce((acc, it) => acc + it.subtotal, 0);
     const newPO: PurchaseOrderDefecta = {
       id: `PO-${Date.now()}`,
-      no_po: `PO-RS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      no_po: `PO-Klinik-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
       tanggal_order: new Date().toISOString().split('T')[0],
       distributor_pbf: selectedPbf,
       alamat_pbf: 'Kawasan Pergudangan Farmasi Nasional, Jakarta',
@@ -100,7 +100,7 @@ export function DefectaProcurementTab({
       status: 'Disetujui Ka. Instalasi',
       petugas_pembuat: 'Apt. Sarah Larasati, S.Farm',
       apoteker_penanggung_jawab: 'Apt. Dimas Alifia, S.Farm., M.Clin.Pharm',
-      sipa_apoteker: 'SIPA.19940826/SIPA-RS/2023'
+      sipa_apoteker: 'SIPA.19940826/SIPA-Klinik/2023'
     };
 
     onAddPO(newPO);
@@ -116,7 +116,7 @@ export function DefectaProcurementTab({
       <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-5 rounded-2xl shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <span className="px-2.5 py-0.5 bg-indigo-500/30 text-indigo-300 rounded-full text-xs font-mono font-bold uppercase tracking-wider">
-            Pengadaan &amp; Buffer Stock RS
+            Pengadaan &amp; Buffer Stock Klinik
           </span>
           <h2 className="text-xl font-black mt-1">Defecta &amp; Surat Pesanan (SP) Farmasi</h2>
           <p className="text-xs text-slate-300">
@@ -255,13 +255,13 @@ export function DefectaProcurementTab({
               <div className="p-6 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4 text-xs font-sans">
                 <div className="text-center border-b-2 border-slate-800 dark:border-slate-200 pb-3">
                   <h3 className="font-black text-base text-slate-900 dark:text-white uppercase tracking-wider">
-                    RUMAH SAKIT ITARU MEDIKA
+                    KLINIK ITARU MEDIKA
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
-                    INSTALASI FARMASI RS ITARU • Jl. Kesehatan No. 10 Jakarta
+                    INSTALASI FARMASI Klinik ITARU • Jl. Kesehatan No. 10 Jakarta
                   </p>
                   <p className="text-[11px] text-slate-500 font-mono">
-                    Izin Operasional RS: 440/12/DINKES/2020 • Telp: (021) 789-0123
+                    Izin Operasional Klinik: 440/12/DINKES/2020 • Telp: (021) 789-0123
                   </p>
                   <div className="mt-2 inline-block px-3 py-0.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-black text-xs uppercase tracking-widest rounded">
                     {selectedPO.jenis_sp}
@@ -348,13 +348,13 @@ export function DefectaProcurementTab({
                     <div className="bg-white text-slate-900 border border-slate-200 rounded-xl p-8 relative shadow-sm max-w-4xl mx-auto">
                       <div className="text-center border-b-2 border-slate-800 pb-3">
                         <h3 className="font-black text-base uppercase tracking-wider">
-                          RUMAH SAKIT ITARU MEDIKA
+                          KLINIK ITARU MEDIKA
                         </h3>
                         <p className="text-xs text-slate-600">
-                          INSTALASI FARMASI RS ITARU • Jl. Kesehatan No. 10 Jakarta
+                          INSTALASI FARMASI Klinik ITARU • Jl. Kesehatan No. 10 Jakarta
                         </p>
                         <p className="text-[11px] text-slate-500 font-mono">
-                          Izin Operasional RS: 440/12/DINKES/2020 • Telp: (021) 789-0123
+                          Izin Operasional Klinik: 440/12/DINKES/2020 • Telp: (021) 789-0123
                         </p>
                         <div className="mt-2 inline-block px-3 py-0.5 bg-slate-900 text-white font-black text-xs uppercase tracking-widest rounded">
                           {selectedPO.jenis_sp}

@@ -10,7 +10,7 @@ import {
 } from './types';
 
 // =========================================================================
-// 1. MASTER FORMULARIUM OBAT RS & KFA SATUSEHAT KEMENKES (50+ OBAT LENGKAP)
+// 1. MASTER FORMULARIUM OBAT Klinik & KFA SATUSEHAT KEMENKES (50+ OBAT LENGKAP)
 // =========================================================================
 export const MASTER_OBAT_FORMULARIUM: MedicationStock[] = [
   {
@@ -1055,7 +1055,7 @@ export const INITIAL_DEFECTA_MOCK: DefectaItem[] = [
 export const INITIAL_PO_MOCK: PurchaseOrderDefecta[] = [
   {
     id: 'PO-2026-081',
-    no_po: 'PO-RS-26-0881',
+    no_po: 'PO-Klinik-26-0881',
     tanggal_order: '2026-08-25',
     distributor_pbf: 'PT Mensa Bina Sukses',
     alamat_pbf: 'Jl. Pemuda No. 88, Jakarta Timur',
@@ -1069,7 +1069,7 @@ export const INITIAL_PO_MOCK: PurchaseOrderDefecta[] = [
     status: 'Disetujui Ka. Instalasi',
     petugas_pembuat: 'Apt. Budi Santoso, S.Farm',
     apoteker_penanggung_jawab: 'Apt. Dimas Alifia, S.Farm., M.Clin.Pharm',
-    sipa_apoteker: 'SIPA.19940826/SIPA-RS/2023'
+    sipa_apoteker: 'SIPA.19940826/SIPA-Klinik/2023'
   }
 ];
 

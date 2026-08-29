@@ -167,7 +167,7 @@ interface MedicalCaseDefinition {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// MASTER KAMUS DIAGNOSIS & TINDAKAN KLINIS RS
+// MASTER KAMUS DIAGNOSIS & TINDAKAN KLINIS Klinik
 // ═══════════════════════════════════════════════════════════════════════════
 const MEDICAL_CASES: MedicalCaseDefinition[] = [
   {

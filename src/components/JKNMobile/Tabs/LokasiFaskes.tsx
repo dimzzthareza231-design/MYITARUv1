@@ -7,15 +7,15 @@ export function LokasiFaskes() {
   const [filterTipe, setFilterTipe] = useState('Semua');
 
   const daftarFaskes = [
-    { id: 1, nama: 'RS MyItaru Pusat', tipe: 'Rumah Sakit', alamat: 'Jl. Sudirman No. 100, Jakarta Selatan', telepon: '021-1234567', jarak: '0.5 km', rating: 4.5, jam: '24 Jam' },
+    { id: 1, nama: 'Klinik MyItaru Pusat', tipe: 'Klinik', alamat: 'Jl. Sudirman No. 100, Jakarta Selatan', telepon: '021-1234567', jarak: '0.5 km', rating: 4.5, jam: '24 Jam' },
     { id: 2, nama: 'Puskesmas Melati', tipe: 'Puskesmas', alamat: 'Jl. Mawar No. 10, Jakarta Selatan', telepon: '021-2345678', jarak: '1.2 km', rating: 4.2, jam: '07:00 - 21:00' },
     { id: 3, nama: 'Klinik Sehat Utama', tipe: 'Klinik', alamat: 'Jl. Anggrek No. 25, Jakarta Selatan', telepon: '021-3456789', jarak: '2.5 km', rating: 4.3, jam: '08:00 - 20:00' },
-    { id: 4, nama: 'RS Cipto Mangunkusumo', tipe: 'Rumah Sakit', alamat: 'Jl. Diponegoro No. 71, Jakarta Pusat', telepon: '021-4567890', jarak: '5.8 km', rating: 4.7, jam: '24 Jam' },
+    { id: 4, nama: 'Klinik Cipto Mangunkusumo', tipe: 'Klinik', alamat: 'Jl. Diponegoro No. 71, Jakarta Pusat', telepon: '021-4567890', jarak: '5.8 km', rating: 4.7, jam: '24 Jam' },
     { id: 5, nama: 'Klinik Keluarga Bahagia', tipe: 'Klinik', alamat: 'Jl. Kenanga No. 8, Jakarta Selatan', telepon: '021-5678901', jarak: '1.8 km', rating: 4.1, jam: '08:00 - 17:00' },
     { id: 6, nama: 'Puskesmas Cempaka', tipe: 'Puskesmas', alamat: 'Jl. Cempaka No. 5, Jakarta Timur', telepon: '021-6789012', jarak: '3.1 km', rating: 4.0, jam: '07:00 - 14:00' },
   ];
 
-  const tipeList = ['Semua', 'Rumah Sakit', 'Puskesmas', 'Klinik'];
+  const tipeList = ['Semua', 'Klinik', 'Puskesmas', 'Klinik'];
 
   const filtered = daftarFaskes.filter(f => {
     const matchSearch = f.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||

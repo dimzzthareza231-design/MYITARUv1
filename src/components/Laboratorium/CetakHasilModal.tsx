@@ -27,7 +27,7 @@ export function CetakHasilModal({ isOpen, onClose, order }: CetakHasilModalProps
     const customContent = (
         <div className="bg-white text-slate-900 p-8 w-full max-w-4xl mx-auto space-y-6">
 
-            {/* KOP SURAT RUMAH SAKIT */}
+            {/* KOP SURAT KLINIK */}
             <div className="border-b-2 border-slate-900 pb-4 text-center relative">
               <div className="flex items-center justify-between">
                 <div className="text-left flex items-center gap-3">
@@ -36,7 +36,7 @@ export function CetakHasilModal({ isOpen, onClose, order }: CetakHasilModalProps
                   </div>
                   <div>
                     <h1 className="text-xl font-extrabold tracking-tight text-slate-900 uppercase">
-                      RS MYITARU SEHAT UTAMA
+                      Klinik MYITARU SEHAT UTAMA
                     </h1>
                     <p className="text-xs text-slate-600 font-medium">
                       Instalasi Laboratorium Patologi Klinik & Bank Darah (LIS)
@@ -256,7 +256,7 @@ export function CetakHasilModal({ isOpen, onClose, order }: CetakHasilModalProps
             
             {/* LEGAL DISCLAIMER */}
             <div className="text-[9px] text-slate-400 text-center pt-2 border-t border-slate-100">
-              Dokumen ini merupakan rekam medis elektronik resmi RS MYITARU SEHAT UTAMA yang dilindungi oleh undang-undang kerahasiaan medis.
+              Dokumen ini merupakan rekam medis elektronik resmi Klinik MYITARU SEHAT UTAMA yang dilindungi oleh undang-undang kerahasiaan medis.
             </div>
         </div>
     );

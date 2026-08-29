@@ -230,7 +230,7 @@ export function GenerateSEP() {
                 unit_pelayanan: sepList[0]?.poli || 'Poliklinik Penyakit Dalam',
                 diagnosis_utama: sepList[0]?.diagnosa || 'Pemeriksaan Rawat Jalan BPJS',
                 penjamin: 'BPJS Kesehatan (V-Claim Terverifikasi)',
-                edukasi_instruksi: 'Surat Eligibilitas Peserta (SEP) ini berlaku sebagai bukti jaminan pelayanan kesehatan BPJS di RS MYITARU.'
+                edukasi_instruksi: 'Surat Eligibilitas Peserta (SEP) ini berlaku sebagai bukti jaminan pelayanan kesehatan BPJS di Klinik MYITARU.'
               }}
               docType="general"
               filename={`SEP_${sepList[0]?.noSep || 'Resmi'}`} 
@@ -280,7 +280,7 @@ export function GenerateSEP() {
                           unit_pelayanan: sep.poli,
                           diagnosis_utama: sep.diagnosa || 'Pemeriksaan Rawat Jalan BPJS',
                           penjamin: 'BPJS Kesehatan (V-Claim Terverifikasi)',
-                          edukasi_instruksi: 'Surat Eligibilitas Peserta (SEP) ini berlaku sebagai bukti jaminan pelayanan kesehatan BPJS di RS MYITARU.'
+                          edukasi_instruksi: 'Surat Eligibilitas Peserta (SEP) ini berlaku sebagai bukti jaminan pelayanan kesehatan BPJS di Klinik MYITARU.'
                         }}
                         docType="general"
                         filename={`SEP_${sep.noSep}`}

@@ -320,7 +320,7 @@ const STREETS = ['Jl. Sudirman', 'Jl. Thamrin', 'Jl. Gatot Subroto', 'Jl. Melawa
 // 1. DATA PASIEN LENGKAP DENGAN RESUME MEDIS & PROFIL KLINIS 100+ PASIEN
 export const PASIEN = generateAllPatientsWithResumes();
 
-// 2. DATA DOKTER LENGKAP DENGAN SELURUH PELAYANAN RS & JADWAL REALISTIS
+// 2. DATA DOKTER LENGKAP DENGAN SELURUH PELAYANAN Klinik & JADWAL REALISTIS
 export const SEMUA_DOKTER: Doctor[] = MASTER_POLIKLINIK.flatMap((poli, idx) => {
   // Create 2 specialized doctors per poliklinik with realistic hospital shift patterns
   return [1, 2].map(docNum => {
@@ -598,7 +598,7 @@ export const SEMUA_DOKTER: Doctor[] = MASTER_POLIKLINIK.flatMap((poli, idx) => {
       pasien_terlayani: served,
       status_jaga: statusJaga,
       kontak: `0812-3456-7${String(100 + docIdx).padStart(3, '0')}`,
-      email: `${fName.toLowerCase()}.${lName.toLowerCase()}@myitaru.rs`,
+      email: `${fName.toLowerCase()}.${lName.toLowerCase()}@myitaru.klinik`,
       status: 'Aktif'
     };
   });

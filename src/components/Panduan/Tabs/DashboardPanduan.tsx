@@ -18,7 +18,7 @@ export function DashboardPanduan({ onNavigate }: { onNavigate?: (tab: any) => vo
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Dashboard Panduan Sistem</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Ringkasan aktivitas, statistik pembaca, dan efektivitas SOP operasional RS.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Ringkasan aktivitas, statistik pembaca, dan efektivitas SOP operasional Klinik.</p>
         </div>
         <div className="flex gap-2.5">
           <button

@@ -145,14 +145,14 @@ export function AnalyticsDashboard() {
   const handlePrintReport = () => {
     const doc = generateHospitalDocument({
       type: 'laporan-medis',
-      title: `LAPORAN EKSEKUTIF RS: ${activeTab.toUpperCase()}`,
+      title: `LAPORAN EKSEKUTIF Klinik: ${activeTab.toUpperCase()}`,
       documentNumber: `LAP-EKS/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`,
       date: new Date().toISOString().split('T')[0],
-      department: 'Direksi & Manajemen Rumah Sakit',
+      department: 'Direksi & Manajemen Klinik',
       notes: `Laporan analitik eksekutif periode ${period}. Data terintegrasi dari seluruh unit kerja SIMRS.`,
       signatures: [
         { role: 'Manajer Keuangan & Akuntansi', name: 'Ahmad Fauzi, SE, Ak., CA' },
-        { role: 'Direktur Utama Rumah Sakit', name: 'dr. H. Hendra Wijaya, Sp.B, MARS' }
+        { role: 'Direktur Utama Klinik', name: 'dr. H. Hendra Wijaya, Sp.B, MARS' }
       ],
       sections: [
         {
@@ -204,7 +204,7 @@ export function AnalyticsDashboard() {
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
             <BarChart3 className="w-7 h-7 text-blue-600" />
-            <span>Pusat Laporan & Analitik Manajemen RS</span>
+            <span>Pusat Laporan & Analitik Manajemen Klinik</span>
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Sistem pelaporan eksekutif terintegrasi: Keuangan, Rekam Medis Pasien, Logistik Farmasi, dan Klaim BPJS.
@@ -277,7 +277,7 @@ export function AnalyticsDashboard() {
           {/* 4 Financial Stat Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm">
-              <span className="text-xs font-bold text-slate-500 uppercase">Total Omset RS (Gross)</span>
+              <span className="text-xs font-bold text-slate-500 uppercase">Total Omset Klinik (Gross)</span>
               <div className="text-2xl font-black text-slate-900 dark:text-white mt-1.5">
                 Rp {(totalRevenue + totalPiutang).toLocaleString('id-ID')}
               </div>
@@ -349,7 +349,7 @@ export function AnalyticsDashboard() {
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
                     />
                     <Legend />
-                    <Bar dataKey="pendapatan" name="Total Pendapatan RS" fill="#2563eb" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="pendapatan" name="Total Pendapatan Klinik" fill="#2563eb" radius={[6, 6, 0, 0]} />
                     <Bar dataKey="klaimBPJS" name="Porsi Klaim BPJS" fill="#10b981" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>

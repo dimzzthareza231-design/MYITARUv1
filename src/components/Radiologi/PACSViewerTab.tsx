@@ -440,7 +440,7 @@ export function PACSViewerTab({ radiologiList, selectedItemId, selectedStudyItem
 
     // Top-Right: Institution & Study UID
     ctx.textAlign = 'right';
-    ctx.fillText(`RS MYITARU DIAGNOSTIC PACS`, width - 20, 20);
+    ctx.fillText(`Klinik MYITARU DIAGNOSTIC PACS`, width - 20, 20);
     ctx.fillText(`DATE: ${item.tanggal_order} ${item.waktu_order}`, width - 20, 38);
     ctx.fillText(`RAD: ${item.dokter_radiolog || 'Sp.Rad Duty'}`, width - 20, 56);
     ctx.fillText(`UID: ${item.study_instance_uid?.slice(-18) || 'DICOM.INSTANCE.001'}`, width - 20, 74);

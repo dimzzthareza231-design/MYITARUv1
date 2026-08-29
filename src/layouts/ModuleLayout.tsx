@@ -23,15 +23,37 @@ export default function ModuleLayout() {
   const pathParts = location.pathname.split('/');
   const moduleId = paramModuleId || pathParts[pathParts.length - 1];
 
+  const isGoogleBlocked = Boolean(currentUser?.isGoogleAuth);
+  const hasModuleAccess = !moduleId || !currentUser || (hasAccess(moduleId) && !isGoogleBlocked);
+
   // Proteksi: jika user tidak punya akses, redirect ke dashboard
   useEffect(() => {
-    if (moduleId && currentUser && !hasAccess(moduleId)) {
-      toast.error('Anda tidak memiliki akses ke modul ini');
-      navigate('/');
+    if (moduleId && currentUser) {
+      if (isGoogleBlocked) {
+        toast.error('Anda tidak berhak mengakses modul ini', { id: 'pelayanan-block' });
+        navigate('/dashboard');
+      } else if (!hasAccess(moduleId)) {
+        toast.error('Anda tidak memiliki akses ke modul ini');
+        navigate('/');
+      }
     }
-  }, [moduleId, currentUser, navigate, hasAccess]);
+  }, [moduleId, currentUser, navigate, hasAccess, isGoogleBlocked]);
 
-  if (moduleId && currentUser && !hasAccess(moduleId)) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        const hasOpenModal = document.querySelector('[role="dialog"]') !== null || 
+                             document.querySelector('.fixed.inset-0:not(.top-navbar-overlay)') !== null;
+        if (!hasOpenModal) {
+          navigate('/dashboard');
+        }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
+
+  if (!hasModuleAccess) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-900 flex-col">
         <div className="text-center bg-slate-800 p-10 rounded-2xl border border-slate-700 shadow-2xl">
@@ -56,20 +78,6 @@ export default function ModuleLayout() {
   // Default tab or tab from URL
   const defaultTab = (config.submenus && config.submenus.length > 0) ? (typeof config.submenus[0] === 'string' ? config.submenus[0] : (config.submenus[0]?.label || 'Data')) : 'Data';
   const activeTab = searchParams.get('tab') || defaultTab;
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        const hasOpenModal = document.querySelector('[role="dialog"]') !== null || 
-                             document.querySelector('.fixed.inset-0:not(.top-navbar-overlay)') !== null;
-        if (!hasOpenModal) {
-          navigate('/dashboard');
-        }
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col w-full text-slate-200">

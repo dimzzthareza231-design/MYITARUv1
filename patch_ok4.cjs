@@ -9,7 +9,7 @@ if (!content.includes('DocumentPreviewModal')) {
     );
 }
 
-const marker = '{/* MODAL 4: CETAK RESMI FORMAT RUMAH SAKIT */}';
+const marker = '{/* MODAL 4: CETAK RESMI FORMAT KLINIK */}';
 const startIdx = content.indexOf(marker);
 
 if (startIdx !== -1) {
@@ -23,7 +23,7 @@ if (startIdx !== -1) {
         innerHTML = innerHTML.substring(0, innerHTML.lastIndexOf('</div>'));
         
         const newModal = `
-      {/* MODAL 4: CETAK RESMI FORMAT RUMAH SAKIT */}
+      {/* MODAL 4: CETAK RESMI FORMAT KLINIK */}
       {isPrintModalOpen && selectedPatient && (
         <DocumentPreviewModal 
             isOpen={isPrintModalOpen}

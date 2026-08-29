@@ -64,20 +64,20 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
           style={{ opacity: 0.03 }}
         >
           <div className="transform -rotate-45 text-center">
-            <p className="text-8xl font-black tracking-widest text-slate-900">TARUMANAGARA</p>
+            <p className="text-8xl font-black tracking-widest text-slate-900">KLINIK TARUMANAGARA</p>
             <p className="text-4xl font-bold tracking-widest text-slate-800 uppercase mt-2">OFFICIAL ELECTRONIC MEDICAL RECORD</p>
             <p className="text-2xl font-mono text-slate-700 mt-1">PERMENKES NO. 24 TAHUN 2022</p>
           </div>
         </div>
       )}
 
-      {/* HEADER / KOP SURAT RUMAH SAKIT */}
+      {/* HEADER / KOP SURAT KLINIK */}
       <header className="relative z-10 pb-3 border-b-2 border-slate-900">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            {/* LOGO RS */}
+            {/* LOGO Klinik */}
             {(hospital as any).logoUrl ? (
-              <img src={(hospital as any).logoUrl} alt="Logo RS" className="w-16 h-16 object-contain shrink-0" />
+              <img src={(hospital as any).logoUrl} alt="Logo Klinik" className="w-16 h-16 object-contain shrink-0" />
             ) : (
               <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-900 to-indigo-950 flex flex-col items-center justify-center text-white font-black text-xl tracking-tighter shadow-md border border-blue-800 shrink-0">
                 <span className="text-cyan-400 text-lg leading-none">{hospitalInitials}</span>
@@ -89,7 +89,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
                 {hospital.name}
               </h1>
               <p className="text-xs font-bold text-blue-900 tracking-wider uppercase mt-1">
-                {hospital.subname || 'RUMAH SAKIT UMUM PENDIDIKAN TARUMANAGARA'}
+                {hospital.subname || 'KLINIK UMUM PENDIDIKAN TARUMANAGARA'}
               </p>
               <p className="text-[11px] text-slate-600 mt-0.5 leading-snug">
                 {hospital.address}
@@ -711,7 +711,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
                 RME RESMI TERSERTIFIKASI KEMENKES RI
               </div>
               <p className="text-[10px] text-slate-600 mt-0.5">
-                Dokumen Rekam Medis Elektronik sah & tersimpan permanen di cloud SIMRS Tarumanagara Hospital & SatuSehat.
+                Dokumen Rekam Medis Elektronik sah & tersimpan permanen di cloud SIMRS Klinik Tarumanagara & SatuSehat.
               </p>
               <p className="text-[9px] font-mono text-slate-500 mt-0.5">
                 ID Validasi: <span className="font-bold text-slate-800">{validationCode}</span>
@@ -752,7 +752,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
         {/* LEGAL DISCLAIMER FOOTER */}
         <div className="mt-6 pt-2 border-t border-slate-200 text-center text-[9px] text-slate-400 leading-snug">
           <p>
-            Dokumen ini merupakan Rekam Medis Elektronik (RME) resmi yang diterbitkan oleh Sistem Informasi Manajemen Rumah Sakit (MYITARU SIMRS).
+            Dokumen ini merupakan Rekam Medis Elektronik (RME) resmi yang diterbitkan oleh Sistem Informasi Manajemen Klinik (MYITARU SIMRS).
           </p>
           <p>
             Sah dan berkekuatan hukum penuh tanpa tanda tangan basah sesuai UU ITE No. 11/2008 & Permenkes RI No. 24/2022 tentang Rekam Medis Elektronik.

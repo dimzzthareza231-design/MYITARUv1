@@ -63,7 +63,7 @@ export function Emergency() {
               Dokter Jaga IGD 24 Jam & Tim Konsulen On-Call
             </h2>
             <p className="text-sm text-slate-400 mt-1">
-              Roster rotasi 3 shift jaga, kepala resusitasi, dan dokter spesialis on-call cito rumah sakit.
+              Roster rotasi 3 shift jaga, kepala resusitasi, dan dokter spesialis on-call cito klinik.
             </p>
           </div>
           <div className="flex items-center gap-3">

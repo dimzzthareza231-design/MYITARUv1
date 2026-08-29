@@ -202,7 +202,7 @@ export function OrderRadiologiModal({ isOpen, onClose, onSave }: OrderRadiologiM
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Estimasi Tarif (Tarif RS)
+                Estimasi Tarif (Tarif Klinik)
               </label>
               <div className="p-2.5 bg-pink-50 dark:bg-pink-950/30 border border-pink-200 dark:border-pink-800 rounded-lg text-sm font-bold text-pink-700 dark:text-pink-300">
                 Rp {selectedTindakanObj?.total_tarif?.toLocaleString('id-ID')}

@@ -126,7 +126,7 @@ export function generateHospitalDocument(
 
   // Extract or generate Document Number
   const docNumber = data.no_resume || data.no_dokumen || data.no_sep || data.nomor_surat || 
-    `RS/RME/${yearStr}/${monthRoman}/${String(data.no_rm || data.id || '452-99-10').replace(/[^a-zA-Z0-9-]/g, '')}`;
+    `Klinik/RME/${yearStr}/${monthRoman}/${String(data.no_rm || data.id || '452-99-10').replace(/[^a-zA-Z0-9-]/g, '')}`;
 
   // Subject/Patient Demographics
   const subjectName = data.nama_pasien || data.nama || data.pasien_nama || data.nama_pegawai || 'Budi Santoso, S.Kom';
@@ -195,7 +195,7 @@ export function generateHospitalDocument(
         title = 'RINCIAN BIAYA PELAYANAN MEDIS & KUITANSI PEMBAYARAN';
         break;
       case 'profil_sdm':
-        title = 'BIODATA RESMI & SURAT KETERANGAN KEPEGAWAIAN RUMAH SAKIT';
+        title = 'BIODATA RESMI & SURAT KETERANGAN KEPEGAWAIAN KLINIK';
         break;
       case 'laporan_insiden':
         title = 'LAPORAN INVESTIGASI INSIDEN KESELAMATAN PASIEN (IKP)';
@@ -204,7 +204,7 @@ export function generateHospitalDocument(
         title = 'SURAT ELEGIBILITAS PESERTA (SEP) BPJS KESEHATAN RI';
         break;
       default:
-        title = 'LEMBAR REKAM MEDIS ELEKTRONIK RESMI RUMAH SAKIT';
+        title = 'LEMBAR REKAM MEDIS ELEKTRONIK RESMI KLINIK';
     }
   }
 
@@ -447,7 +447,7 @@ export function generateHospitalDocument(
     `2. Pembatasan Aktivitas Fisik: Hindari menggerakkan kepala secara mendadak atau menunduk/menengadah ekstrem selama 48 jam ke depan. Disarankan tidur dengan posisi kepala sedikit lebih tinggi (2 bantal).\n` +
     `3. Kepatuhan Pengobatan: Minum obat Betahistine secara teratur 2x sehari dan lanjutkan konsumsi obat hipertensi rutin.\n` +
     `4. Latihan Mandiri: Setelah 48 jam, bila masih ada rasa pusing ringan dapat melakukan senam Brandt-Daroff 3 set per hari di rumah.\n` +
-    `5. Tanda Bahaya (Emergency Signs): Segera ke IGD RS Tarumanagara jika timbul kelemahan pada wajah/lengan/kaki, bicara pelo, pandangan ganda mendadak, atau muntah terus-menerus.`;
+    `5. Tanda Bahaya (Emergency Signs): Segera ke IGD Klinik Tarumanagara jika timbul kelemahan pada wajah/lengan/kaki, bicara pelo, pandangan ganda mendadak, atau muntah terus-menerus.`;
 
   const rencanaKontrol = data.jadwal_kontrol || data.rencana_kontrol || `Senin, 31 Agustus 2026 di ${unit} (Pukul 09:30 - 12:00 WIB, dengan ${doctor})`;
 
@@ -540,7 +540,7 @@ export function generateHospitalDocument(
       sip_nip: doctorSip,
       kota: 'Jakarta Selatan',
       tanggal: dateFormatted,
-      digitalValidationCode: `VERIF-RS-${yearStr}-${Math.floor(10000 + Math.random() * 90000)}`
+      digitalValidationCode: `VERIF-Klinik-${yearStr}-${Math.floor(10000 + Math.random() * 90000)}`
     },
     rawRecord: data
   };

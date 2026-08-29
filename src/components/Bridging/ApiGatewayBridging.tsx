@@ -241,7 +241,7 @@ function PengaturanAPAMTab() {
       </div>
       <div>
         <label className="block font-semibold mb-1">APAM API Backend Endpoint</label>
-        <input type="text" defaultValue="https://api.rs-myitaru.co.id/apam/v1" className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-mono" />
+        <input type="text" defaultValue="https://api.klinik-myitaru.co.id/apam/v1" className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-mono" />
       </div>
       <button
         onClick={() => toast.success('Konfigurasi APAM disimpan!')}
@@ -270,7 +270,7 @@ function PaymentDuitkuTab() {
       </div>
       <div>
         <label className="block font-semibold mb-1">Callback URL (Webhook)</label>
-        <input type="text" defaultValue="https://api.rs-myitaru.co.id/payment/duitku-callback" className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-mono" />
+        <input type="text" defaultValue="https://api.klinik-myitaru.co.id/payment/duitku-callback" className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-mono" />
       </div>
       <button
         onClick={() => toast.success('Konfigurasi Duitku disimpan!')}

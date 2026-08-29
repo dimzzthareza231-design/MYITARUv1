@@ -54,7 +54,7 @@ export default function TopNavbar({ currentTime }: { currentTime: Date }) {
         >
           <div className="w-10 h-10 bg-gradient-to-br from-[#0F3B5E] via-[#1A4F7A] to-[#C9A94E] rounded-xl flex items-center justify-center shadow-[0_0_15px_rgba(201,169,78,0.3)] border border-[#C9A94E]/40 group-hover:scale-105 transition-transform overflow-hidden p-0.5">
             {hospitalSettings?.logoUrl ? (
-              <img src={hospitalSettings.logoUrl} alt="Logo RS" className="w-full h-full object-contain rounded-lg bg-white/10" />
+              <img src={hospitalSettings.logoUrl} alt="Logo Klinik" className="w-full h-full object-contain rounded-lg bg-white/10" />
             ) : (
               <Activity className="text-white w-5 h-5 drop-shadow-md" />
             )}

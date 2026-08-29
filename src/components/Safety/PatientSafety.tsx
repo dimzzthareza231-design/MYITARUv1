@@ -21,7 +21,7 @@ export function PatientSafety() {
             <ShieldAlert className="w-7 h-7" />
             Patient Safety & Quality
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Sistem pelaporan insiden, RCA, dan manajemen risiko rumah sakit.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Sistem pelaporan insiden, RCA, dan manajemen risiko klinik.</p>
         </div>
       </div>
 

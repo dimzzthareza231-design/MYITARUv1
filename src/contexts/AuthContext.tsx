@@ -30,6 +30,7 @@ interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   users: User[];
   loading: boolean;
+  isReadOnly: boolean;
   login: (usernameOrEmail: string, password: string) => Promise<{ success: boolean; message: string }>;
   signInWithGoogle: () => Promise<{ success: boolean; message: string; isCancelled?: boolean }>;
   logout: () => Promise<void>;
@@ -45,20 +46,20 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Default Seed Users (Hospital Staff Directory)
 const DEFAULT_USERS: User[] = [
-  { id: '1', username: 'mhs001', password: 'mahasiswa001', nama: 'Administrator Utama', roleId: 'super_admin', email: 'admin@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '2', username: 'admin', password: 'admin123', nama: 'Staff Adm Sistem', roleId: 'admin', email: 'staffadmin@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '3', username: 'direksi', password: 'direksi123', nama: 'dr. H. Hendra, MARS (Direktur)', roleId: 'direksi', email: 'direksi@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '4', username: 'dokter', password: 'dokter123', nama: 'dr. Budi Santoso, Sp.PD', roleId: 'dokter', email: 'budi@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '5', username: 'perawat', password: 'perawat123', nama: 'Ns. Siti Fatimah, S.Kep', roleId: 'perawat', email: 'siti@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '6', username: 'bidan', password: 'bidan123', nama: 'Bd. Nurul Aini, S.Tr.Keb', roleId: 'bidan', email: 'bidan@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '7', username: 'apoteker', password: 'apotek123', nama: 'apt. Dewi Lestari, S.Farm', roleId: 'apoteker', email: 'dewi@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '8', username: 'kasir', password: 'kasir123', nama: 'Rina Melati, S.E.', roleId: 'kasir', email: 'rina@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '9', username: 'pendaftaran', password: 'daftar123', nama: 'Joko Anwar, A.Md', roleId: 'pendaftaran', email: 'joko@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '10', username: 'rekammedis', password: 'rm123', nama: 'Sari Indah, A.Md.RMIK', roleId: 'rekam_medis', email: 'sari@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '11', username: 'laboran', password: 'lab123', nama: 'Ahmad Fauzi, A.Md.AK', roleId: 'laboran', email: 'laboran@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '12', username: 'radiografer', password: 'rad123', nama: 'Bayu Pratama, A.Md.Rad', roleId: 'radiografer', email: 'radiografer@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '13', username: 'mutu', password: 'mutu123', nama: 'drg. Maya Sari (Komite Mutu)', roleId: 'manajemen_mutu', email: 'mutu@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
-  { id: '14', username: 'gizi', password: 'gizi123', nama: 'Citra Kirana, S.Gz', roleId: 'gizi', email: 'gizi@myitaru.rs', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '1', username: 'mhs001', password: 'mahasiswa001', nama: 'Administrator Utama', roleId: 'super_admin', email: 'admin@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '2', username: 'admin', password: 'admin123', nama: 'Staff Adm Sistem', roleId: 'admin', email: 'staffadmin@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '3', username: 'direksi', password: 'direksi123', nama: 'dr. H. Hendra, MARS (Direktur)', roleId: 'direksi', email: 'direksi@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '4', username: 'dokter', password: 'dokter123', nama: 'dr. Budi Santoso, Sp.PD', roleId: 'dokter', email: 'budi@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '5', username: 'perawat', password: 'perawat123', nama: 'Ns. Siti Fatimah, S.Kep', roleId: 'perawat', email: 'siti@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '6', username: 'bidan', password: 'bidan123', nama: 'Bd. Nurul Aini, S.Tr.Keb', roleId: 'bidan', email: 'bidan@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '7', username: 'apoteker', password: 'apotek123', nama: 'apt. Dewi Lestari, S.Farm', roleId: 'apoteker', email: 'dewi@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '8', username: 'kasir', password: 'kasir123', nama: 'Rina Melati, S.E.', roleId: 'kasir', email: 'rina@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '9', username: 'pendaftaran', password: 'daftar123', nama: 'Joko Anwar, A.Md', roleId: 'pendaftaran', email: 'joko@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '10', username: 'rekammedis', password: 'rm123', nama: 'Sari Indah, A.Md.RMIK', roleId: 'rekam_medis', email: 'sari@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '11', username: 'laboran', password: 'lab123', nama: 'Ahmad Fauzi, A.Md.AK', roleId: 'laboran', email: 'laboran@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '12', username: 'radiografer', password: 'rad123', nama: 'Bayu Pratama, A.Md.Rad', roleId: 'radiografer', email: 'radiografer@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '13', username: 'mutu', password: 'mutu123', nama: 'drg. Maya Sari (Komite Mutu)', roleId: 'manajemen_mutu', email: 'mutu@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '14', username: 'gizi', password: 'gizi123', nama: 'Citra Kirana, S.Gz', roleId: 'gizi', email: 'gizi@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
 ];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -93,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           loadedUsers.push({
             id: docSnap.id,
             username: d.username || docSnap.id,
-            nama: d.nama || 'Staff RS',
+            nama: d.nama || 'Staff Klinik',
             roleId: d.roleId || 'dokter',
             email: d.email || '',
             password: d.password,
@@ -163,16 +164,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           let resolvedProfile: User;
           if (userDocSnap.exists()) {
             const data = userDocSnap.data();
+            const isGoogle = fUser.providerData?.some(p => p.providerId === 'google.com') || data.isGoogleAuth;
             resolvedProfile = {
               id: fUser.uid,
               username: data.username || fUser.email?.split('@')[0] || 'staff',
-              nama: data.nama || fUser.displayName || 'Staff RS',
+              nama: data.nama || fUser.displayName || 'Staff Klinik',
               email: data.email || fUser.email || '',
               photoURL: data.photoURL || fUser.photoURL || undefined,
-              roleId: data.roleId || 'super_admin',
+              roleId: isGoogle ? 'viewer' : (data.roleId || 'admin'),
               aktif: data.aktif ?? true,
               dibuatPada: data.dibuatPada || new Date().toISOString().split('T')[0],
-              isGoogleAuth: fUser.providerData?.some(p => p.providerId === 'google.com')
+              isGoogleAuth: isGoogle
             };
           } else {
             // New user authenticated via Firebase Auth
@@ -181,12 +183,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               u => u.email && u.email.toLowerCase() === fUser.email?.toLowerCase()
             );
 
-            const defaultRole = matchedSeed?.roleId || (isGoogle ? 'super_admin' : 'admin');
+            const defaultRole = matchedSeed?.roleId || (isGoogle ? 'viewer' : 'admin');
 
             resolvedProfile = {
               id: fUser.uid,
               username: matchedSeed?.username || fUser.email?.split('@')[0] || 'google_user',
-              nama: matchedSeed?.nama || fUser.displayName || (isGoogle ? 'Pengguna Google' : 'Staff RS'),
+              nama: matchedSeed?.nama || fUser.displayName || (isGoogle ? 'Pengguna Google' : 'Staff Klinik'),
               email: fUser.email || matchedSeed?.email || '',
               photoURL: fUser.photoURL || undefined,
               roleId: defaultRole,
@@ -218,10 +220,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const fallbackUser: User = {
             id: fUser.uid,
             username: fUser.email?.split('@')[0] || 'user',
-            nama: fUser.displayName || 'Staff RS',
+            nama: fUser.displayName || 'Staff Klinik',
             email: fUser.email || '',
             photoURL: fUser.photoURL || undefined,
-            roleId: 'super_admin',
+            roleId: isGoogle ? 'viewer' : 'super_admin',
             aktif: true,
             dibuatPada: new Date().toISOString().split('T')[0],
             isGoogleAuth: isGoogle
@@ -265,12 +267,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userDocRef = doc(db, 'users', fUser.uid);
       const userDocSnap = await getDoc(userDocRef);
 
-      let roleId = 'super_admin';
+      let roleId = 'viewer';
       let aktif = true;
 
       if (userDocSnap.exists()) {
         const data = userDocSnap.data();
-        roleId = data.roleId || 'super_admin';
+        roleId = data.roleId || 'viewer';
         aktif = data.aktif ?? true;
       } else {
         await setDoc(userDocRef, {
@@ -278,7 +280,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           nama: fUser.displayName || 'Pengguna Google',
           email: fUser.email || '',
           photoURL: fUser.photoURL || '',
-          roleId: 'super_admin',
+          roleId: 'viewer',
           username: fUser.email?.split('@')[0] || 'google_user',
           aktif: true,
           dibuatPada: new Date().toISOString().split('T')[0],
@@ -428,6 +430,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isAdmin = currentUser?.roleId === 'super_admin' || currentUser?.roleId === 'admin';
+  const isReadOnly = currentUser?.roleId === 'viewer' || currentUser?.isGoogleAuth === true;
+
+  useEffect(() => {
+    if (isReadOnly) {
+      document.body.classList.add('viewer-mode');
+    } else {
+      document.body.classList.remove('viewer-mode');
+    }
+  }, [isReadOnly]);
 
   return (
     <AuthContext.Provider value={{
@@ -435,6 +446,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       firebaseUser,
       users,
       loading,
+      isReadOnly,
       login,
       signInWithGoogle,
       logout,

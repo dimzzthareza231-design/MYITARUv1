@@ -130,7 +130,7 @@ INSERT INTO rehab_care_plan (id_care_plan, id_assessment, goal_jangka_pendek, go
 ('RCP-001', 'RAS-001', 'Nyeri berkurang VAS 3, ROM 0-110 deg', 'Kembali jalan tanpa alat bantu', '[{"jenis": "US", "frekuensi": "2x/minggu", "durasi": "10 menit", "target": "Lutut Kanan"}]', 8, '2026-08-01', '2026-08-30', 'Active', 'T-001');
 
 INSERT INTO rehab_session (id_session, id_care_plan, id_pasien, id_kunjungan, tanggal_session, sesi_ke, durasi_menit, modalitas, exercise, subjective, objective, assessment, plan, tanda_vital_pre, tanda_vital_post, nyeri_pre, nyeri_post, therapist) VALUES
-('RS-001', 'RCP-001', 'P1', 'K-01', '2026-08-01 09:30:00', 1, 45, '[{"nama": "US", "durasi": 10, "parameter": "1 MHz, 1.0 W/cm2"}]', '[{"nama": "SLR", "repetisi": 10, "set": 3}]', 'Masih nyeri lutut', 'Bengkak sedikit berkurang', 'Toleransi terapi baik', 'Lanjutkan sesuai plan', '{"TD": "120/80", "HR": 80}', '{"TD": "120/80", "HR": 82}', 6, 4, 'T-001');
+('Klinik-001', 'RCP-001', 'P1', 'K-01', '2026-08-01 09:30:00', 1, 45, '[{"nama": "US", "durasi": 10, "parameter": "1 MHz, 1.0 W/cm2"}]', '[{"nama": "SLR", "repetisi": 10, "set": 3}]', 'Masih nyeri lutut', 'Bengkak sedikit berkurang', 'Toleransi terapi baik', 'Lanjutkan sesuai plan', '{"TD": "120/80", "HR": 80}', '{"TD": "120/80", "HR": 82}', 6, 4, 'T-001');
 
 INSERT INTO rehab_outcome_measurement (id_outcome, id_pasien, tanggal_ukur, instrumen, skor, interpretasi, perubahan_dari_sebelum, diukur_oleh) VALUES
 ('ROM-001', 'P1', '2026-08-01', 'VAS', 6.00, 'Nyeri Sedang', 0.00, 'T-001');

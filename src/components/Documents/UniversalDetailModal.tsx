@@ -166,7 +166,7 @@ export function UniversalDetailModal({
               }`}
             >
               <Eye className="w-4 h-4" />
-              <span>Pratinjau Lembar Surat RS</span>
+              <span>Pratinjau Lembar Surat Klinik</span>
             </button>
             <button
               onClick={() => setActiveTab('audit')}

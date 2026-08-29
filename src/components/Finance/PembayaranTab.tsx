@@ -392,7 +392,7 @@ export function PembayaranTab({
                   {/* Dummy SVG QRIS graphic */}
                   <div className="w-44 h-44 bg-slate-900 rounded-lg p-2 flex flex-col justify-between items-center text-white">
                     <div className="w-full flex justify-between text-[10px] font-mono">
-                      <span>QRIS RS MYITARU</span>
+                      <span>QRIS Klinik MYITARU</span>
                       <span>NMID: ID1029384</span>
                     </div>
                     <QrCode className="w-28 h-28 text-white" />

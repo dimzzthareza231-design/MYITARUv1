@@ -23,9 +23,9 @@ export function Profile() {
     id: currentUser?.id || '1',
     nama_lengkap: currentUser?.nama || 'Administrator Utama',
     nip: '198501152010011001',
-    email: currentUser?.email || 'admin@myitaru.rs',
+    email: currentUser?.email || 'admin@myitaru.klinik',
     no_telepon: '081234567890',
-    jabatan: currentUser?.roleId === 'super_admin' ? 'Super Administrator' : currentUser?.roleId === 'dokter' ? 'Dokter Spesialis' : 'Staff RS',
+    jabatan: currentUser?.roleId === 'super_admin' ? 'Super Administrator' : currentUser?.roleId === 'dokter' ? 'Dokter Spesialis' : currentUser?.roleId === 'viewer' ? 'Guest Viewer' : 'Staff Klinik',
     departemen: 'Teknologi Informasi & SIMRS',
     spesialisasi: currentUser?.roleId === 'dokter' ? 'Spesialis Penyakit Dalam' : 'Manajemen SIMRS',
     str_number: 'STR-123456-990',
@@ -229,7 +229,7 @@ export function Profile() {
                 <UserIcon className="w-5 h-5 text-blue-600" />
                 Informasi Biodata & Kontak
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Data identitas diri resmi pegawai RS.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Data identitas diri resmi pegawai Klinik.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -261,7 +261,7 @@ export function Profile() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-2">
-                  Email Rumah Sakit *
+                  Email Klinik *
                 </label>
                 <input
                   type="email"

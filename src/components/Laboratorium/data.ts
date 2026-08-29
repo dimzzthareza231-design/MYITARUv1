@@ -526,7 +526,7 @@ export const QC_HEMOGLOBIN_DATA: LeveyJenningsPoint[] = [
 ];
 
 // ==========================================
-// 4. STOK BANK DARAH RUMAH SAKIT (BDRS)
+// 4. STOK BANK DARAH KLINIK (BDRS)
 // ==========================================
 export const STOK_BANK_DARAH_INITIAL: BloodBankStock[] = [
   { id: 'BD-001', no_kantong: 'BDRS-26-A-0101', golongan_darah: 'A', rhesus: '+', jenis_komponen: 'Packed Red Cells (PRC)', volume_ml: 250, tanggal_sadap: '2026-08-15', tanggal_exp: '2026-09-19', asal_darah: 'PMI Kota Bandung', status: 'Tersedia', suhu_penyimpanan: '4.0°C', lokasi_chiller: 'Blood Bank Refrigerator Chiller-A1' },

@@ -279,7 +279,7 @@ export function ApotekRalanTab({
       berat_badan_kg: 60,
       riwayat_alergi: ['Tidak ada data alergi'],
       dokter_penulis: newDoctor,
-      sip_dokter: 'SIP.503/RS-ITARU/2023',
+      sip_dokter: 'SIP.503/Klinik-ITARU/2023',
       poli_ruangan: newPoli,
       jenis_layanan: 'Rawat Jalan',
       penjamin: newPenjamin,

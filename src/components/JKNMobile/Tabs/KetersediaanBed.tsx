@@ -11,7 +11,7 @@ export function KetersediaanBed() {
       {
         id: 1,
         hospital: 'RSUD Kota Bandung',
-        address: 'Jl. Rumah Sakit No. 22',
+        address: 'Jl. Klinik No. 22',
         distance: '2.4 km',
         updatedAt: '10 menit yang lalu',
         beds: [
@@ -23,7 +23,7 @@ export function KetersediaanBed() {
       },
       {
         id: 2,
-        hospital: 'RS Hermina',
+        hospital: 'Klinik Hermina',
         address: 'Jl. Jenderal Sudirman No. 100',
         distance: '3.1 km',
         updatedAt: '25 menit yang lalu',
@@ -48,7 +48,7 @@ export function KetersediaanBed() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Ketersediaan Tempat Tidur</h1>
-          <p className="text-slate-500">Cek ketersediaan kamar di Rumah Sakit rujukan</p>
+          <p className="text-slate-500">Cek ketersediaan kamar di Klinik rujukan</p>
         </div>
       </div>
 
@@ -56,7 +56,7 @@ export function KetersediaanBed() {
         <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         <input 
           type="text" 
-          placeholder="Cari nama rumah sakit..." 
+          placeholder="Cari nama klinik..." 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-10 pr-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-500 outline-none shadow-sm"

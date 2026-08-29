@@ -128,7 +128,7 @@ export function PersetujuanTab({ data, onChange }: Props) {
         <div className="space-y-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={data.setujuUmum} onChange={e => onChange('setujuUmum', e.target.checked)} className="mt-1 w-4 h-4 text-blue-600" />
-            <span className="text-sm text-slate-700">Saya telah membaca dan menyetujui <a href="#" className="text-blue-600 hover:underline">Persetujuan Umum (General Consent)</a> untuk menerima pelayanan kesehatan di rumah sakit ini.</span>
+            <span className="text-sm text-slate-700">Saya telah membaca dan menyetujui <a href="#" className="text-blue-600 hover:underline">Persetujuan Umum (General Consent)</a> untuk menerima pelayanan kesehatan di klinik ini.</span>
           </label>
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={data.setujuPdp} onChange={e => onChange('setujuPdp', e.target.checked)} className="mt-1 w-4 h-4 text-blue-600" />

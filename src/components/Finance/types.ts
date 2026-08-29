@@ -167,7 +167,7 @@ export interface JasaMedisDokterRecord {
   totalTindakanOperatif: number;
   brutoJasaMedis: number;
   porsiDokter: number; // misal 70%
-  porsiRumahSakit: number; // misal 30%
+  porsiKlinik: number; // misal 30%
   potonganPPh21: number;
   potonganManajemen: number;
   nettoDiterima: number;

@@ -94,8 +94,8 @@ CREATE TABLE branch_consolidated_report (
 
 -- DUMMY DATA
 INSERT INTO branch_facility (id_facility, kode_facility, nama_facility, kota, provinsi, tipe) VALUES 
-('FAC-001', 'HQ-JKT', 'RS MyItaru Pusat Jakarta', 'Jakarta Selatan', 'DKI Jakarta', 'Pusat'),
-('FAC-002', 'BR-BDG', 'RS MyItaru Cabang Bandung', 'Bandung', 'Jawa Barat', 'Cabang'),
+('FAC-001', 'HQ-JKT', 'Klinik MyItaru Pusat Jakarta', 'Jakarta Selatan', 'DKI Jakarta', 'Pusat'),
+('FAC-002', 'BR-BDG', 'Klinik MyItaru Cabang Bandung', 'Bandung', 'Jawa Barat', 'Cabang'),
 ('FAC-003', 'CL-BKS', 'Klinik Utama MyItaru Bekasi', 'Bekasi', 'Jawa Barat', 'Klinik');
 
 INSERT INTO branch_config (id_config, id_facility, config_key, config_value, config_type) VALUES 

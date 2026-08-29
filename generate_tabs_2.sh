@@ -7,7 +7,7 @@ import { File, Layout, Plus, Edit2, Copy, Trash2 } from 'lucide-react';
 
 export function TemplateCetak() {
   const templates = [
-    { id: 1, name: 'A4 SOP Standard', desc: 'Portrait, 1 Kolom, Header Logo RS', type: 'A4 Portrait' },
+    { id: 1, name: 'A4 SOP Standard', desc: 'Portrait, 1 Kolom, Header Logo Klinik', type: 'A4 Portrait' },
     { id: 2, name: 'A5 Buku Saku', desc: 'Portrait, 1 Kolom, Font Compact', type: 'A5 Portrait' },
     { id: 3, name: 'A3 Poster Alur', desc: 'Landscape, 2 Kolom, Header Besar', type: 'A3 Landscape' },
     { id: 4, name: 'Kartu Saku Lanyard', desc: '10x15cm, 1 Kolom, Font Extra Small', type: 'Custom' },

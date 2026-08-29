@@ -108,7 +108,7 @@ export function DocumentPreviewModal({
       return;
     }
     const textSummary = `
-=== ${doc?.hospitalInfo?.name || 'RUMAH SAKIT SEHAT SEJAHTERA'} ===
+=== ${doc?.hospitalInfo?.name || 'KLINIK SEHAT SEJAHTERA'} ===
 ${doc?.judulDokumen}
 Nomor: ${doc?.nomorDokumen}
 Tanggal: ${doc?.signer.tanggal || new Date().toLocaleDateString('id-ID')}
@@ -162,7 +162,7 @@ DPJP/Pejabat: ${doc?.signer.nama} (${doc?.signer.sip_nip || '-'})
                 Overview & Pratinjau Dokumen Resmi
               </h2>
               <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                Standar RS A4
+                Standar Klinik A4
               </span>
             </div>
             <p className="text-xs text-slate-400">
@@ -313,7 +313,7 @@ DPJP/Pejabat: ${doc?.signer.nama} (${doc?.signer.sip_nip || '-'})
       <footer className="no-print w-full bg-slate-900 border-t border-slate-800 px-4 py-2 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Dokumen Terautentikasi Digital Rumah Sakit</span>
+          <span>Dokumen Terautentikasi Digital Klinik</span>
         </div>
         <div className="flex items-center gap-4">
           <label className="flex items-center gap-1.5 cursor-pointer hover:text-slate-200">
@@ -323,7 +323,7 @@ DPJP/Pejabat: ${doc?.signer.nama} (${doc?.signer.sip_nip || '-'})
               onChange={e => setShowWatermark(e.target.checked)}
               className="rounded bg-slate-800 border-slate-700 text-blue-500 w-3 h-3" 
             />
-            <span>Watermark RS</span>
+            <span>Watermark Klinik</span>
           </label>
           <span className="hidden sm:inline">•</span>
           <span className="font-mono text-slate-500">A4 (210 × 297 mm)</span>

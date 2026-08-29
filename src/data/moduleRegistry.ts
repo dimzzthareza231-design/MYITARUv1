@@ -111,10 +111,12 @@ export const MODULE_REGISTRY = [
     { id: 'satu-sehat', label: 'Satu Sehat', icon: '🌐', color: 'from-green-500 to-green-600',
       submenus: [{ label: 'Kelola', cols: 'dokumen' }, { label: 'Referensi Praktisi', cols: 'pegawai' }, { label: 'Referensi Pasien', cols: 'pasien' }, { label: 'Mapping Departemen', cols: 'mapping' }, { label: 'Mapping Lokasi', cols: 'mapping' }, { label: 'Mapping Praktisi', cols: 'mapping' }, { label: 'Mapping Obat', cols: 'mapping' }, { label: 'Mapping Lab', cols: 'mapping' }, { label: 'Mapping Radiologi', cols: 'mapping' }, { label: 'Data Response', cols: 'dokumen' }, { label: 'Verifikasi KYC', cols: 'pegawai' }, { label: 'Pengaturan', cols: 'dokumen' }] },
     { id: 'sertisign', label: 'Sertisign', icon: '✍️', color: 'from-purple-500 to-purple-600',
-      submenus: [{ label: 'Kelola', cols: 'dokumen' }, { label: 'Tanda Tangan Dokumen', cols: 'dokumen' }, { label: 'Sertifikat', cols: 'dokumen' }, { label: 'Pengaturan', cols: 'dokumen' }] }
+      submenus: [{ label: 'Kelola', cols: 'dokumen' }, { label: 'Tanda Tangan Dokumen', cols: 'dokumen' }, { label: 'Sertifikat', cols: 'dokumen' }, { label: 'Pengaturan', cols: 'dokumen' }] },
+    { id: 'cloudflare', label: 'Cloudflare Security', icon: '🛡️', color: 'from-orange-500 to-amber-600', SPECIAL: true,
+      submenus: [{ label: 'Overview', cols: 'dokumen' }, { label: 'Turnstile', cols: 'dokumen' }, { label: 'DNS', cols: 'dokumen' }, { label: 'WAF', cols: 'dokumen' }, { label: 'R2 Storage', cols: 'dokumen' }, { label: 'Tunnel', cols: 'dokumen' }] }
   ]},
   { id: 'sistem', label: 'Sistem', icon: '⚙️', navColor: 'hover:bg-gray-600', modules: [
-    { id: 'pengaturan-rs', label: 'Pengaturan RS', icon: '🏥', color: 'from-blue-600 to-blue-700', submenus: [{ label: 'Kop Surat & Logo', cols: 'dokumen' }] },
+    { id: 'pengaturan-klinik', label: 'Pengaturan Klinik', icon: '🏥', color: 'from-blue-600 to-blue-700', submenus: [{ label: 'Kop Surat & Logo', cols: 'dokumen' }] },
     { id: 'panduan', label: 'Panduan', icon: '📖', color: 'from-blue-500 to-blue-600', submenus: [{ label: 'Artikel', cols: 'dokumen' }] },
     { id: 'notifikasi', label: 'Notifikasi', icon: '🔔', color: 'from-red-500 to-red-600', submenus: [{ label: 'Semua', cols: 'dokumen' }] },
     { id: 'profile', label: 'Profile', icon: '👤', color: 'from-fuchsia-500 to-fuchsia-600', SPECIAL: true, submenus: [] },
