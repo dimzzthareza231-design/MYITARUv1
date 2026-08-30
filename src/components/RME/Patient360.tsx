@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  User, Activity, AlertTriangle, Pill, ClipboardList, Clock,
+import { LayoutDashboard, CalendarDays, Building2, User, Activity, AlertTriangle, Pill, ClipboardList, Clock,
   Stethoscope, Syringe, HeartPulse, FileText, Plus, Search,
   ShieldAlert, Printer, Edit2, Trash2, X, Lock, Unlock, Eye,
   Calculator, FileSignature, ShieldCheck, Scale, Apple, Brain,
-  ListChecks, FileCode2, FlaskConical, ScanLine, CheckCircle2, Mic, Globe
+  ListChecks, FileCode2, FlaskConical, ScanLine, CheckCircle2, Mic, Globe, ChevronDown, UserCheck
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import {
@@ -13,6 +12,12 @@ import {
 import PrintPDFButton from '../PrintPDFButton';
 import { SmartVoiceReport } from './SmartVoiceReport';
 import { MedicalSearchGrounding } from '../MedicalSearchGrounding';
+import { LaboratoryTab } from './LaboratoryTab';
+import { RadiologyTab } from './RadiologyTab';
+import { ImmunizationsTab } from './ImmunizationsTab';
+import { GrowthChartTab } from './GrowthChartTab';
+import { PendingAlertsModal } from './PendingAlertsModal';
+import { AddendumModal } from './AddendumModal';
 
 // ═══════════════════════════════════════════════════════════
 // INFORMED CONSENT MODAL (dipindah dari MedicalRecords)
@@ -174,6 +179,8 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
   const [patientData, setPatientData] = useState<any>(null);
   const [showConsent, setShowConsent] = useState(false);
   const [showSmartVoice, setShowSmartVoice] = useState(false);
+  const [showPendingAlerts, setShowPendingAlerts] = useState(false);
+  const [currentRole, setCurrentRole] = useState<'Dokter DPJP' | 'Perawat (Ns.)' | 'Perekam Medis' | 'Pendaftaran'>('Dokter DPJP');
 
   useEffect(() => {
     const defaultData = {
@@ -199,9 +206,6 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
   }, [patient]);
 
   const handleApplyVoiceToSOAP = (data: { s: string; o: string; a: string; p: string; parsed?: any }) => {
-
-
-    // If new vitals or problems parsed, update patient state
     if (data.parsed?.vitals && Object.keys(data.parsed.vitals).length > 0) {
       const v = data.parsed.vitals;
       const newVital = {
@@ -220,7 +224,6 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
         vitals: [newVital, ...(prev?.vitals || [])]
       }));
     }
-
     if (data.parsed?.icd10 && data.parsed.icd10.length > 0) {
       const newProblems = data.parsed.icd10.map((d: any, idx: number) => ({
         id: Date.now() + idx,
@@ -235,186 +238,287 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
         problem_list: [...newProblems, ...(prev?.problem_list || [])]
       }));
     }
-
     toast.success('Rekam medis pasien diperbarui dari Laporan Suara Cerdas');
-    setActiveTab('soap');
+    setActiveTab('encounters');
   };
 
   if (!patientData) return null;
 
-  const tabs = [
-    { id: 'overview', label: 'Overview', icon: User },
-    { id: 'voice_report', label: '🎙️ Laporan Suara Cerdas', icon: Mic },
-    { id: 'search_grounding', label: '🌐 Google Search Grounding Klinis', icon: Globe },
-    { id: 'triase', label: 'Triase & Skrining', icon: Activity },
-    { id: 'fisik', label: 'Pemeriksaan Fisik', icon: Stethoscope },
-    { id: 'soap', label: 'SOAP', icon: FileText },
-    { id: 'kode', label: 'Kodefikasi ICD/SNOMED', icon: FileCode2 },
-    { id: 'cpoe', label: 'CPOE / E-Resep', icon: Pill },
-    { id: 'legal', label: 'Resume & Legal', icon: FileSignature },
-    { id: 'audit', label: 'Keamanan & Audit', icon: ShieldCheck },
-    { id: 'problems', label: 'Problem List', icon: ClipboardList },
-    { id: 'medications', label: 'Medications', icon: Pill },
-    { id: 'allergies', label: 'Allergies', icon: AlertTriangle },
-    { id: 'vitals', label: 'Vital Signs', icon: HeartPulse },
-    { id: 'immunizations', label: 'Immunizations', icon: Syringe },
-    { id: 'growth', label: 'Growth Chart', icon: Scale },
+  const sidebarGroups = [
+    {
+      title: 'PATIENT CHART',
+      items: [
+        { id: 'overview', label: 'Clinical Overview', icon: User },
+        { id: 'encounters', label: 'Encounters', icon: CalendarDays },
+      ]
+    },
+    {
+      title: 'LONGITUDINAL RECORD',
+      items: [
+        { id: 'problems', label: 'Problem List', icon: ClipboardList },
+        { id: 'allergies', label: 'Allergies', icon: AlertTriangle },
+        { id: 'medications', label: 'Medication History', icon: Pill },
+        { id: 'vitals', label: 'Vital Signs', icon: HeartPulse },
+        { id: 'immunizations', label: 'Immunizations', icon: Syringe },
+        { id: 'growth', label: 'Growth Chart', icon: Scale },
+      ]
+    },
+    {
+      title: 'INVESTIGATIONS',
+      items: [
+        { id: 'laboratory', label: 'Laboratory', icon: FlaskConical },
+        { id: 'radiology', label: 'Radiology', icon: ScanLine },
+      ]
+    },
+    {
+      title: 'ADMINISTRATION',
+      items: [
+        { id: 'legal', label: 'Documents & Resume', icon: FileSignature },
+        { id: 'audit', label: 'Keamanan & Audit', icon: ShieldCheck },
+      ]
+    },
+    {
+      title: 'AI ASSISTANTS',
+      items: [
+        { id: 'voice_report', label: 'Laporan Suara Cerdas', icon: Mic },
+        { id: 'search_grounding', label: 'Search Grounding', icon: Globe },
+      ]
+    }
   ];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto h-full flex flex-col">
-      {/* HEADER */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 mb-4 flex justify-between items-start">
-        <div className="flex gap-6">
-          <div className="w-24 h-24 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-            <User className="w-12 h-12" />
+    <div className="flex flex-col h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
+      {/* ───────────────────────────────────────────────────────── */}
+      {/* 1. PATIENT HEADER (STRONG, CLEAR IDENTITY)               */}
+      {/* ───────────────────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 sm:p-5 shrink-0 shadow-sm z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex gap-4 items-start w-full md:w-auto">
+          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center text-2xl font-bold border border-blue-200 dark:border-blue-800 shrink-0 uppercase shadow-inner">
+            {patientData?.nama?.charAt(0) || 'P'}
           </div>
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{patientData?.nama || 'Pasien'}</h1>
-              <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs font-bold border border-slate-200 dark:border-slate-600">
-                {patientData?.jenis_kelamin || 'L'} • {patientData?.umur || 35} Thn
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-3 mb-1.5">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white leading-tight">
+                {patientData?.nama || 'Nama Pasien'}
+              </h1>
+              <span className="text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                {patientData?.no_rm || 'RM-000000'}
+              </span>
+              <span className="text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                {patientData?.jenis_kelamin === 'P' ? 'Perempuan' : 'Laki-laki'} • {patientData?.umur || 35} Thn
               </span>
             </div>
-            <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm mt-3">
-              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                <span className="w-16 text-slate-400">No. RM:</span>
-                <span className="font-bold text-slate-900 dark:text-white font-mono">{patientData?.no_rm || 'RM-000000'}</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                <span className="w-16 text-slate-400">Gol. Darah:</span>
-                <span className="font-medium text-rose-600 font-bold">O+</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                <span className="w-16 text-slate-400">Jaminan:</span>
-                <span className="font-medium text-emerald-600 font-bold bg-emerald-50 px-2 rounded">BPJS Kesehatan</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          {onBack && (
-            <button onClick={onBack} className="text-slate-500 hover:text-slate-800 self-end mb-2"><X className="w-6 h-6" /></button>
-          )}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowSmartVoice(true)}
-              className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-3 py-2 rounded-lg flex items-center gap-2 shadow-sm transition-all transform hover:scale-105"
-            >
-              <Mic className="w-4 h-4 text-cyan-300 animate-pulse" />
-              <span>Laporan Suara Cerdas</span>
-            </button>
-            <PrintPDFButton 
-              filename={`RME_${patientData?.nama || 'Pasien'}`} 
-              label="📄 Print PDF RME" 
-              className="text-sm bg-white border border-slate-300 !text-slate-700 hover:bg-slate-50" 
-              documentData={patientData}
-              docType="resume_medis"
-              title="RINGKASAN REKAM MEDIS ELEKTRONIK PASIEN (RME 360)"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ALLERGY BANNER */}
-      {patientData.allergies?.length > 0 && (
-        <div className="mb-4 bg-red-600 text-white p-3 rounded-lg flex items-center justify-between shadow-sm animate-in fade-in">
-          <div className="flex items-center gap-3">
-            <ShieldAlert className="w-6 h-6 animate-pulse" />
-            <div>
-              <h3 className="font-bold">CRITICAL ALLERGY ALERT</h3>
-              <p className="text-sm text-red-100">{patientData.allergies.map((a: any) => `${a.allergen} (${a.severity})`).join(', ')}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TABS NAVIGATION */}
-      <div className="flex gap-1 overflow-x-auto mb-4 border-b border-slate-200 dark:border-slate-700 pb-px custom-scrollbar">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${
-                isActive
-                  ? 'border-indigo-600 text-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
-              }`}
-            >
-              <Icon className="w-4 h-4" /> {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* TAB CONTENT */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {activeTab === 'overview' && <OverviewTab patientData={patientData} />}
-        {activeTab === 'voice_report' && (
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                  <Mic className="w-5 h-5 text-indigo-500" /> Modul Laporan Suara Cerdas Pasien
-                </h2>
-                <p className="text-sm text-slate-500">
-                  Dikte suara medis real-time dengan filter kebisingan cerdas untuk {patientData?.nama}
-                </p>
-              </div>
-              <button
-                onClick={() => setShowSmartVoice(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm"
-              >
-                <Mic className="w-4 h-4 text-cyan-300 animate-pulse" /> Buka Modal Dikte & Visualizer
-              </button>
-            </div>
             
-            <div className="p-8 border-2 border-dashed border-indigo-200 dark:border-indigo-800/80 rounded-2xl text-center bg-indigo-50/40 dark:bg-indigo-950/20">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 flex items-center justify-center mx-auto mb-3 shadow-inner">
-                <Mic className="w-8 h-8" />
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
+              {patientData.allergies?.length > 0 ? (
+                <button 
+                  onClick={() => setActiveTab('allergies')}
+                  className="flex items-center gap-1.5 font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 px-2.5 py-1 rounded-md border border-rose-200 dark:border-rose-900/50 animate-pulse hover:bg-rose-100 transition-colors"
+                >
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  Alergi: {patientData.allergies.map((a:any) => a.allergen).join(', ')}
+                </button>
+              ) : (
+                <div className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-900/50">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  Tidak ada alergi
+                </div>
+              )}
+              
+              <div className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-900/50">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Rawat Jalan
               </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Siap Merekam Dikte Klinis Dokter</h3>
-              <p className="text-sm text-slate-500 max-w-md mx-auto mt-1 mb-4">
-                Gunakan fitur ini untuk merekam keluhan, temuan fisik, diagnosis, dan terapi dengan penyaringan kebisingan aktif dan verifikasi SOAP terstruktur.
-              </p>
-              <button
-                onClick={() => setShowSmartVoice(true)}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow-md flex items-center gap-2 mx-auto transform hover:scale-105 transition-all"
+              <div className="flex items-center gap-1.5 font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-900/50">
+                <Building2 className="w-3.5 h-3.5" />
+                Poli Umum
+              </div>
+              <div className="flex items-center gap-1.5 font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 px-2.5 py-1 rounded-md border border-indigo-200 dark:border-indigo-900/50">
+                <Stethoscope className="w-3.5 h-3.5" />
+                dr. Budi Santoso
+              </div>
+              
+              {/* PENDING ALERTS */}
+              <button 
+                onClick={() => setShowPendingAlerts(true)}
+                className="flex items-center gap-1.5 font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-md border border-amber-300 dark:border-amber-800/60 hover:bg-amber-100 transition-colors shadow-sm"
+                title="Klik untuk membuka daftar pending task"
               >
-                <Mic className="w-5 h-5 text-cyan-300 animate-pulse" /> Mulai Laporan Suara Cerdas Sekarang
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-500 animate-bounce" />
+                <span>1 Pending Item</span>
               </button>
             </div>
           </div>
-        )}
-        {activeTab === 'search_grounding' && (
-          <MedicalSearchGrounding
-            context={`Pasien: ${patientData?.nama}, Usia: ${patientData?.umur || 35} tahun, Masalah Aktif: ${patientData?.problem_list?.map((p: any) => p.nama).join(', ') || '-'}`}
-            onApplyRecommendation={(rec) => {
-              const saved = localStorage.getItem('simrs_soap_draft'); const currentDraft = JSON.parse(saved || '{}'); localStorage.setItem('simrs_soap_draft', JSON.stringify({ ...currentDraft, plan: (currentDraft.plan || '') + `\n\n[Google Search Grounding]:\n${rec}` }));
-              toast.success('Rekomendasi diterapkan ke Plan SOAP.');
-            }}
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
+          {/* ROLE SELECTOR */}
+          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+            <UserCheck className="w-3.5 h-3.5 text-blue-500" />
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Peran:</span>
+            <select
+              value={currentRole}
+              onChange={(e) => {
+                setCurrentRole(e.target.value as any);
+                toast.success(`Beralih ke mode pandangan: ${e.target.value}`);
+              }}
+              className="bg-transparent font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer"
+            >
+              <option value="Dokter DPJP">Dokter DPJP</option>
+              <option value="Perawat (Ns.)">Perawat (Ns.)</option>
+              <option value="Perekam Medis">Perekam Medis</option>
+              <option value="Pendaftaran">Pendaftaran</option>
+            </select>
+          </div>
+
+          <PrintPDFButton 
+            filename={`RME_${patientData?.nama || 'Pasien'}`} 
+            label="Print RME" 
+            className="text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 !text-slate-700 dark:!text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700" 
+            documentData={patientData}
+            docType="resume_medis"
+            title="RINGKASAN REKAM MEDIS"
           />
-        )}
-        {activeTab === 'triase' && <TriaseTab />}
-        {activeTab === 'fisik' && <FisikTab />}
-        {activeTab === 'soap' && <SoapTab onOpenVoice={() => setShowSmartVoice(true)} />}
-        {activeTab === 'kode' && <KodeTab />}
-        {activeTab === 'cpoe' && <CPOETab patientData={patientData} />}
-        {activeTab === 'legal' && <LegalTab patientData={patientData} />}
-        {activeTab === 'audit' && <AuditTab />}
-        {activeTab === 'problems' && <ProblemListTab patientData={patientData} setPatientData={setPatientData} />}
-        {activeTab === 'medications' && <MedicationsTab patientData={patientData} setPatientData={setPatientData} />}
-        {activeTab === 'allergies' && <AllergiesTab patientData={patientData} setPatientData={setPatientData} />}
-        {activeTab === 'vitals' && <VitalsTab patientData={patientData} />}
-        {activeTab === 'immunizations' && <ImmunizationsTab />}
-        {activeTab === 'growth' && <GrowthChartTab />}
+          {onBack && (
+            <button onClick={onBack} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors ml-1" title="Tutup Rekam Medis (Esc)">
+              <X className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ───────────────────────────────────────────────────────── */}
+      {/* 2. MAIN LAYOUT (SIDEBAR + CONTENT)                        */}
+      {/* ───────────────────────────────────────────────────────── */}
+      <div className="flex flex-1 overflow-hidden">
+        
+        {/* SIDEBAR NAVIGATION */}
+        <div className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col overflow-y-auto custom-scrollbar hidden md:flex shrink-0">
+          <div className="p-4 space-y-6">
+            {sidebarGroups.map((group, idx) => (
+              <div key={idx}>
+                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-2">
+                  {group.title}
+                </h4>
+                <div className="space-y-1">
+                  {group.items.map(item => {
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                          isActive 
+                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-800/50' 
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}`} />
+                        {item.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* MOBILE TABS (FALLBACK) */}
+        <div className="md:hidden flex gap-2 overflow-x-auto p-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0 custom-scrollbar">
+          {sidebarGroups.flatMap(g => g.items).map(item => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap ${
+                  isActive 
+                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {item.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* CONTENT AREA */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8">
+          <div className="max-w-5xl mx-auto">
+            {activeTab === 'overview' && <OverviewTab patientData={patientData} />}
+            {activeTab === 'timeline' && <TimelineTab />}
+            {activeTab === 'encounters' && <EncountersTab patientData={patientData} onOpenVoice={() => setShowSmartVoice(true)} />}
+            
+            {activeTab === 'voice_report' && (
+              <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+                <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 mx-auto mb-4 border border-indigo-100 dark:border-indigo-800/50 shadow-inner">
+                  <Mic className="w-10 h-10" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Laporan Suara Cerdas</h2>
+                <p className="text-slate-500 dark:text-slate-400 max-w-lg mx-auto mb-8">
+                  Dikte suara medis real-time dengan filter kebisingan cerdas untuk <strong>{patientData?.nama}</strong>. Hasil dikte akan otomatis diubah menjadi format SOAP terstruktur oleh AI.
+                </p>
+                <button
+                  onClick={() => setShowSmartVoice(true)}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg flex items-center gap-3 mx-auto transform hover:scale-105 transition-all"
+                >
+                  <Mic className="w-5 h-5 text-cyan-300 animate-pulse" /> 
+                  Mulai Perekaman Dikte
+                </button>
+              </div>
+            )}
+
+            {activeTab === 'search_grounding' && (
+              <MedicalSearchGrounding
+                context={`Pasien: ${patientData?.nama}, Usia: ${patientData?.umur || 35} tahun, Masalah Aktif: ${patientData?.problem_list?.map((p: any) => p.nama).join(', ') || '-'}`}
+                onApplyRecommendation={(rec) => {
+                  const saved = localStorage.getItem('simrs_soap_draft'); const currentDraft = JSON.parse(saved || '{}'); localStorage.setItem('simrs_soap_draft', JSON.stringify({ ...currentDraft, plan: (currentDraft.plan || '') + `\n\n[Google Search Grounding]:\n${rec}` }));
+                  toast.success('Rekomendasi diterapkan ke draft SOAP.');
+                }}
+              />
+            )}
+            
+            {/* Modular Investigation & Longitudinal Tabs */}
+            {activeTab === 'problems' && <ProblemListTab patientData={patientData} setPatientData={setPatientData} />}
+            {activeTab === 'medications' && <MedicationsTab patientData={patientData} setPatientData={setPatientData} />}
+            {activeTab === 'allergies' && <AllergiesTab patientData={patientData} setPatientData={setPatientData} />}
+            {activeTab === 'vitals' && <VitalsTab patientData={patientData} />}
+            {activeTab === 'immunizations' && <ImmunizationsTab patientData={patientData} />}
+            {activeTab === 'growth' && <GrowthChartTab patientData={patientData} />}
+            {activeTab === 'laboratory' && <LaboratoryTab patientData={patientData} />}
+            {activeTab === 'radiology' && <RadiologyTab patientData={patientData} />}
+
+            {/* Legacy Tab support for backward compatibility */}
+            {activeTab === 'triase' && <TriaseTab />}
+            {activeTab === 'fisik' && <FisikTab />}
+            {activeTab === 'soap' && <SoapTab onOpenVoice={() => setShowSmartVoice(true)} />}
+            {activeTab === 'kode' && <KodeTab />}
+            {activeTab === 'cpoe' && <CPOETab patientData={patientData} />}
+            {activeTab === 'legal' && <LegalTab patientData={patientData} />}
+            {activeTab === 'audit' && <AuditTab />}
+          </div>
+        </div>
       </div>
 
       {showConsent && <InformedConsentModal patient={patientData} onClose={() => setShowConsent(false)} />}
       
+      {showPendingAlerts && (
+        <PendingAlertsModal
+          isOpen={showPendingAlerts}
+          onClose={() => setShowPendingAlerts(false)}
+          patientData={patientData}
+          onNavigateTab={(tabId: string) => {
+            setShowPendingAlerts(false);
+            setActiveTab(tabId);
+          }}
+        />
+      )}
+
       {showSmartVoice && (
         <SmartVoiceReport
           patient={patientData}
@@ -429,8 +533,6 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
     </div>
   );
 }
-
-
 // ═══════════════════════════════════════════════════════════
 // OVERVIEW TAB (Read-only Summary)
 // ═══════════════════════════════════════════════════════════
@@ -441,360 +543,91 @@ function OverviewTab({ patientData }: { patientData: any }) {
   const activeMeds = patientData.medications?.filter((m: any) => m.status === 'Active') || [];
   const allergies = patientData.allergies || [];
   const latestVitals = patientData.vitals?.[0] || null;
-  const immunizations = patientData.immunizations || [];
-
-  // Data SOAP terakhir (simulasi - bisa diambil dari localStorage)
-  const lastSOAP = (() => { try { const s = localStorage.getItem('rme_last_soap'); return s ? JSON.parse(s) : null; } catch { return null; } })();
-  const lastResume = (() => { try { const s = localStorage.getItem('rme_last_resume'); return s ? JSON.parse(s) : null; } catch { return null; } })();
-  const lastTriase = (() => { try { const s = localStorage.getItem('rme_last_triase'); return s ? JSON.parse(s) : null; } catch { return null; } })();
-  const lastPhysicalExam = (() => { try { const s = localStorage.getItem('rme_last_physical_exam'); return s ? JSON.parse(s) : null; } catch { return null; } })();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Active Problems */}
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
+          <div className="flex items-center gap-2 mb-3">
+            <ClipboardList className="w-5 h-5 text-blue-500" />
+            <h3 className="font-bold text-slate-900 dark:text-white">Active Problems</h3>
+          </div>
+          <div className="flex-1 space-y-2">
+            {activeProblems.length > 0 ? activeProblems.map((p: any, i: number) => (
+              <div key={i} className="text-sm border-l-2 border-blue-500 pl-3 py-1 bg-slate-50 dark:bg-slate-800/50 rounded-r-lg">
+                <div className="font-bold text-slate-800 dark:text-white">{p.nama}</div>
+                <div className="text-xs text-slate-500">{p.kode_icd10} • Onset: {p.tanggal_onset}</div>
+              </div>
+            )) : <p className="text-sm text-slate-500 italic">No active problems</p>}
+          </div>
+        </div>
 
-      {/* ═══════════ BANNER ALERGI ═══════════ */}
-      {allergies.length > 0 && (
-        <div className="bg-red-600 text-white p-4 rounded-xl flex items-center gap-4 shadow-lg">
-          <ShieldAlert className="w-8 h-8 shrink-0 animate-pulse" />
-          <div className="flex-1">
-            <h3 className="font-bold text-lg">⚠️ PERINGATAN ALERGI</h3>
-            <p className="text-red-100 text-sm">
-              {allergies.map((a: any) => `${a.allergen} (${a.severity})`).join(' • ')}
-            </p>
+        {/* Active Medications */}
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
+          <div className="flex items-center gap-2 mb-3">
+            <Pill className="w-5 h-5 text-emerald-500" />
+            <h3 className="font-bold text-slate-900 dark:text-white">Active Medications</h3>
           </div>
-          <span className="bg-white/20 px-3 py-1 rounded-full text-sm font-bold shrink-0">
-            {allergies.length} Alergi
-          </span>
+          <div className="flex-1 space-y-2">
+            {activeMeds.length > 0 ? activeMeds.map((m: any, i: number) => (
+              <div key={i} className="text-sm border-l-2 border-emerald-500 pl-3 py-1 bg-slate-50 dark:bg-slate-800/50 rounded-r-lg">
+                <div className="font-bold text-slate-800 dark:text-white">{m.name}</div>
+                <div className="text-xs text-slate-500">{m.dose} • {m.frequency}</div>
+              </div>
+            )) : <p className="text-sm text-slate-500 italic">No active medications</p>}
+          </div>
         </div>
-      )}
 
-      {/* ═══════════ QUICK STATS ═══════════ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="card p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400">
-            <ClipboardList className="w-6 h-6" />
+        {/* Allergies */}
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-5 h-5 text-rose-500" />
+            <h3 className="font-bold text-slate-900 dark:text-white">Allergies</h3>
           </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">{activeProblems.length}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Problem Aktif</div>
-          </div>
-        </div>
-        <div className="card p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400">
-            <Pill className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">{activeMeds.length}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Obat Aktif</div>
+          <div className="flex-1 space-y-2">
+            {allergies.length > 0 ? allergies.map((a: any, i: number) => (
+              <div key={i} className="text-sm border-l-2 border-rose-500 pl-3 py-1 bg-slate-50 dark:bg-slate-800/50 rounded-r-lg">
+                <div className="font-bold text-slate-800 dark:text-white">{a.allergen}</div>
+                <div className="text-xs text-rose-600">{a.reaction}</div>
+              </div>
+            )) : <p className="text-sm text-slate-500 italic">No known allergies</p>}
           </div>
         </div>
-        <div className="card p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400">
-            <AlertTriangle className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">{allergies.length}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Alergi</div>
-          </div>
-        </div>
-        <div className="card p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
-            <FileText className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white">{immunizations.length}</div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">Imunisasi</div>
-          </div>
-        </div>
-      </div>
 
-      {/* ═══════════ GRID RINGKASAN UTAMA ═══════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* KOLOM KIRI: Demografi + Vital */}
-        <div className="space-y-4">
-          {/* Data Demografi */}
-          <div className="card p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 className="font-bold text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <User className="w-4 h-4 text-blue-500" /> Data Demografi
-            </h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">No. RM</span>
-                <span className="font-bold text-slate-900 dark:text-white font-mono">{patientData.no_rm || '-'}</span>
+        {/* Latest Vitals */}
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
+          <div className="flex items-center gap-2 mb-3">
+            <HeartPulse className="w-5 h-5 text-indigo-500" />
+            <h3 className="font-bold text-slate-900 dark:text-white">Latest Vitals</h3>
+          </div>
+          {latestVitals ? (
+            <div className="flex-1 grid grid-cols-2 gap-2 text-sm">
+              <div className="bg-slate-50 dark:bg-slate-800/80 p-2 rounded-lg text-center">
+                <div className="text-[10px] text-slate-500 uppercase font-bold">BP</div>
+                <div className="font-bold text-rose-600">{latestVitals.bp}</div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Nama Lengkap</span>
-                <span className="font-bold text-slate-900 dark:text-white">{patientData.nama || '-'}</span>
+              <div className="bg-slate-50 dark:bg-slate-800/80 p-2 rounded-lg text-center">
+                <div className="text-[10px] text-slate-500 uppercase font-bold">HR</div>
+                <div className="font-bold text-emerald-600">{latestVitals.hr}</div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Jenis Kelamin</span>
-                <span className="font-medium text-slate-700 dark:text-slate-300">
-                  {patientData.jenis_kelamin === 'L' ? '👨 Laki-laki' : '👩 Perempuan'}
-                </span>
+              <div className="bg-slate-50 dark:bg-slate-800/80 p-2 rounded-lg text-center">
+                <div className="text-[10px] text-slate-500 uppercase font-bold">Temp</div>
+                <div className="font-bold text-amber-600">{latestVitals.temp}°C</div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Gol. Darah</span>
-                <span className="font-bold text-red-600 dark:text-red-400">{patientData.gol_darah || 'O+'}</span>
+              <div className="bg-slate-50 dark:bg-slate-800/80 p-2 rounded-lg text-center">
+                <div className="text-[10px] text-slate-500 uppercase font-bold">SpO2</div>
+                <div className="font-bold text-blue-600">{latestVitals.spo2}%</div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500 dark:text-slate-400">Penjamin</span>
-                <span className="font-medium text-emerald-600 dark:text-emerald-400">BPJS Kesehatan</span>
-              </div>
+              <div className="col-span-2 text-xs text-center text-slate-500 mt-1">Recorded: {latestVitals.date}</div>
             </div>
-          </div>
-
-          {/* Tanda Vital Terakhir */}
-          <div className="card p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 className="font-bold text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <HeartPulse className="w-4 h-4 text-rose-500" /> Tanda Vital Terakhir
-            </h3>
-            {latestVitals ? (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg text-center">
-                  <div className="text-xs text-slate-500 mb-1">TD</div>
-                  <div className="font-bold text-lg text-slate-900 dark:text-white">{latestVitals.bp}</div>
-                  <div className="text-[10px] text-slate-400">mmHg</div>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg text-center">
-                  <div className="text-xs text-slate-500 mb-1">Nadi</div>
-                  <div className="font-bold text-lg text-slate-900 dark:text-white">{latestVitals.hr}</div>
-                  <div className="text-[10px] text-slate-400">x/mnt</div>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg text-center">
-                  <div className="text-xs text-slate-500 mb-1">Suhu</div>
-                  <div className="font-bold text-lg text-slate-900 dark:text-white">{latestVitals.temp}</div>
-                  <div className="text-[10px] text-slate-400">°C</div>
-                </div>
-                <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg text-center">
-                  <div className="text-xs text-slate-500 mb-1">SpO2</div>
-                  <div className="font-bold text-lg text-slate-900 dark:text-white">{latestVitals.spo2}%</div>
-                  <div className="text-[10px] text-slate-400">%</div>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400 text-center py-4">Belum ada data vital</p>
-            )}
-            {latestVitals && (
-              <div className="mt-3 text-xs text-slate-400 text-center">📅 {latestVitals.date}</div>
-            )}
-          </div>
-        </div>
-
-        {/* KOLOM TENGAH: Problem + Obat + Triase */}
-        <div className="space-y-4">
-          {/* Problem List */}
-          <div className="card p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 className="font-bold text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-indigo-500" /> Problem List Aktif
-              </span>
-              <span className="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs px-2 py-0.5 rounded-full font-bold">
-                {activeProblems.length}
-              </span>
-            </h3>
-            {activeProblems.length > 0 ? (
-              <div className="space-y-2">
-                {activeProblems.map((problem: any, idx: number) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-800/50">
-                    <div className="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-slate-900 dark:text-white truncate">{problem.nama}</p>
-                      <p className="text-xs text-slate-500 font-mono">{problem.kode_icd10} • Sejak {problem.tanggal_onset}</p>
-                    </div>
-                    <span className={`text-[10px] px-2 py-0.5 rounded font-bold shrink-0 ${
-                      problem.severity === 'Severe' ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400' :
-                      problem.severity === 'Moderate' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400' :
-                      'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400'
-                    }`}>
-                      {problem.severity}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400 text-center py-4">Tidak ada problem aktif</p>
-            )}
-          </div>
-
-          {/* Obat Aktif */}
-          <div className="card p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 className="font-bold text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Pill className="w-4 h-4 text-purple-500" /> Obat Aktif
-              </span>
-              <span className="bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs px-2 py-0.5 rounded-full font-bold">
-                {activeMeds.length}
-              </span>
-            </h3>
-            {activeMeds.length > 0 ? (
-              <div className="space-y-2">
-                {activeMeds.map((med: any, idx: number) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800/50">
-                    <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center shrink-0">
-                      <Pill className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-slate-900 dark:text-white truncate">{med.name}</p>
-                      <p className="text-xs text-slate-500">{med.dose} • {med.frequency}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400 text-center py-4">Tidak ada obat aktif</p>
-            )}
-          </div>
-
-          {/* Hasil Triase Terakhir */}
-          {lastTriase && (
-            <div className="card p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-              <h3 className="font-bold text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-amber-500" /> Triase Terakhir
-              </h3>
-              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800/50">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={`w-3 h-3 rounded-full ${
-                    lastTriase.kategori === 'Merah' ? 'bg-red-500' :
-                    lastTriase.kategori === 'Kuning' ? 'bg-amber-500' : 'bg-emerald-500'
-                  }`}></span>
-                  <span className="font-bold text-slate-900 dark:text-white">{lastTriase.kategori}</span>
-                </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">{lastTriase.keluhan || '-'}</p>
-              </div>
-            </div>
+          ) : (
+            <p className="text-sm text-slate-500 italic">No vitals recorded</p>
           )}
         </div>
-
-        {/* KOLOM KANAN: SOAP + Resume + Kunjungan */}
-        <div className="space-y-4">
-          {/* SOAP Terakhir */}
-          <div className="card p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 className="font-bold text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-blue-500" /> SOAP Terakhir
-            </h3>
-            {lastSOAP ? (
-              <div className="space-y-3 text-sm">
-                <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
-                  <span className="font-bold text-blue-700 dark:text-blue-400">S:</span>
-                  <p className="text-slate-700 dark:text-slate-300 mt-1 line-clamp-2">{lastSOAP.subjective?.keluhan_utama || '-'}</p>
-                </div>
-                <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded">
-                  <span className="font-bold text-green-700 dark:text-green-400">O:</span>
-                  <p className="text-slate-700 dark:text-slate-300 mt-1 line-clamp-2">{lastSOAP.objective?.pemeriksaan_fisik || '-'}</p>
-                </div>
-                <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded">
-                  <span className="font-bold text-amber-700 dark:text-amber-400">A:</span>
-                  <p className="text-slate-700 dark:text-slate-300 mt-1 line-clamp-2">{lastSOAP.assessment?.primaryDiagnosis?.desc || '-'}</p>
-                </div>
-                <div className="p-2 bg-purple-50 dark:bg-purple-900/20 rounded">
-                  <span className="font-bold text-purple-700 dark:text-purple-400">P:</span>
-                  <p className="text-slate-700 dark:text-slate-300 mt-1 line-clamp-2">{lastSOAP.plan?.medications?.[0]?.nama || '-'}</p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400 text-center py-4">Belum ada data SOAP</p>
-            )}
-          </div>
-
-          {/* Resume Medis Terakhir */}
-          <div className="card p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 className="font-bold text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Stethoscope className="w-4 h-4 text-emerald-500" /> Resume Medis Terakhir
-            </h3>
-            {lastResume ? (
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800/50">
-                <p className="text-sm text-slate-700 dark:text-slate-300 line-clamp-3">{lastResume.ringkasan || '-'}</p>
-                <p className="text-xs text-slate-500 mt-2">📅 {lastResume.tanggal || '-'}</p>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-400 text-center py-4">Belum ada resume medis</p>
-            )}
-          </div>
-
-          {/* Kunjungan Terakhir */}
-          <div className="card p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 className="font-bold text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <Clock className="w-4 h-4 text-amber-500" /> Kunjungan Terakhir
-            </h3>
-            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800/50">
-              <div className="text-sm font-bold text-slate-900 dark:text-white mb-1">05 Agt 2026 • Poli Penyakit Dalam</div>
-              <div className="text-sm text-slate-600 dark:text-slate-300 mb-2">Kontrol Rutin DM Tipe 2</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">👨‍⚕️ dr. Budi Santoso, Sp.PD</div>
-            </div>
-          </div>
-
-          {/* Ringkasan Klinis */}
-          <div className="card p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 className="font-bold text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-emerald-500" /> Ringkasan Klinis
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Pasien {patientData.jenis_kelamin === 'L' ? 'pria' : 'wanita'} dengan riwayat
-              {activeProblems.length > 0 && (
-                <span className="font-medium text-indigo-600 dark:text-indigo-400"> {activeProblems.map((p: any) => p.nama).join(', ')}</span>
-              )}.
-              {allergies.length > 0 && (
-                <> Alergi <span className="font-bold text-red-600 dark:text-red-400">{allergies.map((a: any) => a.allergen).join(', ')}</span>.</>
-              )}
-              {' '}Kondisi klinis stabil.
-            </p>
-          </div>
-        </div>
       </div>
 
-      {/* ═══════════ PEMERIKSAAN FISIK TERAKHIR ═══════════ */}
-      {lastPhysicalExam && (
-        <div className="card p-5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <h3 className="font-bold text-sm text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-            <Stethoscope className="w-4 h-4 text-teal-500" /> Pemeriksaan Fisik Terakhir
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
-              <span className="font-bold text-slate-700 dark:text-slate-300">Kepala:</span>
-              <span className="text-slate-600 dark:text-slate-400 ml-2">{lastPhysicalExam.kepala || 'Normocephal'}</span>
-            </div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
-              <span className="font-bold text-slate-700 dark:text-slate-300">Thorax:</span>
-              <span className="text-slate-600 dark:text-slate-400 ml-2">{lastPhysicalExam.thorax || 'Vesikuler'}</span>
-            </div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
-              <span className="font-bold text-slate-700 dark:text-slate-300">Abdomen:</span>
-              <span className="text-slate-600 dark:text-slate-400 ml-2">{lastPhysicalExam.abdomen || 'Supel'}</span>
-            </div>
-            <div className="p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
-              <span className="font-bold text-slate-700 dark:text-slate-300">Ekstremitas:</span>
-              <span className="text-slate-600 dark:text-slate-400 ml-2">{lastPhysicalExam.ekstremitas || 'Edema (-)'}</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ═══════════ GRAFIK TREND VITAL ═══════════ */}
-      {patientData.vitals && patientData.vitals.length > 0 && (
-        <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-          <h3 className="font-bold text-lg mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
-            <Activity className="w-5 h-5 text-indigo-500" /> Grafik Trend Tanda Vital
-          </h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={[...patientData.vitals].reverse().map((v: any) => {
-                const [sys, dia] = String(v.bp || '0/0').split('/').map(Number);
-                return { date: String(v.date || '').slice(0, 11), sistolik: sys, diastolik: dia, nadi: Number(v.hr), spo2: Number(v.spo2) };
-              })}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Line type="monotone" dataKey="sistolik" stroke="#3b82f6" strokeWidth={2} name="Sistolik" />
-                <Line type="monotone" dataKey="diastolik" stroke="#8b5cf6" strokeWidth={2} name="Diastolik" />
-                <Line type="monotone" dataKey="nadi" stroke="#ef4444" strokeWidth={2} name="Nadi" />
-                <Line type="monotone" dataKey="spo2" stroke="#10b981" strokeWidth={2} name="SpO2" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -1381,90 +1214,199 @@ function AuditTab() {
 // EXISTING TABS (dipertahankan dari versi lama)
 // ═══════════════════════════════════════════════════════════
 function ProblemListTab({ patientData, setPatientData }: any) {
+  const [filter, setFilter] = useState('Active');
+  
   const handleDelete = (id: number) => {
     const updated = patientData.problem_list.filter((p: any) => p.id !== id);
     setPatientData({ ...patientData, problem_list: updated });
     toast.success('Problem dihapus');
   };
+
+  const filteredProblems = patientData.problem_list.filter((p: any) => filter === 'All' || p.status === filter);
+
   return (
-    <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-bold">Problem List</h2>
-        <button onClick={() => toast('Form tambah problem', { icon: '🚧' })} className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Problem
-        </button>
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <ClipboardList className="w-5 h-5 text-blue-500" />
+              Daftar Masalah Klinis (Problem List)
+            </h2>
+            <p className="text-sm text-slate-500">Diagnosis dan masalah medis longitudinal pasien</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <select 
+              value={filter} 
+              onChange={e => setFilter(e.target.value)}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium outline-none"
+            >
+              <option value="All">Semua Status</option>
+              <option value="Active">Active</option>
+              <option value="Resolved">Resolved</option>
+              <option value="Historical">Historical</option>
+              <option value="Suspected">Suspected</option>
+              <option value="Ruled Out">Ruled Out</option>
+            </select>
+            <button onClick={() => toast('Form tambah problem', { icon: '🚧' })} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm">
+              <Plus className="w-4 h-4" /> Add Problem
+            </button>
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                <th className="p-4 font-bold text-slate-500">Diagnosis / Problem</th>
+                <th className="p-4 font-bold text-slate-500">ICD-10</th>
+                <th className="p-4 font-bold text-slate-500">Onset Date</th>
+                <th className="p-4 font-bold text-slate-500">Severity</th>
+                <th className="p-4 font-bold text-slate-500">Status</th>
+                <th className="p-4 font-bold text-slate-500">Recorded By</th>
+                <th className="p-4 font-bold text-slate-500">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {filteredProblems.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-500">Tidak ada data untuk status {filter}</td>
+                </tr>
+              ) : filteredProblems.map((p: any) => (
+                <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="p-4 font-bold text-slate-900 dark:text-white">{p.nama}</td>
+                  <td className="p-4"><span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 font-mono text-slate-600 dark:text-slate-300 rounded border border-slate-200 dark:border-slate-700">{p.kode_icd10}</span></td>
+                  <td className="p-4">{p.tanggal_onset}</td>
+                  <td className="p-4">
+                    <span className={`px-2 py-1 rounded text-xs font-bold ${p.severity === 'Severe' ? 'bg-rose-50 text-rose-600 border border-rose-200' : p.severity === 'Moderate' ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}`}>{p.severity}</span>
+                  </td>
+                  <td className="p-4">
+                    <select 
+                      value={p.status}
+                      onChange={(e) => {
+                        const updated = patientData.problem_list.map((item: any) => item.id === p.id ? { ...item, status: e.target.value } : item);
+                        setPatientData({ ...patientData, problem_list: updated });
+                        toast.success(`Status diagnosis diubah menjadi ${e.target.value}`);
+                      }}
+                      className={`px-2 py-1 rounded text-xs font-bold border outline-none cursor-pointer ${
+                        p.status === 'Active' ? 'bg-blue-50 text-blue-600 border-blue-200' : 
+                        p.status === 'Resolved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 
+                        p.status === 'Historical' ? 'bg-slate-100 text-slate-600 border-slate-300' : 
+                        p.status === 'Suspected' ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                        'bg-rose-50 text-rose-600 border-rose-200'
+                      }`}
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Resolved">Resolved</option>
+                      <option value="Historical">Historical</option>
+                      <option value="Suspected">Suspected</option>
+                      <option value="Ruled Out">Ruled Out</option>
+                    </select>
+                  </td>
+                  <td className="p-4 text-xs text-slate-500">
+                    <div>dr. Budi Santoso</div>
+                    <div className="text-[10px]">{p.tanggal_onset}</div>
+                  </td>
+                  <td className="p-4 flex gap-2">
+                    <button className="p-1.5 text-slate-400 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete(p.id)} className="p-1.5 text-slate-400 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-      <table className="w-full text-left text-sm">
-        <thead className="bg-slate-50 dark:bg-slate-800/50">
-          <tr>
-            <th className="p-4 font-bold">Diagnosis / Problem</th>
-            <th className="p-4 font-bold">ICD-10</th>
-            <th className="p-4 font-bold">Onset Date</th>
-            <th className="p-4 font-bold">Severity</th>
-            <th className="p-4 font-bold">Status</th>
-            <th className="p-4 font-bold">Aksi</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-          {patientData.problem_list.map((p: any) => (
-            <tr key={p.id}>
-              <td className="p-4 font-medium">{p.nama}</td>
-              <td className="p-4 font-mono text-slate-500">{p.kode_icd10}</td>
-              <td className="p-4">{p.tanggal_onset}</td>
-              <td className="p-4">
-                <span className={`px-2 py-1 rounded text-xs font-bold ${p.severity === 'Severe' ? 'bg-rose-100 text-rose-700' : p.severity === 'Moderate' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>{p.severity}</span>
-              </td>
-              <td className="p-4"><span className={`px-2 py-1 rounded text-xs font-bold ${p.status === 'Active' ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-700'}`}>{p.status}</span></td>
-              <td className="p-4 flex gap-2">
-                <button className="p-1.5 text-amber-600 hover:bg-amber-50 rounded"><Edit2 className="w-4 h-4" /></button>
-                <button onClick={() => handleDelete(p.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded"><Trash2 className="w-4 h-4" /></button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }
 
 function MedicationsTab({ patientData, setPatientData }: any) {
+  const [filter, setFilter] = useState('All');
+
   const handleDelete = (id: number) => {
     const updated = patientData.medications.filter((m: any) => m.id !== id);
     setPatientData({ ...patientData, medications: updated });
     toast.success('Obat dihapus');
   };
+
+  const filteredMeds = patientData.medications.filter((m: any) => filter === 'All' || m.status === filter);
+
   return (
-    <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-bold">Medication History</h2>
-        <button onClick={() => toast('Form tambah obat', { icon: '🚧' })} className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Medication
-        </button>
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Pill className="w-5 h-5 text-blue-500" />
+              Riwayat Penggunaan Obat (Medication History)
+            </h2>
+            <p className="text-sm text-slate-500">Catatan komprehensif obat yang pernah atau sedang dikonsumsi pasien.</p>
+          </div>
+          <div className="flex gap-2">
+            <select 
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none font-medium"
+            >
+              <option value="All">Semua Status</option>
+              <option value="Active">Active</option>
+              <option value="Stopped">Stopped</option>
+              <option value="Hold">Hold</option>
+            </select>
+            <button onClick={() => toast('Form tambah obat', { icon: '🚧' })} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm">
+              <Plus className="w-4 h-4" /> Add Record
+            </button>
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                <th className="p-4 font-bold text-slate-500">Nama Obat</th>
+                <th className="p-4 font-bold text-slate-500">Dosis & Rute</th>
+                <th className="p-4 font-bold text-slate-500">Frekuensi</th>
+                <th className="p-4 font-bold text-slate-500">Mulai - Berhenti</th>
+                <th className="p-4 font-bold text-slate-500">Status</th>
+                <th className="p-4 font-bold text-slate-500">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {filteredMeds.map((m: any) => (
+                <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="p-4 font-bold text-slate-900 dark:text-white">{m.name}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-300">{m.dose}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-300">{m.frequency}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-300">{m.startDate} - {m.endDate || 'Sekarang'}</td>
+                  <td className="p-4">
+                    <select
+                      value={m.status}
+                      onChange={(e) => {
+                        const updated = patientData.medications.map((item: any) => item.id === m.id ? { ...item, status: e.target.value } : item);
+                        setPatientData({ ...patientData, medications: updated });
+                      }}
+                      className={`px-2 py-1 rounded-full text-xs font-bold border outline-none cursor-pointer ${
+                        m.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                        m.status === 'Stopped' ? 'bg-slate-100 text-slate-600 border-slate-300' :
+                        'bg-amber-50 text-amber-600 border-amber-200'
+                      }`}
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Stopped">Stopped</option>
+                      <option value="Hold">Hold</option>
+                    </select>
+                  </td>
+                  <td className="p-4 flex gap-2">
+                    <button className="p-1.5 text-slate-400 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete(m.id)} className="p-1.5 text-slate-400 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-      <table className="w-full text-left text-sm">
-        <thead className="bg-slate-50 dark:bg-slate-800/50">
-          <tr>
-            <th className="p-4 font-bold">Nama Obat</th>
-            <th className="p-4 font-bold">Dosis & Rute</th>
-            <th className="p-4 font-bold">Frekuensi</th>
-            <th className="p-4 font-bold">Tanggal Mulai</th>
-            <th className="p-4 font-bold">Status</th>
-            <th className="p-4 font-bold">Aksi</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-          {patientData.medications.map((m: any) => (
-            <tr key={m.id}>
-              <td className="p-4 font-bold">{m.name}</td>
-              <td className="p-4">{m.dose}</td>
-              <td className="p-4">{m.frequency}</td>
-              <td className="p-4">{m.startDate}</td>
-              <td className="p-4"><span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">{m.status}</span></td>
-              <td className="p-4"><button onClick={() => handleDelete(m.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded"><Trash2 className="w-4 h-4" /></button></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }
@@ -1510,56 +1452,575 @@ function AllergiesTab({ patientData, setPatientData }: any) {
 }
 
 function VitalsTab({ patientData }: any) {
+  const chartData = [...(patientData.vitals || [])].reverse().map(v => {
+    const bpParts = v.bp.split('/');
+    return {
+      date: v.date.split(' ')[0],
+      systolic: parseInt(bpParts[0]),
+      diastolic: parseInt(bpParts[1]),
+      hr: parseInt(v.hr)
+    };
+  });
+
   return (
-    <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-bold">Vital Signs History</h2>
-        <button onClick={() => toast('Form tambah vital', { icon: '🚧' })} className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Vitals
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+          <HeartPulse className="w-5 h-5 text-rose-500" /> Tren Tanda Vital (Blood Pressure & Heart Rate)
+        </h3>
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+              <XAxis dataKey="date" tick={{fontSize: 12}} tickLine={false} axisLine={false} />
+              <YAxis tick={{fontSize: 12}} tickLine={false} axisLine={false} />
+              <Tooltip 
+                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+              />
+              <Line type="monotone" dataKey="systolic" stroke="#ef4444" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} name="Sistolik" />
+              <Line type="monotone" dataKey="diastolic" stroke="#3b82f6" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} name="Diastolik" />
+              <Line type="monotone" dataKey="hr" stroke="#10b981" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} name="Nadi" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="card p-6 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-bold">Vital Signs History</h2>
+          <button onClick={() => toast('Form tambah vital', { icon: '🚧' })} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
+            <Plus className="w-4 h-4" /> Add Vitals
+          </button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm whitespace-nowrap">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                <th className="p-4 font-bold text-slate-500">Tanggal & Waktu</th>
+                <th className="p-4 font-bold text-slate-500">TD (mmHg)</th>
+                <th className="p-4 font-bold text-slate-500">Nadi</th>
+                <th className="p-4 font-bold text-slate-500">Suhu (°C)</th>
+                <th className="p-4 font-bold text-slate-500">RR</th>
+                <th className="p-4 font-bold text-slate-500">SpO2</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {patientData.vitals.map((v: any) => (
+                <tr key={v.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="p-4">{v.date}</td>
+                  <td className="p-4 font-bold text-rose-600 dark:text-rose-400">{v.bp}</td>
+                  <td className="p-4 font-bold text-emerald-600 dark:text-emerald-400">{v.hr}</td>
+                  <td className="p-4">{v.temp}</td>
+                  <td className="p-4">{v.rr}</td>
+                  <td className="p-4">{v.spo2}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// ENCOUNTERS TAB (Kunjungan & Alur Klinis Lengkap PMK 24/2022)
+// ═══════════════════════════════════════════════════════════
+function EncountersTab({ patientData, onOpenVoice }: { patientData: any, onOpenVoice: () => void }) {
+  const [activeEncounterId, setActiveEncounterId] = useState<string | null>(null);
+  const [encounterSubTab, setEncounterSubTab] = useState<'soap' | 'fisik' | 'triase' | 'cpoe' | 'addendum'>('soap');
+  const [showAddendumModal, setShowAddendumModal] = useState(false);
+  
+  // Encounters data with state & addendums
+  const [encounters, setEncounters] = useState([
+    { 
+      id: 'ENC-001', 
+      date: '30 Aug 2026', 
+      time: '09:00', 
+      type: 'Rawat Jalan', 
+      poli: 'Poli Umum', 
+      doctor: 'dr. Budi Santoso, Sp.PD', 
+      diagnosis: 'Hypertension (I10)', 
+      status: 'In Review',
+      signedAt: null as string | null,
+      tteHash: null as string | null,
+      addendums: [] as any[]
+    },
+    { 
+      id: 'ENC-002', 
+      date: '15 Jul 2026', 
+      time: '10:30', 
+      type: 'Rawat Jalan', 
+      poli: 'Penyakit Dalam', 
+      doctor: 'dr. Budi Santoso, Sp.PD', 
+      diagnosis: 'Type 2 DM (E11.9)', 
+      status: 'Signed',
+      signedAt: '15 Jul 2026 11:15 WIB',
+      tteHash: 'SHA256:7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069',
+      addendums: [
+        {
+          id: 'ADD-101',
+          date: '16 Jul 2026 09:00 WIB',
+          author: 'dr. Budi Santoso, Sp.PD',
+          reason: 'Koreksi dosis obat karena toleransi lambung',
+          note: 'Dosis Metformin disesuaikan dari 1000mg menjadi 500mg 2x1 bersama makan.'
+        }
+      ]
+    },
+    { 
+      id: 'ENC-003', 
+      date: '10 Mar 2026', 
+      time: '14:15', 
+      type: 'IGD', 
+      poli: 'Instalasi Gawat Darurat', 
+      doctor: 'dr. Sarah Wijaya, Sp.Em', 
+      diagnosis: 'Gastroenteritis Akut (A09.9)', 
+      status: 'Locked',
+      signedAt: '10 Mar 2026 18:30 WIB',
+      tteHash: 'SHA256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      addendums: []
+    },
+  ]);
+
+  const activeEncounter = encounters.find(e => e.id === activeEncounterId);
+
+  const handleSignDocument = (encId: string) => {
+    const timeStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB';
+    const mockHash = 'SHA256:' + Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    
+    setEncounters(prev => prev.map(enc => {
+      if (enc.id === encId) {
+        return {
+          ...enc,
+          status: 'Signed',
+          signedAt: timeStr,
+          tteHash: mockHash
+        };
+      }
+      return enc;
+    }));
+
+    toast.success(`Dokumen ${encId} berhasil ditandatangani secara elektronik (TTE Bersertifikasi BSrE/BSSN)`);
+  };
+
+  const handleLockDocument = (encId: string) => {
+    setEncounters(prev => prev.map(enc => {
+      if (enc.id === encId) {
+        return {
+          ...enc,
+          status: 'Locked'
+        };
+      }
+      return enc;
+    }));
+    toast.success(`Rekam Medis ${encId} telah dikunci permanen sesuai regulasi PMK 24/2022`);
+  };
+
+  const handleAddAddendum = (addendumData: { text: string; reason: string; doctor: string; timestamp: string }) => {
+    if (!activeEncounterId) return;
+    const newAddendum = {
+      id: `ADD-${Date.now().toString().slice(-4)}`,
+      date: addendumData.timestamp || new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIB',
+      author: addendumData.doctor || 'dr. Budi Santoso, Sp.PD',
+      reason: addendumData.reason,
+      note: addendumData.text
+    };
+
+    setEncounters(prev => prev.map(enc => {
+      if (enc.id === activeEncounterId) {
+        return {
+          ...enc,
+          addendums: [newAddendum, ...(enc.addendums || [])]
+        };
+      }
+      return enc;
+    }));
+
+    setShowAddendumModal(false);
+  };
+
+  if (activeEncounterId && activeEncounter) {
+    return (
+      <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
+        {/* ENCOUNTER BANNER */}
+        <div className="bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setActiveEncounterId(null)}
+              className="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              title="Kembali ke Daftar Kunjungan"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <div>
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  Kunjungan {activeEncounter.id}
+                </h2>
+                <span className={`text-xs uppercase font-bold px-2.5 py-0.5 rounded-full border ${
+                  activeEncounter.status === 'Signed' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' :
+                  activeEncounter.status === 'Locked' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700' :
+                  'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                }`}>
+                  {activeEncounter.status}
+                </span>
+                {activeEncounter.status === 'Signed' && (
+                  <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                    <ShieldCheck className="w-3.5 h-3.5" /> TTE Terverifikasi
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                {activeEncounter.date} • {activeEncounter.type} - {activeEncounter.poli} • DPJP: <strong>{activeEncounter.doctor}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button 
+              onClick={onOpenVoice} 
+              className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-300 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-indigo-200 dark:border-indigo-800"
+            >
+              <Mic className="w-3.5 h-3.5" /> AI Scribe
+            </button>
+            
+            {activeEncounter.status === 'In Review' && (
+              <button 
+                onClick={() => handleSignDocument(activeEncounter.id)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+              >
+                <FileSignature className="w-3.5 h-3.5" /> Tandatangani (TTE)
+              </button>
+            )}
+
+            {activeEncounter.status === 'Signed' && (
+              <>
+                <button 
+                  onClick={() => setShowAddendumModal(true)}
+                  className="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Buat Addendum
+                </button>
+                <button 
+                  onClick={() => handleLockDocument(activeEncounter.id)}
+                  className="bg-slate-700 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"
+                >
+                  <Lock className="w-3.5 h-3.5" /> Kunci Dokumen (PMK 24)
+                </button>
+              </>
+            )}
+
+            {activeEncounter.status === 'Locked' && (
+              <button 
+                onClick={() => setShowAddendumModal(true)}
+                className="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+              >
+                <Plus className="w-3.5 h-3.5" /> Buat Addendum Resmi
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* TTE STATUS BANNER IF SIGNED */}
+        {activeEncounter.signedAt && (
+          <div className="p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 rounded-xl flex items-start justify-between gap-3 text-xs">
+            <div className="flex items-start gap-2.5">
+              <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-emerald-900 dark:text-emerald-200">Dokumen Rekam Medis Sah & Terotentikasi</p>
+                <p className="text-emerald-700 dark:text-emerald-300">
+                  Ditandatangani secara digital oleh {activeEncounter.doctor} pada {activeEncounter.signedAt}.
+                </p>
+                {activeEncounter.tteHash && (
+                  <p className="font-mono text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    Fingerprint Dokumen: {activeEncounter.tteHash}
+                  </p>
+                )}
+              </div>
+            </div>
+            <span className="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-bold px-2.5 py-1 rounded-md text-[10px] uppercase">
+              BSrE Certified
+            </span>
+          </div>
+        )}
+
+        {/* ENCOUNTER SUB-NAVIGATION */}
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto custom-scrollbar">
+          {[
+            { id: 'soap', label: 'Catatan SOAP Dokter', icon: FileText },
+            { id: 'fisik', label: 'Pemeriksaan Fisik', icon: Stethoscope },
+            { id: 'triase', label: 'Triase & Tanda Vital', icon: HeartPulse },
+            { id: 'cpoe', label: 'Resep & Order Penunjang', icon: Pill },
+            { id: 'addendum', label: `Addendum (${activeEncounter.addendums?.length || 0})`, icon: ClipboardList },
+          ].map(tab => {
+            const Icon = tab.icon;
+            const isSelected = encounterSubTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setEncounterSubTab(tab.id as any)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  isSelected
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* SUBTAB CONTENT */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm">
+          {encounterSubTab === 'soap' && (
+            <SoapTab onOpenVoice={onOpenVoice} />
+          )}
+
+          {encounterSubTab === 'fisik' && (
+            <FisikTab />
+          )}
+
+          {encounterSubTab === 'triase' && (
+            <TriaseTab />
+          )}
+
+          {encounterSubTab === 'cpoe' && (
+            <CPOETab patientData={patientData} />
+          )}
+
+          {encounterSubTab === 'addendum' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                    <ClipboardList className="w-5 h-5 text-amber-500" />
+                    Riwayat Addendum Rekam Medis (PMK 24/2022)
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Sesuai ketentuan, data yang sudah ditandatangani tidak dihapus, melainkan dikoreksi melalui catatan addendum resmi.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowAddendumModal(true)}
+                  className="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Buat Addendum Baru
+                </button>
+              </div>
+
+              {activeEncounter.addendums && activeEncounter.addendums.length > 0 ? (
+                <div className="space-y-3 mt-4">
+                  {activeEncounter.addendums.map((add: any, idx: number) => (
+                    <div key={add.id || idx} className="p-4 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-amber-800 dark:text-amber-300">
+                          {add.id} • {add.author}
+                        </span>
+                        <span className="text-slate-500 dark:text-slate-400 font-mono">{add.date}</span>
+                      </div>
+                      <div className="text-xs">
+                        <strong className="text-slate-700 dark:text-slate-300">Alasan Perubahan:</strong> {add.reason}
+                      </div>
+                      <div className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-amber-100 dark:border-amber-900/30 text-xs text-slate-800 dark:text-slate-200 font-medium">
+                        {add.note}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-slate-400">
+                  <p className="text-sm">Belum ada catatan addendum untuk kunjungan ini.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {showAddendumModal && (
+          <AddendumModal
+            isOpen={showAddendumModal}
+            onClose={() => setShowAddendumModal(false)}
+            encounterId={activeEncounter.id}
+            onSaveAddendum={handleAddAddendum}
+          />
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <CalendarDays className="w-6 h-6 text-blue-500" /> 
+            Riwayat Kunjungan (Encounters)
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400">Pilih kunjungan untuk melihat atau mengedit rekam medis (SOAP & Penunjang).</p>
+        </div>
+        <button 
+          onClick={() => {
+            const newId = `ENC-00${encounters.length + 1}`;
+            const newEnc = {
+              id: newId,
+              date: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+              time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+              type: 'Rawat Jalan',
+              poli: 'Poli Umum',
+              doctor: 'dr. Budi Santoso, Sp.PD',
+              diagnosis: 'Menunggu Pemeriksaan',
+              status: 'In Review',
+              signedAt: null,
+              tteHash: null,
+              addendums: []
+            };
+            setEncounters([newEnc, ...encounters]);
+            setActiveEncounterId(newId);
+            toast.success(`Kunjungan baru ${newId} dibuat`);
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-sm text-sm"
+        >
+          <Plus className="w-4 h-4" /> Kunjungan Baru
         </button>
       </div>
-      <table className="w-full text-left text-sm">
-        <thead className="bg-slate-50 dark:bg-slate-800/50">
-          <tr>
-            <th className="p-4 font-bold">Tanggal & Waktu</th>
-            <th className="p-4 font-bold">TD (mmHg)</th>
-            <th className="p-4 font-bold">Nadi</th>
-            <th className="p-4 font-bold">Suhu (°C)</th>
-            <th className="p-4 font-bold">RR</th>
-            <th className="p-4 font-bold">SpO2</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-          {patientData.vitals.map((v: any) => (
-            <tr key={v.id}>
-              <td className="p-4">{v.date}</td>
-              <td className="p-4 font-bold">{v.bp}</td>
-              <td className="p-4">{v.hr}</td>
-              <td className="p-4">{v.temp}</td>
-              <td className="p-4">{v.rr}</td>
-              <td className="p-4">{v.spo2}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      
+      <div className="space-y-3">
+        {encounters.map(enc => (
+          <div 
+            key={enc.id} 
+            onClick={() => setActiveEncounterId(enc.id)}
+            className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-md cursor-pointer transition-all group"
+          >
+            <div className="flex justify-between items-start">
+              <div className="flex gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex flex-col items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 group-hover:bg-blue-50 group-hover:border-blue-200 dark:group-hover:bg-blue-900/30 transition-colors">
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">{enc.date.split(' ')[1]}</span>
+                  <span className="text-lg font-bold text-slate-800 dark:text-white leading-none">{enc.date.split(' ')[0]}</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                    {enc.type} - {enc.poli}
+                    {enc.status === 'Signed' && <span title="TTE Terverifikasi"><ShieldCheck className="w-4 h-4 text-emerald-500" /></span>}
+                    {enc.status === 'Locked' && <span title="Terkunci Sesuai PMK 24"><Lock className="w-4 h-4 text-slate-500" /></span>}
+                  </h3>
+                  <div className="text-xs text-slate-500 flex items-center gap-3 mt-1">
+                    <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {enc.time}</span>
+                    <span className="flex items-center gap-1"><Stethoscope className="w-3.5 h-3.5" /> {enc.doctor}</span>
+                  </div>
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700">
+                      Diagnosis: {enc.diagnosis}
+                    </span>
+                    {enc.addendums?.length > 0 && (
+                      <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
+                        {enc.addendums.length} Addendum
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
+                  enc.status === 'Signed' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800' :
+                  enc.status === 'Locked' ? 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300 dark:border-slate-700' :
+                  'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                }`}>
+                  {enc.status}
+                </span>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-function ImmunizationsTab() {
+// ═══════════════════════════════════════════════════════════
+// TIMELINE TAB
+// ═══════════════════════════════════════════════════════════
+function TimelineTab() {
   return (
-    <div className="flex flex-col items-center justify-center h-64 text-slate-500 bg-white rounded-xl shadow-sm border border-slate-200">
-      <Syringe className="w-16 h-16 mb-4 text-slate-300" />
-      <p>Data Imunisasi kosong atau belum diinput.</p>
-    </div>
-  );
-}
+    <div className="space-y-6 animate-in fade-in duration-300">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-6">
+          <Clock className="w-5 h-5 text-blue-500" />
+          Clinical Timeline
+        </h2>
+        
+        <div className="relative border-l-2 border-slate-200 dark:border-slate-700 ml-4 space-y-8 pb-4">
+          
+          {/* Item 1 */}
+          <div className="relative pl-6">
+            <div className="absolute -left-[13px] top-1 w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full border-4 border-white dark:border-slate-900 flex items-center justify-center">
+              <Stethoscope className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-bold text-slate-900 dark:text-white">Pemeriksaan Dokter (Rawat Jalan)</h3>
+              <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded">30 Aug 2026, 09:00</span>
+            </div>
+            <p className="text-sm text-slate-500 mb-3">Oleh dr. Budi Santoso (Poli Umum)</p>
+            
+            <div className="ml-2 border-l-2 border-slate-100 dark:border-slate-800 pl-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <FileText className="w-4 h-4 text-slate-400 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">SOAP Document Dibuat</p>
+                  <p className="text-xs text-slate-500">Keluhan: Pusing, tekanan darah tinggi.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <ClipboardList className="w-4 h-4 text-amber-500 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Diagnosis Ditambahkan</p>
+                  <p className="text-xs text-slate-500">Hypertension (I10) - Active</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Pill className="w-4 h-4 text-emerald-500 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Resep Obat Dibuat</p>
+                  <p className="text-xs text-slate-500">Amlodipine 10mg, 1x1 oral</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Item 2 */}
+          <div className="relative pl-6">
+            <div className="absolute -left-[13px] top-1 w-6 h-6 bg-purple-100 dark:bg-purple-900 rounded-full border-4 border-white dark:border-slate-900 flex items-center justify-center">
+              <FlaskConical className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-bold text-slate-900 dark:text-white">Hasil Laboratorium Tersedia</h3>
+              <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded">29 Aug 2026, 14:30</span>
+            </div>
+            <p className="text-sm text-slate-500">Panel Profil Lipid, Gula Darah Puasa</p>
+          </div>
+          
+          {/* Item 3 */}
+          <div className="relative pl-6">
+            <div className="absolute -left-[13px] top-1 w-6 h-6 bg-indigo-100 dark:bg-indigo-900 rounded-full border-4 border-white dark:border-slate-900 flex items-center justify-center">
+              <Stethoscope className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-bold text-slate-900 dark:text-white">Pemeriksaan Dokter (Rawat Jalan)</h3>
+              <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded">15 Jul 2026, 10:30</span>
+            </div>
+            <p className="text-sm text-slate-500 mb-3">Oleh dr. Budi Santoso (Poli Penyakit Dalam)</p>
+          </div>
 
-function GrowthChartTab() {
-  return (
-    <div className="flex flex-col items-center justify-center h-64 text-slate-500 bg-white rounded-xl shadow-sm border border-slate-200">
-      <Scale className="w-16 h-16 mb-4 text-slate-300" />
-      <p>Growth Chart (Kurva WHO/KMS) hanya tersedia untuk pasien anak (Pediatri).</p>
+        </div>
+      </div>
     </div>
   );
 }
