@@ -52,7 +52,7 @@ export function PanduanModule() {
           </div>
           <div>
             <h2 className="text-base font-bold text-slate-800 dark:text-white">Pusat Panduan</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Dokumentasi & SOP SIMRS</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Dokumentasi & SOP SIMK</p>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">

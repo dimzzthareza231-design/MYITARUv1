@@ -168,7 +168,7 @@ function JobsTab() {
     { id: 'JOB-FULL-01', name: 'Pencadangan Penuh Harian (Full Snapshot)', schedule: 'Setiap Hari 02:00 WIB', type: 'Full DB', status: 'Aktif', lastRun: 'Hari ini, 02:00 WIB', size: '2.8 TB' },
     { id: 'JOB-INC-01', name: 'Pencadangan Inkremental Transaksi (WAL)', schedule: 'Setiap 1 Jam', type: 'Incremental', status: 'Aktif', lastRun: '15 menit lalu', size: '1.2 GB' },
     { id: 'JOB-PACS-01', name: 'Sinkronisasi Arsip Radiologi DICOM', schedule: 'Setiap Hari 03:30 WIB', type: 'Blob Storage', status: 'Aktif', lastRun: 'Hari ini, 03:30 WIB', size: '45 GB' },
-    { id: 'JOB-CFG-01', name: 'Cadangan Konfigurasi SIMRS & Akun', schedule: 'Setiap 6 Jam', type: 'Config/JSON', status: 'Aktif', lastRun: '1 jam lalu', size: '12 MB' },
+    { id: 'JOB-CFG-01', name: 'Cadangan Konfigurasi SIMK & Akun', schedule: 'Setiap 6 Jam', type: 'Config/JSON', status: 'Aktif', lastRun: '1 jam lalu', size: '12 MB' },
   ]);
 
   const triggerManual = () => {
@@ -418,7 +418,7 @@ function DrTab() {
       '[00:08] Mengaktifkan protokol Disaster Recovery otomatis (Failover Sequence)...',
       '[00:15] Mempromosikan Hot Standby Replica di DR Region (AWS Singapore) menjadi Primary...',
       '[00:28] Mengalihkan DNS & Reverse Proxy Gateway ke DR Server Cluster...',
-      '[00:42] Validasi integritas transaksi selesai. Semua servis SIMRS berjalan normal di DR Site. (RTO: 42 Detik)'
+      '[00:42] Validasi integritas transaksi selesai. Semua servis SIMK berjalan normal di DR Site. (RTO: 42 Detik)'
     ]);
     toast.success('Simulasi Disaster Recovery (DR Drill) dimulai');
   };

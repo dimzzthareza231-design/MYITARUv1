@@ -49,14 +49,14 @@ function ExportButton({ data, filename, title, columns }: ExportButtonProps) {
 
     const doc = generateHospitalDocument({
       type: 'laporan-medis',
-      title: title || 'Laporan Data SIMRS',
+      title: title || 'Laporan Data SIMK',
       documentNumber: `EXP/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`,
       date: new Date().toISOString().split('T')[0],
       department: 'Sistem Informasi Klinik',
       notes: watermark ? `Watermark: ${watermark}. Total ${data.length} baris data.` : `Total ${data.length} baris data diekspor.`,
       signatures: [
-        { role: 'Petugas / Operator', name: 'Staf Administrasi SIMRS' },
-        { role: 'Kepala Bagian / DPJP', name: 'dr. Penanggung Jawab SIMRS' }
+        { role: 'Petugas / Operator', name: 'Staf Administrasi SIMK' },
+        { role: 'Kepala Bagian / DPJP', name: 'dr. Penanggung Jawab SIMK' }
       ],
       sections: [
         {

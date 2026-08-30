@@ -269,7 +269,7 @@ export function UniversalDetailModal({
                       <div>
                         <p className="font-bold text-emerald-900 dark:text-emerald-300">Dokumen Terverifikasi Sah</p>
                         <p className="text-emerald-800/80 dark:text-emerald-400 text-[11px] mt-0.5">
-                          Telah ditandatangani secara elektronik dan terdaftar di server database MYITARU SIMRS sesuai standar Permenkes No. 24/2022.
+                          Telah ditandatangani secara elektronik dan terdaftar di server database MYITARU SIMK sesuai standar Permenkes No. 24/2022.
                         </p>
                       </div>
                     </div>

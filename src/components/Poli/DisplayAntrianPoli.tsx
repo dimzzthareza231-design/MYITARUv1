@@ -24,7 +24,7 @@ export function DisplayAntrianPoli() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 text-white p-8">
       {/* Header */}
       <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold mb-2">🏥 MYITARU SIMRS - Antrian Poli</h1>
+        <h1 className="text-4xl font-bold mb-2">🏥 MYITARU SIMK - Antrian Poli</h1>
         <div className="flex items-center justify-center gap-2 text-blue-300">
           <Clock className="w-6 h-6" />
           <span className="text-2xl font-mono">

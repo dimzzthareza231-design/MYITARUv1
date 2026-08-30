@@ -283,15 +283,15 @@ function PaymentDuitkuTab() {
 }
 
 function ApiKeyManagementTab() {
-  const [apiKey] = useState('SIMRS_LIVE_KEY_882910_XPTA');
+  const [apiKey] = useState('SIMK_LIVE_KEY_882910_XPTA');
 
   return (
     <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm max-w-2xl mx-auto space-y-4 text-xs">
       <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
         <Key className="w-5 h-5 text-blue-600" />
-        REST API Key Management SIMRS
+        REST API Key Management SIMK
       </h3>
-      <p className="text-slate-500">Gunakan API Key ini untuk menghubungkan aplikasi eksternal atau vendor pihak ketiga dengan SIMRS.</p>
+      <p className="text-slate-500">Gunakan API Key ini untuk menghubungkan aplikasi eksternal atau vendor pihak ketiga dengan SIMK.</p>
 
       <div className="flex gap-2">
         <input type="text" readOnly value={apiKey} className="flex-1 p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-900 font-mono font-bold" />

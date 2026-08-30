@@ -711,7 +711,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
                 RME RESMI TERSERTIFIKASI KEMENKES RI
               </div>
               <p className="text-[10px] text-slate-600 mt-0.5">
-                Dokumen Rekam Medis Elektronik sah & tersimpan permanen di cloud SIMRS Klinik Tarumanagara & SatuSehat.
+                Dokumen Rekam Medis Elektronik sah & tersimpan permanen di cloud SIMK Klinik Tarumanagara & SatuSehat.
               </p>
               <p className="text-[9px] font-mono text-slate-500 mt-0.5">
                 ID Validasi: <span className="font-bold text-slate-800">{validationCode}</span>
@@ -752,7 +752,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
         {/* LEGAL DISCLAIMER FOOTER */}
         <div className="mt-6 pt-2 border-t border-slate-200 text-center text-[9px] text-slate-400 leading-snug">
           <p>
-            Dokumen ini merupakan Rekam Medis Elektronik (RME) resmi yang diterbitkan oleh Sistem Informasi Manajemen Klinik (MYITARU SIMRS).
+            Dokumen ini merupakan Rekam Medis Elektronik (RME) resmi yang diterbitkan oleh Sistem Informasi Manajemen Klinik (MYITARU SIMK).
           </p>
           <p>
             Sah dan berkekuatan hukum penuh tanpa tanda tangan basah sesuai UU ITE No. 11/2008 & Permenkes RI No. 24/2022 tentang Rekam Medis Elektronik.

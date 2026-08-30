@@ -6,7 +6,26 @@ import { ConfirmationModal } from './ConfirmationModal';
 import { UniversalDetailModal } from './Documents/UniversalDetailModal';
 import { DocumentPreviewModal } from './Documents/DocumentPreviewModal';
 import { generateHospitalDocument } from '../utils/documentGenerator';
-import { Printer, Eye, Edit2, Trash2, Download, Plus, Search } from 'lucide-react';
+import { 
+  Printer, 
+  Eye, 
+  Edit2, 
+  Edit3, 
+  Trash2, 
+  Download, 
+  Plus, 
+  Search, 
+  Save, 
+  RotateCcw, 
+  X, 
+  Calendar, 
+  Tag, 
+  FileText, 
+  CheckCircle2, 
+  Hash,
+  Activity,
+  Layers
+} from 'lucide-react';
 
 export interface ColumnDef {
   key: string;
@@ -43,15 +62,33 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
     );
   }
 
-  const save = () => {
+  const save = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (modal === 'add') {
-      setData([...data, { ...form, id: Date.now(), tanggal: '2026-08-25', status: form.status || 'Aktif' }]);
-      toast.success('Data berhasil ditambahkan');
+      const newRow = { 
+        ...form, 
+        id: form.id || Date.now(), 
+        tanggal: form.tanggal || new Date().toISOString().split('T')[0], 
+        status: form.status || 'Aktif' 
+      };
+      setData([...data, newRow]);
+      toast.success('Data baru berhasil ditambahkan');
     } else if (modal === 'edit') {
       setData(data.map(d => d.id === selected.id ? { ...selected, ...form } : d));
-      toast.success('Data berhasil diupdate');
+      toast.success('Perubahan data berhasil disimpan');
     }
-    setModal(null); setForm({});
+    setModal(null); 
+    setForm({});
+  };
+
+  const resetForm = () => {
+    if (modal === 'edit' && selected) {
+      setForm({ ...selected });
+      toast.info('Formulir dikembalikan ke nilai awal');
+    } else {
+      setForm({});
+      toast.info('Formulir dikosongkan');
+    }
   };
 
   const del = (id: number | string) => {
@@ -81,12 +118,15 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
   };
 
   return (
-    <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden flex flex-col h-full">
-      <div className="p-4 border-b border-slate-700 flex flex-wrap gap-2 justify-between items-center bg-slate-800/80 sticky top-0 z-10 backdrop-blur-sm">
-        <h3 className="font-bold text-white flex items-center gap-2">
-          <span>{title}</span>
-          <span className="text-cyan-400 text-xs px-2 py-0.5 bg-cyan-950/60 border border-cyan-800/50 rounded-full font-mono">
-            {rows.length} Data
+    <div className="bg-slate-850 bg-slate-900 rounded-2xl border border-slate-700/80 shadow-lg overflow-hidden flex flex-col h-full">
+      <div className="p-4 border-b border-slate-700/80 flex flex-wrap gap-2 justify-between items-center bg-slate-800/80 sticky top-0 z-10 backdrop-blur-sm">
+        <h3 className="font-bold text-white flex items-center gap-2.5">
+          <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <Layers className="w-4 h-4" />
+          </div>
+          <span className="text-base tracking-tight">{title}</span>
+          <span className="text-cyan-400 text-xs px-2.5 py-0.5 bg-cyan-950/60 border border-cyan-800/50 rounded-full font-mono font-bold">
+            {rows.length} Record
           </span>
         </h3>
         <div className="flex gap-2 items-center flex-wrap">
@@ -96,60 +136,63 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
               value={search} 
               onChange={e => setSearch(e.target.value)} 
               placeholder="🔍 Cari data..."
-              className="p-2 pl-3 rounded-lg bg-slate-900 border border-slate-600 text-white text-sm focus:border-cyan-500 outline-none w-44 sm:w-56" 
+              className="p-2 pl-3 rounded-xl bg-slate-900/90 border border-slate-700 text-white text-xs sm:text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none w-44 sm:w-56 placeholder:text-slate-500" 
             />
           </div>
           <button 
             onClick={exportCsv} 
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-sm transition-colors shadow-sm flex items-center gap-1.5 font-medium" 
+            className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-xl text-xs sm:text-sm transition-colors shadow-sm flex items-center gap-1.5 font-medium" 
             title="Export CSV"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 text-emerald-400" />
             <span className="hidden sm:inline">Export</span>
           </button>
           {!isReadOnly && (
             <button 
               onClick={() => { setForm({}); setModal('add'); }} 
-              className="bg-cyan-600 hover:bg-cyan-500 text-white px-3.5 py-2 rounded-lg text-sm font-bold transition-all shadow-md shadow-cyan-900/30 flex items-center gap-1.5"
+              className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md shadow-cyan-950/50 flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
             >
               <Plus className="w-4 h-4" />
-              <span>Tambah</span>
+              <span>Tambah Data</span>
             </button>
           )}
         </div>
       </div>
       
       <div className="overflow-x-auto flex-1 custom-scrollbar">
-        <table className="w-full text-left">
-          <thead className="bg-slate-700/80 sticky top-0 backdrop-blur-md z-10">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-slate-800/90 sticky top-0 backdrop-blur-md z-10 border-b border-slate-700/80">
             <tr>
               {columns.map((c, cIdx) => (
                 <th key={c.key || `th-${cIdx}`} onClick={() => setSort(s => ({ key: c.key, dir: s.key === c.key && s.dir === 'asc' ? 'desc' : 'asc' }))}
-                  className="p-3 text-xs font-semibold text-slate-300 cursor-pointer capitalize whitespace-nowrap hover:text-white transition-colors">
-                  {c.label} {sort.key === c.key ? (sort.dir === 'asc' ? '↑' : '↓') : '↕'}
+                  className="p-3.5 text-xs font-bold text-slate-300 cursor-pointer capitalize whitespace-nowrap hover:text-white transition-colors select-none">
+                  <div className="flex items-center gap-1">
+                    <span>{c.label}</span>
+                    <span className="text-[10px] text-slate-500">{sort.key === c.key ? (sort.dir === 'asc' ? '▲' : '▼') : '⇅'}</span>
+                  </div>
                 </th>
               ))}
-              <th className="p-3 text-center text-xs font-semibold text-slate-300">Aksi & Dokumen</th>
+              <th className="p-3.5 text-center text-xs font-bold text-slate-300">Aksi & Dokumen</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/50">
+          <tbody className="divide-y divide-slate-800">
             {rows.length === 0 ? (
-              <tr><td colSpan={columns.length + 1} className="p-8 text-center text-slate-500 font-medium">📭 Belum ada data</td></tr>
+              <tr><td colSpan={columns.length + 1} className="p-12 text-center text-slate-500 font-medium">📭 Belum ada data pada modul ini</td></tr>
             ) : rows.map((r, rIdx) => (
-              <tr key={r.id !== undefined && r.id !== null ? String(r.id) : `smart-row-${rIdx}-${r.no_rm || r.nama || r.nomor || ''}`} className="hover:bg-slate-750/50 transition-colors group">
+              <tr key={r.id !== undefined && r.id !== null ? String(r.id) : `smart-row-${rIdx}-${r.no_rm || r.nama || r.nomor || ''}`} className="hover:bg-slate-800/50 transition-colors group">
                 {columns.map((c, cIdx) => (
-                  <td key={c.key || `col-${cIdx}`} className="p-3 text-sm text-slate-300">
+                  <td key={c.key || `col-${cIdx}`} className="p-3.5 text-xs sm:text-sm text-slate-300">
                     {c.badge ? <Badge v={r[c.key]} /> : String(r[c.key] ?? '-')}
                   </td>
                 ))}
-                <td className="p-3">
-                  <div className="flex gap-1.5 justify-center opacity-85 group-hover:opacity-100 transition-opacity">
+                <td className="p-3.5">
+                  <div className="flex gap-1.5 justify-center items-center opacity-85 group-hover:opacity-100 transition-opacity">
                     {customActions && customActions(r, { setData, data, toast })}
                     
                     {/* LIHAT DETAIL DOKUMEN & FORM LENGKAP */}
                     <button 
                       onClick={() => { setSelected(r); setModal('detail'); }} 
-                      className="p-1.5 bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white rounded-lg transition-colors border border-blue-500/30 flex items-center gap-1 text-xs font-bold" 
+                      className="px-2.5 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg transition-colors border border-blue-500/20 flex items-center gap-1 text-xs font-bold" 
                       title="Lihat Detail & Dokumen Lengkap"
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -159,7 +202,7 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
                     {/* CETAK / OVERVIEW DOKUMEN LANGSUNG */}
                     <button 
                       onClick={() => setPrintPreviewRow(r)} 
-                      className="p-1.5 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500 hover:text-white rounded-lg transition-colors border border-emerald-500/30 flex items-center gap-1 text-xs font-bold" 
+                      className="px-2.5 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-lg transition-colors border border-emerald-500/20 flex items-center gap-1 text-xs font-bold" 
                       title="Overview & Cetak PDF Resmi"
                     >
                       <Printer className="w-3.5 h-3.5" />
@@ -168,19 +211,20 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
 
                     {!isReadOnly && (
                       <>
-                        {/* EDIT DATA */}
+                        {/* EDIT DATA DENGAN STYLE ELEGAN */}
                         <button 
-                          onClick={() => { setSelected(r); setForm(r); setModal('edit'); }} 
-                          className="p-1.5 bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-white rounded-lg transition-colors border border-amber-500/30" 
-                          title="Edit Data"
+                          onClick={() => { setSelected(r); setForm({ ...r }); setModal('edit'); }} 
+                          className="px-2.5 py-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-600 hover:text-white rounded-lg transition-colors border border-amber-500/20 flex items-center gap-1 text-xs font-bold" 
+                          title="Edit & Perbarui Data"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span className="hidden md:inline">Edit</span>
                         </button>
 
                         {/* HAPUS DATA */}
                         <button 
                           onClick={() => del(r.id !== undefined && r.id !== null ? r.id : rIdx)} 
-                          className="p-1.5 bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white rounded-lg transition-colors border border-rose-500/30" 
+                          className="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-600 hover:text-white rounded-lg transition-colors border border-rose-500/20" 
                           title="Hapus Data"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -195,33 +239,172 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
         </table>
       </div>
 
-      {/* MODAL FORM TAMBAH / EDIT */}
+      {/* MODAL FORM TAMBAH / EDIT YANG DIPERCANTIK SECARA MAKSIMAL */}
       {modal && modal !== 'detail' && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-slate-800 rounded-2xl w-full max-w-lg border border-slate-700 shadow-2xl flex flex-col max-h-[90vh]">
-            <div className="bg-slate-800/90 p-5 flex justify-between items-center border-b border-slate-700 rounded-t-2xl">
-              <h3 className="font-bold text-white text-lg">
-                {modal === 'add' ? '+ Tambah Data Baru' : '✏️ Edit Data'}
-              </h3>
-              <button onClick={() => setModal(null)} className="text-slate-400 hover:text-white bg-slate-700/50 p-1.5 rounded-lg transition-colors">✕</button>
-            </div>
-            <div className="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
-              {columns.map((c, cIdx) => (
-                <div key={c.key || `form-${cIdx}`}>
-                  <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">{c.label}</label>
-                  <input 
-                    value={form[c.key] || ''} 
-                    onChange={e => setForm({ ...form, [c.key]: e.target.value })}
-                    placeholder={`Masukkan ${c.label}`}
-                    className="w-full p-3 rounded-xl bg-slate-900/80 border border-slate-700 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all text-sm" 
-                  />
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-[100] p-3 sm:p-4">
+          <div className="bg-slate-900 rounded-2xl w-full max-w-2xl border border-slate-700/80 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* MODAL HEADER */}
+            <div className={`p-5 flex justify-between items-center border-b ${
+              modal === 'edit' ? 'border-amber-500/20 bg-gradient-to-r from-amber-950/30 via-slate-900 to-slate-900' : 'border-cyan-500/20 bg-gradient-to-r from-cyan-950/30 via-slate-900 to-slate-900'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl border ${
+                  modal === 'edit' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+                }`}>
+                  {modal === 'edit' ? <Edit3 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                 </div>
-              ))}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-white text-base sm:text-lg">
+                      {modal === 'edit' ? 'Edit Data Record' : 'Tambah Data Baru'}
+                    </h3>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      modal === 'edit' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+                    }`}>
+                      {modal === 'edit' ? 'Mode Edit' : 'Input Baru'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1.5">
+                    <span>Modul: <strong className="text-slate-200">{title}</strong></span>
+                    {modal === 'edit' && selected?.id && (
+                      <>
+                        <span className="text-slate-600">•</span>
+                        <span className="font-mono text-slate-400">ID: #{selected.id}</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setModal(null)} 
+                className="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 p-2 rounded-xl transition-colors"
+                title="Tutup (Esc)"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <div className="border-t border-slate-700 p-4 bg-slate-800/80 rounded-b-2xl flex gap-3 justify-end">
-              <button onClick={() => setModal(null)} className="px-5 py-2.5 bg-slate-700 text-slate-200 rounded-lg hover:bg-slate-600 font-medium transition-colors text-sm">Batal</button>
-              <button onClick={save} className="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-bold shadow-lg shadow-cyan-900/30 transition-colors text-sm">💾 Simpan Perubahan</button>
-            </div>
+
+            {/* FORM BODY */}
+            <form onSubmit={save} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-5 sm:p-6 overflow-y-auto flex-1 custom-scrollbar space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {columns.map((c, cIdx) => {
+                    const keyLower = c.key.toLowerCase();
+                    const labelLower = c.label.toLowerCase();
+                    const isStatus = /status|kondisi|tahap|prioritas/.test(keyLower) || c.badge;
+                    const isDate = /tanggal|tgl|date|waktu/.test(keyLower);
+                    const isLongText = /catatan|keterangan|deskripsi|diagnosa|alamat|indikasi|ringkasan|notes|hasil/.test(keyLower);
+                    const isNumeric = /harga|tarif|jumlah|biaya|stok|qty|nominal|umur|kuota|total/.test(keyLower);
+                    const isCode = /no_|kode|nik|rm|rekam|id_/.test(keyLower);
+
+                    if (isLongText) {
+                      return (
+                        <div key={c.key || `form-${cIdx}`} className="col-span-1 sm:col-span-2">
+                          <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                            <span>{c.label}</span>
+                          </label>
+                          <textarea 
+                            rows={3}
+                            value={form[c.key] || ''} 
+                            onChange={e => setForm({ ...form, [c.key]: e.target.value })}
+                            placeholder={`Masukkan ${c.label}...`}
+                            className="w-full p-3 rounded-xl bg-slate-950/70 border border-slate-700 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all text-xs sm:text-sm placeholder:text-slate-600" 
+                          />
+                        </div>
+                      );
+                    }
+
+                    if (isStatus) {
+                      const currentVal = form[c.key] || (modal === 'add' ? 'Aktif' : '');
+                      return (
+                        <div key={c.key || `form-${cIdx}`}>
+                          <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                            <Activity className="w-3.5 h-3.5 text-amber-400" />
+                            <span>{c.label}</span>
+                          </label>
+                          <select
+                            value={currentVal}
+                            onChange={e => setForm({ ...form, [c.key]: e.target.value })}
+                            className="w-full p-3 rounded-xl bg-slate-950/70 border border-slate-700 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all text-xs sm:text-sm"
+                          >
+                            <option value="Aktif">🟢 Aktif</option>
+                            <option value="Selesai">🔵 Selesai</option>
+                            <option value="Proses">🟡 Dalam Proses</option>
+                            <option value="Pending">🟠 Pending / Menunggu</option>
+                            <option value="Tervalidasi">✅ Tervalidasi</option>
+                            <option value="Steril">✨ Steril</option>
+                            <option value="Lunas">💳 Lunas</option>
+                            <option value="Nonaktif">⚪ Nonaktif</option>
+                            <option value="Batal">🔴 Batal</option>
+                            {currentVal && !['Aktif','Selesai','Proses','Pending','Tervalidasi','Steril','Lunas','Nonaktif','Batal'].includes(currentVal) && (
+                              <option value={currentVal}>{currentVal}</option>
+                            )}
+                          </select>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={c.key || `form-${cIdx}`} className={columns.length === 1 ? 'col-span-1 sm:col-span-2' : ''}>
+                        <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                          {isDate ? (
+                            <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                          ) : isCode ? (
+                            <Hash className="w-3.5 h-3.5 text-cyan-400" />
+                          ) : (
+                            <Tag className="w-3.5 h-3.5 text-cyan-400" />
+                          )}
+                          <span>{c.label}</span>
+                        </label>
+                        <input 
+                          type={isDate ? 'date' : isNumeric ? 'number' : 'text'}
+                          value={form[c.key] || ''} 
+                          onChange={e => setForm({ ...form, [c.key]: e.target.value })}
+                          placeholder={`Masukkan ${c.label}`}
+                          className={`w-full p-3 rounded-xl bg-slate-950/70 border border-slate-700 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all text-xs sm:text-sm placeholder:text-slate-600 ${
+                            isCode ? 'font-mono' : ''
+                          }`} 
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* MODAL FOOTER */}
+              <div className="border-t border-slate-700/80 p-4 bg-slate-900/95 flex flex-wrap items-center justify-between gap-3">
+                <button 
+                  type="button" 
+                  onClick={resetForm}
+                  className="px-3.5 py-2 bg-slate-800 text-slate-300 hover:text-white rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors text-xs font-semibold flex items-center gap-1.5"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset Nilai</span>
+                </button>
+
+                <div className="flex items-center gap-2.5">
+                  <button 
+                    type="button" 
+                    onClick={() => setModal(null)} 
+                    className="px-4 py-2 bg-slate-800 text-slate-300 hover:text-white rounded-xl hover:bg-slate-700 border border-slate-700 transition-colors text-xs font-semibold"
+                  >
+                    Batal
+                  </button>
+                  <button 
+                    type="submit" 
+                    className={`px-5 py-2 text-white rounded-xl font-bold shadow-lg transition-all text-xs flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98] ${
+                      modal === 'edit'
+                        ? 'bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 shadow-amber-950/50'
+                        : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 shadow-cyan-950/50'
+                    }`}
+                  >
+                    <Save className="w-3.5 h-3.5" />
+                    <span>{modal === 'edit' ? 'Simpan Perubahan' : 'Tambahkan Data'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -235,7 +418,7 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
           data={selected}
           columns={columns}
           onEdit={(row) => {
-            setForm(row);
+            setForm({ ...row });
             setModal('edit');
           }}
         />

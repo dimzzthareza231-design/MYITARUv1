@@ -309,7 +309,7 @@ export function KwitansiTab({
                       Doc Hash: {selectedBilling.id.slice(0, 16).toUpperCase()}
                     </span>
                     <span className="text-[10px] text-emerald-600 font-semibold block">
-                      ✓ Sah & Tercatat Resmi di Database SIMRS
+                      ✓ Sah & Tercatat Resmi di Database SIMK
                     </span>
                   </div>
                 </div>

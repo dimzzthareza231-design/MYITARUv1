@@ -19,7 +19,7 @@ import { Patient360 } from './RME/Patient360';
 
 export function Outpatient() {
   const { activeTab } = useOutletContext<{ activeTab: string }>();
-  const { kunjungan, pasien, dokter, perawat, poli, addKunjungan, updateKunjunganStatus, syncAllData } = useHospital();
+  const { kunjungan, pasien, dokter, perawat, poli, addPasien, addKunjungan, updateKunjunganStatus, syncAllData } = useHospital();
   const toast = useToast();
   
   // Active Filter / Selection State
@@ -428,17 +428,22 @@ export function Outpatient() {
         toast.error('Pilih pasien atau masukkan nama pasien baru');
         return;
       }
-      chosenPatient = {
+      const newP: Pasien = {
         id: `P-${Date.now()}`,
         no_rm: newQueueForm.noRmManual || `RM-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`,
         nik: '3171' + Math.floor(100000000000 + Math.random() * 900000000000),
         nama: newQueueForm.namaManual,
         jenis_kelamin: 'L',
         tanggal_lahir: '1990-01-01',
+        tgl_lahir: '1990-01-01',
         telepon: '0812-8888-9999',
+        no_hp: '0812-8888-9999',
         penjamin: newQueueForm.penjamin,
-        status: 'Aktif'
-      } as any;
+        status: 'Aktif',
+        alamat: 'Kota Bandung, Jawa Barat'
+      };
+      chosenPatient = newP;
+      addPasien(newP);
     }
 
     if (!chosenPatient) {

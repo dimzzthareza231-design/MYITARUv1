@@ -560,8 +560,8 @@ export function generateAllPatientsWithResumes(): PatientFullRecord[] {
         }
       ],
       immunizations: [
-        { id: 1, vaksin: 'Hepatitis B Recombinant', tanggal: '2024-02-10', faskes: 'MYITARU SIMRS', batch: 'HB-9981' },
-        { id: 2, vaksin: 'Influenza Quadrivalent', tanggal: '2025-11-05', faskes: 'MYITARU SIMRS', batch: 'INF-4432' },
+        { id: 1, vaksin: 'Hepatitis B Recombinant', tanggal: '2024-02-10', faskes: 'MYITARU SIMK', batch: 'HB-9981' },
+        { id: 2, vaksin: 'Influenza Quadrivalent', tanggal: '2025-11-05', faskes: 'MYITARU SIMK', batch: 'INF-4432' },
         { id: 3, vaksin: 'COVID-19 Booster 2 (InaVac)', tanggal: '2023-08-14', faskes: 'Puskesmas Gambir', batch: 'COV-8821' }
       ],
       soap: {

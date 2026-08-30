@@ -96,7 +96,7 @@ function KelolaOrthanc({ onNavigate }: { onNavigate: (tab: string) => void }) {
           <div className="text-xl font-bold text-emerald-500 flex items-center gap-1.5">
             <CheckCircle2 className="w-5 h-5" /> Online (v1.12.3)
           </div>
-          <span className="text-xs text-slate-400 mt-1 block">AET: ORTHANC_SIMRS</span>
+          <span className="text-xs text-slate-400 mt-1 block">AET: ORTHANC_SIMK</span>
         </div>
 
         <div className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -326,7 +326,7 @@ function PengaturanOrthancTab() {
       </div>
       <div>
         <label className="block font-semibold mb-1">DICOM AET (Application Entity Title)</label>
-        <input type="text" defaultValue="ORTHANC_SIMRS" className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-mono" />
+        <input type="text" defaultValue="ORTHANC_SIMK" className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-mono" />
       </div>
       <div>
         <label className="block font-semibold mb-1">DICOM Port</label>

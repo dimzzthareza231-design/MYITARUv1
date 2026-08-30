@@ -205,25 +205,119 @@ function MasterTab({ items, setItems }: { items: any[], setItems: any }) {
         </tbody>
       </table>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editItem ? 'Edit Item' : 'Tambah Item'}>
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        title={editItem ? 'Edit Master Item' : 'Tambah Master Item Baru'}
+        subtitle={editItem ? `Perbarui data dan spesifikasi item: ${editItem.id}` : 'Registrasi barang medis, obat, atau BHP baru'}
+        icon={editItem ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+        variant={editItem ? 'edit' : 'add'}
+        badgeText={editItem ? editItem.id : 'Barang Baru'}
+      >
         <form onSubmit={handleSave} className="space-y-4">
           {!editItem && (
-            <div><label className="block text-sm mb-1">Kode Item (Kosongi utk Auto)</label><input type="text" className="input-field" value={form.id} onChange={e => setForm({...form, id: e.target.value})} /></div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                Kode Item (Kosongi untuk Auto-generate)
+              </label>
+              <input 
+                type="text" 
+                placeholder="Auto jika dikosongkan"
+                className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white font-mono focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" 
+                value={form.id} 
+                onChange={e => setForm({...form, id: e.target.value})} 
+              />
+            </div>
           )}
-          <div><label className="block text-sm mb-1">Nama Item</label><input required type="text" className="input-field" value={form.nama} onChange={e => setForm({...form, nama: e.target.value})} /></div>
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm mb-1">Kategori</label>
-              <select className="input-field" value={form.kategori} onChange={e => setForm({...form, kategori: e.target.value})}>
-                <option>Obat</option><option>BHP</option><option>Alkes</option>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+              Nama Item Barang Medis / Obat <span className="text-rose-500">*</span>
+            </label>
+            <input 
+              required 
+              type="text" 
+              placeholder="Contoh: Amoxicillin 500mg Kapsul"
+              className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" 
+              value={form.nama} 
+              onChange={e => setForm({...form, nama: e.target.value})} 
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                Kategori
+              </label>
+              <select 
+                className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" 
+                value={form.kategori} 
+                onChange={e => setForm({...form, kategori: e.target.value})}
+              >
+                <option>Obat</option>
+                <option>BHP</option>
+                <option>Alkes</option>
               </select>
             </div>
-            <div><label className="block text-sm mb-1">Unit Satuan</label><input required type="text" className="input-field" value={form.unit} onChange={e => setForm({...form, unit: e.target.value})} /></div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                Unit Satuan <span className="text-rose-500">*</span>
+              </label>
+              <input 
+                required 
+                type="text" 
+                placeholder="Tablet, Botol, Pcs, Box"
+                className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" 
+                value={form.unit} 
+                onChange={e => setForm({...form, unit: e.target.value})} 
+              />
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-sm mb-1">Min Stok (ROP)</label><input required type="number" className="input-field" value={form.min} onChange={e => setForm({...form, min: Number(e.target.value)})} /></div>
-            <div><label className="block text-sm mb-1">Harga (Rp)</label><input required type="number" className="input-field" value={form.harga} onChange={e => setForm({...form, harga: Number(e.target.value)})} /></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                Min Stok (ROP) <span className="text-rose-500">*</span>
+              </label>
+              <input 
+                required 
+                type="number" 
+                placeholder="100"
+                className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all" 
+                value={form.min} 
+                onChange={e => setForm({...form, min: Number(e.target.value)})} 
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                Harga Beli Satuan (Rp) <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">Rp</span>
+                <input 
+                  required 
+                  type="number" 
+                  placeholder="0"
+                  className="w-full pl-9 pr-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all font-mono" 
+                  value={form.harga} 
+                  onChange={e => setForm({...form, harga: Number(e.target.value)})} 
+                />
+              </div>
+            </div>
           </div>
-          <button type="submit" className="btn-primary w-full bg-teal-600">Simpan Item</button>
+          <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+            <button 
+              type="button" 
+              onClick={() => setIsModalOpen(false)}
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors border border-slate-300 dark:border-slate-700"
+            >
+              Batal
+            </button>
+            <button 
+              type="submit" 
+              className="px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/20 transition-all flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>{editItem ? 'Simpan Perubahan' : 'Tambah Item'}</span>
+            </button>
+          </div>
         </form>
       </Modal>
     </div>

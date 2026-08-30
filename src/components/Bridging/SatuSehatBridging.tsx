@@ -399,7 +399,7 @@ function MappingGenericTab({ title, type }: { title: string; type: string }) {
     <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-5">
       <div>
         <h3 className="text-lg font-bold text-slate-800 dark:text-white">{title}</h3>
-        <p className="text-xs text-slate-500">Korelasi kode internal SIMRS dengan standar Kemenkes SatuSehat.</p>
+        <p className="text-xs text-slate-500">Korelasi kode internal SIMK dengan standar Kemenkes SatuSehat.</p>
       </div>
 
       <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3">
@@ -407,7 +407,7 @@ function MappingGenericTab({ title, type }: { title: string; type: string }) {
           type="text"
           value={localInput}
           onChange={e => setLocalInput(e.target.value)}
-          placeholder="Nama / Kode Lokal SIMRS..."
+          placeholder="Nama / Kode Lokal SIMK..."
           className="flex-1 px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 text-xs focus:ring-2 focus:ring-teal-500 outline-none"
         />
         <input
@@ -429,7 +429,7 @@ function MappingGenericTab({ title, type }: { title: string; type: string }) {
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-50 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-700">
             <tr>
-              <th className="p-3">Data Internal SIMRS</th>
+              <th className="p-3">Data Internal SIMK</th>
               <th className="p-3">Standar SatuSehat Kemenkes</th>
               <th className="p-3">Status</th>
               <th className="p-3 text-right">Aksi</th>

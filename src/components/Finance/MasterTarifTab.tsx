@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Search, Plus, Edit2, Trash2, CheckCircle, XCircle, 
-  Tag, Download, Upload, Filter, DollarSign, Layers
+  Tag, Download, Upload, Filter, DollarSign, Layers, X, Save
 } from 'lucide-react';
 import { MasterTarifItem } from './types';
 import { useToast } from '../../contexts/ToastContext';
@@ -303,35 +303,74 @@ export function MasterTarifTab({
 
       {/* Modal Add / Edit Tariff */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
-              {editingTarif ? 'Edit Tarif Pelayanan' : 'Tambah Master Tarif Baru'}
-            </h3>
-
-            <form onSubmit={handleSaveForm} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-3 sm:p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 dark:border-slate-700/80 max-h-[92vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className={`p-5 flex items-center justify-between border-b ${
+              editingTarif 
+                ? 'border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-transparent to-transparent' 
+                : 'border-blue-500/20 bg-gradient-to-r from-blue-500/10 via-transparent to-transparent'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-xl border ${
+                  editingTarif 
+                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' 
+                    : 'bg-blue-500/10 text-blue-500 border-blue-500/30'
+                }`}>
+                  <Tag className="w-5 h-5" />
+                </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Kode Tarif
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                      {editingTarif ? 'Edit Tarif Pelayanan' : 'Tambah Master Tarif Baru'}
+                    </h3>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                      editingTarif 
+                        ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30' 
+                        : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30'
+                    }`}>
+                      {editingTarif ? 'Mode Edit' : 'Entri Baru'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    {editingTarif ? `Mengubah rincian tarif: ${editingTarif.kodeTarif}` : 'Konfigurasi tarif layanan dan pemecahan unit cost'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 p-2 rounded-xl transition-colors"
+                title="Tutup (Esc)"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveForm} className="flex-1 overflow-y-auto custom-scrollbar p-5 sm:p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                    Kode Tarif <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={kode}
                     onChange={(e) => setKode(e.target.value)}
-                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-mono"
+                    className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white font-mono focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+                    placeholder="TRF-XXX-001"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    Kategori
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                    Kategori Layanan
                   </label>
                   <select
                     value={kategori}
                     onChange={(e) => setKategori(e.target.value as any)}
-                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                    className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                   >
                     <option value="Konsultasi">Konsultasi Medis</option>
                     <option value="Tindakan Medis">Tindakan Medis</option>
@@ -345,28 +384,28 @@ export function MasterTarifTab({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                  Nama Layanan / Tindakan Medis
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
+                  Nama Layanan / Tindakan Medis <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   placeholder="Contoh: Konsultasi Dokter Spesialis Paru"
                   value={nama}
                   onChange={(e) => setNama(e.target.value)}
-                  className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                  className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Unit Pelayanan
                   </label>
                   <select
                     value={unit}
                     onChange={(e) => setUnit(e.target.value as any)}
-                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                    className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                   >
                     <option value="Rawat Jalan">Rawat Jalan</option>
                     <option value="Rawat Inap">Rawat Inap</option>
@@ -378,13 +417,13 @@ export function MasterTarifTab({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                     Kelas Ruangan
                   </label>
                   <select
                     value={kelas}
                     onChange={(e) => setKelas(e.target.value as any)}
-                    className="w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                    className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-xl text-xs sm:text-sm bg-slate-50 dark:bg-slate-950/70 text-slate-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
                   >
                     <option value="Non-Kelas">Non-Kelas / Ralan</option>
                     <option value="Kelas 3">Kelas 3</option>
@@ -397,78 +436,94 @@ export function MasterTarifTab({
               </div>
 
               {/* Rincian Komponen Jasa */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                  Pembagian Komponen Unit Cost:
-                </h4>
+              <div className="p-4 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Pembagian Komponen Unit Cost
+                  </h4>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">Rincian otomatis dijumlahkan</span>
+                </div>
                 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1">Jasa Klinik (Sarana & Prasarana)</label>
-                    <input
-                      type="number"
-                      step={1000}
-                      value={jasaRs}
-                      onChange={(e) => setJasaRs(Number(e.target.value))}
-                      className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium"
-                    />
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Jasa Sarana & RS</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">Rp</span>
+                      <input
+                        type="number"
+                        step={1000}
+                        value={jasaRs}
+                        onChange={(e) => setJasaRs(Number(e.target.value))}
+                        className="w-full pl-9 pr-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium outline-none focus:border-blue-500 transition-all"
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1">Jasa Medis Dokter (JM Dokter)</label>
-                    <input
-                      type="number"
-                      step={1000}
-                      value={jasaDokter}
-                      onChange={(e) => setJasaDokter(Number(e.target.value))}
-                      className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium text-emerald-600"
-                    />
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Jasa Medis Dokter (JM)</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs text-emerald-500 font-bold">Rp</span>
+                      <input
+                        type="number"
+                        step={1000}
+                        value={jasaDokter}
+                        onChange={(e) => setJasaDokter(Number(e.target.value))}
+                        className="w-full pl-9 pr-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs sm:text-sm bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 font-medium outline-none focus:border-blue-500 transition-all"
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1">Jasa Paramedis / Perawat</label>
-                    <input
-                      type="number"
-                      step={1000}
-                      value={jasaParamedis}
-                      onChange={(e) => setJasaParamedis(Number(e.target.value))}
-                      className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium"
-                    />
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Jasa Paramedis / Perawat</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">Rp</span>
+                      <input
+                        type="number"
+                        step={1000}
+                        value={jasaParamedis}
+                        onChange={(e) => setJasaParamedis(Number(e.target.value))}
+                        className="w-full pl-9 pr-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium outline-none focus:border-blue-500 transition-all"
+                      />
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-500 mb-1">Bahan Habis Pakai (BHP)</label>
-                    <input
-                      type="number"
-                      step={1000}
-                      value={bhp}
-                      onChange={(e) => setBhp(Number(e.target.value))}
-                      className="w-full p-2 border border-slate-300 dark:border-slate-600 rounded text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium"
-                    />
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">Bahan Habis Pakai (BHP)</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2.5 text-xs text-slate-400 font-bold">Rp</span>
+                      <input
+                        type="number"
+                        step={1000}
+                        value={bhp}
+                        onChange={(e) => setBhp(Number(e.target.value))}
+                        className="w-full pl-9 pr-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs sm:text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium outline-none focus:border-blue-500 transition-all"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-sm font-bold text-slate-900 dark:text-white">
-                  <span>Total Tarif Yang Ditagihkan:</span>
-                  <span className="text-blue-600 dark:text-blue-400 text-base">
+                <div className="pt-3 border-t border-slate-200 dark:border-slate-700/80 flex justify-between items-center text-sm font-bold text-slate-900 dark:text-white bg-blue-50/50 dark:bg-blue-950/20 p-3 rounded-lg">
+                  <span className="text-xs sm:text-sm">Total Tarif Yang Ditagihkan:</span>
+                  <span className="text-blue-600 dark:text-blue-400 text-base sm:text-lg font-mono">
                     Rp {(jasaRs + jasaDokter + jasaParamedis + bhp).toLocaleString('id-ID')}
                   </span>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium transition-colors"
+                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors border border-slate-300 dark:border-slate-700"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold transition-colors"
+                  className="px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/20 transition-all flex items-center gap-1.5 hover:scale-[1.02] active:scale-[0.98]"
                 >
-                  Simpan Tarif
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Simpan Tarif</span>
                 </button>
               </div>
             </form>

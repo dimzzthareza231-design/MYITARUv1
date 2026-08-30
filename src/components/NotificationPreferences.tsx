@@ -73,7 +73,7 @@ export function NotificationPreferences() {
             Pengaturan & Preferensi Notifikasi
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Atur saluran pengiriman notifikasi, trigger peristiwa klinis, dan mode hening SIMRS.
+            Atur saluran pengiriman notifikasi, trigger peristiwa klinis, dan mode hening SIMK.
           </p>
         </div>
       </div>

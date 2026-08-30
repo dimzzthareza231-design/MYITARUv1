@@ -26,8 +26,8 @@ export function Profile() {
     email: currentUser?.email || 'admin@myitaru.klinik',
     no_telepon: '081234567890',
     jabatan: currentUser?.roleId === 'super_admin' ? 'Super Administrator' : currentUser?.roleId === 'dokter' ? 'Dokter Spesialis' : currentUser?.roleId === 'viewer' ? 'Guest Viewer' : 'Staff Klinik',
-    departemen: 'Teknologi Informasi & SIMRS',
-    spesialisasi: currentUser?.roleId === 'dokter' ? 'Spesialis Penyakit Dalam' : 'Manajemen SIMRS',
+    departemen: 'Teknologi Informasi & SIMK',
+    spesialisasi: currentUser?.roleId === 'dokter' ? 'Spesialis Penyakit Dalam' : 'Manajemen SIMK',
     str_number: 'STR-123456-990',
     sip_number: 'SIP-789012-441',
     tanggal_lahir: '1985-01-15',
@@ -36,7 +36,7 @@ export function Profile() {
     foto_url: currentUser?.photoURL || '',
     join_date: '2020-01-01',
     status_kepegawaian: 'Pegawai Tetap',
-    unit_kerja: 'Instalasi SIMRS & Rekam Medis'
+    unit_kerja: 'Instalasi SIMK & Rekam Medis'
   });
 
   // Load profile from localStorage or sync with currentUser
@@ -481,7 +481,7 @@ export function Profile() {
             <div className="space-y-3">
               {[
                 { action: 'Login Berhasil via Web Dashboard', time: 'Baru saja', ip: '192.168.1.102', status: 'Sukses', icon: Shield, color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30' },
-                { action: 'Akses Modul Pengaturan SIMRS', time: '15 menit lalu', ip: '192.168.1.102', status: 'Sukses', icon: FileText, color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
+                { action: 'Akses Modul Pengaturan SIMK', time: '15 menit lalu', ip: '192.168.1.102', status: 'Sukses', icon: FileText, color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
                 { action: 'Perubahan Konfigurasi Sistem', time: '1 jam lalu', ip: '192.168.1.102', status: 'Sukses', icon: CheckCircle, color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
                 { action: 'Sesi Aktif Diperbarui', time: '3 jam lalu', ip: '192.168.1.102', status: 'Sukses', icon: Activity, color: 'text-amber-600 bg-amber-100 dark:bg-amber-900/30' }
               ].map((act, i) => (

@@ -25,7 +25,7 @@ export function MonitoringSystem() {
             Monitoring Infrastruktur & Performa Sistem
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Telemetri metrik server, pelacak exception HTTP/Database, dan log transaksi real-time SIMRS.
+            Telemetri metrik server, pelacak exception HTTP/Database, dan log transaksi real-time SIMK.
           </p>
         </div>
       </div>
@@ -79,7 +79,7 @@ function HealthTab() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-5 border border-slate-200 dark:border-slate-700 space-y-2">
           <div className="flex justify-between items-center text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            <span>Uptime Layanan SIMRS</span>
+            <span>Uptime Layanan SIMK</span>
             <Server className="w-4 h-4 text-emerald-500" />
           </div>
           <div className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">99.98%</div>

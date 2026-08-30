@@ -79,7 +79,7 @@ export function AuditTrail() {
       iframe.contentDocument.write(`
         <html>
           <head>
-            <title>Audit Trail Report - MYITARU SIMRS</title>
+            <title>Audit Trail Report - MYITARU SIMK</title>
             <style>
               body { font-family: Arial, sans-serif; padding: 24px; color: #1e293b; }
               h1 { color: #0f172a; margin-bottom: 4px; }
@@ -91,7 +91,7 @@ export function AuditTrail() {
             </style>
           </head>
           <body>
-            <h1>Laporan Audit Trail Sistem SIMRS</h1>
+            <h1>Laporan Audit Trail Sistem SIMK</h1>
             <p>Dicetak pada: ${new Date().toLocaleString('id-ID')} | Total Catatan: ${filteredLogs.length}</p>
             ${printContent}
           </body>
@@ -142,7 +142,7 @@ export function AuditTrail() {
             Audit Trail & Log Aktivitas
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-            Rekaman jejak integritas keamanan dan seluruh transaksi operasional SIMRS.
+            Rekaman jejak integritas keamanan dan seluruh transaksi operasional SIMK.
           </p>
         </div>
 
@@ -239,7 +239,7 @@ export function AuditTrail() {
               <option value="Laboratorium">Laboratorium</option>
               <option value="Radiologi">Radiologi</option>
               <option value="Rekam Medis">Rekam Medis (RME)</option>
-              <option value="Pengaturan">Pengaturan SIMRS</option>
+              <option value="Pengaturan">Pengaturan SIMK</option>
               <option value="Auth">Keamanan & Login</option>
             </select>
           </div>

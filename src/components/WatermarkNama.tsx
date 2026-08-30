@@ -30,7 +30,7 @@ export default function WatermarkNama() {
       <div className="absolute top-20 right-4 pointer-events-none select-none z-10 hidden md:block">
         <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-blue-200 dark:border-blue-800">
           <div className="text-xs text-right text-gray-700 dark:text-gray-300">
-            <div className="font-bold text-blue-700 dark:text-blue-400">SIMRS Myitaru</div>
+            <div className="font-bold text-blue-700 dark:text-blue-400">SIMK Myitaru</div>
             <div className="font-semibold">Dimas P. Alifia</div>
             <div className="italic text-gray-600 dark:text-gray-400">Mahasiswa ITARU</div>
           </div>

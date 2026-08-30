@@ -114,7 +114,7 @@ export function RadiologiDashboard() {
                 Instalasi Radiologi & Diagnostic Imaging
               </h1>
               <p className="text-xs text-pink-200/80">
-                Radiology Information System (RIS) & Cloud PACS Terintegrasi MYITARU SIMRS
+                Radiology Information System (RIS) & Cloud PACS Terintegrasi MYITARU SIMK
               </p>
             </div>
           </div>

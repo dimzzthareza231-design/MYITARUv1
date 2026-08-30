@@ -141,7 +141,7 @@ export function ProfessionalTable<T extends { id?: string | number; [key: string
       department: 'Sistem Informasi Klinik',
       notes: `Total ${filteredData.length} data tercatat dalam sistem. Menampilkan hingga 100 data teratas.`,
       signatures: [
-        { role: 'Petugas / Operator', name: 'Staf Administrasi SIMRS' },
+        { role: 'Petugas / Operator', name: 'Staf Administrasi SIMK' },
         { role: 'Kepala Instalasi / Unit', name: 'dr. Penanggung Jawab, Sp.PK' }
       ],
       sections: [

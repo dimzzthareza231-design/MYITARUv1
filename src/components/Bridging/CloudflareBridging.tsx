@@ -282,7 +282,7 @@ export function CloudflareBridging() {
                 </span>
               </div>
               <p className="text-orange-100 text-sm mt-1 max-w-2xl">
-                Perlindungan DDoS L3/L4/L7, Anti-Bot Turnstile, SSL/TLS Full Strict, Web Application Firewall (WAF), dan Cloudflare R2 Storage untuk SIMRS MY ITARU.
+                Perlindungan DDoS L3/L4/L7, Anti-Bot Turnstile, SSL/TLS Full Strict, Web Application Firewall (WAF), dan Cloudflare R2 Storage untuk SIMK MY ITARU.
               </p>
             </div>
           </div>
@@ -395,16 +395,16 @@ export function CloudflareBridging() {
           <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 shadow-lg">
             <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-orange-400" />
-              Status Integrasi Cloudflare SIMRS
+              Status Integrasi Cloudflare SIMK
             </h2>
             <div className="space-y-3">
               {[
                 { title: 'Cloudflare Turnstile Anti-Bot', desc: 'Melindungi halaman login, registrasi pasien, dan antrian dari brute force.', status: turnstileConfig.enabled, tab: 'turnstile' },
-                { title: 'DNS & Proxied Domain CNAME', desc: 'Mengarahkan simrs.klinik-myitaru.co.id ke server dengan proteksi DDoS Orange Cloud.', status: true, tab: 'dns' },
+                { title: 'DNS & Proxied Domain CNAME', desc: 'Mengarahkan simk.klinik-myitaru.co.id ke server dengan proteksi DDoS Orange Cloud.', status: true, tab: 'dns' },
                 { title: 'Enkripsi SSL/TLS End-to-End', desc: 'Sertifikat otomatis Cloudflare Universal SSL dengan enkripsi tingkat klinik.', status: true, tab: 'dns' },
                 { title: 'WAF Rate Limiting & Geo-Blocking', desc: 'Membatasi request flood ke API SatuSehat/VClaim & challenge IP asing.', status: true, tab: 'waf' },
                 { title: 'R2 Object Storage untuk Rekam Medis', desc: 'Penyimpanan berkas radiologi (DICOM) & hasil lab tanpa biaya download data.', status: true, tab: 'r2' },
-                { title: 'Cloudflare Tunnel (Zero Trust)', desc: 'Akses internal SIMRS tanpa membuka port publik 80/443 di router Klinik.', status: true, tab: 'tunnel' }
+                { title: 'Cloudflare Tunnel (Zero Trust)', desc: 'Akses internal SIMK tanpa membuka port publik 80/443 di router Klinik.', status: true, tab: 'tunnel' }
               ].map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between p-3.5 bg-slate-900/60 rounded-xl border border-slate-700/50">
                   <div className="flex items-center gap-3">
@@ -442,7 +442,7 @@ export function CloudflareBridging() {
                 Konfigurasi Cloudflare Turnstile
               </h2>
               <p className="text-xs text-slate-400 mb-6">
-                Turnstile menggantikan CAPTCHA lama tanpa puzzle menyebalkan. Lindungi login SIMRS dari bot secara instan.
+                Turnstile menggantikan CAPTCHA lama tanpa puzzle menyebalkan. Lindungi login SIMK dari bot secara instan.
               </p>
 
               <div className="space-y-4">
@@ -634,12 +634,12 @@ export function CloudflareBridging() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Custom Domain SIMRS</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Custom Domain SIMK</label>
                 <input
                   type="text"
                   value={domainConfig.customDomain}
                   onChange={(e) => setDomainConfig({ ...domainConfig, customDomain: e.target.value })}
-                  placeholder="simrs.namaklinik.co.id"
+                  placeholder="simk.namaklinik.co.id"
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none font-semibold"
                 />
               </div>
@@ -651,7 +651,7 @@ export function CloudflareBridging() {
                   onChange={(e) => setDomainConfig({ ...domainConfig, sslMode: e.target.value })}
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:border-orange-500 focus:outline-none"
                 >
-                  <option value="Full (Strict)">Full (Strict) - Direkomendasikan untuk SIMRS</option>
+                  <option value="Full (Strict)">Full (Strict) - Direkomendasikan untuk SIMK</option>
                   <option value="Full">Full</option>
                   <option value="Flexible">Flexible</option>
                 </select>
@@ -868,7 +868,7 @@ export function CloudflareBridging() {
           <div className="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-6 shadow-lg">
             <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
               <Terminal className="w-5 h-5 text-orange-400" />
-              Cloudflare Tunnel (Zero Trust on-premise SIMRS)
+              Cloudflare Tunnel (Zero Trust on-premise SIMK)
             </h2>
             <p className="text-xs text-slate-400 mb-6">
               Hubungkan server lokal Klinik ke internet dengan aman tanpa perlu IP Publik Statis atau membuka port 80/443 di router klinik.

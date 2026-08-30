@@ -272,7 +272,7 @@ function RolesTab() {
               Role & Permission Matrix
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              Atur hak akses granular setiap peran pengguna ke modul-modul SIMRS secara real-time.
+              Atur hak akses granular setiap peran pengguna ke modul-modul SIMK secara real-time.
             </p>
           </div>
 

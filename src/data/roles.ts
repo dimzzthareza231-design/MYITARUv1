@@ -81,7 +81,7 @@ export const ROLES: Role[] = [
   },
   {
     id: 'admin',
-    nama: 'Administrator SIMRS',
+    nama: 'Administrator SIMK',
     icon: '🔧',
     warna: 'from-slate-500 to-slate-700',
     deskripsi: 'Pengelolaan master data, pegawai, logistik inventory, bridging eksternal, laporan, dan konfigurasi Klinik.',

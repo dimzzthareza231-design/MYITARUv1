@@ -149,7 +149,7 @@ export function AnalyticsDashboard() {
       documentNumber: `LAP-EKS/${new Date().getFullYear()}/${Math.floor(1000 + Math.random() * 9000)}`,
       date: new Date().toISOString().split('T')[0],
       department: 'Direksi & Manajemen Klinik',
-      notes: `Laporan analitik eksekutif periode ${period}. Data terintegrasi dari seluruh unit kerja SIMRS.`,
+      notes: `Laporan analitik eksekutif periode ${period}. Data terintegrasi dari seluruh unit kerja SIMK.`,
       signatures: [
         { role: 'Manajer Keuangan & Akuntansi', name: 'Ahmad Fauzi, SE, Ak., CA' },
         { role: 'Direktur Utama Klinik', name: 'dr. H. Hendra Wijaya, Sp.B, MARS' }

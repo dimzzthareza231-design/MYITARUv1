@@ -26,7 +26,12 @@ export const MODULE_REGISTRY = [
     },
     
     { id: 'pendaftaran', label: 'Pendaftaran Pasien', icon: '📝', color: 'from-blue-500 to-blue-600', SPECIAL: true,
-      submenus: [{ label: 'Pasien Baru', cols: 'pasien', source: 'db_pasien' }, { label: 'Cari Pasien', cols: 'pasien', source: 'db_pasien' }, { label: 'Riwayat Kunjungan', cols: 'pasien', source: 'db_pasien' }, { label: 'Antrian', cols: 'antrian' }] },
+      submenus: [
+        { label: '1. Master Pasien', cols: 'pasien', source: 'db_pasien' },
+        { label: '2. Registrasi Kunjungan', cols: 'pasien', source: 'db_kunjungan' },
+        { label: '3. Antrian', cols: 'antrian', source: 'db_antrian' },
+        { label: '4. Riwayat Pendaftaran', cols: 'pasien', source: 'db_kunjungan' }
+      ] },
     { id: 'igd', label: 'IGD', icon: '🚑', color: 'from-red-500 to-red-600', SPECIAL: true,
       submenus: [{ label: 'Triase', cols: 'triase', source: 'myitaru_igd_triase' }, { label: 'Penanganan IGD', cols: 'dokumen' }, { label: 'Observasi', cols: 'dokumen' }, { label: 'Dokter IGD', cols: 'pegawai', source: 'db_dokter_igd' }] },
     { id: 'rawat-jalan', label: 'Poliklinik', icon: '🩺', color: 'from-teal-500 to-teal-600', SPECIAL: true,

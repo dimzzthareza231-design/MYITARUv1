@@ -165,16 +165,40 @@ export function RegistrationForm({ initialData, onClose }: { initialData?: any, 
     toast.success('Pendaftaran berhasil disimpan!');
     
     // Convert state to proper patient format
+    const fullAddress = [formData.alamatKtp, formData.rt ? `RT ${formData.rt}` : '', formData.rw ? `RW ${formData.rw}` : '', formData.kelurahan, formData.kecamatan, formData.kotaKabupaten, formData.provinsi].filter(Boolean).join(', ') || formData.alamatDomisili || 'Kota Bandung, Jawa Barat';
+
     const newPatient = {
       id: Date.now().toString(),
       no_rm: formData.noRm,
       nik: formData.nik,
       nama: formData.namaLengkap,
+      nama_pasien: formData.namaLengkap,
       jenis_kelamin: formData.jenisKelamin,
       tgl_lahir: formData.tanggalLahir,
+      tanggal_lahir: formData.tanggalLahir,
       no_hp: formData.noHpUtama,
+      telepon: formData.noHpUtama,
       penjamin: formData.jenisPenjamin,
-      status: 'Menunggu'
+      status: 'Aktif',
+      alamat: fullAddress,
+      alamat_ktp: formData.alamatKtp,
+      alamat_domisili: formData.alamatDomisili,
+      golongan_darah: formData.golonganDarah || 'O',
+      rhesus: formData.rhesus || '+',
+      agama: formData.agama || 'Islam',
+      pekerjaan: formData.pekerjaan || 'Karyawan Swasta',
+      status_pekerjaan: formData.statusPekerjaan,
+      pendidikan: formData.pendidikanTerakhir || 'SMA/Sederajat',
+      status_perkawinan: formData.statusPerkawinan || 'Menikah',
+      suku_bangsa: formData.sukuBangsa || 'Sunda/Jawa',
+      bahasa: formData.bahasa || 'Indonesia',
+      kewarganegaraan: formData.kewarganegaraan || 'WNI',
+      kontak_darurat: formData.kontakDarurat || [],
+      no_kartu_bpjs: formData.noKartuBpjs || '',
+      nama_ibu_kandung: formData.namaIbuKandung || '',
+      keluhan_utama: formData.keluhanUtama || '',
+      diagnosa_primer: formData.diagnosisRujukan || '',
+      tanda_vital: formData.tandaVital
     };
     
     // Simpan ke HospitalContext (Data Master)
