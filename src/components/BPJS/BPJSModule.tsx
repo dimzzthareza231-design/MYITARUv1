@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import {
   LayoutDashboard, Users, FileText, Ticket, ClipboardCheck,
   RefreshCcw, Receipt, Bot, FileCode2, TerminalSquare, Settings,
-  Activity, Clock, History, ShieldCheck, CalendarClock
+  Activity, Clock, History, ShieldCheck, CalendarClock,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { DashboardBPJS } from './Tabs/DashboardBPJS';
 import { DataPesertaBPJS } from './Tabs/DataPesertaBPJS';
@@ -21,6 +22,7 @@ import { ICareJKN } from './Tabs/ICareJKN';
 
 export function BPJSModule() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard BPJS', icon: LayoutDashboard },
@@ -59,27 +61,66 @@ export function BPJSModule() {
 
   return (
     <div className="flex h-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-      {/* Inner Sidebar for BPJS */}
-      <div className="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0">
-        <div className="p-4 border-b border-slate-200 dark:border-slate-700">
-          <h2 className="font-bold text-slate-800 dark:text-white text-lg">Modul BPJS</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Integrasi P-Care & V-Claim</p>
+      {/* Inner Sidebar for BPJS (Collapsible with smooth transitions & hover feedback) */}
+      <div className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shrink-0 transition-all duration-300 ease-in-out`}>
+        <div className={`p-4 border-b border-slate-200 dark:border-slate-700 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} transition-all duration-300`}>
+          {!isSidebarCollapsed && (
+            <div className="overflow-hidden transition-all duration-300">
+              <h2 className="font-bold text-slate-800 dark:text-white text-base leading-tight">Modul BPJS</h2>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Integrasi P-Care & V-Claim</p>
+            </div>
+          )}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200 shadow-2xs hover:scale-105 active:scale-95"
+            title={isSidebarCollapsed ? 'Perluas Sidebar' : 'Sempitkan Sidebar'}
+          >
+            {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-3 space-y-1 custom-scrollbar">
+
+        <div className={`flex-1 overflow-y-auto space-y-1 custom-scrollbar transition-all duration-300 ${isSidebarCollapsed ? 'p-2' : 'p-3'}`}>
           {menuItems.map(item => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`group relative w-full flex items-center gap-2.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                  isSidebarCollapsed ? 'justify-center p-2.5' : 'px-3 py-2.5'
+                } ${
                   isActive
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold shadow-xs border border-blue-200/70 dark:border-blue-800/60'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/90 dark:hover:bg-slate-700/60 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
-                <item.icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
-                {item.label}
+                {/* Active Indicator Bar */}
+                {isActive && !isSidebarCollapsed && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-600 dark:bg-blue-400 rounded-r-full" />
+                )}
+
+                {/* Menu Icon with distinct hover feedback */}
+                <div className={`p-1.5 rounded-lg transition-all duration-200 shrink-0 flex items-center justify-center ${
+                  isActive
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-sm shadow-blue-500/30 scale-105'
+                    : 'bg-slate-100 dark:bg-slate-700/80 text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/40 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:scale-110 group-hover:shadow-xs'
+                }`}>
+                  <item.icon className="w-4 h-4 transition-transform duration-200" />
+                </div>
+
+                {/* Text Label with smooth width */}
+                {!isSidebarCollapsed && (
+                  <span className="truncate text-left flex-1 transition-all duration-200">
+                    {item.label}
+                  </span>
+                )}
+
+                {/* Floating Tooltip when collapsed */}
+                {isSidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xl border border-slate-700/80 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible pointer-events-none transition-all duration-200 z-50 translate-x-1 group-hover:translate-x-0">
+                    {item.label}
+                  </div>
+                )}
               </button>
             );
           })}

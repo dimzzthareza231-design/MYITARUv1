@@ -128,7 +128,7 @@ export function PoliPelayanan() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sidebar: Daftar Poli */}
         <div className="lg:col-span-1 space-y-2">
-          <h2 className="font-bold text-slate-700 dark:text-slate-300 mb-3">Pilih Poli</h2>
+          <h2 className="font-bold text-slate-700 dark:text-slate-300 mb-3 text-sm">Pilih Poli Layanan</h2>
           {poliList.map(poli => {
             const jumlahAntrian = antrianList.filter(a => a.poliId === poli.id && a.status === 'Menunggu').length;
             const isActive = selectedPoli === poli.id;
@@ -136,23 +136,38 @@ export function PoliPelayanan() {
               <button
                 key={poli.id}
                 onClick={() => setSelectedPoli(poli.id)}
-                className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+                className={`group relative w-full p-3.5 rounded-xl border text-left transition-all duration-200 flex items-center justify-between shadow-2xs ${
                   isActive
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-300'
+                    ? 'border-blue-500 bg-blue-50/80 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200 shadow-sm'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-300'
                 }`}
               >
+                {/* Active Indicator */}
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-blue-600 dark:bg-blue-400 rounded-r-full" />
+                )}
+
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{poli.icon}</span>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl transition-transform duration-200 shrink-0 ${
+                    isActive 
+                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30 scale-105' 
+                      : 'bg-slate-100 dark:bg-slate-700 group-hover:scale-110 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30'
+                  }`}>
+                    {poli.icon}
+                  </div>
                   <div>
-                    <p className="font-bold text-slate-800 dark:text-white text-sm">{poli.nama}</p>
-                    <p className="text-xs text-slate-500">Kode: {poli.kode}</p>
+                    <p className={`font-bold text-sm transition-colors ${isActive ? 'text-blue-700 dark:text-blue-300' : 'text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}>
+                      {poli.nama}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Kode: {poli.kode}</p>
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  jumlahAntrian > 0 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'
+                <span className={`px-2.5 py-1 rounded-full text-xs font-bold transition-transform duration-200 group-hover:scale-105 ${
+                  jumlahAntrian > 0 
+                    ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800' 
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                 }`}>
-                  {jumlahAntrian}
+                  {jumlahAntrian} Antrian
                 </span>
               </button>
             );

@@ -4,7 +4,8 @@ import {
   ZoomIn, ZoomOut, RotateCw, RotateCcw, FlipHorizontal, FlipVertical,
   Sun, Contrast, Ruler, Compass, Disc, RefreshCw, Download, 
   Layers, Play, Pause, Maximize2, ShieldCheck, Eye, 
-  FileText, Activity, AlertCircle, Sparkles, Sliders
+  FileText, Activity, AlertCircle, Sparkles, Sliders,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -27,6 +28,7 @@ const WINDOW_PRESETS = [
 
 export function PACSViewerTab({ radiologiList, selectedItemId, selectedStudyItem, onOpenEkspertise }: PACSViewerTabProps) {
   const toast = useToast();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
   // Select active patient study
   const [activeItem, setActiveItem] = useState<RadiologiItem>(() => {
@@ -551,20 +553,31 @@ export function PACSViewerTab({ radiologiList, selectedItemId, selectedStudyItem
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 h-full">
-      {/* 1. LEFT SIDEBAR: PATIENT STUDY LIST */}
-      <div className="w-full lg:w-80 bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 flex flex-col gap-3 shrink-0">
-        <div className="flex items-center justify-between pb-2 border-b border-slate-700">
-          <div className="flex items-center gap-2">
-            <Layers className="w-5 h-5 text-pink-400" />
-            <h3 className="font-bold text-white text-sm">Study Worklist PACS</h3>
+      {/* 1. LEFT SIDEBAR: PATIENT STUDY LIST (Collapsible with smooth transition) */}
+      <div className={`w-full ${isSidebarCollapsed ? 'lg:w-20' : 'lg:w-80'} bg-slate-900/90 border border-slate-700/80 rounded-2xl p-3.5 flex flex-col gap-3 shrink-0 transition-all duration-300 ease-in-out`}>
+        <div className={`flex items-center ${isSidebarCollapsed ? 'lg:justify-center' : 'justify-between'} pb-2 border-b border-slate-700 transition-all duration-300`}>
+          <div className="flex items-center gap-2 overflow-hidden">
+            <div className="p-1.5 bg-pink-500/20 text-pink-400 rounded-lg shrink-0">
+              <Layers className="w-4 h-4" />
+            </div>
+            {!isSidebarCollapsed && (
+              <div className="overflow-hidden transition-all duration-300">
+                <h3 className="font-bold text-white text-xs truncate">Worklist PACS</h3>
+                <span className="text-[10px] text-slate-400 font-mono">{radiologiList.length} Studies</span>
+              </div>
+            )}
           </div>
-          <span className="px-2 py-0.5 bg-pink-500/20 text-pink-300 text-xs font-mono font-bold rounded-full">
-            {radiologiList.length} Studies
-          </span>
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200 shadow-2xs hover:scale-105 active:scale-95"
+            title={isSidebarCollapsed ? 'Perluas Study Worklist' : 'Sempitkan Study Worklist'}
+          >
+            {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
         </div>
 
         {/* Study Cards */}
-        <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 max-h-[620px]">
+        <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 max-h-[620px] custom-scrollbar">
           {radiologiList.map((item) => {
             const isSelected = item.id === activeItem.id;
             return (
@@ -575,31 +588,54 @@ export function PACSViewerTab({ radiologiList, selectedItemId, selectedStudyItem
                   setCurrentSlice(1);
                   handleReset();
                 }}
-                className={`p-3 rounded-xl cursor-pointer transition-all border text-left ${
+                className={`group relative p-2.5 rounded-xl cursor-pointer transition-all duration-200 border text-left ${
+                  isSidebarCollapsed ? 'lg:p-2 lg:text-center' : ''
+                } ${
                   isSelected
-                    ? 'bg-gradient-to-r from-pink-950/60 to-slate-800 border-pink-500 shadow-md shadow-pink-500/10'
-                    : 'bg-slate-800/60 border-slate-700 hover:border-slate-500 hover:bg-slate-800'
+                    ? 'bg-gradient-to-r from-pink-950/70 to-slate-800 border-pink-500 shadow-md shadow-pink-500/10'
+                    : 'bg-slate-800/60 border-slate-700/80 hover:border-slate-500 hover:bg-slate-800/90'
                 }`}
               >
-                <div className="flex items-start justify-between gap-1">
-                  <span className="text-xs font-mono font-bold text-pink-400">{item.id}</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                    item.modalitas === 'CT-Scan' ? 'bg-indigo-500/20 text-indigo-300' :
-                    item.modalitas === 'MRI' ? 'bg-purple-500/20 text-purple-300' :
-                    item.modalitas === 'USG' ? 'bg-cyan-500/20 text-cyan-300' :
-                    'bg-slate-700 text-slate-300'
-                  }`}>
-                    {item.modalitas}
-                  </span>
-                </div>
+                {!isSidebarCollapsed ? (
+                  <>
+                    <div className="flex items-start justify-between gap-1">
+                      <span className="text-xs font-mono font-bold text-pink-400">{item.id}</span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        item.modalitas === 'CT-Scan' ? 'bg-indigo-500/20 text-indigo-300' :
+                        item.modalitas === 'MRI' ? 'bg-purple-500/20 text-purple-300' :
+                        item.modalitas === 'USG' ? 'bg-cyan-500/20 text-cyan-300' :
+                        'bg-slate-700 text-slate-300'
+                      }`}>
+                        {item.modalitas}
+                      </span>
+                    </div>
 
-                <div className="font-bold text-white text-xs mt-1 truncate">{item.nama_pasien}</div>
-                <div className="text-[11px] text-slate-300 font-medium truncate">{item.nama_pemeriksaan}</div>
+                    <div className="font-bold text-white text-xs mt-1 truncate">{item.nama_pasien}</div>
+                    <div className="text-[11px] text-slate-300 font-medium truncate">{item.nama_pemeriksaan}</div>
 
-                <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2 pt-1.5 border-t border-slate-700/60">
-                  <span>RM: {item.no_rm}</span>
-                  <span>{item.tanggal_order}</span>
-                </div>
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 mt-2 pt-1.5 border-t border-slate-700/60">
+                      <span>RM: {item.no_rm}</span>
+                      <span>{item.tanggal_order}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-1">
+                    <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold transition-transform duration-200 group-hover:scale-110 ${
+                      isSelected ? 'bg-pink-600 text-white shadow-sm shadow-pink-500/30' : 'bg-slate-700 text-slate-300 group-hover:bg-pink-500/20 group-hover:text-pink-300'
+                    }`}>
+                      {item.modalitas?.slice(0, 3) || 'IMG'}
+                    </span>
+                    <span className="text-[9px] font-mono text-slate-400 truncate w-full text-center">{item.no_rm?.slice(-4)}</span>
+                  </div>
+                )}
+
+                {/* Floating Tooltip when collapsed */}
+                {isSidebarCollapsed && (
+                  <div className="hidden lg:block absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl border border-slate-700 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible pointer-events-none transition-all duration-200 z-50 translate-x-1 group-hover:translate-x-0">
+                    <div className="font-bold text-pink-300">{item.nama_pasien} ({item.modalitas})</div>
+                    <div className="text-[10px] text-slate-300">{item.nama_pemeriksaan}</div>
+                  </div>
+                )}
               </div>
             );
           })}

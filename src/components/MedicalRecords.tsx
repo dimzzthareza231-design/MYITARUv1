@@ -684,7 +684,7 @@ function ResumeMedisTab() {
 export function MedicalRecords() {
 const { pasien } = useHospital();
 const toast = useToast();
-const { activeTab } = useOutletContext<{ activeTab: string }>();
+const { activeTab } = useOutletContext<{ activeTab: string }>() || { activeTab: 'Daftar Pasien' };
 const [activePatient, setActivePatient] = useState<any>(null);
 const [voicePatient, setVoicePatient] = useState<any>(null);
 const [isModalOpen, setIsModalOpen] = useState(false);

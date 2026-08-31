@@ -3,7 +3,8 @@ import { LayoutDashboard, CalendarDays, Building2, User, Activity, AlertTriangle
   Stethoscope, Syringe, HeartPulse, FileText, Plus, Search,
   ShieldAlert, Printer, Edit2, Trash2, X, Lock, Unlock, Eye,
   Calculator, FileSignature, ShieldCheck, Scale, Apple, Brain,
-  ListChecks, FileCode2, FlaskConical, ScanLine, CheckCircle2, Mic, Globe, ChevronDown, UserCheck
+  ListChecks, FileCode2, FlaskConical, ScanLine, CheckCircle2, Mic, Globe, ChevronDown, UserCheck,
+  ChevronLeft, ChevronRight, PanelLeftClose, PanelLeftOpen
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import {
@@ -177,6 +178,7 @@ function InformedConsentModal({ onClose, patient }: { onClose: () => void, patie
 export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => void }) {
   const [activeTab, setActiveTab] = useState('overview');
   const [patientData, setPatientData] = useState<any>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
   const [showSmartVoice, setShowSmartVoice] = useState(false);
   const [showPendingAlerts, setShowPendingAlerts] = useState(false);
@@ -392,14 +394,36 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
       {/* ───────────────────────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden">
         
-        {/* SIDEBAR NAVIGATION */}
-        <div className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col overflow-y-auto custom-scrollbar hidden md:flex shrink-0">
-          <div className="p-4 space-y-6">
+        {/* SIDEBAR NAVIGATION (COLLAPSIBLE WITH SMOOTH TRANSITION & HOVER FEEDBACK) */}
+        <div className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col overflow-y-auto custom-scrollbar hidden md:flex shrink-0 transition-all duration-300 ease-in-out`}>
+          {/* Sidebar Header & Collapse Toggle Button */}
+          <div className={`p-3 border-b border-slate-200 dark:border-slate-800 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} transition-all duration-300`}>
+            {!isSidebarCollapsed && (
+              <div className="flex items-center gap-2 overflow-hidden transition-all duration-300">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Menu Rekam Medis
+                </span>
+              </div>
+            )}
+            <button
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 shadow-2xs hover:scale-105 active:scale-95"
+              title={isSidebarCollapsed ? 'Perluas Sidebar' : 'Sempitkan Sidebar'}
+            >
+              {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
+          </div>
+
+          <div className={`space-y-5 transition-all duration-300 ${isSidebarCollapsed ? 'p-2' : 'p-3.5'}`}>
             {sidebarGroups.map((group, idx) => (
               <div key={idx}>
-                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-2">
-                  {group.title}
-                </h4>
+                {!isSidebarCollapsed ? (
+                  <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 px-2 truncate transition-all duration-300">
+                    {group.title}
+                  </h4>
+                ) : (
+                  <div className="h-px bg-slate-200 dark:bg-slate-800 my-2 mx-1" />
+                )}
                 <div className="space-y-1">
                   {group.items.map(item => {
                     const Icon = item.icon;
@@ -408,14 +432,41 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
                       <button
                         key={item.id}
                         onClick={() => setActiveTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                        className={`group relative w-full flex items-center gap-2.5 rounded-xl text-xs font-bold transition-all duration-200 ${
+                          isSidebarCollapsed ? 'justify-center p-2.5' : 'px-3 py-2.5'
+                        } ${
                           isActive 
-                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-800/50' 
-                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
+                            ? 'bg-blue-50 dark:bg-blue-900/25 text-blue-600 dark:text-blue-400 shadow-xs border border-blue-200/80 dark:border-blue-800/60 font-extrabold' 
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/90 dark:hover:bg-slate-800/90 hover:text-slate-900 dark:hover:text-white hover:shadow-2xs'
                         }`}
                       >
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'}`} />
-                        {item.label}
+                        {/* Active Indicator Bar */}
+                        {isActive && !isSidebarCollapsed && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blue-600 dark:bg-blue-400 rounded-r-full" />
+                        )}
+
+                        {/* Menu Icon with distinct hover feedback */}
+                        <div className={`p-1.5 rounded-lg transition-all duration-200 shrink-0 flex items-center justify-center ${
+                          isActive
+                            ? 'bg-blue-600 dark:bg-blue-500 text-white shadow-sm shadow-blue-500/30 scale-105'
+                            : 'bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/40 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:scale-110 group-hover:shadow-xs'
+                        }`}>
+                          <Icon className="w-4 h-4 transition-transform duration-200" />
+                        </div>
+
+                        {/* Text Label with smooth width & opacity */}
+                        {!isSidebarCollapsed && (
+                          <span className="truncate text-left flex-1 transition-all duration-200">
+                            {item.label}
+                          </span>
+                        )}
+
+                        {/* Floating Tooltip when collapsed */}
+                        {isSidebarCollapsed && (
+                          <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 dark:bg-slate-800 text-white text-xs font-semibold rounded-lg shadow-xl border border-slate-700/80 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible pointer-events-none transition-all duration-200 z-50 translate-x-1 group-hover:translate-x-0">
+                            {item.label}
+                          </div>
+                        )}
                       </button>
                     )
                   })}

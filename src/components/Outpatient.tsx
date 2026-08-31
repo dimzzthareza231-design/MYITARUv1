@@ -5,21 +5,28 @@ import {
   ChevronRight, RefreshCw, Volume2, ShieldCheck, Heart, Eye, Baby, 
   Scissors, Brain, Ear, Wind, Smile, Droplet, Bone, 
   Ribbon, UserCheck, ShieldAlert, Award, FileCode, CheckSquare, Plus, Trash2,
-  Printer, ArrowLeft, ExternalLink, HelpCircle, Layers, X, UserPlus
+  Printer, ArrowLeft, ExternalLink, HelpCircle, Layers, X, UserPlus, Tv, Phone, MapPin, Check
 } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useHospital, MASTER_POLI_LIST } from '../contexts/HospitalContext';
 import { useToast } from '../contexts/ToastContext';
+import { usePatientFlow } from '../contexts/PatientFlowContext';
+import { useAntrian } from '../contexts/AntrianContext';
 import SmartTable from './SmartTable';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import PatientFlowDashboard from './PatientFlowDashboard';
 import { MasterPoli, Pasien, Kunjungan } from '../types';
 import PrintPDFButton from './PrintPDFButton';
 import { Patient360 } from './RME/Patient360';
+import { PoliklinikQueueDisplay } from './PoliklinikQueueDisplay';
+import { RegistrationForm } from './Registration/RegistrationForm';
+import { WilayahSelector } from './WilayahSelector';
 
 export function Outpatient() {
-  const { activeTab } = useOutletContext<{ activeTab: string }>();
-  const { kunjungan, pasien, dokter, perawat, poli, addPasien, addKunjungan, updateKunjunganStatus, syncAllData } = useHospital();
+  const { activeTab } = useOutletContext<{ activeTab: string }>() || { activeTab: 'Pemeriksaan' };
+  const { kunjungan, pasien, dokter, perawat, poli, addPasien, addKunjungan, updateKunjunganStatus, updatePasien, syncAllData } = useHospital();
+  const { addKunjungan: addKunjunganPatientFlow } = usePatientFlow() || { addKunjungan: () => {} };
+  const { daftarkanAntrian } = useAntrian() || { daftarkanAntrian: () => {} };
   const toast = useToast();
   
   // Active Filter / Selection State
@@ -28,21 +35,169 @@ export function Outpatient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [activeExamTab, setActiveExamTab] = useState<'soap' | 'patient360' | 'scribe'>('soap');
+  const [rightPanelView, setRightPanelView] = useState<'display' | 'exam'>(activeTab === 'Antrian Poli' ? 'display' : 'exam');
+
+  useEffect(() => {
+    if (activeTab === 'Antrian Poli') {
+      setRightPanelView('display');
+    } else if (activeTab === 'Pemeriksaan') {
+      setRightPanelView('exam');
+    }
+  }, [activeTab]);
 
   // Modals State
   const [showAddPatientModal, setShowAddPatientModal] = useState(false);
+  const [showUnifiedRegistrationModal, setShowUnifiedRegistrationModal] = useState(false);
   const [showPatient360Modal, setShowPatient360Modal] = useState(false);
   const [selectedPatientForModal, setSelectedPatientForModal] = useState<any>(null);
+  const [showAddBookingModal, setShowAddBookingModal] = useState(false);
+
+  // Booking Registrasi State
+  const [bookingSearch, setBookingSearch] = useState('');
+  const [bookingStatusFilter, setBookingStatusFilter] = useState('ALL');
+  const [newBookingForm, setNewBookingForm] = useState({
+    pasienId: '',
+    namaManual: '',
+    noRmManual: '',
+    poliId: 'POLI-01',
+    dokterId: '',
+    tanggal: new Date().toISOString().split('T')[0],
+    jam: '08:30',
+    penjamin: 'BPJS Kesehatan',
+    keluhan: ''
+  });
+
+  const [bookingList, setBookingList] = useState<any[]>(() => {
+    const saved = localStorage.getItem('hospital_booking_registrasi');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    return [
+      {
+        id: 'BK-001',
+        booking_code: 'BK-2026-08101',
+        nama_pasien: 'Budi Santoso',
+        no_rm: 'RM-260801-1001',
+        pasien_id: 'P-001',
+        poli_tujuan: 'Poli Penyakit Dalam',
+        poli_id: 'POLI-01',
+        dokter_dpjp: 'dr. Andi Pratama, Sp.PD',
+        tanggal_booking: new Date().toISOString().split('T')[0],
+        jam_estimasi: '08:30 WIB',
+        penjamin: 'BPJS Kesehatan',
+        status_booking: 'Terkonfirmasi',
+        keluhan: 'Kontrol rutin hipertensi dan diabetes melitus'
+      },
+      {
+        id: 'BK-002',
+        booking_code: 'BK-2026-08102',
+        nama_pasien: 'Siti Aminah',
+        no_rm: 'RM-260801-1002',
+        pasien_id: 'P-002',
+        poli_tujuan: 'Poli Jantung & Pembuluh Darah',
+        poli_id: 'POLI-03',
+        dokter_dpjp: 'dr. Citra Lestari, Sp.JP',
+        tanggal_booking: new Date().toISOString().split('T')[0],
+        jam_estimasi: '09:15 WIB',
+        penjamin: 'BPJS Kesehatan',
+        status_booking: 'Terkonfirmasi',
+        keluhan: 'Evaluasi nyeri dada saat beraktivitas'
+      },
+      {
+        id: 'BK-003',
+        booking_code: 'BK-2026-08103',
+        nama_pasien: 'Ahmad Dahlan',
+        no_rm: 'RM-260802-1003',
+        pasien_id: 'P-003',
+        poli_tujuan: 'Poli Bedah Umum',
+        poli_id: 'POLI-04',
+        dokter_dpjp: 'dr. Denny Kurniawan, Sp.B',
+        tanggal_booking: new Date().toISOString().split('T')[0],
+        jam_estimasi: '10:00 WIB',
+        penjamin: 'Umum / Mandiri',
+        status_booking: 'Check-In',
+        keluhan: 'Kontrol luka post eksisi kista sebasea'
+      },
+      {
+        id: 'BK-004',
+        booking_code: 'BK-2026-08104',
+        nama_pasien: 'Dewi Sartika',
+        no_rm: 'RM-260802-1004',
+        pasien_id: 'P-004',
+        poli_tujuan: 'Poli Kebidanan & Kandungan',
+        poli_id: 'POLI-02',
+        dokter_dpjp: 'dr. Budi Setiawan, Sp.OG',
+        tanggal_booking: new Date().toISOString().split('T')[0],
+        jam_estimasi: '10:45 WIB',
+        penjamin: 'BPJS Kesehatan',
+        status_booking: 'Terkonfirmasi',
+        keluhan: 'Pemeriksaan USG antenatal trimester 2'
+      },
+      {
+        id: 'BK-005',
+        booking_code: 'BK-2026-08105',
+        nama_pasien: 'Ananda Rizky Pratama',
+        no_rm: 'RM-260803-1005',
+        pasien_id: 'P-005',
+        poli_tujuan: 'Poli Anak (Pediatri)',
+        poli_id: 'POLI-05',
+        dokter_dpjp: 'dr. Eka Rahmawati, Sp.A',
+        tanggal_booking: new Date().toISOString().split('T')[0],
+        jam_estimasi: '11:15 WIB',
+        penjamin: 'BPJS Kesehatan',
+        status_booking: 'Terkonfirmasi',
+        keluhan: 'Demam 3 hari naik turun disertai batuk pilek'
+      },
+      {
+        id: 'BK-006',
+        booking_code: 'BK-2026-08106',
+        nama_pasien: 'Hendra Gunawan',
+        no_rm: 'RM-260803-1006',
+        pasien_id: 'P-006',
+        poli_tujuan: 'Poli Mata (Oftalmologi)',
+        poli_id: 'POLI-06',
+        dokter_dpjp: 'dr. Farhan Syahputra, Sp.M',
+        tanggal_booking: new Date().toISOString().split('T')[0],
+        jam_estimasi: '11:45 WIB',
+        penjamin: 'Asuransi Inhealth',
+        status_booking: 'Terkonfirmasi',
+        keluhan: 'Pemeriksaan visus dan refraksi mata kabur'
+      }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('hospital_booking_registrasi', JSON.stringify(bookingList));
+  }, [bookingList]);
 
   // New Patient Queue Form State (in Modal)
+  const [modalFormMode, setModalFormMode] = useState<'registered' | 'new'>('registered');
+  const [patientSearchInModal, setPatientSearchInModal] = useState('');
   const [newQueueForm, setNewQueueForm] = useState({
     pasienId: '',
     namaManual: '',
     noRmManual: '',
-    penjamin: 'BPJS Kesehatan',
+    nikManual: '',
+    jenisKelamin: 'L' as 'L' | 'P',
+    tanggalLahir: '1990-01-01',
+    noHp: '',
+    alamat: '',
+    provinsi: '',
+    kotaKabupaten: '',
+    kecamatan: '',
+    kelurahan: '',
+    poliId: 'POLI-01',
     dokterId: '',
+    penjamin: 'BPJS Kesehatan',
     keluhan: '',
-    tipeKunjungan: 'Rawat Jalan'
+    tipeKunjungan: 'Rawat Jalan',
+    tandaVital: {
+      td: '120/80',
+      suhu: '36.5',
+      nadi: '80',
+      rr: '18',
+      spo2: '98'
+    }
   });
 
   // AI Scribe & Talk-To-Text State
@@ -408,8 +563,93 @@ export function Outpatient() {
       return;
     }
 
+    // 1. Update status kunjungan
     updateKunjunganStatus(activeVisit.id, 'Selesai');
-    toast.success(`Pemeriksaan selesai! Rekam medis pasien ${activePatient?.nama || ''} berhasil disimpan ke EMR dan resep terkirim ke Farmasi.`);
+
+    // 2. Buat objek encounter rekam medis terpadu
+    const encounterId = `ENC-${Date.now()}`;
+    const newEncounter = {
+      id: encounterId,
+      visitId: activeVisit.id,
+      patientId: String(activePatient?.id || activeVisit.pasien_id),
+      no_rm: activePatient?.no_rm || 'RM-000000',
+      nama: activePatient?.nama || 'Pasien',
+      tanggal: new Date().toISOString(),
+      unit: currentPoli ? currentPoli.nama : 'Poliklinik Terpadu',
+      dokter: activeDoctor ? activeDoctor.nama : 'dr. Spesialis DPJP',
+      subjective: soapData.s,
+      objective: soapData.o,
+      assessment: soapData.a,
+      plan: soapData.p,
+      icd10: soapData.icd10 || 'Z00.0',
+      tindakan_icd9: soapData.tindakan_icd9,
+      alergi: soapData.alergi,
+      vitalSigns: soapData.vitalSigns,
+      kontrol: soapData.kontrol,
+      resep: prescriptions,
+      status: 'Selesai'
+    };
+
+    // 3. Update master data pasien di HospitalContext (resume medis, soap, tanda vital, alergi)
+    if (activePatient && activePatient.id) {
+      updatePasien(String(activePatient.id), {
+        keluhan_utama: soapData.s,
+        alergi: soapData.alergi ? [{ allergen: soapData.alergi, reaction: 'Reaksi Tercatat', severity: 'Sedang' }] : undefined,
+        tanda_vital: {
+          td: soapData.vitalSigns.td,
+          nadi: soapData.vitalSigns.nadi,
+          suhu: soapData.vitalSigns.suhu,
+          rr: soapData.vitalSigns.rr,
+          spo2: soapData.vitalSigns.spo2
+        },
+        resume_medis: {
+          id: `RES-${Date.now()}`,
+          tanggal: new Date().toISOString(),
+          keluhan_utama: soapData.s,
+          riwayat_penyakit_dahulu: soapData.rpd,
+          alergi: soapData.alergi,
+          pemeriksaan_fisik: soapData.o,
+          pemeriksaan_penunjang: soapData.lab_rad,
+          diagnosis_primer: { kode_icd10: soapData.icd10 || 'Z00.0', nama: soapData.a || 'Pemeriksaan Klinis' },
+          diagnosis_sekunder: soapData.diagnosis_sekunder ? [{ kode_icd10: 'R51', nama: soapData.diagnosis_sekunder }] : [],
+          tindakan_prosedur: soapData.tindakan_icd9 ? [{ kode_icd9: '89.52', nama: soapData.tindakan_icd9 }] : [],
+          rencana_terapi: soapData.p,
+          instruksi_kontrol: soapData.kontrol,
+          dokter_dpjp: activeDoctor?.nama || 'dr. Spesialis DPJP',
+          unit_pelayanan: currentPoli?.nama || 'Poliklinik',
+          terapi: prescriptions.map(p => ({ nama_obat: p.name, dosis: p.qty, frekuensi: p.rules }))
+        },
+        soap: {
+          s: soapData.s,
+          o: soapData.o,
+          a: soapData.a,
+          p: soapData.p
+        }
+      });
+    }
+
+    // 4. Sinkronisasikan ke local storage encounters untuk Rekam Medis (RME & Patient360)
+    try {
+      const savedEncounters = localStorage.getItem('simrs_rme_encounters');
+      const encountersList = savedEncounters ? JSON.parse(savedEncounters) : [];
+      encountersList.unshift(newEncounter);
+      localStorage.setItem('simrs_rme_encounters', JSON.stringify(encountersList));
+
+      if (activePatient?.id) {
+        const ptKey = `simrs_rme_patient_${activePatient.id}`;
+        const savedPt = localStorage.getItem(ptKey);
+        const ptList = savedPt ? JSON.parse(savedPt) : [];
+        ptList.unshift(newEncounter);
+        localStorage.setItem(ptKey, JSON.stringify(ptList));
+      }
+
+      localStorage.setItem('simrs_rme_soap', JSON.stringify(soapData));
+      localStorage.setItem('simrs_soap_draft', JSON.stringify(soapData));
+    } catch (e) {
+      console.error('Error syncing clinical data with RME storage:', e);
+    }
+
+    toast.success(`✅ Pemeriksaan selesai! Data tersinkronisasi ke Rekam Medis (RME) pasien ${activePatient?.nama || ''} & Resep diteruskan ke Farmasi.`);
     
     // Notify next in line
     const nextWaiting = filteredQueues.find(q => q.id !== activeVisit.id && q.status === 'Menunggu');
@@ -418,36 +658,41 @@ export function Outpatient() {
     }
   };
 
-  // Add new patient to queue
+  // Add new patient to queue (Quick / Complete Registration)
   const handleAddNewQueue = () => {
-    const targetPoli = currentPoli || allPoliList[0];
+    const targetPoli = allPoliList.find(p => p.id === newQueueForm.poliId) || currentPoli || allPoliList[0];
     let chosenPatient = pasien.find(p => String(p.id) === String(newQueueForm.pasienId));
     
-    if (!chosenPatient) {
+    if (modalFormMode === 'new' || !chosenPatient) {
       if (!newQueueForm.namaManual.trim()) {
-        toast.error('Pilih pasien atau masukkan nama pasien baru');
+        toast.error('Silakan isi Nama Lengkap Pasien.');
         return;
       }
+
+      const generatedNoRm = newQueueForm.noRmManual.trim() || `RM-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const generatedNik = newQueueForm.nikManual.trim() || ('3273' + Math.floor(100000000000 + Math.random() * 900000000000));
+
       const newP: Pasien = {
         id: `P-${Date.now()}`,
-        no_rm: newQueueForm.noRmManual || `RM-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`,
-        nik: '3171' + Math.floor(100000000000 + Math.random() * 900000000000),
-        nama: newQueueForm.namaManual,
-        jenis_kelamin: 'L',
-        tanggal_lahir: '1990-01-01',
-        tgl_lahir: '1990-01-01',
-        telepon: '0812-8888-9999',
-        no_hp: '0812-8888-9999',
+        no_rm: generatedNoRm,
+        nik: generatedNik,
+        nama: newQueueForm.namaManual.trim(),
+        jenis_kelamin: newQueueForm.jenisKelamin || 'L',
+        tanggal_lahir: newQueueForm.tanggalLahir || '1990-01-01',
+        tgl_lahir: newQueueForm.tanggalLahir || '1990-01-01',
+        telepon: newQueueForm.noHp.trim() || '0812-8888-9999',
+        no_hp: newQueueForm.noHp.trim() || '0812-8888-9999',
         penjamin: newQueueForm.penjamin,
         status: 'Aktif',
-        alamat: 'Kota Bandung, Jawa Barat'
+        alamat: newQueueForm.alamat.trim() || 'Kota Bandung, Jawa Barat'
       };
+
       chosenPatient = newP;
       addPasien(newP);
     }
 
     if (!chosenPatient) {
-      toast.error('Gagal memproses data pasien');
+      toast.error('Gagal memproses data pasien.');
       return;
     }
 
@@ -458,6 +703,7 @@ export function Outpatient() {
     const currentPoliQueues = kunjungan.filter(k => k.poli_id === targetPoli.id);
     const queueCode = targetPoli.kode || targetPoli.nama.substring(0, 3).toUpperCase();
     const queueNum = String(currentPoliQueues.length + 1).padStart(3, '0');
+    const nomorAntrian = `${queueCode}-${queueNum}`;
 
     const newVisit: Kunjungan = {
       id: `K-${targetPoli.kode}-${Date.now().toString().slice(-4)}`,
@@ -465,26 +711,84 @@ export function Outpatient() {
       tanggal: new Date().toISOString().split('T')[0],
       poli_id: targetPoli.id,
       dokter_id: assignedDoc.id,
-      penjamin_id: 'PJ-01',
+      penjamin_id: newQueueForm.penjamin.includes('BPJS') ? 'PJ-02' : 'PJ-01',
       status: 'Menunggu',
       tipe: 'Rawat Jalan',
-      nomor_antrian: `${queueCode}-${queueNum}`,
-      keluhan_utama: newQueueForm.keluhan || `Pemeriksaan klinis di ${targetPoli.nama}`
+      nomor_antrian: nomorAntrian,
+      keluhan_utama: newQueueForm.keluhan.trim() || `Pemeriksaan klinis di ${targetPoli.nama}`
     };
 
+    // 1. Simpan Kunjungan di HospitalContext
     addKunjungan(newVisit);
-    toast.success(`Pasien ${chosenPatient.nama} berhasil didaftarkan ke antrian ${targetPoli.nama} (${newVisit.nomor_antrian})`);
+
+    // 2. Sinkronkan ke PatientFlowContext
+    try {
+      if (addKunjunganPatientFlow) {
+        addKunjunganPatientFlow({
+          no_rm: chosenPatient.no_rm,
+          nama_pasien: chosenPatient.nama,
+          jenis_kunjungan: 'Rawat Jalan',
+          poli: targetPoli.nama,
+          dokter: assignedDoc.nama,
+          penjamin: newQueueForm.penjamin
+        });
+      }
+    } catch (e) {
+      console.warn('PatientFlowContext sync:', e);
+    }
+
+    // 3. Sinkronkan ke AntrianContext
+    try {
+      if (daftarkanAntrian) {
+        daftarkanAntrian({
+          pasienId: String(chosenPatient.id),
+          namaPasien: chosenPatient.nama,
+          noRm: chosenPatient.no_rm,
+          poliId: targetPoli.id,
+          keluhan: newQueueForm.keluhan,
+          penjamin: newQueueForm.penjamin
+        });
+      }
+    } catch (e) {
+      console.warn('AntrianContext sync:', e);
+    }
+
+    // 4. Update Filter & Focus
+    setSelectedPoliFilter(targetPoli.id);
+    setActiveQueue(newVisit.id);
     setShowAddPatientModal(false);
+
+    toast.success(`🎫 Pasien ${chosenPatient.nama} berhasil didaftarkan ke ${targetPoli.nama}! (No. Antrean: ${nomorAntrian})`);
+
+    // Reset Form State
     setNewQueueForm({
       pasienId: '',
       namaManual: '',
       noRmManual: '',
-      penjamin: 'BPJS Kesehatan',
+      nikManual: '',
+      jenisKelamin: 'L',
+      tanggalLahir: '1990-01-01',
+      noHp: '',
+      alamat: '',
+      provinsi: '',
+      kotaKabupaten: '',
+      kecamatan: '',
+      kelurahan: '',
+      poliId: targetPoli.id,
       dokterId: '',
+      penjamin: 'BPJS Kesehatan',
       keluhan: '',
-      tipeKunjungan: 'Rawat Jalan'
+      tipeKunjungan: 'Rawat Jalan',
+      tandaVital: {
+        td: '120/80',
+        suhu: '36.5',
+        nadi: '80',
+        rr: '18',
+        spo2: '98'
+      }
     });
-    setActiveQueue(newVisit.id);
+    setModalFormMode('registered');
+    setPatientSearchInModal('');
   };
 
   // Doctor Filter Logic for Jadwal Dokter Tab
@@ -510,42 +814,305 @@ export function Outpatient() {
 
   // 2. TAB: BOOKING REGISTRASI
   if (activeTab === 'Booking Registrasi' || activeTab === 'Booking Periksa') {
+    const filteredBookings = bookingList.filter(b => {
+      const matchSearch = !bookingSearch || 
+        b.nama_pasien?.toLowerCase().includes(bookingSearch.toLowerCase()) ||
+        b.no_rm?.toLowerCase().includes(bookingSearch.toLowerCase()) ||
+        b.booking_code?.toLowerCase().includes(bookingSearch.toLowerCase()) ||
+        b.poli_tujuan?.toLowerCase().includes(bookingSearch.toLowerCase());
+      const matchStatus = bookingStatusFilter === 'ALL' || b.status_booking === bookingStatusFilter;
+      return matchSearch && matchStatus;
+    });
+
+    const countTotal = bookingList.length;
+    const countConfirmed = bookingList.filter(b => b.status_booking === 'Terkonfirmasi').length;
+    const countCheckedIn = bookingList.filter(b => b.status_booking === 'Check-In').length;
+    const countDone = bookingList.filter(b => b.status_booking === 'Selesai').length;
+
+    const handleCheckInBooking = (b: any) => {
+      // Find patient or create
+      let p = pasien.find(px => px.no_rm === b.no_rm || String(px.id) === String(b.pasien_id));
+      if (!p) {
+        const newP: Pasien = {
+          id: b.pasien_id || `P-${Date.now()}`,
+          no_rm: b.no_rm,
+          nik: '3171' + Math.floor(100000000000 + Math.random() * 900000000000),
+          nama: b.nama_pasien,
+          jenis_kelamin: 'L',
+          tanggal_lahir: '1990-01-01',
+          tgl_lahir: '1990-01-01',
+          telepon: '0812-8888-9999',
+          no_hp: '0812-8888-9999',
+          penjamin: b.penjamin,
+          status: 'Aktif',
+          alamat: 'Kota Bandung'
+        };
+        addPasien(newP);
+        p = newP;
+      }
+
+      const targetPoli = allPoliList.find(x => x.id === b.poli_id || x.nama === b.poli_tujuan) || allPoliList[0];
+      const targetDoc = dokter.find(d => d.nama === b.dokter_dpjp || d.poli_id === targetPoli.id) || dokter[0];
+      const currentPoliQueues = kunjungan.filter(k => k.poli_id === targetPoli.id);
+      const queueCode = targetPoli.kode || targetPoli.nama.substring(0, 3).toUpperCase();
+      const queueNum = String(currentPoliQueues.length + 1).padStart(3, '0');
+
+      const newVisit: Kunjungan = {
+        id: `K-${targetPoli.kode}-${Date.now().toString().slice(-4)}`,
+        pasien_id: String(p.id),
+        tanggal: new Date().toISOString().split('T')[0],
+        poli_id: targetPoli.id,
+        dokter_id: targetDoc.id,
+        penjamin_id: 'PJ-01',
+        status: 'Menunggu',
+        tipe: 'Rawat Jalan',
+        nomor_antrian: `${queueCode}-${queueNum}`,
+        keluhan_utama: b.keluhan || `Booking Registrasi di ${targetPoli.nama}`
+      };
+
+      addKunjungan(newVisit);
+
+      // Update booking status
+      setBookingList(prev => prev.map(item => item.id === b.id ? { ...item, status_booking: 'Check-In' } : item));
+      toast.success(`Pasien ${b.nama_pasien} berhasil Check-In ke Antrian ${targetPoli.nama} (${newVisit.nomor_antrian})`);
+    };
+
     return (
       <div className="p-6 h-full space-y-6">
-        <div className="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700">
+        {/* Header Bar */}
+        <div className="flex flex-wrap justify-between items-center gap-4 bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-sm">
           <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-cyan-400" />
-              Booking Registrasi & Periksa Poliklinik
+            <h2 className="text-xl font-bold text-white flex items-center gap-2.5">
+              <Calendar className="w-6 h-6 text-cyan-400" />
+              Booking & Registrasi Pasien Poliklinik Terpadu
             </h2>
-            <p className="text-sm text-slate-400 mt-0.5">Reservasi jadwal poliklinik online dan integrasi Mobile JKN</p>
+            <p className="text-xs text-slate-400 mt-1">
+              Kelola pendaftaran pasien baru dengan Form Terpadu 8-Langkah, reservasi poliklinik, dan integrasi Mobile JKN & RME.
+            </p>
           </div>
-          <button onClick={syncAllData} className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm font-semibold flex items-center gap-2">
-            <RefreshCw className="w-4 h-4" /> Sinkronisasi
-          </button>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button 
+              onClick={() => setShowUnifiedRegistrationModal(true)}
+              className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-950/40 transition-all cursor-pointer"
+            >
+              <UserPlus className="w-4 h-4" /> Daftarkan Pasien Baru (Form Terpadu)
+            </button>
+            <button 
+              onClick={() => setShowAddBookingModal(true)}
+              className="px-3.5 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md"
+            >
+              <Plus className="w-4 h-4" /> Tambah Reservasi
+            </button>
+            <button 
+              onClick={syncAllData}
+              className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Sinkronisasi
+            </button>
+          </div>
         </div>
 
-        <SmartTable
-          title="Daftar Reservasi & Booking Poliklinik Hari Ini"
-          storageKey="hospital_booking_registrasi"
-          columns={[
-            { key: 'booking_code', label: 'Kode Booking' },
-            { key: 'nama_pasien', label: 'Nama Pasien' },
-            { key: 'no_rm', label: 'No. RM' },
-            { key: 'poli_tujuan', label: 'Poli Tujuan' },
-            { key: 'dokter_dpjp', label: 'Dokter DPJP' },
-            { key: 'tanggal_booking', label: 'Tgl Kunjungan' },
-            { key: 'jam_estimasi', label: 'Estimasi Jam' },
-            { key: 'penjamin', label: 'Penjamin' },
-            { key: 'status_booking', label: 'Status Reservasi', badge: true }
-          ]}
-        />
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-slate-800/90 border border-slate-700/80 p-4 rounded-xl flex items-center gap-3.5">
+            <div className="p-3 bg-cyan-500/10 text-cyan-400 rounded-xl border border-cyan-500/20">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Total Reservasi</p>
+              <p className="text-xl font-black text-white">{countTotal}</p>
+            </div>
+          </div>
+          <div className="bg-slate-800/90 border border-slate-700/80 p-4 rounded-xl flex items-center gap-3.5">
+            <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Terkonfirmasi</p>
+              <p className="text-xl font-black text-amber-300">{countConfirmed}</p>
+            </div>
+          </div>
+          <div className="bg-slate-800/90 border border-slate-700/80 p-4 rounded-xl flex items-center gap-3.5">
+            <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Sudah Check-In</p>
+              <p className="text-xl font-black text-blue-300">{countCheckedIn}</p>
+            </div>
+          </div>
+          <div className="bg-slate-800/90 border border-slate-700/80 p-4 rounded-xl flex items-center gap-3.5">
+            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+              <CheckCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Selesai Poli</p>
+              <p className="text-xl font-black text-emerald-300">{countDone}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Controls Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-800/80 p-3.5 rounded-xl border border-slate-700">
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Cari pasien, No. RM, kode booking, atau poliklinik..."
+              value={bookingSearch}
+              onChange={(e) => setBookingSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400">Status:</span>
+            <select
+              value={bookingStatusFilter}
+              onChange={(e) => setBookingStatusFilter(e.target.value)}
+              className="px-3 py-2 text-xs bg-slate-900 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-cyan-500"
+            >
+              <option value="ALL">Semua Status</option>
+              <option value="Terkonfirmasi">Terkonfirmasi</option>
+              <option value="Check-In">Check-In</option>
+              <option value="Selesai">Selesai</option>
+              <option value="Batal">Batal</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Table of Bookings */}
+        <div className="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-slate-700 flex justify-between items-center">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-cyan-400" />
+              Daftar Reservasi & Antrian Poliklinik ({filteredBookings.length} Data)
+            </h3>
+            <span className="text-[11px] text-slate-400">
+              Hari ini: {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-900/60 border-b border-slate-700 text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                <tr>
+                  <th className="p-3.5">Kode & Waktu</th>
+                  <th className="p-3.5">Pasien (No. RM)</th>
+                  <th className="p-3.5">Poliklinik Tujuan</th>
+                  <th className="p-3.5">Dokter DPJP</th>
+                  <th className="p-3.5">Penjamin</th>
+                  <th className="p-3.5">Keluhan</th>
+                  <th className="p-3.5">Status</th>
+                  <th className="p-3.5 text-right">Aksi Terintegrasi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-700/60 text-slate-200">
+                {filteredBookings.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-slate-400 text-xs">
+                      Tidak ada data booking atau reservasi yang sesuai filter.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredBookings.map((b) => {
+                    const matchedPatient = pasien.find(p => p.no_rm === b.no_rm || String(p.id) === String(b.pasien_id));
+                    return (
+                      <tr key={b.id} className="hover:bg-slate-700/30 transition-colors">
+                        <td className="p-3.5">
+                          <div className="font-mono font-bold text-cyan-400">{b.booking_code}</div>
+                          <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                            <Clock className="w-3 h-3 text-slate-400" /> {b.jam_estimasi || '08:30 WIB'}
+                          </div>
+                        </td>
+                        <td className="p-3.5">
+                          <div className="font-bold text-white flex items-center gap-1.5">
+                            <UserCircle className="w-3.5 h-3.5 text-slate-400" />
+                            {b.nama_pasien}
+                          </div>
+                          <div className="text-[11px] font-mono text-slate-400">{b.no_rm}</div>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="font-semibold text-slate-200">{b.poli_tujuan}</span>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="text-slate-300">{b.dokter_dpjp}</span>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="px-2 py-0.5 rounded text-[11px] bg-slate-900 border border-slate-700 text-slate-300 font-semibold">
+                            {b.penjamin}
+                          </span>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="text-[11px] text-slate-400 line-clamp-1 max-w-[160px]">{b.keluhan || '-'}</span>
+                        </td>
+                        <td className="p-3.5">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+                            b.status_booking === 'Check-In'
+                              ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                              : b.status_booking === 'Terkonfirmasi'
+                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                              : b.status_booking === 'Selesai'
+                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                              : 'bg-slate-700 text-slate-300 border-slate-600'
+                          }`}>
+                            {b.status_booking}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            {b.status_booking !== 'Check-In' && b.status_booking !== 'Selesai' && (
+                              <button
+                                onClick={() => handleCheckInBooking(b)}
+                                className="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all shadow-sm cursor-pointer"
+                                title="Check-In ke Antrian Poliklinik Hari Ini"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" /> Check-In Poli
+                              </button>
+                            )}
+
+                            {matchedPatient && (
+                              <button
+                                onClick={() => {
+                                  setSelectedPatientForModal(matchedPatient);
+                                  setShowPatient360Modal(true);
+                                }}
+                                className="px-2.5 py-1 bg-purple-950/70 hover:bg-purple-900/80 text-purple-300 border border-purple-700/60 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer"
+                                title="Lihat Rekam Medis Elektronik (RME 360°)"
+                              >
+                                <FileText className="w-3.5 h-3.5" /> RME 360°
+                              </button>
+                            )}
+
+                            {b.status_booking !== 'Batal' && b.status_booking !== 'Selesai' && (
+                              <button
+                                onClick={() => {
+                                  setBookingList(prev => prev.map(item => item.id === b.id ? { ...item, status_booking: 'Batal' } : item));
+                                  toast.info(`Booking ${b.booking_code} telah dibatalkan.`);
+                                }}
+                                className="p-1 text-slate-400 hover:text-rose-400 rounded-md transition-colors"
+                                title="Batalkan Reservasi"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     );
   }
 
   // 3. TAB: JADWAL DOKTER & DOKTER RALAN
-  if (activeTab === 'Dokter Ralan' || activeTab === 'Jadwal Dokter') {
+  if (activeTab === 'Dokter Ralan' || activeTab === 'Jadwal Dokter' || activeTab === 'Dokter Rawat Jalan') {
     return (
       <div className="p-6 h-full space-y-6">
         {/* Header Bar */}
@@ -886,6 +1453,31 @@ export function Outpatient() {
             </select>
           </div>
 
+          <div className="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-700">
+            <button
+              onClick={() => setRightPanelView('display')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                rightPanelView === 'display' || !activeVisit
+                  ? 'bg-sky-600 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Tv className="w-3.5 h-3.5" /> Display Antrean TV
+            </button>
+            {activeVisit && (
+              <button
+                onClick={() => setRightPanelView('exam')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  rightPanelView === 'exam'
+                    ? 'bg-cyan-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Stethoscope className="w-3.5 h-3.5" /> Periksa ({activePatient?.nama?.split(' ')[0] || 'Pasien'})
+              </button>
+            )}
+          </div>
+
           <button
             onClick={() => setShowAddPatientModal(true)}
             className="px-3.5 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-cyan-950/40 transition-all"
@@ -974,6 +1566,7 @@ export function Outpatient() {
                     key={q.id}
                     onClick={() => {
                       setActiveQueue(q.id);
+                      setRightPanelView('exam');
                       toast.info(`Memilih pasien: ${p?.nama || q.nomor_antrian}`);
                     }}
                     className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
@@ -1020,6 +1613,7 @@ export function Outpatient() {
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveQueue(q.id);
+                          setRightPanelView('exam');
                           updateKunjunganStatus(q.id, 'Diperiksa');
                           toast.success(`Memulai pemeriksaan untuk ${p?.nama || q.nomor_antrian}`);
                         }}
@@ -1044,7 +1638,16 @@ export function Outpatient() {
                         onClick={(e) => {
                           e.stopPropagation();
                           updateKunjunganStatus(q.id, 'Panggil');
-                          toast.success(`🔊 Memanggil antrian ${q.nomor_antrian} - ${p?.nama}`);
+                          const nomor = q.nomor_antrian || 'A-001';
+                          const poliNama = poliObj?.nama || 'Poliklinik';
+                          const nama = p?.nama || 'Pasien';
+                          if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                            window.speechSynthesis.cancel();
+                            const utt = new SpeechSynthesisUtterance(`Nomor antrean ${nomor.replace('-', ' ')}, atas nama ${nama}, silakan menuju ${poliNama}`);
+                            utt.lang = 'id-ID';
+                            window.speechSynthesis.speak(utt);
+                          }
+                          toast.success(`🔊 Memanggil antrian ${nomor} - ${nama}`);
                         }}
                         className="px-2.5 py-1.5 bg-slate-700 hover:bg-slate-600 text-amber-300 rounded-lg text-xs font-bold transition-colors"
                         title="Panggil Antrian"
@@ -1059,9 +1662,9 @@ export function Outpatient() {
           </div>
         </div>
 
-        {/* Right Column (8 cols): Active Patient Medical Records (EMR) / Form SOAP & Patient360 */}
+        {/* Right Column (8 cols): Active Patient Medical Records (EMR) / Form SOAP & Patient360 OR Display Antrean TV */}
         <div className="lg:col-span-8 flex flex-col space-y-4">
-          {activeVisit && activePatient ? (
+          {activeVisit && activePatient && rightPanelView === 'exam' ? (
             <div className="bg-slate-800 rounded-2xl border border-slate-700 shadow-xl flex flex-col flex-1 overflow-hidden">
               {/* Header Info Pasien & EMR Switcher */}
               <div className="p-5 bg-gradient-to-r from-slate-800 via-slate-800 to-cyan-950/40 border-b border-slate-700 flex flex-wrap justify-between items-center gap-4">
@@ -1093,6 +1696,14 @@ export function Outpatient() {
 
                 {/* View Mode Buttons */}
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setRightPanelView('display')}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all bg-sky-950/80 hover:bg-sky-900 border border-sky-700/60 text-sky-300 shadow-sm"
+                    title="Buka Layar Display Antrean TV"
+                  >
+                    <Tv className="w-3.5 h-3.5 text-sky-400" /> Display Antrean TV
+                  </button>
+
                   <button
                     onClick={() => setActiveExamTab('soap')}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
@@ -1554,158 +2165,399 @@ export function Outpatient() {
               )}
             </div>
           ) : (
-            <div className="bg-slate-800 rounded-2xl border border-slate-700 shadow-xl flex-1 flex flex-col items-center justify-center p-12 text-center">
-              <div className="w-20 h-20 rounded-3xl bg-slate-900/90 border border-slate-700 flex items-center justify-center text-4xl mb-4 text-cyan-400 shadow-inner">
-                🩺
-              </div>
-              <h3 className="text-xl font-bold text-white">
-                {currentPoli ? `Pelayanan ${currentPoli.nama}` : 'Pilih Pasien Poliklinik'}
-              </h3>
-              <p className="text-sm text-slate-400 max-w-md mt-2 leading-relaxed">
-                Pilih pasien dari daftar antrian di sebelah kiri untuk membuka form rekam medis (SOAP), atau daftarkan pasien baru ke poliklinik ini.
-              </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <button
-                  onClick={() => setShowAddPatientModal(true)}
-                  className="px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2"
-                >
-                  <UserPlus className="w-4 h-4" /> + Daftarkan Pasien ke Poli Ini
-                </button>
-              </div>
-            </div>
+            <PoliklinikQueueDisplay
+              currentPoli={currentPoli}
+              kunjungan={kunjungan}
+              pasien={pasien}
+              dokter={dokter}
+              allPoliList={allPoliList}
+              activeQueueId={activeQueue}
+              onSelectQueue={(qId) => {
+                setActiveQueue(qId);
+                setRightPanelView('exam');
+              }}
+              onCallQueue={(qId, nomor, nama, poliNama) => {
+                updateKunjunganStatus(qId, 'Panggil');
+              }}
+              onStartExam={(qId) => {
+                setActiveQueue(qId);
+                updateKunjunganStatus(qId, 'Diperiksa');
+                setRightPanelView('exam');
+                toast.success('Membuka form pemeriksaan klinis (SOAP)');
+              }}
+              onPoliChange={(poliId) => {
+                setSelectedPoliFilter(poliId);
+                const pObj = allPoliList.find(x => x.id === poliId);
+                if (pObj) toast.info(`Poliklinik dialihkan: ${pObj.nama}`);
+              }}
+            />
           )}
         </div>
       </div>
 
       {/* MODAL 1: Tambah Pasien / Pendaftaran Cepat ke Antrian Poliklinik */}
       {showAddPatientModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center border-b border-slate-700 pb-3">
-              <div className="flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-cyan-400" />
-                <h3 className="text-lg font-bold text-white">
-                  Daftarkan Pasien ke {currentPoli?.nama || 'Poliklinik'}
-                </h3>
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full p-5 sm:p-6 space-y-5 shadow-2xl animate-in fade-in zoom-in duration-200 my-auto">
+            {/* Modal Header */}
+            <div className="flex justify-between items-start border-b border-slate-700 pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-cyan-500/10 rounded-xl border border-cyan-500/20 text-cyan-400">
+                  <UserPlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white leading-tight">
+                    Daftarkan Pasien ke Antrean Poliklinik
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    Pilih pasien terdaftar atau daftarkan pasien baru langsung ke antrean dan rekam medis.
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setShowAddPatientModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="font-bold text-slate-300 block mb-1.5">Pilih Pasien Terdaftar (Master Pasien)</label>
-                <select
-                  value={newQueueForm.pasienId}
-                  onChange={(e) => {
-                    const selId = e.target.value;
-                    const p = pasien.find(px => String(px.id) === selId);
-                    setNewQueueForm({
-                      ...newQueueForm,
-                      pasienId: selId,
-                      namaManual: p?.nama || '',
-                      noRmManual: p?.no_rm || '',
-                      penjamin: p?.penjamin || 'BPJS Kesehatan'
-                    });
-                  }}
-                  className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
-                >
-                  <option value="">-- Pilih dari 100+ Data Pasien Klinik --</option>
-                  {pasien.slice(0, 50).map(p => (
-                    <option key={p.id} value={p.id}>
-                      {p.no_rm} - {p.nama} ({p.penjamin || 'Umum'})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="relative flex items-center justify-center my-2">
-                <div className="border-t border-slate-700 w-full"></div>
-                <span className="bg-slate-800 px-3 text-[10px] text-slate-400 uppercase font-mono">atau input pasien baru</span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
+            {/* Poliklinik & Dokter Tujuan Bar */}
+            <div className="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div>
-                  <label className="font-bold text-slate-300 block mb-1">Nama Pasien</label>
-                  <input
-                    type="text"
-                    value={newQueueForm.namaManual}
-                    onChange={(e) => setNewQueueForm({ ...newQueueForm, namaManual: e.target.value })}
-                    placeholder="Nama Lengkap Pasien..."
-                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-300 block mb-1">No. Rekam Medis (RM)</label>
-                  <input
-                    type="text"
-                    value={newQueueForm.noRmManual}
-                    onChange={(e) => setNewQueueForm({ ...newQueueForm, noRmManual: e.target.value })}
-                    placeholder="Auto-generate jika kosong"
-                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono outline-none focus:border-cyan-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-300 block mb-1">Penjamin Biaya</label>
+                  <label className="font-bold text-slate-300 block mb-1">
+                    Poliklinik Tujuan <span className="text-rose-400">*</span>
+                  </label>
                   <select
-                    value={newQueueForm.penjamin}
-                    onChange={(e) => setNewQueueForm({ ...newQueueForm, penjamin: e.target.value })}
-                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                    value={newQueueForm.poliId}
+                    onChange={(e) => {
+                      const selPoliId = e.target.value;
+                      const docsForPoli = dokter.filter(d => d.poli_id === selPoliId);
+                      setNewQueueForm({
+                        ...newQueueForm,
+                        poliId: selPoliId,
+                        dokterId: docsForPoli.length > 0 ? docsForPoli[0].id : ''
+                      });
+                    }}
+                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500 font-semibold"
                   >
-                    <option value="BPJS Kesehatan">BPJS Kesehatan (JKN)</option>
-                    <option value="Umum / Mandiri">Umum / Mandiri</option>
-                    <option value="Asuransi Inhealth">Asuransi Inhealth</option>
-                    <option value="Asuransi Allianz Care">Asuransi Allianz Care</option>
-                    <option value="PT Pertamina (Persero)">PT Pertamina (Persero)</option>
+                    {allPoliList.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.kode} - {p.nama}
+                      </option>
+                    ))}
                   </select>
                 </div>
+
                 <div>
-                  <label className="font-bold text-slate-300 block mb-1">Dokter DPJP</label>
+                  <label className="font-bold text-slate-300 block mb-1">
+                    Dokter DPJP Poliklinik
+                  </label>
                   <select
                     value={newQueueForm.dokterId}
                     onChange={(e) => setNewQueueForm({ ...newQueueForm, dokterId: e.target.value })}
                     className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
                   >
-                    <option value="">-- Dokter Jaga Default --</option>
-                    {dokter.filter(d => !currentPoli || d.poli_id === currentPoli.id).map(d => (
-                      <option key={d.id} value={d.id}>{d.nama} ({d.spesialisasi})</option>
-                    ))}
+                    {dokter.filter(d => d.poli_id === newQueueForm.poliId).length > 0 ? (
+                      dokter.filter(d => d.poli_id === newQueueForm.poliId).map(d => (
+                        <option key={d.id} value={d.id}>{d.nama} ({d.spesialisasi})</option>
+                      ))
+                    ) : (
+                      dokter.map(d => (
+                        <option key={d.id} value={d.id}>{d.nama} ({d.spesialisasi || d.poli_nama})</option>
+                      ))
+                    )}
                   </select>
                 </div>
               </div>
+            </div>
 
+            {/* Mode Switcher: Pasien Terdaftar vs Pasien Baru */}
+            <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+              <button
+                type="button"
+                onClick={() => setModalFormMode('registered')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                  modalFormMode === 'registered'
+                    ? 'bg-cyan-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Search className="w-3.5 h-3.5" /> Pilih Pasien Terdaftar ({pasien.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalFormMode('new')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                  modalFormMode === 'new'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <UserPlus className="w-3.5 h-3.5" /> Input Pasien Baru Lengkap
+              </button>
+            </div>
+
+            {/* Mode 1: Pasien Terdaftar */}
+            {modalFormMode === 'registered' && (
+              <div className="space-y-3 text-xs animate-in fade-in duration-150">
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">
+                    Cari Pasien (Nama, No. RM, NIK, atau No. HP)
+                  </label>
+                  <div className="relative">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      value={patientSearchInModal}
+                      onChange={(e) => setPatientSearchInModal(e.target.value)}
+                      placeholder="Ketik nama atau No. RM pasien..."
+                      className="w-full pl-9 pr-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white placeholder-slate-500 outline-none focus:border-cyan-500 text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="max-h-44 overflow-y-auto space-y-1.5 border border-slate-700/80 rounded-xl p-2 bg-slate-950/60 custom-scrollbar">
+                  {pasien
+                    .filter(p => {
+                      if (!patientSearchInModal) return true;
+                      const q = patientSearchInModal.toLowerCase();
+                      return (
+                        p.nama.toLowerCase().includes(q) ||
+                        p.no_rm.toLowerCase().includes(q) ||
+                        (p.nik && p.nik.includes(q)) ||
+                        (p.no_hp && p.no_hp.includes(q))
+                      );
+                    })
+                    .slice(0, 20)
+                    .map(p => {
+                      const isSelected = String(p.id) === String(newQueueForm.pasienId);
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => {
+                            setNewQueueForm({
+                              ...newQueueForm,
+                              pasienId: String(p.id),
+                              namaManual: p.nama,
+                              noRmManual: p.no_rm,
+                              nikManual: p.nik || '',
+                              penjamin: p.penjamin || 'BPJS Kesehatan',
+                              noHp: p.no_hp || p.telepon || '',
+                              alamat: p.alamat || ''
+                            });
+                          }}
+                          className={`p-2.5 rounded-lg flex items-center justify-between cursor-pointer transition-all ${
+                            isSelected
+                              ? 'bg-cyan-950/70 border border-cyan-500/60 text-white'
+                              : 'bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 text-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${
+                              isSelected ? 'border-cyan-400 bg-cyan-500' : 'border-slate-500'
+                            }`}>
+                              {isSelected && <Check className="w-2.5 h-2.5 text-white" />}
+                            </div>
+                            <div>
+                              <div className="font-bold text-white flex items-center gap-1.5">
+                                {p.nama}
+                                <span className="text-[10px] font-mono text-cyan-300 font-semibold">({p.no_rm})</span>
+                              </div>
+                              <div className="text-[10px] text-slate-400 flex items-center gap-2 mt-0.5">
+                                <span>NIK: {p.nik || '-'}</span>
+                                <span>•</span>
+                                <span>{p.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</span>
+                                <span>•</span>
+                                <span className="text-slate-300">{p.penjamin || 'Umum'}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[10px] px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-semibold">
+                            {p.status || 'Aktif'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
+
+            {/* Mode 2: Input Pasien Baru Lengkap */}
+            {modalFormMode === 'new' && (
+              <div className="space-y-3 text-xs animate-in fade-in duration-150">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">
+                      Nama Lengkap Pasien <span className="text-rose-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newQueueForm.namaManual}
+                      onChange={(e) => setNewQueueForm({ ...newQueueForm, namaManual: e.target.value })}
+                      placeholder="Cth: Muhammad Rizky Pratama..."
+                      className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">
+                      NIK KTP (16 Digit)
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={16}
+                      value={newQueueForm.nikManual}
+                      onChange={(e) => setNewQueueForm({ ...newQueueForm, nikManual: e.target.value })}
+                      placeholder="3273..."
+                      className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">Jenis Kelamin</label>
+                    <select
+                      value={newQueueForm.jenisKelamin}
+                      onChange={(e) => setNewQueueForm({ ...newQueueForm, jenisKelamin: e.target.value as 'L' | 'P' })}
+                      className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                    >
+                      <option value="L">Laki-laki</option>
+                      <option value="P">Perempuan</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">Tanggal Lahir</label>
+                    <input
+                      type="date"
+                      value={newQueueForm.tanggalLahir}
+                      onChange={(e) => setNewQueueForm({ ...newQueueForm, tanggalLahir: e.target.value })}
+                      className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">No. Rekam Medis</label>
+                    <input
+                      type="text"
+                      value={newQueueForm.noRmManual}
+                      onChange={(e) => setNewQueueForm({ ...newQueueForm, noRmManual: e.target.value })}
+                      placeholder="Auto-generate"
+                      className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white font-mono outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">No. HP / WhatsApp</label>
+                    <input
+                      type="text"
+                      value={newQueueForm.noHp}
+                      onChange={(e) => setNewQueueForm({ ...newQueueForm, noHp: e.target.value })}
+                      placeholder="0812-xxxx-xxxx"
+                      className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">Detail Alamat Jalan (RT/RW/No. Rumah)</label>
+                    <input
+                      type="text"
+                      value={newQueueForm.alamat}
+                      onChange={(e) => setNewQueueForm({ ...newQueueForm, alamat: e.target.value })}
+                      placeholder="Cth: Jl. Kebon Sirih No. 12 RT 02/05..."
+                      className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Integrated Region Selector (Provinsi, Kota, Kecamatan, Kelurahan) */}
+                <WilayahSelector
+                  compactMode={true}
+                  selectedProvinsi={newQueueForm.provinsi}
+                  selectedKota={newQueueForm.kotaKabupaten}
+                  selectedKecamatan={newQueueForm.kecamatan}
+                  selectedKelurahan={newQueueForm.kelurahan}
+                  onSelectWilayah={(w) => {
+                    const detailJalan = newQueueForm.alamat.split(',')[0] || '';
+                    const fullAddr = [detailJalan.trim(), w.formattedAlamat].filter(Boolean).join(', ');
+                    setNewQueueForm({
+                      ...newQueueForm,
+                      provinsi: w.provinsi,
+                      kotaKabupaten: w.kotaKabupaten,
+                      kecamatan: w.kecamatan,
+                      kelurahan: w.kelurahan,
+                      alamat: fullAddr || w.formattedAlamat || newQueueForm.alamat
+                    });
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Penjamin & Keluhan Section */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
               <div>
-                <label className="font-bold text-slate-300 block mb-1">Keluhan Utama / Alasan Kunjungan</label>
-                <textarea
-                  rows={2}
+                <label className="font-bold text-slate-300 block mb-1">
+                  Penjamin Biaya <span className="text-rose-400">*</span>
+                </label>
+                <select
+                  value={newQueueForm.penjamin}
+                  onChange={(e) => setNewQueueForm({ ...newQueueForm, penjamin: e.target.value })}
+                  className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500 font-semibold"
+                >
+                  <option value="BPJS Kesehatan">BPJS Kesehatan (JKN)</option>
+                  <option value="Umum / Mandiri">Umum / Mandiri</option>
+                  <option value="Asuransi Inhealth">Asuransi Inhealth</option>
+                  <option value="Asuransi Allianz Care">Asuransi Allianz Care</option>
+                  <option value="Asuransi Prudential">Asuransi Prudential</option>
+                  <option value="PT Pertamina (Persero)">PT Pertamina (Persero)</option>
+                  <option value="PT PLN (Persero)">PT PLN (Persero)</option>
+                </select>
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="font-bold text-slate-300 block mb-1">
+                  Keluhan Utama / Alasan Kunjungan
+                </label>
+                <input
+                  type="text"
                   value={newQueueForm.keluhan}
                   onChange={(e) => setNewQueueForm({ ...newQueueForm, keluhan: e.target.value })}
                   placeholder="Cth: Kontrol rutin, batuk berdahak 3 hari, nyeri dada..."
-                  className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 outline-none focus:border-cyan-500"
+                  className="w-full p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-white placeholder-slate-500 outline-none focus:border-cyan-500 text-xs"
                 />
               </div>
             </div>
 
-            <div className="border-t border-slate-700 pt-4 flex justify-end gap-2.5">
+            {/* Modal Actions Footer */}
+            <div className="border-t border-slate-700 pt-4 flex flex-wrap items-center justify-between gap-3">
               <button
-                onClick={() => setShowAddPatientModal(false)}
-                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-xs font-bold"
+                type="button"
+                onClick={() => {
+                  setShowAddPatientModal(false);
+                  setShowUnifiedRegistrationModal(true);
+                }}
+                className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1.5 transition-colors"
               >
-                Batal
+                <UserPlus className="w-3.5 h-3.5" /> Buka Form Pendaftaran Terpadu 8 Langkah
               </button>
-              <button
-                onClick={handleAddNewQueue}
-                className="px-5 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl text-xs font-bold shadow-lg"
-              >
-                Daftarkan ke Antrian Poli
-              </button>
+
+              <div className="flex items-center gap-2.5 ml-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowAddPatientModal(false)}
+                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAddNewQueue}
+                  className="px-5 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-cyan-950/50 flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <UserPlus className="w-3.5 h-3.5" /> Daftarkan ke Antrean Poli
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1732,6 +2584,227 @@ export function Outpatient() {
 
             <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
               <Patient360 patient={selectedPatientForModal} onBack={() => setShowPatient360Modal(false)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: Form Pendaftaran Pasien Terpadu (8-Langkah Wizard) */}
+      {showUnifiedRegistrationModal && (
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-6xl max-h-[96vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-4 bg-slate-800 border-b border-slate-700 flex justify-between items-center">
+              <div className="flex items-center gap-2.5">
+                <UserPlus className="w-5 h-5 text-emerald-400" />
+                <div>
+                  <h3 className="text-base font-bold text-white leading-tight">
+                    Form Pendaftaran Pasien Terpadu (Registrasi & Rekam Medis)
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Form 8-langkah terpadu: Demografi, Kontak, Penjamin, Rujukan, Data Medis, dan Tanda Tangan Digital
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowUnifiedRegistrationModal(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-slate-900">
+              <RegistrationForm onClose={() => {
+                setShowUnifiedRegistrationModal(false);
+                toast.success('Pendaftaran pasien terpadu berhasil diselesaikan.');
+              }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: Tambah Booking / Reservasi Jadwal Poliklinik */}
+      {showAddBookingModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center border-b border-slate-700 pb-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-lg font-bold text-white">
+                  Buat Reservasi / Booking Poliklinik
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowAddBookingModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3.5 text-xs">
+              <div>
+                <label className="font-bold text-slate-300 block mb-1">Pilih Pasien Terdaftar</label>
+                <select
+                  value={newBookingForm.pasienId}
+                  onChange={(e) => {
+                    const selId = e.target.value;
+                    const p = pasien.find(px => String(px.id) === selId);
+                    setNewBookingForm({
+                      ...newBookingForm,
+                      pasienId: selId,
+                      namaManual: p?.nama || '',
+                      noRmManual: p?.no_rm || '',
+                      penjamin: p?.penjamin || 'BPJS Kesehatan'
+                    });
+                  }}
+                  className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                >
+                  <option value="">-- Pasien Baru / Input Manual --</option>
+                  {pasien.slice(0, 50).map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.no_rm} - {p.nama} ({p.penjamin || 'Umum'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {!newBookingForm.pasienId && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">Nama Pasien</label>
+                    <input
+                      type="text"
+                      value={newBookingForm.namaManual}
+                      onChange={(e) => setNewBookingForm({ ...newBookingForm, namaManual: e.target.value })}
+                      placeholder="Nama Pasien..."
+                      className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-300 block mb-1">No. RM (Opsional)</label>
+                    <input
+                      type="text"
+                      value={newBookingForm.noRmManual}
+                      onChange={(e) => setNewBookingForm({ ...newBookingForm, noRmManual: e.target.value })}
+                      placeholder="RM-XXXX..."
+                      className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">Poliklinik Tujuan</label>
+                  <select
+                    value={newBookingForm.poliId}
+                    onChange={(e) => setNewBookingForm({ ...newBookingForm, poliId: e.target.value })}
+                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                  >
+                    {allPoliList.map(p => (
+                      <option key={p.id} value={p.id}>{p.nama}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">Penjamin</label>
+                  <select
+                    value={newBookingForm.penjamin}
+                    onChange={(e) => setNewBookingForm({ ...newBookingForm, penjamin: e.target.value })}
+                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                  >
+                    <option value="BPJS Kesehatan">BPJS Kesehatan (JKN)</option>
+                    <option value="Umum / Mandiri">Umum / Mandiri</option>
+                    <option value="Asuransi Inhealth">Asuransi Inhealth</option>
+                    <option value="Asuransi Allianz Care">Asuransi Allianz Care</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">Tanggal Kunjungan</label>
+                  <input
+                    type="date"
+                    value={newBookingForm.tanggal}
+                    onChange={(e) => setNewBookingForm({ ...newBookingForm, tanggal: e.target.value })}
+                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-300 block mb-1">Estimasi Jam</label>
+                  <input
+                    type="text"
+                    value={newBookingForm.jam}
+                    onChange={(e) => setNewBookingForm({ ...newBookingForm, jam: e.target.value })}
+                    placeholder="08:30 WIB"
+                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-300 block mb-1">Keluhan / Catatan Reservasi</label>
+                <textarea
+                  rows={2}
+                  value={newBookingForm.keluhan}
+                  onChange={(e) => setNewBookingForm({ ...newBookingForm, keluhan: e.target.value })}
+                  placeholder="Cth: Kontrol rutin pasca rawat inap, evaluasi hasil lab..."
+                  className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-cyan-500"
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-slate-700 pt-4 flex justify-end gap-2.5">
+              <button
+                onClick={() => setShowAddBookingModal(false)}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-xl text-xs font-bold"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  const targetPoli = allPoliList.find(p => p.id === newBookingForm.poliId) || allPoliList[0];
+                  const doc = dokter.find(d => d.poli_id === targetPoli.id) || dokter[0];
+                  const patientName = newBookingForm.namaManual || (pasien.find(p => String(p.id) === newBookingForm.pasienId)?.nama) || 'Pasien Baru';
+                  const patientRm = newBookingForm.noRmManual || (pasien.find(p => String(p.id) === newBookingForm.pasienId)?.no_rm) || `RM-${Date.now().toString().slice(-6)}`;
+
+                  const newBookingItem = {
+                    id: `BK-${Date.now()}`,
+                    booking_code: `BK-2026-${Math.floor(10000 + Math.random() * 90000)}`,
+                    nama_pasien: patientName,
+                    no_rm: patientRm,
+                    pasien_id: newBookingForm.pasienId || `P-${Date.now()}`,
+                    poli_tujuan: targetPoli.nama,
+                    poli_id: targetPoli.id,
+                    dokter_dpjp: doc?.nama || 'dr. Spesialis DPJP',
+                    tanggal_booking: newBookingForm.tanggal,
+                    jam_estimasi: `${newBookingForm.jam} WIB`,
+                    penjamin: newBookingForm.penjamin,
+                    status_booking: 'Terkonfirmasi',
+                    keluhan: newBookingForm.keluhan
+                  };
+
+                  setBookingList(prev => [newBookingItem, ...prev]);
+                  toast.success(`Reservasi ${newBookingItem.booking_code} untuk ${patientName} berhasil dibuat!`);
+                  setShowAddBookingModal(false);
+                  setNewBookingForm({
+                    pasienId: '',
+                    namaManual: '',
+                    noRmManual: '',
+                    poliId: 'POLI-01',
+                    dokterId: '',
+                    tanggal: new Date().toISOString().split('T')[0],
+                    jam: '08:30',
+                    penjamin: 'BPJS Kesehatan',
+                    keluhan: ''
+                  });
+                }}
+                className="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold shadow-lg"
+              >
+                Simpan Reservasi
+              </button>
             </div>
           </div>
         </div>

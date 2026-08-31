@@ -60,6 +60,9 @@ const DEFAULT_USERS: User[] = [
   { id: '12', username: 'radiografer', password: 'rad123', nama: 'Bayu Pratama, A.Md.Rad', roleId: 'radiografer', email: 'radiografer@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
   { id: '13', username: 'mutu', password: 'mutu123', nama: 'drg. Maya Sari (Komite Mutu)', roleId: 'manajemen_mutu', email: 'mutu@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
   { id: '14', username: 'gizi', password: 'gizi123', nama: 'Citra Kirana, S.Gz', roleId: 'gizi', email: 'gizi@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '15', username: 'rehab', password: 'rehab123', nama: 'Rian Hidayat, A.Md.FT (Rehab)', roleId: 'rehab_medik', email: 'rehab@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '16', username: 'itsupport', password: 'it123', nama: 'Bagas Setiawan, S.T. (IT Infra)', roleId: 'it_support', email: 'it@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
+  { id: '17', username: 'viewer', password: 'viewer123', nama: 'Guest Viewer (Read-Only)', roleId: 'viewer', email: 'viewer@myitaru.klinik', aktif: true, dibuatPada: '2026-01-01' },
 ];
 
 export function AuthProvider({ children }: { children: ReactNode }) {

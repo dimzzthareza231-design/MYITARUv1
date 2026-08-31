@@ -32,7 +32,8 @@ export const MODULE_ALIASES: Record<string, string[]> = {
   'pengaturan-klinik': ['settings', 'pengaturan'],
   'apotek-ralan': ['farmasi-ralan'],
   'apotek-ranap': ['farmasi-ranap'],
-  'stok-obat': ['farmasi-stok', 'obat']
+  'stok-obat': ['farmasi-stok', 'obat'],
+  'security': ['user-management', 'auth-management', 'users', 'roles']
 };
 
 export const ROLES: Role[] = [

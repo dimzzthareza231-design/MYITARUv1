@@ -36,12 +36,12 @@ export const MODULE_REGISTRY = [
       submenus: [{ label: 'Triase', cols: 'triase', source: 'myitaru_igd_triase' }, { label: 'Penanganan IGD', cols: 'dokumen' }, { label: 'Observasi', cols: 'dokumen' }, { label: 'Dokter IGD', cols: 'pegawai', source: 'db_dokter_igd' }] },
     { id: 'rawat-jalan', label: 'Poliklinik', icon: '🩺', color: 'from-teal-500 to-teal-600', SPECIAL: true,
       submenus: [
-        { label: 'Pemeriksaan & AI Scribe', cols: 'pasien' },
+        { label: 'Booking Registrasi', cols: 'pasien' },
         { label: 'Daftar Poliklinik', cols: 'dokumen' },
         { label: 'Antrian Poli', cols: 'antrian' },
-        { label: 'Dokter Ralan', cols: 'pegawai', source: 'db_dokter' },
+        { label: 'Pemeriksaan', cols: 'pasien' },
         { label: 'Jadwal Dokter', cols: 'jadwal' },
-        { label: 'Booking Registrasi', cols: 'pasien' },
+        { label: 'Dokter Rawat Jalan', cols: 'pegawai', source: 'db_dokter' },
         { label: 'Patient Flow', cols: 'antrian' }
       ] },
     { id: 'rawat-inap', label: 'Rawat Inap', icon: '🛏️', color: 'from-indigo-500 to-indigo-600', SPECIAL: true,

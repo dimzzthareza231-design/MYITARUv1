@@ -1541,6 +1541,17 @@ export function Registration() {
       {/* MODALS SECTION                                                            */}
       {/* ========================================================================= */}
 
+      {/* MODAL 0: Pasien Baru Wizard Modal */}
+      {showWizardModal && (
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5">
+          <div className="w-full max-w-5xl max-h-[95vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
+            <RegistrationForm 
+              onClose={() => setShowWizardModal(false)} 
+            />
+          </div>
+        </div>
+      )}
+
       {/* MODAL 1: Quick Register Visit Modal */}
       {showQuickRegisterModal && (
         <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">

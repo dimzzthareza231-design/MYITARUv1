@@ -25,7 +25,10 @@ export interface Pasien {
   status?: string;
   keluhan_utama?: string;
   diagnosa_primer?: string;
+  alergi?: any;
+  tanda_vital?: any;
   resume_medis?: any;
+  soap?: any;
 }
 
 export interface PasienKeluarga {
@@ -75,6 +78,8 @@ export interface MasterDokter {
   email?: string;
   status?: string;
 }
+
+export type Dokter = MasterDokter;
 
 export interface MasterPerawat {
   id: string;

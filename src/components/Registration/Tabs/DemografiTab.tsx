@@ -1,6 +1,5 @@
 import React from 'react';
 import { RegistrationFormState } from './types';
-import { HelpCircle } from 'lucide-react';
 
 interface Props {
   data: RegistrationFormState;
@@ -8,68 +7,79 @@ interface Props {
 }
 
 export function DemografiTab({ data, onChange }: Props) {
+  const inputClass = "w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 outline-none font-medium text-xs";
+  const labelClass = "block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1";
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">No RM</label>
-          <input type="text" disabled value={data.noRm} className="w-full p-2 border border-slate-300 rounded bg-slate-100 text-black font-medium" />
+          <label className={labelClass}>No RM</label>
+          <input 
+            type="text" 
+            disabled 
+            value={data.noRm} 
+            className="w-full p-2.5 border border-slate-300 dark:border-slate-700 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-bold text-xs" 
+          />
         </div>
         
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">NIK <span className="text-red-500">*</span></label>
+          <label className={labelClass}>NIK <span className="text-red-500">*</span></label>
           <input 
             type="text" 
             maxLength={16}
             value={data.nik} 
             onChange={e => onChange('nik', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium" 
-            placeholder="16 digit NIK"
+            className={inputClass} 
+            placeholder="16 digit NIK..."
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap (Sesuai KTP) <span className="text-red-500">*</span></label>
+          <label className={labelClass}>Nama Lengkap (Sesuai KTP) <span className="text-red-500">*</span></label>
           <input 
             type="text" 
             value={data.namaLengkap} 
             onChange={e => onChange('namaLengkap', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium" 
+            className={inputClass} 
+            placeholder="Nama lengkap pasien..."
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Nama Panggilan</label>
+          <label className={labelClass}>Nama Panggilan</label>
           <input 
             type="text" 
             value={data.namaPanggilan} 
             onChange={e => onChange('namaPanggilan', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium" 
+            className={inputClass} 
+            placeholder="Nama panggilan..."
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Tempat Lahir <span className="text-red-500">*</span></label>
+          <label className={labelClass}>Tempat Lahir <span className="text-red-500">*</span></label>
           <input 
             type="text" 
             value={data.tempatLahir} 
             onChange={e => onChange('tempatLahir', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium" 
+            className={inputClass} 
+            placeholder="Kota kelahiran..."
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Tanggal Lahir <span className="text-red-500">*</span></label>
+          <label className={labelClass}>Tanggal Lahir <span className="text-red-500">*</span></label>
           <div className="flex gap-2">
             <input 
               type="date" 
               max={new Date().toISOString().split('T')[0]}
               value={data.tanggalLahir} 
               onChange={e => onChange('tanggalLahir', e.target.value)}
-              className="flex-1 p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium" 
+              className={`${inputClass} flex-1`} 
             />
             {data.tanggalLahir && (
-              <div className="flex items-center px-3 bg-slate-100 border border-slate-300 rounded text-sm text-slate-600 font-bold">
+              <div className="flex items-center px-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-xs text-slate-700 dark:text-slate-200 font-bold whitespace-nowrap">
                 {Math.floor((new Date().getTime() - new Date(data.tanggalLahir).getTime()) / 31557600000)} Thn
               </div>
             )}
@@ -77,40 +87,40 @@ export function DemografiTab({ data, onChange }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Jenis Kelamin <span className="text-red-500">*</span></label>
-          <div className="flex gap-4 p-2">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <label className={labelClass}>Jenis Kelamin <span className="text-red-500">*</span></label>
+          <div className="flex gap-6 p-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-200">
               <input 
                 type="radio" 
                 name="jenisKelamin" 
                 value="L" 
                 checked={data.jenisKelamin === 'L'}
                 onChange={e => onChange('jenisKelamin', e.target.value)}
-                className="w-4 h-4 text-blue-600"
+                className="w-4 h-4 text-blue-600 dark:text-cyan-500"
               />
               <span>Laki-laki</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-200">
               <input 
                 type="radio" 
                 name="jenisKelamin" 
                 value="P" 
                 checked={data.jenisKelamin === 'P'}
                 onChange={e => onChange('jenisKelamin', e.target.value)}
-                className="w-4 h-4 text-blue-600"
+                className="w-4 h-4 text-blue-600 dark:text-cyan-500"
               />
               <span>Perempuan</span>
             </label>
           </div>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <div className="flex-1">
-            <label className="block text-sm font-bold text-slate-700 mb-1">Golongan Darah</label>
+            <label className={labelClass}>Golongan Darah</label>
             <select 
               value={data.golonganDarah} 
               onChange={e => onChange('golonganDarah', e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium"
+              className={inputClass}
             >
               <option value="">- Pilih -</option>
               <option value="A">A</option>
@@ -122,11 +132,11 @@ export function DemografiTab({ data, onChange }: Props) {
           </div>
           {data.golonganDarah && data.golonganDarah !== '-' && (
             <div className="w-1/3">
-              <label className="block text-sm font-bold text-slate-700 mb-1">Rhesus</label>
+              <label className={labelClass}>Rhesus</label>
               <select 
                 value={data.rhesus} 
                 onChange={e => onChange('rhesus', e.target.value)}
-                className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium"
+                className={inputClass}
               >
                 <option value="">- Pilih -</option>
                 <option value="+">Positif (+)</option>
@@ -137,13 +147,13 @@ export function DemografiTab({ data, onChange }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Agama</label>
+          <label className={labelClass}>Agama</label>
           <select 
             value={data.agama} 
             onChange={e => onChange('agama', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium"
+            className={inputClass}
           >
-            <option value="">- Pilih -</option>
+            <option value="">- Pilih Agama -</option>
             <option value="Islam">Islam</option>
             <option value="Kristen">Kristen</option>
             <option value="Katolik">Katolik</option>
@@ -154,37 +164,38 @@ export function DemografiTab({ data, onChange }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Suku/Bangsa</label>
+          <label className={labelClass}>Suku/Bangsa</label>
           <input 
             type="text" 
             value={data.sukuBangsa} 
             onChange={e => onChange('sukuBangsa', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium" 
+            className={inputClass} 
+            placeholder="Cth: Sunda, Jawa, Batak..."
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Kewarganegaraan</label>
-          <div className="flex gap-4 p-2">
-            <label className="flex items-center gap-2 cursor-pointer">
+          <label className={labelClass}>Kewarganegaraan</label>
+          <div className="flex gap-6 p-2 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-200">
               <input 
                 type="radio" 
                 name="kewarganegaraan" 
                 value="WNI" 
                 checked={data.kewarganegaraan === 'WNI'}
                 onChange={e => onChange('kewarganegaraan', e.target.value)}
-                className="w-4 h-4 text-blue-600"
+                className="w-4 h-4 text-blue-600 dark:text-cyan-500"
               />
               <span>WNI</span>
             </label>
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-200">
               <input 
                 type="radio" 
                 name="kewarganegaraan" 
                 value="WNA" 
                 checked={data.kewarganegaraan === 'WNA'}
                 onChange={e => onChange('kewarganegaraan', e.target.value)}
-                className="w-4 h-4 text-blue-600"
+                className="w-4 h-4 text-blue-600 dark:text-cyan-500"
               />
               <span>WNA</span>
             </label>
@@ -193,22 +204,23 @@ export function DemografiTab({ data, onChange }: Props) {
 
         {data.kewarganegaraan === 'WNA' && (
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1">No Paspor</label>
+            <label className={labelClass}>No Paspor</label>
             <input 
               type="text" 
               value={data.noPaspor} 
               onChange={e => onChange('noPaspor', e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium" 
+              className={inputClass} 
+              placeholder="Nomor Paspor WNA..."
             />
           </div>
         )}
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Bahasa yang digunakan</label>
+          <label className={labelClass}>Bahasa Komunikasi</label>
           <select 
             value={data.bahasa} 
             onChange={e => onChange('bahasa', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium"
+            className={inputClass}
           >
             <option value="Indonesia">Indonesia</option>
             <option value="Daerah">Daerah</option>
@@ -218,13 +230,13 @@ export function DemografiTab({ data, onChange }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Status Perkawinan</label>
+          <label className={labelClass}>Status Perkawinan</label>
           <select 
             value={data.statusPerkawinan} 
             onChange={e => onChange('statusPerkawinan', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium"
+            className={inputClass}
           >
-            <option value="">- Pilih -</option>
+            <option value="">- Pilih Status -</option>
             <option value="Belum Kawin">Belum Kawin</option>
             <option value="Kawin">Kawin</option>
             <option value="Cerai Hidup">Cerai Hidup</option>
@@ -233,13 +245,13 @@ export function DemografiTab({ data, onChange }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-slate-700 mb-1">Pendidikan Terakhir</label>
+          <label className={labelClass}>Pendidikan Terakhir</label>
           <select 
             value={data.pendidikanTerakhir} 
             onChange={e => onChange('pendidikanTerakhir', e.target.value)}
-            className="w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-black font-medium"
+            className={inputClass}
           >
-            <option value="">- Pilih -</option>
+            <option value="">- Pilih Pendidikan -</option>
             <option value="SD">SD</option>
             <option value="SMP">SMP</option>
             <option value="SMA/SMK">SMA/SMK</option>
@@ -254,3 +266,4 @@ export function DemografiTab({ data, onChange }: Props) {
     </div>
   );
 }
+
