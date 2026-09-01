@@ -15,7 +15,7 @@ export function SubjectiveTab({ formData, updateForm }: { formData: any, updateF
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <label className="block font-bold text-slate-900 dark:text-white mb-2">
           Keluhan Utama <span className="text-red-500">*</span>
         </label>
@@ -27,7 +27,7 @@ export function SubjectiveTab({ formData, updateForm }: { formData: any, updateF
         />
       </div>
       
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">History of Present Illness (HPI - OLDARTS)</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -73,7 +73,7 @@ export function SubjectiveTab({ formData, updateForm }: { formData: any, updateF
         </div>
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Riwayat Medis</h3>
         
         <div className="mb-6">

@@ -71,7 +71,7 @@ function InformedConsentModal({ onClose, patient }: { onClose: () => void, patie
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-[110] p-4 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-800 rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700">
         <div className="bg-emerald-600 text-white p-4 flex justify-between items-center rounded-t-xl sticky top-0 z-10">
           <h2 className="text-xl font-bold">✍️ Informed Consent - Persetujuan Tindakan Medis</h2>
           <button onClick={onClose} className="text-2xl hover:bg-emerald-700 w-8 h-8 rounded flex items-center justify-center">✕</button>
@@ -111,11 +111,11 @@ function InformedConsentModal({ onClose, patient }: { onClose: () => void, patie
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block font-semibold mb-2 text-slate-700 dark:text-slate-300">Nama Penandatangan *</label>
-              <input type="text" value={consent.nama} onChange={(e) => setConsent((c) => ({ ...c, nama: e.target.value }))} className="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-900 rounded-lg" placeholder="Masukkan nama lengkap" />
+              <input type="text" value={consent.nama} onChange={(e) => setConsent((c) => ({ ...c, nama: e.target.value }))} className="w-full p-3 border dark:border-slate-600 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-lg" placeholder="Masukkan nama lengkap" />
             </div>
             <div>
               <label className="block font-semibold mb-2 text-slate-700 dark:text-slate-300">Hubungan dengan Pasien</label>
-              <select value={consent.hubungan} onChange={(e) => setConsent((c) => ({ ...c, hubungan: e.target.value }))} className="w-full p-3 border dark:border-slate-600 bg-white dark:bg-slate-900 rounded-lg">
+              <select value={consent.hubungan} onChange={(e) => setConsent((c) => ({ ...c, hubungan: e.target.value }))} className="w-full p-3 border dark:border-slate-600 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-lg">
                 <option>Pasien Sendiri</option>
                 <option>Suami/Istri</option>
                 <option>Orang Tua</option>
@@ -162,7 +162,7 @@ function InformedConsentModal({ onClose, patient }: { onClose: () => void, patie
             </button>
           </div>
         </div>
-        <div className="border-t dark:border-slate-700 p-6 flex gap-4 sticky bottom-0 bg-white dark:bg-slate-800 rounded-b-xl">
+        <div className="border-t dark:border-slate-700 p-6 flex gap-4 sticky bottom-0 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-b-xl">
           <button onClick={onClose} className="flex-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 py-3 rounded-lg font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">Batal</button>
           <button onClick={handleSave} className="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition-colors shadow-sm">💾 Simpan Persetujuan</button>
         </div>
@@ -293,7 +293,7 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
       {/* ───────────────────────────────────────────────────────── */}
       {/* 1. PATIENT HEADER (STRONG, CLEAR IDENTITY)               */}
       {/* ───────────────────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 p-4 sm:p-5 shrink-0 shadow-sm z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 sm:p-5 shrink-0 shadow-sm z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex gap-4 items-start w-full md:w-auto">
           <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center text-2xl font-bold border border-blue-200 dark:border-blue-800 shrink-0 uppercase shadow-inner">
             {patientData?.nama?.charAt(0) || 'P'}
@@ -376,7 +376,7 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
           <PrintPDFButton 
             filename={`RME_${patientData?.nama || 'Pasien'}`} 
             label="Print RME" 
-            className="text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 !text-slate-700 dark:!text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700" 
+            className="text-xs bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border border-slate-300 dark:border-slate-700 !text-slate-700 dark:!text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700" 
             documentData={patientData}
             docType="resume_medis"
             title="RINGKASAN REKAM MEDIS"
@@ -395,7 +395,7 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
       <div className="flex flex-1 overflow-hidden">
         
         {/* SIDEBAR NAVIGATION (COLLAPSIBLE WITH SMOOTH TRANSITION & HOVER FEEDBACK) */}
-        <div className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex-col overflow-y-auto custom-scrollbar hidden md:flex shrink-0 transition-all duration-300 ease-in-out`}>
+        <div className={`${isSidebarCollapsed ? 'w-20' : 'w-64'} bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border-r border-slate-200 dark:border-slate-800 flex-col overflow-y-auto custom-scrollbar hidden md:flex shrink-0 transition-all duration-300 ease-in-out`}>
           {/* Sidebar Header & Collapse Toggle Button */}
           <div className={`p-3 border-b border-slate-200 dark:border-slate-800 flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} transition-all duration-300`}>
             {!isSidebarCollapsed && (
@@ -477,7 +477,7 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
         </div>
 
         {/* MOBILE TABS (FALLBACK) */}
-        <div className="md:hidden flex gap-2 overflow-x-auto p-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0 custom-scrollbar">
+        <div className="md:hidden flex gap-2 overflow-x-auto p-3 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 shrink-0 custom-scrollbar">
           {sidebarGroups.flatMap(g => g.items).map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -506,7 +506,7 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
             {activeTab === 'encounters' && <EncountersTab patientData={patientData} onOpenVoice={() => setShowSmartVoice(true)} />}
             
             {activeTab === 'voice_report' && (
-              <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+              <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-200 dark:border-slate-800 shadow-sm text-center">
                 <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 mx-auto mb-4 border border-indigo-100 dark:border-indigo-800/50 shadow-inner">
                   <Mic className="w-10 h-10" />
                 </div>
@@ -600,7 +600,7 @@ function OverviewTab({ patientData }: { patientData: any }) {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Active Problems */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
           <div className="flex items-center gap-2 mb-3">
             <ClipboardList className="w-5 h-5 text-blue-500" />
             <h3 className="font-bold text-slate-900 dark:text-white">Active Problems</h3>
@@ -616,7 +616,7 @@ function OverviewTab({ patientData }: { patientData: any }) {
         </div>
 
         {/* Active Medications */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
           <div className="flex items-center gap-2 mb-3">
             <Pill className="w-5 h-5 text-emerald-500" />
             <h3 className="font-bold text-slate-900 dark:text-white">Active Medications</h3>
@@ -632,7 +632,7 @@ function OverviewTab({ patientData }: { patientData: any }) {
         </div>
 
         {/* Allergies */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-5 h-5 text-rose-500" />
             <h3 className="font-bold text-slate-900 dark:text-white">Allergies</h3>
@@ -648,7 +648,7 @@ function OverviewTab({ patientData }: { patientData: any }) {
         </div>
 
         {/* Latest Vitals */}
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full">
           <div className="flex items-center gap-2 mb-3">
             <HeartPulse className="w-5 h-5 text-indigo-500" />
             <h3 className="font-bold text-slate-900 dark:text-white">Latest Vitals</h3>
@@ -700,13 +700,13 @@ function TriaseTab() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* MORSE FALL RISK */}
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-amber-500" /> Skrining Risiko Jatuh (Morse)</h3>
         <div className="space-y-3">
           <label className="flex items-center gap-2"><input type="checkbox" checked={morse.riwayatJatuh} onChange={(e) => setMorse({ ...morse, riwayatJatuh: e.target.checked })} /> Riwayat jatuh 3 bulan terakhir (25)</label>
           <label className="flex items-center gap-2"><input type="checkbox" checked={morse.dxSekunder} onChange={(e) => setMorse({ ...morse, dxSekunder: e.target.checked })} /> Diagnosis sekunder &gt; 1 (15)</label>
           <label className="flex flex-col gap-1">Alat bantu jalan
-            <select value={morse.alatBantu} onChange={(e) => setMorse({ ...morse, alatBantu: e.target.value })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600">
+            <select value={morse.alatBantu} onChange={(e) => setMorse({ ...morse, alatBantu: e.target.value })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600">
               <option value="0">Tidak ada / bedrest (0)</option>
               <option value="15">Kruk / tongkat (15)</option>
               <option value="30">Berpegangan furniture (30)</option>
@@ -714,7 +714,7 @@ function TriaseTab() {
           </label>
           <label className="flex items-center gap-2"><input type="checkbox" checked={morse.terapiInfus} onChange={(e) => setMorse({ ...morse, terapiInfus: e.target.checked })} /> Terapi infus / heparin lock (20)</label>
           <label className="flex flex-col gap-1">Gaya berjalan
-            <select value={morse.gayaBerjalan} onChange={(e) => setMorse({ ...morse, gayaBerjalan: e.target.value })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600">
+            <select value={morse.gayaBerjalan} onChange={(e) => setMorse({ ...morse, gayaBerjalan: e.target.value })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600">
               <option value="0">Normal (0)</option>
               <option value="10">Lemah (10)</option>
               <option value="20">Terganggu (20)</option>
@@ -728,25 +728,25 @@ function TriaseTab() {
       </div>
 
       {/* MUST NUTRITION */}
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Apple className="w-5 h-5 text-emerald-500" /> Skrining Gizi Awal (MUST)</h3>
         <div className="space-y-3">
           <label className="flex flex-col gap-1">BMI / Skor BMI
-            <select value={must.bmiSkor} onChange={(e) => setMust({ ...must, bmiSkor: parseInt(e.target.value) })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600">
+            <select value={must.bmiSkor} onChange={(e) => setMust({ ...must, bmiSkor: parseInt(e.target.value) })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600">
               <option value="0">BMI &gt; 20 (0)</option>
               <option value="1">BMI 18.5–20 (1)</option>
               <option value="2">BMI &lt; 18.5 (2)</option>
             </select>
           </label>
           <label className="flex flex-col gap-1">Penurunan BB 3–6 bulan terakhir
-            <select value={must.bbTurun} onChange={(e) => setMust({ ...must, bbTurun: parseInt(e.target.value) })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600">
+            <select value={must.bbTurun} onChange={(e) => setMust({ ...must, bbTurun: parseInt(e.target.value) })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600">
               <option value="0">&lt; 5% (0)</option>
               <option value="1">5–10% (1)</option>
               <option value="2">&gt; 10% (2)</option>
             </select>
           </label>
           <label className="flex flex-col gap-1">Efek sakit akut (tidak makan &gt; 5 hari)
-            <select value={must.sakitAkut} onChange={(e) => setMust({ ...must, sakitAkut: parseInt(e.target.value) })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600">
+            <select value={must.sakitAkut} onChange={(e) => setMust({ ...must, sakitAkut: parseInt(e.target.value) })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600">
               <option value="0">Tidak (0)</option>
               <option value="2">Ya (2)</option>
             </select>
@@ -758,7 +758,7 @@ function TriaseTab() {
       </div>
 
       {/* PAIN ASSESSMENT */}
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Brain className="w-5 h-5 text-rose-500" /> Asesmen Nyeri (VAS / Wong-Baker)</h3>
         <div className="flex justify-between mb-2">
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
@@ -776,17 +776,17 @@ function TriaseTab() {
       </div>
 
       {/* VITALS + BMI CALCULATOR */}
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><HeartPulse className="w-5 h-5 text-blue-500" /> Tanda Vital & Kalkulator IMT</h3>
         <div className="grid grid-cols-2 gap-3">
-          <input type="number" placeholder="Sistole (mmHg)" value={vital.sistole} onChange={(e) => setVital({ ...vital, sistole: e.target.value })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600" />
-          <input type="number" placeholder="Diastole (mmHg)" value={vital.diastole} onChange={(e) => setVital({ ...vital, diastole: e.target.value })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600" />
-          <input type="number" placeholder="Nadi (x/mnt)" value={vital.nadi} onChange={(e) => setVital({ ...vital, nadi: e.target.value })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600" />
-          <input type="number" placeholder="Suhu (°C)" value={vital.suhu} onChange={(e) => setVital({ ...vital, suhu: e.target.value })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600" />
-          <input type="number" placeholder="RR (x/mnt)" value={vital.rr} onChange={(e) => setVital({ ...vital, rr: e.target.value })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600" />
-          <input type="number" placeholder="SpO₂ (%)" value={vital.spo2} onChange={(e) => setVital({ ...vital, spo2: e.target.value })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600" />
-          <input type="number" placeholder="TB (cm)" value={vital.tb} onChange={(e) => setVital({ ...vital, tb: e.target.value })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600" />
-          <input type="number" placeholder="BB (kg)" value={vital.bb} onChange={(e) => setVital({ ...vital, bb: e.target.value })} className="p-2 border rounded bg-white dark:bg-slate-900 dark:border-slate-600" />
+          <input type="number" placeholder="Sistole (mmHg)" value={vital.sistole} onChange={(e) => setVital({ ...vital, sistole: e.target.value })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600" />
+          <input type="number" placeholder="Diastole (mmHg)" value={vital.diastole} onChange={(e) => setVital({ ...vital, diastole: e.target.value })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600" />
+          <input type="number" placeholder="Nadi (x/mnt)" value={vital.nadi} onChange={(e) => setVital({ ...vital, nadi: e.target.value })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600" />
+          <input type="number" placeholder="Suhu (°C)" value={vital.suhu} onChange={(e) => setVital({ ...vital, suhu: e.target.value })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600" />
+          <input type="number" placeholder="RR (x/mnt)" value={vital.rr} onChange={(e) => setVital({ ...vital, rr: e.target.value })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600" />
+          <input type="number" placeholder="SpO₂ (%)" value={vital.spo2} onChange={(e) => setVital({ ...vital, spo2: e.target.value })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600" />
+          <input type="number" placeholder="TB (cm)" value={vital.tb} onChange={(e) => setVital({ ...vital, tb: e.target.value })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600" />
+          <input type="number" placeholder="BB (kg)" value={vital.bb} onChange={(e) => setVital({ ...vital, bb: e.target.value })} className="p-2 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600" />
         </div>
         <div className="mt-4 p-3 rounded-lg font-bold text-center bg-blue-100 text-blue-700 flex items-center justify-center gap-2">
           <Calculator className="w-4 h-4" /> IMT Otomatis: {bmi} {bmi !== '-' && (parseFloat(bmi) < 18.5 ? '(Kurus)' : parseFloat(bmi) < 25 ? '(Normal)' : parseFloat(bmi) < 30 ? '(Overweight)' : '(Obesitas)')}
@@ -818,7 +818,7 @@ function FisikTab() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Stethoscope className="w-5 h-5 text-indigo-500" /> Body Mapping Tool</h3>
         <div className="flex justify-center">
           <svg viewBox="0 0 200 260" className="w-56 h-auto">
@@ -859,7 +859,7 @@ function FisikTab() {
             <textarea
               value={findings[selectedRegion] || ''}
               onChange={(e) => setFindings({ ...findings, [selectedRegion]: e.target.value })}
-              className="w-full p-3 border rounded bg-white dark:bg-slate-900 dark:border-slate-600"
+              className="w-full p-3 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600"
               placeholder="Catat temuan pemeriksaan (anotasi)..."
             />
             <button onClick={() => { toast.success('Temuan tersimpan'); setSelectedRegion(null); }} className="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold">Simpan Temuan</button>
@@ -867,14 +867,14 @@ function FisikTab() {
         )}
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><ListChecks className="w-5 h-5 text-indigo-500" /> Checklist Head-to-Toe</h3>
         <div className="space-y-2">
           {headToToe.map((item) => (
             <div key={item} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700">
               <input type="checkbox" className="w-4 h-4 text-indigo-600" />
               <span className="text-sm flex-1">{item}</span>
-              <input type="text" placeholder="Temuan..." className="p-1.5 text-sm border rounded bg-white dark:bg-slate-900 dark:border-slate-600 w-40" />
+              <input type="text" placeholder="Temuan..." className="p-1.5 text-sm border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600 w-40" />
             </div>
           ))}
         </div>
@@ -913,7 +913,7 @@ function SoapTab({ onOpenVoice }: { onOpenVoice?: () => void }) {
   }, [soap]);
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap justify-between items-center gap-3 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="flex flex-wrap justify-between items-center gap-3 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <div>
           <h3 className="font-bold text-lg flex items-center gap-2 text-slate-900 dark:text-white">
             <FileText className="w-5 h-5 text-blue-500" /> Dasbor SOAP Dokter & Perawat
@@ -939,9 +939,9 @@ function SoapTab({ onOpenVoice }: { onOpenVoice?: () => void }) {
         ['a', 'Assessment (Diagnosis Kerja & Banding)'],
         ['p', 'Plan (Terapi, Tindakan, Edukasi, Follow-up)']
       ] as const).map(([key, label]) => (
-        <div key={key} className="card p-5 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div key={key} className="card p-5 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
           <label className="block font-bold mb-2 text-sm uppercase tracking-wide text-slate-600 dark:text-slate-300">{label}</label>
-          <textarea value={soap[key as 's'|'o'|'a'|'p']} onChange={(e) => setSoap({ ...soap, [key]: e.target.value })} className="w-full p-3 border rounded bg-white dark:bg-slate-900 dark:border-slate-600 min-h-[100px]" placeholder={`Tulis ${label}...`} />
+          <textarea value={soap[key as 's'|'o'|'a'|'p']} onChange={(e) => setSoap({ ...soap, [key]: e.target.value })} className="w-full p-3 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600 min-h-[100px]" placeholder={`Tulis ${label}...`} />
         </div>
       ))}
       <button onClick={() => toast.success('SOAP tersimpan permanen')} className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">💾 Simpan SOAP</button>
@@ -974,9 +974,9 @@ function KodeTab() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Search className="w-5 h-5 text-indigo-500" /> Smart-Search ICD-10 (WHO)</h3>
-        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Ketik kode atau nama penyakit..." className="w-full p-3 border rounded bg-white dark:bg-slate-900 dark:border-slate-600 mb-3" />
+        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Ketik kode atau nama penyakit..." className="w-full p-3 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600 mb-3" />
         <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
           {filtered.map((d) => (
             <button key={d.code} onClick={() => { setSelectedDx([...selectedDx, d]); toast.success(`${d.code} ditambahkan sebagai diagnosis`); }} className="w-full text-left p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-indigo-400 transition-colors">
@@ -987,7 +987,7 @@ function KodeTab() {
       </div>
 
       <div className="space-y-4">
-        <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
           <h3 className="font-bold mb-3 flex items-center gap-2"><FileCode2 className="w-5 h-5 text-emerald-500" /> Diagnosis Terpilih</h3>
           {selectedDx.length === 0 ? <p className="text-sm text-slate-500">Belum ada diagnosis dipilih.</p> : (
             <div className="space-y-2">
@@ -1000,7 +1000,7 @@ function KodeTab() {
             </div>
           )}
         </div>
-        <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
           <h3 className="font-bold mb-3 flex items-center gap-2"><ListChecks className="w-5 h-5 text-blue-500" /> Prosedur / Tindakan (ICD-9-CM)</h3>
           <div className="space-y-2">
             {icd9.map((d) => (
@@ -1059,15 +1059,15 @@ function CPOETab({ patientData }: { patientData: any }) {
       </div>
 
       {subTab === 'resep' && (
-        <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
           {warning && (
             <div className={`mb-4 p-3 rounded-lg font-bold text-sm ${warning.includes('HARD') ? 'bg-red-100 text-red-700 border border-red-300' : 'bg-amber-100 text-amber-700 border border-amber-300'}`}>
               {warning}
             </div>
           )}
           <div className="flex gap-2 mb-4">
-            <input type="text" placeholder="Cari obat (zat aktif / nama dagang - KFA)" value={newDrug.name} onChange={(e) => setNewDrug({ ...newDrug, name: e.target.value })} className="flex-1 p-2.5 border rounded bg-white dark:bg-slate-900 dark:border-slate-600" />
-            <input type="text" placeholder="Dosis (kalk auto anak/geriatri)" value={newDrug.dose} onChange={(e) => setNewDrug({ ...newDrug, dose: e.target.value })} className="w-56 p-2.5 border rounded bg-white dark:bg-slate-900 dark:border-slate-600" />
+            <input type="text" placeholder="Cari obat (zat aktif / nama dagang - KFA)" value={newDrug.name} onChange={(e) => setNewDrug({ ...newDrug, name: e.target.value })} className="flex-1 p-2.5 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600" />
+            <input type="text" placeholder="Dosis (kalk auto anak/geriatri)" value={newDrug.dose} onChange={(e) => setNewDrug({ ...newDrug, dose: e.target.value })} className="w-56 p-2.5 border rounded bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl dark:border-slate-600" />
             <button onClick={addDrug} className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-1"><Plus className="w-4 h-4" /> Tambah</button>
           </div>
           <div className="space-y-2">
@@ -1084,7 +1084,7 @@ function CPOETab({ patientData }: { patientData: any }) {
       )}
 
       {subTab === 'lab' && (
-        <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
           <h3 className="font-bold mb-3">Order Laboratorium (Standar LOINC)</h3>
           <div className="space-y-2">
             {[
@@ -1104,7 +1104,7 @@ function CPOETab({ patientData }: { patientData: any }) {
       )}
 
       {subTab === 'rad' && (
-        <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
           <h3 className="font-bold mb-3">Order Radiologi & Imaging (RIS/PACS - DICOM)</h3>
           <div className="space-y-2">
             {['Rontgen Thorax PA', 'USG Abdomen', 'CT-Scan Kepala', 'MRI Lumbal'].map((t) => (
@@ -1137,7 +1137,7 @@ function LegalTab({ patientData }: { patientData: any }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><FileText className="w-5 h-5 text-blue-500" /> Resume Medis Otomatis (Discharge Summary)</h3>
         <div className="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-slate-700 text-sm space-y-2">
           <p><strong>Identitas:</strong> {patientData?.nama} ({patientData?.no_rm})</p>
@@ -1160,7 +1160,7 @@ function LegalTab({ patientData }: { patientData: any }) {
         </div>
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><FileSignature className="w-5 h-5 text-emerald-500" /> Tanda Tangan Elektronik (TTE / BSrE)</h3>
         <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800 mb-4">
           <p className="text-sm flex items-center gap-2 font-bold text-emerald-700"><ShieldCheck className="w-4 h-4" /> Sertifikat Digital Aktif</p>
@@ -1169,7 +1169,7 @@ function LegalTab({ patientData }: { patientData: any }) {
         <button onClick={() => toast.success('✅ TTE berhasil ditempelkan (sertifikat BSrE)')} className="w-full bg-emerald-600 text-white py-2.5 rounded-lg font-bold">✍️ Tempelkan TTE</button>
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2">{locked ? <Lock className="w-5 h-5 text-rose-500" /> : <Unlock className="w-5 h-5 text-emerald-500" />} Penguncian Rekam Medis</h3>
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Data terkunci otomatis 1×24 jam setelah kunjungan selesai untuk mencegah manipulasi ilegal (PMK 24/2022).</p>
         <div className={`p-3 rounded-lg font-bold text-center mb-4 ${locked ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
@@ -1180,7 +1180,7 @@ function LegalTab({ patientData }: { patientData: any }) {
         </button>
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Clock className="w-5 h-5 text-amber-500" /> Manajemen Retensi & Pemusnahan</h3>
         <div className="space-y-2">
           {['Aktif', 'Inaktif (> 5 tahun)', 'Siap Musnah'].map((s) => (
@@ -1215,7 +1215,7 @@ function AuditTab() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-indigo-500" /> Role-Based Access Control (RBAC)</h3>
         <table className="w-full text-sm">
           <thead className="bg-slate-50 dark:bg-slate-900/50">
@@ -1241,7 +1241,7 @@ function AuditTab() {
         </table>
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
         <h3 className="font-bold text-lg mb-4 flex items-center gap-2"><Eye className="w-5 h-5 text-blue-500" /> Audit Trail (Immutable Log)</h3>
         <div className="space-y-2">
           {auditLog.map((l, i) => (
@@ -1277,7 +1277,7 @@ function ProblemListTab({ patientData, setPatientData }: any) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -1385,7 +1385,7 @@ function MedicationsTab({ patientData, setPatientData }: any) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
@@ -1469,7 +1469,7 @@ function AllergiesTab({ patientData, setPatientData }: any) {
     toast.success('Alergi dihapus');
   };
   return (
-    <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 border-t-4 border-t-red-500">
+    <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 border-t-4 border-t-red-500">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-bold text-red-600">Allergy List</h2>
         <button onClick={() => toast('Form tambah alergi', { icon: '🚧' })} className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
@@ -1515,7 +1515,7 @@ function VitalsTab({ patientData }: any) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
           <HeartPulse className="w-5 h-5 text-rose-500" /> Tren Tanda Vital (Blood Pressure & Heart Rate)
         </h3>
@@ -1536,7 +1536,7 @@ function VitalsTab({ patientData }: any) {
         </div>
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold">Vital Signs History</h2>
           <button onClick={() => toast('Form tambah vital', { icon: '🚧' })} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
@@ -1694,7 +1694,7 @@ function EncountersTab({ patientData, onOpenVoice }: { patientData: any, onOpenV
     return (
       <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
         {/* ENCOUNTER BANNER */}
-        <div className="bg-white dark:bg-slate-900 p-5 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-5 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setActiveEncounterId(null)}
@@ -1815,7 +1815,7 @@ function EncountersTab({ patientData, onOpenVoice }: { patientData: any, onOpenV
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
                   isSelected
                     ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
+                    : 'bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -1826,7 +1826,7 @@ function EncountersTab({ patientData, onOpenVoice }: { patientData: any, onOpenV
         </div>
 
         {/* SUBTAB CONTENT */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-sm">
           {encounterSubTab === 'soap' && (
             <SoapTab onOpenVoice={onOpenVoice} />
           )}
@@ -1876,7 +1876,7 @@ function EncountersTab({ patientData, onOpenVoice }: { patientData: any, onOpenV
                       <div className="text-xs">
                         <strong className="text-slate-700 dark:text-slate-300">Alasan Perubahan:</strong> {add.reason}
                       </div>
-                      <div className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-amber-100 dark:border-amber-900/30 text-xs text-slate-800 dark:text-slate-200 font-medium">
+                      <div className="p-3 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-lg border border-amber-100 dark:border-amber-900/30 text-xs text-slate-800 dark:text-slate-200 font-medium">
                         {add.note}
                       </div>
                     </div>
@@ -1944,7 +1944,7 @@ function EncountersTab({ patientData, onOpenVoice }: { patientData: any, onOpenV
           <div 
             key={enc.id} 
             onClick={() => setActiveEncounterId(enc.id)}
-            className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-md cursor-pointer transition-all group"
+            className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-md cursor-pointer transition-all group"
           >
             <div className="flex justify-between items-start">
               <div className="flex gap-4">
@@ -2002,7 +2002,7 @@ function EncountersTab({ patientData, onOpenVoice }: { patientData: any, onOpenV
 function TimelineTab() {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
         <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-6">
           <Clock className="w-5 h-5 text-blue-500" />
           Clinical Timeline

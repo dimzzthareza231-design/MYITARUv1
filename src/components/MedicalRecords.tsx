@@ -83,13 +83,13 @@ return (
  <p className="text-slate-500 text-sm">Pencarian dan penetapan kode diagnosis WHO</p>
  </div>
  </div>
-  <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+  <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 p-4">
      <div className="relative mb-4">
        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
        <input
          type="text"
          placeholder="Cari kode atau nama penyakit ICD-10..."
-         className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+         className="w-full pl-10 pr-4 py-3 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
          value={search}
          onChange={e => setSearch(e.target.value)}
        />
@@ -110,7 +110,7 @@ return (
      <div className="overflow-x-auto">
        <table className="w-full text-left border-collapse">
          <thead>
-           <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+           <tr className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 border-b border-slate-200 dark:border-slate-700">
              <th className="p-3 text-xs font-bold text-slate-500 uppercase">Kode</th>
              <th className="p-3 text-xs font-bold text-slate-500 uppercase">Deskripsi</th>
              <th className="p-3 text-xs font-bold text-slate-500 uppercase">Kategori</th>
@@ -181,13 +181,13 @@ return (
  <p className="text-slate-500 text-sm">Pencarian dan penetapan kode tindakan medis</p>
  </div>
  </div>
-  <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+  <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 p-4">
      <div className="relative mb-4">
        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
        <input
          type="text"
          placeholder="Cari kode atau nama tindakan ICD-9-CM..."
-         className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+         className="w-full pl-10 pr-4 py-3 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
          value={search}
          onChange={e => setSearch(e.target.value)}
        />
@@ -208,7 +208,7 @@ return (
      <div className="overflow-x-auto">
        <table className="w-full text-left border-collapse">
          <thead>
-           <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+           <tr className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 border-b border-slate-200 dark:border-slate-700">
              <th className="p-3 text-xs font-bold text-slate-500 uppercase">Kode</th>
              <th className="p-3 text-xs font-bold text-slate-500 uppercase">Deskripsi</th>
              <th className="p-3 text-xs font-bold text-slate-500 uppercase">Kategori</th>
@@ -306,27 +306,27 @@ function ResumeMedisTab() {
 
       {/* METRIC CARDS */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase">Total Resume</p>
           <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{allResumes.length}</h3>
           <p className="text-xs text-emerald-600 font-medium mt-1">100% Terverifikasi TTE</p>
         </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase">Rawat Jalan / Poli</p>
           <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{countRJ}</h3>
           <p className="text-xs text-slate-400 mt-1">24 Poliklinik</p>
         </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase">Gawat Darurat (IGD)</p>
           <h3 className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{countIGD}</h3>
           <p className="text-xs text-slate-400 mt-1">Triase ATS & ESI</p>
         </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase">Rawat Inap</p>
           <h3 className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{countRanap}</h3>
           <p className="text-xs text-slate-400 mt-1">Bangsal & ICU</p>
         </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase">Bedah & Operasi</p>
           <h3 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">{countBedah}</h3>
           <p className="text-xs text-slate-400 mt-1">Kamar Operasi (OK)</p>
@@ -334,7 +334,7 @@ function ResumeMedisTab() {
       </div>
 
       {/* FILTER & SEARCH */}
-      <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
         <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1">
           {['Semua', 'Poli', 'IGD', 'Rawat Inap', 'Bedah'].map((unit) => (
             <button
@@ -358,16 +358,16 @@ function ResumeMedisTab() {
             placeholder="Cari pasien, No. RM, diagnosis, dokter..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
 
       {/* TABLE RESUME MEDIS */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
-            <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+            <thead className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th className="p-3.5 text-xs font-bold text-slate-500 uppercase">No. Resume & RM</th>
                 <th className="p-3.5 text-xs font-bold text-slate-500 uppercase">Nama Pasien</th>
@@ -435,7 +435,7 @@ function ResumeMedisTab() {
       {/* DETAIL RESUME MODAL */}
       {selectedResume && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col">
+          <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col">
             {/* MODAL HEADER */}
             <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-5 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
               <div className="flex items-center gap-3">
@@ -470,7 +470,7 @@ function ResumeMedisTab() {
             {/* MODAL BODY */}
             <div className="p-6 space-y-6 text-sm text-slate-800 dark:text-slate-200">
               {/* 1. IDENTITAS & ADMISI */}
-              <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <p className="text-xs text-slate-400 font-semibold uppercase">Nama Lengkap</p>
                   <p className="font-bold text-slate-900 dark:text-white">{selectedResume.nama_pasien}</p>
@@ -507,7 +507,7 @@ function ResumeMedisTab() {
 
               {/* 2. ANAMNESIS & TANDA VITAL */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                   <h4 className="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-1.5 text-xs uppercase tracking-wide text-blue-600">
                     <Activity className="w-4 h-4" /> Anamnesis Klinis
                   </h4>
@@ -522,32 +522,32 @@ function ResumeMedisTab() {
                   )}
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                   <h4 className="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-1.5 text-xs uppercase tracking-wide text-red-600">
                     <HeartPulse className="w-4 h-4" /> Tanda Vital Saat Pelayanan
                   </h4>
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
                       <p className="text-[10px] text-slate-400 uppercase">Tekanan Darah</p>
                       <p className="font-bold text-xs">{selectedResume.tanda_vital_keluar?.td || '120/80'} mmHg</p>
                     </div>
-                    <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
                       <p className="text-[10px] text-slate-400 uppercase">Nadi</p>
                       <p className="font-bold text-xs">{selectedResume.tanda_vital_keluar?.nadi || 80} x/mnt</p>
                     </div>
-                    <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
                       <p className="text-[10px] text-slate-400 uppercase">Suhu</p>
                       <p className="font-bold text-xs">{selectedResume.tanda_vital_keluar?.suhu || 36.5} °C</p>
                     </div>
-                    <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
                       <p className="text-[10px] text-slate-400 uppercase">Laju Napas</p>
                       <p className="font-bold text-xs">{selectedResume.tanda_vital_keluar?.rr || 20} x/mnt</p>
                     </div>
-                    <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
                       <p className="text-[10px] text-slate-400 uppercase">SpO2</p>
                       <p className="font-bold text-xs">{selectedResume.tanda_vital_keluar?.spo2 || 99}%</p>
                     </div>
-                    <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
                       <p className="text-[10px] text-slate-400 uppercase">Kesadaran</p>
                       <p className="font-bold text-xs">Compos Mentis</p>
                     </div>
@@ -556,12 +556,12 @@ function ResumeMedisTab() {
               </div>
 
               {/* 3. DIAGNOSIS ICD-10 & PROSEDUR ICD-9-CM */}
-              <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4">
+              <div className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4">
                 <div>
                   <h4 className="font-bold text-slate-900 dark:text-white mb-2 text-xs uppercase tracking-wide text-indigo-600">
                     Diagnosis Akhir (ICD-10)
                   </h4>
-                  <div className="p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                  <div className="p-3 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold text-blue-600 dark:text-blue-400">Diagnosis Utama:</span>
                       <p className="font-bold text-sm text-slate-900 dark:text-white">
@@ -576,7 +576,7 @@ function ResumeMedisTab() {
                   {selectedResume.diagnosis_sekunder && selectedResume.diagnosis_sekunder.length > 0 && (
                     <div className="mt-2 space-y-1">
                       {selectedResume.diagnosis_sekunder.map((sec: any, idx: number) => (
-                        <div key={idx} className="p-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+                        <div key={idx} className="p-2 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
                           <span><strong>Sekunder {idx + 1}:</strong> {sec.nama}</span>
                           <span className="font-mono font-bold text-slate-600 dark:text-slate-400">{sec.kode_icd10}</span>
                         </div>
@@ -592,7 +592,7 @@ function ResumeMedisTab() {
                     </h4>
                     <div className="space-y-1">
                       {selectedResume.tindakan_prosedur.map((proc: any, idx: number) => (
-                        <div key={idx} className="p-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
+                        <div key={idx} className="p-2 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
                           <span>{proc.nama}</span>
                           <span className="font-mono font-bold px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded">
                             {proc.kode_icd9}
@@ -606,7 +606,7 @@ function ResumeMedisTab() {
 
               {/* 4. HASIL PENUNJANG & TERAPI OBAT PULANG */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                   <h4 className="font-bold text-slate-900 dark:text-white mb-2 text-xs uppercase tracking-wide text-purple-600">
                     🔬 Hasil Pemeriksaan Penunjang
                   </h4>
@@ -616,14 +616,14 @@ function ResumeMedisTab() {
                   </div>
                 </div>
 
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                   <h4 className="font-bold text-slate-900 dark:text-white mb-2 text-xs uppercase tracking-wide text-amber-600">
                     💊 Terapi Obat & Resep Pulang
                   </h4>
                   <div className="space-y-1 max-h-32 overflow-y-auto">
                     {selectedResume.obat_pulang && selectedResume.obat_pulang.length > 0 ? (
                       selectedResume.obat_pulang.map((med: any, idx: number) => (
-                        <div key={idx} className="p-2 bg-slate-50 dark:bg-slate-900 rounded-lg text-xs flex justify-between items-center">
+                        <div key={idx} className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg text-xs flex justify-between items-center">
                           <span className="font-semibold">{med.nama_obat}</span>
                           <span className="text-slate-500">{med.dosis} • {med.aturan_pakai}</span>
                         </div>
@@ -636,7 +636,7 @@ function ResumeMedisTab() {
               </div>
 
               {/* 5. EDUKASI, KONTROL & TANDA TANGAN ELEKTRONIK */}
-              <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div className="space-y-1 text-xs">
                   <p><strong>Jadwal Kontrol Ulang:</strong> {selectedResume.jadwal_kontrol || '1 minggu setelah tanggal pelayanan di Poli Terkait'}</p>
                   <p><strong>Instruksi Khusus / Edukasi:</strong> {selectedResume.instruksi_edukasi || 'Istirahat cukup, minum obat teratur, segera kembali bila ada keluhan memberat.'}</p>
@@ -654,7 +654,7 @@ function ResumeMedisTab() {
             </div>
 
             {/* MODAL FOOTER */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-2 rounded-b-2xl">
+            <div className="p-4 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 flex justify-end gap-2 rounded-b-2xl">
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(JSON.stringify(selectedResume, null, 2));
@@ -753,7 +753,7 @@ return (
      emptyMessage="Tidak ada data pasien."
    />
    {isModalOpen && activePatient && (
-     <div className="fixed inset-0 z-50 bg-slate-50 dark:bg-slate-900 overflow-hidden">
+     <div className="fixed inset-0 z-50 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md overflow-hidden">
        <Patient360 
          patient={activePatient} 
          onBack={() => setIsModalOpen(false)} 

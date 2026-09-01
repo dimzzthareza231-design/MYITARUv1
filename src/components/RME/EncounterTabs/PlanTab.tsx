@@ -14,7 +14,7 @@ export function PlanTab({ formData, updateForm }: { formData: any, updateForm: (
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-lg text-slate-900 dark:text-white">Terapi Farmakologi (E-Resep)</h3>
           <button 
@@ -69,7 +69,7 @@ export function PlanTab({ formData, updateForm }: { formData: any, updateForm: (
         )}
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Terapi Non-Farmakologi</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -110,7 +110,7 @@ export function PlanTab({ formData, updateForm }: { formData: any, updateForm: (
         </div>
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Rujukan / Follow-up</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>

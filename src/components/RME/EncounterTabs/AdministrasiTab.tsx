@@ -4,7 +4,7 @@ import { Sparkles, Printer } from 'lucide-react';
 export function AdministrasiTab({ formData, updateForm }: { formData: any, updateForm: (data: any) => void }) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="text-lg font-bold mb-4 flex items-center justify-between text-slate-900 dark:text-white">
           Resume Medis (Discharge Summary)
           <button className="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-md flex items-center gap-1 font-bold hover:bg-indigo-200 transition-colors">
@@ -22,7 +22,7 @@ export function AdministrasiTab({ formData, updateForm }: { formData: any, updat
         </button>
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Status Akhir Kunjungan</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {['Selesai (Pulang)', 'Rujuk Rawat Inap', 'Rujuk Klinik Lain', 'Meninggal', 'Pulang APS'].map(status => (
@@ -44,7 +44,7 @@ export function AdministrasiTab({ formData, updateForm }: { formData: any, updat
         </div>
       </div>
       
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Informed Consent (Persetujuan Tindakan)</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>

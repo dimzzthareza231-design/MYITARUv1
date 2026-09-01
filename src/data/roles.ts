@@ -42,7 +42,7 @@ export const ROLES: Role[] = [
     nama: 'Guest Viewer',
     icon: '👁️',
     warna: 'from-gray-400 to-gray-500',
-    deskripsi: 'Akses read-only ke seluruh modul (hanya melihat, tidak dapat mengubah data).',
+    deskripsi: 'Akses read-only ke seluruh modul operasional dan medis (hanya melihat, tidak dapat mengubah data).',
     kategori: 'Sistem',
     moduleAccess: [
       'rekam-medis', 'pendaftaran', 'igd', 'rawat-jalan', 'rawat-inap', 'operasi', 'laboratorium', 'radiologi',
@@ -50,7 +50,7 @@ export const ROLES: Role[] = [
       'sdm', 'inventory', 'mutu', 'patient-flow',
       'apotek-ralan', 'apotek-ranap', 'stok-obat',
       'kasir', 'bpjs-klaim', 'laporan',
-      'bridging-hub', 'wa-gateway', 'anjungan', 'api', 'jkn-mobile', 'vclaim', 'vedika', 'orthanc', 'bpjs-emr', 'hfis', 'veronisa', 'satu-sehat', 'sertisign',
+      'bridging-hub', 'wa-gateway', 'anjungan', 'api', 'jkn-mobile', 'vclaim', 'vedika', 'orthanc', 'bpjs-emr', 'hfis', 'veronisa', 'satu-sehat', 'sertisign', 'cloudflare',
       'pengaturan-klinik', 'security', 'audit', 'backup', 'monitoring',
       ...COMMON_MODULES
     ]
@@ -60,22 +60,15 @@ export const ROLES: Role[] = [
     nama: 'Super Admin',
     icon: '👑',
     warna: 'from-purple-500 to-pink-600',
-    deskripsi: 'Akses penuh tanpa batas ke semua modul klinis, bridging, billing, keamanan, dan infrastruktur sistem.',
+    deskripsi: 'Akses penuh ke semua modul klinis, bridging, keuangan, keamanan, dan infrastruktur sistem tanpa batas.',
     kategori: 'Sistem',
     moduleAccess: [
-      // Pelayanan Klinis
       'rekam-medis', 'pendaftaran', 'igd', 'rawat-jalan', 'rawat-inap', 'operasi', 'laboratorium', 'radiologi',
-      // Penunjang & Spesialistik
       'triase', 'icu', 'cssd', 'rehab', 'telemedicine', 'gizi',
-      // Manajemen & SDM
       'sdm', 'inventory', 'mutu', 'patient-flow',
-      // Farmasi
       'apotek-ralan', 'apotek-ranap', 'stok-obat',
-      // Keuangan & BPJS
       'kasir', 'bpjs-klaim', 'laporan',
-      // Bridging & Integrasi
-      'bridging-hub', 'wa-gateway', 'anjungan', 'api', 'jkn-mobile', 'vclaim', 'vedika', 'orthanc', 'bpjs-emr', 'hfis', 'veronisa', 'satu-sehat', 'sertisign',
-      // Sistem & Security
+      'bridging-hub', 'wa-gateway', 'anjungan', 'api', 'jkn-mobile', 'vclaim', 'vedika', 'orthanc', 'bpjs-emr', 'hfis', 'veronisa', 'satu-sehat', 'sertisign', 'cloudflare',
       'pengaturan-klinik', 'security', 'audit', 'backup', 'monitoring',
       ...COMMON_MODULES
     ]
@@ -85,7 +78,7 @@ export const ROLES: Role[] = [
     nama: 'Administrator SIMK',
     icon: '🔧',
     warna: 'from-slate-500 to-slate-700',
-    deskripsi: 'Pengelolaan master data, pegawai, logistik inventory, bridging eksternal, laporan, dan konfigurasi Klinik.',
+    deskripsi: 'Pengelolaan manajerial tingkat lanjut untuk master data, SDM, inventori, laporan dan bridging sistem.',
     kategori: 'Sistem',
     moduleAccess: [
       'rekam-medis', 'pendaftaran', 'sdm', 'inventory', 'mutu', 'laporan', 'patient-flow',
@@ -100,11 +93,11 @@ export const ROLES: Role[] = [
     nama: 'Direksi & Manajemen',
     icon: '🏛️',
     warna: 'from-amber-600 to-yellow-600',
-    deskripsi: 'Executive dashboard, analytics operasional, laporan keuangan, mutu layanan, dan audit trail.',
+    deskripsi: 'Akses executive dashboard tingkat tinggi untuk analitik operasional, KPI, dan laporan mutu layanan.',
     kategori: 'Manajemen',
     moduleAccess: [
       'laporan', 'mutu', 'sdm', 'inventory', 'kasir', 'bpjs-klaim', 'patient-flow', 'monitoring', 'audit',
-      'rekam-medis', 'rawat-jalan', 'rawat-inap', 'igd', 'bridging-hub',
+      'rekam-medis', 'rawat-jalan', 'rawat-inap', 'igd', 'bridging-hub', 'hfis',
       ...COMMON_MODULES
     ]
   },
@@ -113,11 +106,11 @@ export const ROLES: Role[] = [
     nama: 'Dokter / DPJP',
     icon: '👨‍⚕️',
     warna: 'from-blue-500 to-cyan-600',
-    deskripsi: 'Pelayanan medis RME, diagnosis ICD-10, tindakan, e-resep, permintaan lab/rad, bridging V-Claim & SatuSehat.',
+    deskripsi: 'Kewenangan klinis penuh untuk penulisan EMR, diagnosis ICD, asuhan medis, e-resep, dan validasi medis.',
     kategori: 'Medis',
     moduleAccess: [
       'rekam-medis', 'rawat-jalan', 'igd', 'rawat-inap', 'operasi', 'triase',
-      'laboratorium', 'radiologi', 'orthanc',
+      'laboratorium', 'radiologi', 'orthanc', 'cssd',
       'vclaim', 'bpjs-emr', 'satu-sehat', 'telemedicine', 'rehab', 'gizi', 'icu',
       'patient-flow', 'mutu', 'laporan',
       ...COMMON_MODULES
@@ -128,11 +121,11 @@ export const ROLES: Role[] = [
     nama: 'Perawat',
     icon: '👩‍⚕️',
     warna: 'from-emerald-500 to-teal-600',
-    deskripsi: 'Asuhan keperawatan, triase IGD, observasi rawat inap, vital signs, ICU monitoring, dan antrian poli.',
+    deskripsi: 'Fokus pada asuhan keperawatan, triase gawat darurat, observasi vital sign, dan manajemen antrian pasien.',
     kategori: 'Medis',
     moduleAccess: [
-      'igd', 'rawat-inap', 'rawat-jalan', 'triase', 'rekam-medis', 'icu', 'cssd',
-      'pendaftaran', 'patient-flow', 'gizi', 'sdm',
+      'igd', 'rawat-inap', 'rawat-jalan', 'triase', 'rekam-medis', 'icu', 'cssd', 'operasi',
+      'pendaftaran', 'patient-flow', 'gizi', 'sdm', 'satu-sehat',
       ...COMMON_MODULES
     ]
   },
@@ -141,7 +134,7 @@ export const ROLES: Role[] = [
     nama: 'Bidan',
     icon: '🤱',
     warna: 'from-pink-500 to-rose-600',
-    deskripsi: 'Pelayanan kebidanan (VK/Kamar Bersalin, Poli KIA/Kandungan), partograf, dan perawatan nifas.',
+    deskripsi: 'Otoritas layanan asuhan kebidanan (Poli KIA/Kandungan), observasi partograf, dan perawatan khusus nifas.',
     kategori: 'Medis',
     moduleAccess: [
       'rawat-inap', 'rawat-jalan', 'igd', 'rekam-medis', 'pendaftaran', 'patient-flow', 'satu-sehat',
@@ -153,10 +146,10 @@ export const ROLES: Role[] = [
     nama: 'Apoteker & Farmasi',
     icon: '💊',
     warna: 'from-purple-500 to-pink-600',
-    deskripsi: 'Pengelolaan resep rawat jalan & rawat inap, stok obat multi-depo, dan logistik inventory / gudang farmasi.',
+    deskripsi: 'Manajemen peresepan elektronik (e-prescription), dispensing obat, stok multi-depo, dan logistik obat.',
     kategori: 'Penunjang',
     moduleAccess: [
-      'apotek-ralan', 'apotek-ranap', 'stok-obat', 'inventory',
+      'apotek-ralan', 'apotek-ranap', 'stok-obat', 'inventory', 'satu-sehat',
       ...COMMON_MODULES
     ]
   },
@@ -165,7 +158,7 @@ export const ROLES: Role[] = [
     nama: 'Kasir & Keuangan',
     icon: '💰',
     warna: 'from-amber-500 to-orange-600',
-    deskripsi: 'Billing tagihan pasien, pembayaran tunai/non-tunai, kwitansi, klaim BPJS INA-CBGs, dan laporan kasir.',
+    deskripsi: 'Sentralisasi sistem tagihan (billing), pembayaran non-tunai, kwitansi, dan klaim asuransi/BPJS (INA-CBGs).',
     kategori: 'Administrasi',
     moduleAccess: [
       'kasir', 'bpjs-klaim', 'vclaim', 'vedika', 'veronisa', 'laporan', 'api',
@@ -177,7 +170,7 @@ export const ROLES: Role[] = [
     nama: 'Petugas Pendaftaran',
     icon: '📋',
     warna: 'from-indigo-500 to-violet-600',
-    deskripsi: 'Registrasi pasien baru/lama, antrian poli/IGD, bridging V-Claim (SEP & Rujukan), anjungan, dan JKN Mobile.',
+    deskripsi: 'Titik masuk registrasi pasien, penerbitan SEP V-Claim, validasi identitas dan penjadwalan antrian poli.',
     kategori: 'Administrasi',
     moduleAccess: [
       'pendaftaran', 'anjungan', 'jkn-mobile', 'vclaim', 'veronisa', 'rekam-medis', 'patient-flow', 'triase', 'wa-gateway',
@@ -186,24 +179,24 @@ export const ROLES: Role[] = [
   },
   {
     id: 'rekam_medis',
-    nama: 'Petugas Rekam Medis (RMIK)',
+    nama: 'Petugas RMIK',
     icon: '🗂️',
     warna: 'from-blue-600 to-indigo-700',
-    deskripsi: 'Pengelolaan berkas RME, koding ICD-10 & ICD-9-CM, bridging SatuSehat & Vedika, audit rekam medis, dan pelaporan RL.',
+    deskripsi: 'Pengelolaan berkas EMR (Rekam Medis Elektronik), koding ICD, audit RL Kemenkes, dan pengiriman SatuSehat.',
     kategori: 'Administrasi',
     moduleAccess: [
       'rekam-medis', 'pendaftaran', 'igd', 'rawat-jalan', 'rawat-inap', 'operasi',
       'laboratorium', 'radiologi', 'orthanc', 'bpjs-klaim', 'vclaim', 'vedika', 'bpjs-emr',
-      'satu-sehat', 'sertisign', 'mutu', 'laporan', 'patient-flow',
+      'satu-sehat', 'sertisign', 'mutu', 'laporan', 'patient-flow', 'hfis', 'veronisa',
       ...COMMON_MODULES
     ]
   },
   {
     id: 'laboran',
-    nama: 'Laboran / Analis Lab',
+    nama: 'Analis Laboratorium',
     icon: '🔬',
     warna: 'from-red-500 to-rose-600',
-    deskripsi: 'Pemeriksaan spesimen LIS, input hasil nilai kritis, quality control laboratorium, dan bridging SatuSehat LOINC.',
+    deskripsi: 'Pemeriksaan spesimen Lab (LIS), pemrosesan nilai kritis, quality control, dan bridging LOINC.',
     kategori: 'Penunjang',
     moduleAccess: [
       'laboratorium', 'satu-sehat', 'bridging-hub', 'rekam-medis',
@@ -215,7 +208,7 @@ export const ROLES: Role[] = [
     nama: 'Radiografer',
     icon: '🩻',
     warna: 'from-sky-500 to-blue-600',
-    deskripsi: 'Pemeriksaan radiologi & imaging, pengelolaan PACS DICOM viewer (Orthanc), dan bridging hasil SatuSehat.',
+    deskripsi: 'Layanan diagnostic imaging radiologi, akuisisi citra ke PACS (Orthanc), dan bridging hasil ekspertise.',
     kategori: 'Penunjang',
     moduleAccess: [
       'radiologi', 'orthanc', 'satu-sehat', 'bridging-hub', 'rekam-medis',
@@ -224,10 +217,10 @@ export const ROLES: Role[] = [
   },
   {
     id: 'manajemen_mutu',
-    nama: 'Komite Mutu & Keselamatan',
+    nama: 'Komite Mutu (PMKP)',
     icon: '📊',
     warna: 'from-fuchsia-500 to-purple-600',
-    deskripsi: 'Pemantauan indikator mutu nasional (INM), insiden keselamatan pasien (IKP), clinical pathway, dan audit kepatuhan.',
+    deskripsi: 'Supervisi Indikator Mutu Nasional (INM), evaluasi RCA, insiden (IKP), dan standardisasi clinical pathway.',
     kategori: 'Manajemen',
     moduleAccess: [
       'mutu', 'laporan', 'patient-flow', 'audit', 'monitoring', 'rekam-medis',
@@ -239,7 +232,7 @@ export const ROLES: Role[] = [
     nama: 'Fisioterapis & Rehab',
     icon: '🩺',
     warna: 'from-violet-500 to-purple-600',
-    deskripsi: 'Asesmen indeks Barthel, catatan sesi terapi fisik, dan program home exercise pasien.',
+    deskripsi: 'Pengkajian indeks Barthel (ADL), evaluasi sesi terapi fisik, dan pembuatan program home exercise pasien.',
     kategori: 'Penunjang',
     moduleAccess: [
       'rehab', 'rawat-jalan', 'rekam-medis',
@@ -251,7 +244,7 @@ export const ROLES: Role[] = [
     nama: 'Nutrisionis / Ahli Gizi',
     icon: '🥗',
     warna: 'from-teal-500 to-emerald-600',
-    deskripsi: 'Skrining gizi (MST), preskripsi diet makanan pasien rawat inap, monitoring asupan (Comstock), dan edukasi gizi.',
+    deskripsi: 'Skrining gizi komprehensif (MST), perhitungan preskripsi diet, serta monitoring asupan makronutrien.',
     kategori: 'Penunjang',
     moduleAccess: [
       'gizi', 'rawat-inap', 'rekam-medis',
@@ -263,10 +256,10 @@ export const ROLES: Role[] = [
     nama: 'IT Support & Infra',
     icon: '💻',
     warna: 'from-cyan-600 to-blue-700',
-    deskripsi: 'Pemeliharaan server, bridging API, backup & disaster recovery, manajemen sesi, dan error monitoring.',
+    deskripsi: 'Otoritas manajemen server, pengelolaan API Gateway, keamanan cyber (WAF), dan disaster recovery (DRC).',
     kategori: 'Sistem',
     moduleAccess: [
-      'security', 'audit', 'backup', 'monitoring', 'api', 'bridging-hub', 'pengaturan-klinik', 'wa-gateway', 'anjungan',
+      'security', 'audit', 'backup', 'monitoring', 'api', 'bridging-hub', 'pengaturan-klinik', 'wa-gateway', 'anjungan', 'hfis', 'cloudflare',
       ...COMMON_MODULES
     ]
   }

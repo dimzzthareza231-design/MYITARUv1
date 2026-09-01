@@ -89,7 +89,7 @@ export function ImmunizationsTab({ patientData }: { patientData: any }) {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* HEADER CARD */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
@@ -147,7 +147,7 @@ export function ImmunizationsTab({ patientData }: { patientData: any }) {
       </div>
 
       {/* FILTER & TABLE */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-2">
           {['Semua', 'Wajib Dasar', 'Lanjutan', 'Dewasa / Khusus'].map(cat => (
             <button
@@ -219,7 +219,7 @@ export function ImmunizationsTab({ patientData }: { patientData: any }) {
       {/* ADD VACCINE MODAL */}
       {showAddModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-5 bg-teal-600 text-white flex justify-between items-center">
               <div>
                 <h3 className="font-bold text-lg flex items-center gap-2">

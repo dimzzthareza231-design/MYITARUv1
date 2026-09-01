@@ -431,7 +431,7 @@ export function SmartVoiceReport({
 
   return (
     <div className="fixed inset-0 z-[120] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         
         {/* MODAL HEADER */}
         <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white p-5 flex items-center justify-between shadow-md">
@@ -531,7 +531,7 @@ export function SmartVoiceReport({
                   <select
                     value={engineMode}
                     onChange={(e: any) => setEngineMode(e.target.value)}
-                    className="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2.5 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="hybrid">⚡ Hybrid (SpeechAPI + Gemini Scribe)</option>
                     <option value="browser_noise_filter">🎙️ Native Speech + DSP Noise Filter</option>
@@ -660,7 +660,7 @@ export function SmartVoiceReport({
                   value={transcript}
                   onChange={(e) => setTranscript(e.target.value)}
                   placeholder="Katakan keluhan pasien, riwayat penyakit, hasil pemeriksaan fisik, tanda vital, dan instruksi terapi..."
-                  className="w-full p-4 border border-slate-300 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white min-h-[140px] focus:ring-2 focus:ring-indigo-500 focus:outline-none text-base leading-relaxed"
+                  className="w-full p-4 border border-slate-300 dark:border-slate-700 rounded-xl bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl text-slate-900 dark:text-white min-h-[140px] focus:ring-2 focus:ring-indigo-500 focus:outline-none text-base leading-relaxed"
                 />
               </div>
 
@@ -677,7 +677,7 @@ export function SmartVoiceReport({
                     <button
                       key={idx}
                       onClick={() => handleSelectScenario(sc)}
-                      className="text-left p-3 rounded-lg bg-white dark:bg-slate-800 border border-indigo-100 dark:border-slate-700 hover:border-indigo-400 hover:shadow-sm transition-all text-xs text-slate-700 dark:text-slate-300 font-medium"
+                      className="text-left p-3 rounded-lg bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border border-indigo-100 dark:border-slate-700 hover:border-indigo-400 hover:shadow-sm transition-all text-xs text-slate-700 dark:text-slate-300 font-medium"
                     >
                       <strong className="block text-indigo-700 dark:text-indigo-400 font-bold mb-1">{sc.title}</strong>
                       <p className="text-slate-500 dark:text-slate-400 line-clamp-2">{sc.text}</p>
@@ -726,7 +726,7 @@ export function SmartVoiceReport({
 
                 <button
                   onClick={() => handleAnalyzeTranscript(transcript)}
-                  className="text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 flex items-center gap-1.5 font-semibold"
+                  className="text-xs bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border border-slate-300 dark:border-slate-700 px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:bg-slate-50 flex items-center gap-1.5 font-semibold"
                 >
                   <RefreshCw className="w-3.5 h-3.5" /> Re-Analisis AI
                 </button>
@@ -747,7 +747,7 @@ export function SmartVoiceReport({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 {/* S - Subjective */}
-                <div className="card p-4 bg-white dark:bg-slate-800 rounded-xl border border-blue-200 dark:border-blue-900/50 shadow-sm">
+                <div className="card p-4 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-blue-200 dark:border-blue-900/50 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <label className="font-bold text-xs uppercase tracking-wider text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
                       <Stethoscope className="w-4 h-4" /> [S] Subjective (Keluhan / Anamnesis)
@@ -765,7 +765,7 @@ export function SmartVoiceReport({
                 </div>
 
                 {/* O - Objective */}
-                <div className="card p-4 bg-white dark:bg-slate-800 rounded-xl border border-emerald-200 dark:border-emerald-900/50 shadow-sm">
+                <div className="card p-4 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-emerald-200 dark:border-emerald-900/50 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <label className="font-bold text-xs uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
                       <HeartPulse className="w-4 h-4" /> [O] Objective (Fisik & Tanda Vital)
@@ -783,7 +783,7 @@ export function SmartVoiceReport({
                 </div>
 
                 {/* A - Assessment */}
-                <div className="card p-4 bg-white dark:bg-slate-800 rounded-xl border border-amber-200 dark:border-amber-900/50 shadow-sm">
+                <div className="card p-4 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-amber-200 dark:border-amber-900/50 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <label className="font-bold text-xs uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                       <Brain className="w-4 h-4" /> [A] Assessment (Diagnosis & ICD-10)
@@ -801,7 +801,7 @@ export function SmartVoiceReport({
                 </div>
 
                 {/* P - Plan */}
-                <div className="card p-4 bg-white dark:bg-slate-800 rounded-xl border border-purple-200 dark:border-purple-900/50 shadow-sm">
+                <div className="card p-4 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-purple-200 dark:border-purple-900/50 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <label className="font-bold text-xs uppercase tracking-wider text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
                       <Pill className="w-4 h-4" /> [P] Plan (Terapi, Resep, Edukasi)
@@ -827,7 +827,7 @@ export function SmartVoiceReport({
                 <textarea
                   value={verifiedSOAP.resume}
                   onChange={(e) => setVerifiedSOAP({ ...verifiedSOAP, resume: e.target.value })}
-                  className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm min-h-[60px]"
+                  className="w-full p-3 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-lg text-sm min-h-[60px]"
                 />
               </div>
 

@@ -3,7 +3,7 @@ import React from 'react';
 export function ObjectiveTab({ formData, updateForm }: { formData: any, updateForm: (data: any) => void }) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Tanda-tanda Vital</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div>
@@ -60,7 +60,7 @@ export function ObjectiveTab({ formData, updateForm }: { formData: any, updateFo
         </div>
       </div>
       
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Pemeriksaan Fisik</h3>
         <textarea 
           className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500 min-h-[120px]" 
@@ -70,7 +70,7 @@ export function ObjectiveTab({ formData, updateForm }: { formData: any, updateFo
         />
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Pemeriksaan Penunjang (Lab & Rad)</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>

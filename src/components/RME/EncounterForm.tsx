@@ -109,7 +109,7 @@ export function EncounterForm({ patient, onSave, onCancel, syncData }: { patient
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden mt-6 shadow-sm">
+    <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden mt-6 shadow-sm">
       <div className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 flex items-center justify-between">
         <h2 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
           <Clock className="w-5 h-5 text-indigo-500" />

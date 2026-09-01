@@ -10,6 +10,7 @@ import { KeyboardShortcutsProvider } from './contexts/KeyboardShortcutsContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserManagement } from './components/Auth/UserManagement';
+import { ProtectedRoute, withAuthorization } from './components/Auth/ProtectedRoute';
 import { Login } from './components/Login';
 import Dashboard from './components/Dashboard';
 import ModuleLayout from './layouts/ModuleLayout';
@@ -128,55 +129,58 @@ function AppContent() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/modul" element={<ModuleLayout />}>
-              <Route path="pendaftaran" element={<ErrorBoundary><Registration /></ErrorBoundary>} />
-              <Route path="rekam-medis" element={<ErrorBoundary><MedicalRecords /></ErrorBoundary>} />
-              <Route path="igd" element={<ErrorBoundary><Emergency /></ErrorBoundary>} />
-              <Route path="rawat-jalan" element={<ErrorBoundary><Outpatient /></ErrorBoundary>} />
-              <Route path="rawat-inap" element={<ErrorBoundary><BedManagement /></ErrorBoundary>} />
-              <Route path="operasi" element={<ErrorBoundary><KamarOperasi /></ErrorBoundary>} />
-              <Route path="laboratorium" element={<ErrorBoundary><Laboratorium /></ErrorBoundary>} />
-              <Route path="radiologi" element={<ErrorBoundary><RadiologiDashboard /></ErrorBoundary>} />
+              <Route path="pendaftaran" element={<ErrorBoundary><ProtectedRoute moduleId="pendaftaran"><Registration /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="rekam-medis" element={<ErrorBoundary><ProtectedRoute moduleId="rekam-medis"><MedicalRecords /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="igd" element={<ErrorBoundary><ProtectedRoute moduleId="igd"><Emergency /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="rawat-jalan" element={<ErrorBoundary><ProtectedRoute moduleId="rawat-jalan"><Outpatient /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="rawat-inap" element={<ErrorBoundary><ProtectedRoute moduleId="rawat-inap"><BedManagement /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="operasi" element={<ErrorBoundary><ProtectedRoute moduleId="operasi"><KamarOperasi /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="laboratorium" element={<ErrorBoundary><ProtectedRoute moduleId="laboratorium"><Laboratorium /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="radiologi" element={<ErrorBoundary><ProtectedRoute moduleId="radiologi"><RadiologiDashboard /></ProtectedRoute></ErrorBoundary>} />
               
               {/* Bridging Modules */}
-              <Route path="bridging-hub" element={<ErrorBoundary><BridgingHub /></ErrorBoundary>} />
-              <Route path="wa-gateway" element={<ErrorBoundary><WAGatewayBridging /></ErrorBoundary>} />
-              <Route path="anjungan" element={<ErrorBoundary><AnjunganBridging /></ErrorBoundary>} />
-              <Route path="api" element={<ErrorBoundary><ApiGatewayBridging /></ErrorBoundary>} />
-              <Route path="vclaim" element={<ErrorBoundary><VClaimBridging /></ErrorBoundary>} />
-              <Route path="vedika" element={<ErrorBoundary><VedikaBridging /></ErrorBoundary>} />
-              <Route path="orthanc" element={<ErrorBoundary><OrthancBridging /></ErrorBoundary>} />
-              <Route path="bpjs-emr" element={<ErrorBoundary><BPJSEMRBridging /></ErrorBoundary>} />
-              <Route path="hfis" element={<ErrorBoundary><HFISBridging /></ErrorBoundary>} />
-              <Route path="veronisa" element={<ErrorBoundary><VeronisaBridging /></ErrorBoundary>} />
-              <Route path="satu-sehat" element={<ErrorBoundary><SatuSehatBridging /></ErrorBoundary>} />
-              <Route path="sertisign" element={<ErrorBoundary><SertisignBridging /></ErrorBoundary>} />
-              <Route path="cloudflare" element={<ErrorBoundary><CloudflareBridging /></ErrorBoundary>} />
+              <Route path="bridging-hub" element={<ErrorBoundary><ProtectedRoute moduleId="bridging-hub"><BridgingHub /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="wa-gateway" element={<ErrorBoundary><ProtectedRoute moduleId="wa-gateway"><WAGatewayBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="anjungan" element={<ErrorBoundary><ProtectedRoute moduleId="anjungan"><AnjunganBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="api" element={<ErrorBoundary><ProtectedRoute moduleId="api"><ApiGatewayBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="vclaim" element={<ErrorBoundary><ProtectedRoute moduleId="vclaim"><VClaimBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="vedika" element={<ErrorBoundary><ProtectedRoute moduleId="vedika"><VedikaBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="orthanc" element={<ErrorBoundary><ProtectedRoute moduleId="orthanc"><OrthancBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="bpjs-emr" element={<ErrorBoundary><ProtectedRoute moduleId="bpjs-emr"><BPJSEMRBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="hfis" element={<ErrorBoundary><ProtectedRoute moduleId="hfis"><HFISBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="veronisa" element={<ErrorBoundary><ProtectedRoute moduleId="veronisa"><VeronisaBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="satu-sehat" element={<ErrorBoundary><ProtectedRoute moduleId="satu-sehat"><SatuSehatBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="sertisign" element={<ErrorBoundary><ProtectedRoute moduleId="sertisign"><SertisignBridging /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="cloudflare" element={<ErrorBoundary><ProtectedRoute moduleId="cloudflare"><CloudflareBridging /></ProtectedRoute></ErrorBoundary>} />
               
-              <Route path="sdm" element={<ErrorBoundary><ManajemenSDM /></ErrorBoundary>} />
-              <Route path="inventory" element={<ErrorBoundary><InventoryManagement /></ErrorBoundary>} />
-              <Route path="mutu" element={<ErrorBoundary><PatientSafety /></ErrorBoundary>} />
-              <Route path="apotek-ralan" element={<ErrorBoundary><Pharmacy /></ErrorBoundary>} />
-              <Route path="apotek-ranap" element={<ErrorBoundary><Pharmacy /></ErrorBoundary>} />
-              <Route path="stok-obat" element={<ErrorBoundary><Pharmacy /></ErrorBoundary>} />
-              <Route path="kasir" element={<ErrorBoundary><Billing /></ErrorBoundary>} />
-              <Route path="bpjs-klaim" element={<ErrorBoundary><BPJSModule /></ErrorBoundary>} />
-              <Route path="laporan" element={<ErrorBoundary><AnalyticsDashboard /></ErrorBoundary>} />
-              <Route path="bpjs" element={<ErrorBoundary><BPJSModule /></ErrorBoundary>} />
-              <Route path="kemenkes" element={<ErrorBoundary><SatuSehatIntegration /></ErrorBoundary>} />
-              <Route path="integrasi" element={<ErrorBoundary><ApiManagementSystem /></ErrorBoundary>} />
-              <Route path="panduan" element={<ErrorBoundary><PanduanModule /></ErrorBoundary>} />
-              <Route path="pengaturan-klinik" element={<ErrorBoundary><PengaturanRS /></ErrorBoundary>} />
-              <Route path="notifikasi" element={<ErrorBoundary><NotificationPreferences /></ErrorBoundary>} />
-              <Route path="profile" element={<ErrorBoundary><Profile /></ErrorBoundary>} />
-              <Route path="security" element={<ErrorBoundary><AuthManagement /></ErrorBoundary>} />
-              <Route path="audit" element={<ErrorBoundary><AuditTrail /></ErrorBoundary>} />
-              <Route path="backup" element={<ErrorBoundary><BackupManagement /></ErrorBoundary>} />
-              <Route path="monitoring" element={<ErrorBoundary><MonitoringSystem /></ErrorBoundary>} />
-              <Route path="triase" element={<ErrorBoundary><ModulTriase /></ErrorBoundary>} />
-              <Route path="jkn-mobile" element={<ErrorBoundary><JKNMobile /></ErrorBoundary>} />
-              <Route path="user-management" element={<ErrorBoundary><UserManagement /></ErrorBoundary>} />
-              <Route path="poli" element={<ErrorBoundary><PoliPelayanan /></ErrorBoundary>} />
-              <Route path="display-antrian" element={<ErrorBoundary><DisplayAntrianPoli /></ErrorBoundary>} />
+              <Route path="sdm" element={<ErrorBoundary><ProtectedRoute moduleId="sdm"><ManajemenSDM /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="inventory" element={<ErrorBoundary><ProtectedRoute moduleId="inventory"><InventoryManagement /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="mutu" element={<ErrorBoundary><ProtectedRoute moduleId="mutu"><PatientSafety /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="apotek-ralan" element={<ErrorBoundary><ProtectedRoute moduleId="apotek-ralan"><Pharmacy /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="apotek-ranap" element={<ErrorBoundary><ProtectedRoute moduleId="apotek-ranap"><Pharmacy /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="stok-obat" element={<ErrorBoundary><ProtectedRoute moduleId="stok-obat"><Pharmacy /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="kasir" element={<ErrorBoundary><ProtectedRoute moduleId="kasir"><Billing /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="bpjs-klaim" element={<ErrorBoundary><ProtectedRoute moduleId="bpjs-klaim"><BPJSModule /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="laporan" element={<ErrorBoundary><ProtectedRoute moduleId="laporan"><AnalyticsDashboard /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="bpjs" element={<ErrorBoundary><ProtectedRoute moduleId="vclaim"><BPJSModule /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="kemenkes" element={<ErrorBoundary><ProtectedRoute moduleId="satu-sehat"><SatuSehatIntegration /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="integrasi" element={<ErrorBoundary><ProtectedRoute moduleId="api"><ApiManagementSystem /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="panduan" element={<ErrorBoundary><ProtectedRoute moduleId="panduan"><PanduanModule /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="pengaturan-klinik" element={<ErrorBoundary><ProtectedRoute moduleId="pengaturan-klinik"><PengaturanRS /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="notifikasi" element={<ErrorBoundary><ProtectedRoute moduleId="notifikasi"><NotificationPreferences /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="profile" element={<ErrorBoundary><ProtectedRoute moduleId="profile"><Profile /></ProtectedRoute></ErrorBoundary>} />
+              
+              {/* Sensitive System & Security Routes */}
+              <Route path="security" element={<ErrorBoundary><ProtectedRoute moduleId="security" allowedRoles={['super_admin', 'admin', 'it_support']}><AuthManagement /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="audit" element={<ErrorBoundary><ProtectedRoute moduleId="audit"><AuditTrail /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="backup" element={<ErrorBoundary><ProtectedRoute moduleId="backup" allowedRoles={['super_admin', 'admin', 'it_support']}><BackupManagement /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="monitoring" element={<ErrorBoundary><ProtectedRoute moduleId="monitoring" allowedRoles={['super_admin', 'admin', 'it_support', 'direksi']}><MonitoringSystem /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="user-management" element={<ErrorBoundary><ProtectedRoute moduleId="security" allowedRoles={['super_admin', 'admin', 'it_support']}><UserManagement /></ProtectedRoute></ErrorBoundary>} />
+
+              <Route path="triase" element={<ErrorBoundary><ProtectedRoute moduleId="triase"><ModulTriase /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="jkn-mobile" element={<ErrorBoundary><ProtectedRoute moduleId="jkn-mobile"><JKNMobile /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="poli" element={<ErrorBoundary><ProtectedRoute moduleId="rawat-jalan"><PoliPelayanan /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="display-antrian" element={<ErrorBoundary><ProtectedRoute moduleId="pendaftaran"><DisplayAntrianPoli /></ProtectedRoute></ErrorBoundary>} />
               <Route path=":moduleId" element={<ErrorBoundary><GenericModuleContent /></ErrorBoundary>} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -114,45 +114,6 @@ export function Login() {
             </svg>
             <span>{isGoogleLoading ? 'Menghubungkan ke Google...' : 'Masuk dengan Akun Google'}</span>
           </button>
-
-          <div className="flex items-center my-3">
-            <div className="flex-1 border-t border-slate-200 dark:border-slate-700"></div>
-            <span className="px-3 text-[10px] uppercase font-bold text-slate-400 tracking-wider">Pilih Role Pengguna (Demo Akses)</span>
-            <div className="flex-1 border-t border-slate-200 dark:border-slate-700"></div>
-          </div>
-
-          {/* Quick Demo Role Selector */}
-          <div className="p-2 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700/80 max-h-40 overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-2 gap-1.5">
-              {[
-                { role: 'Dokter DPJP', icon: '👨‍⚕️', user: 'dokter', pass: 'dokter123', color: 'hover:bg-blue-50 dark:hover:bg-blue-950/40 text-blue-600 dark:text-blue-400' },
-                { role: 'Perawat', icon: '👩‍⚕️', user: 'perawat', pass: 'perawat123', color: 'hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400' },
-                { role: 'Pendaftaran', icon: '📋', user: 'pendaftaran', pass: 'daftar123', color: 'hover:bg-indigo-50 dark:hover:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400' },
-                { role: 'Kasir', icon: '💰', user: 'kasir', pass: 'kasir123', color: 'hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-600 dark:text-amber-400' },
-                { role: 'Rekam Medis', icon: '🗂️', user: 'rekammedis', pass: 'rm123', color: 'hover:bg-cyan-50 dark:hover:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400' },
-                { role: 'Apoteker', icon: '💊', user: 'apoteker', pass: 'apotek123', color: 'hover:bg-purple-50 dark:hover:bg-purple-950/40 text-purple-600 dark:text-purple-400' },
-                { role: 'Laboran', icon: '🔬', user: 'laboran', pass: 'lab123', color: 'hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400' },
-                { role: 'Radiografer', icon: '🩻', user: 'radiografer', pass: 'rad123', color: 'hover:bg-sky-50 dark:hover:bg-sky-950/40 text-sky-600 dark:text-sky-400' },
-                { role: 'Komite Mutu', icon: '📊', user: 'mutu', pass: 'mutu123', color: 'hover:bg-violet-50 dark:hover:bg-violet-950/40 text-violet-600 dark:text-violet-400' },
-                { role: 'Direksi', icon: '🏛️', user: 'direksi', pass: 'direksi123', color: 'hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-600 dark:text-amber-400' },
-                { role: 'Super Admin', icon: '👑', user: 'mhs001', pass: 'mahasiswa001', color: 'hover:bg-purple-50 dark:hover:bg-purple-950/40 text-purple-600 dark:text-purple-400' },
-                { role: 'Guest Viewer', icon: '👁️', user: 'viewer', pass: 'viewer123', color: 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400' },
-              ].map(item => (
-                <button
-                  key={item.user}
-                  type="button"
-                  onClick={() => {
-                    setUsername(item.user);
-                    setPassword(item.pass);
-                  }}
-                  className={`px-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800 text-left transition-all flex items-center gap-1.5 ${item.color}`}
-                >
-                  <span className="text-sm shrink-0">{item.icon}</span>
-                  <span className="text-[11px] font-bold truncate">{item.role}</span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Form Login */}

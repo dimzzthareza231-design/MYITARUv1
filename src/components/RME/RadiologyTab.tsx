@@ -108,7 +108,7 @@ export function RadiologyTab({ patientData }: { patientData: any }) {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* HEADER SECTION */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
@@ -299,7 +299,7 @@ export function RadiologyTab({ patientData }: { patientData: any }) {
           </div>
 
           {/* EXPERTISE REPORT PANEL (5 cols) */}
-          <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 flex flex-col justify-between space-y-6">
+          <div className="lg:col-span-5 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
               <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-4">
                 <div>
@@ -386,7 +386,7 @@ export function RadiologyTab({ patientData }: { patientData: any }) {
       {/* MODAL ORDER RADIOLOGI */}
       {showOrderModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl max-w-lg w-full border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-5 bg-indigo-600 text-white flex justify-between items-center">
               <div>
                 <h3 className="font-bold text-lg flex items-center gap-2">

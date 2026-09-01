@@ -21,7 +21,7 @@ export function AssessmentTab({ formData, updateForm }: { formData: any, updateF
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm border-l-4 border-l-indigo-500">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm border-l-4 border-l-indigo-500">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Diagnosis Primer (Utama)</h3>
         <div className="relative">
           <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Cari ICD-10 <span className="text-rose-500">*</span></label>
@@ -44,7 +44,7 @@ export function AssessmentTab({ formData, updateForm }: { formData: any, updateF
           </div>
           
           {showResults && searchICD && !formData.primaryDiagnosis && (
-            <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <div className="absolute z-10 w-full mt-1 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {filteredICD.length > 0 ? (
                 filteredICD.map(icd => (
                   <div 
@@ -68,7 +68,7 @@ export function AssessmentTab({ formData, updateForm }: { formData: any, updateF
         </div>
       </div>
 
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Diagnosis Sekunder & Komplikasi</h3>
         
         {formData.secondaryDiagnoses.length > 0 && (
@@ -106,7 +106,7 @@ export function AssessmentTab({ formData, updateForm }: { formData: any, updateF
         </button>
       </div>
       
-      <div className="card p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white">Assessment Klinis (Narasi)</h3>
         <textarea 
           className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all min-h-[100px]" 
