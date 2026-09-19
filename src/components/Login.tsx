@@ -174,14 +174,74 @@ export function Login() {
           <button
             type="submit"
             disabled={isLoading || loading || (turnstileEnabled && !turnstileToken)}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md shadow-blue-500/20 flex items-center justify-center gap-2 disabled:opacity-50 text-sm cursor-pointer"
           >
             <LogIn className="w-4 h-4" />
             {isLoading ? 'Memvalidasi Akun...' : 'Masuk'}
           </button>
         </form>
 
-        <p className="text-center text-[10px] text-slate-400 mt-6 font-semibold tracking-widest uppercase opacity-70">
+        {/* Quick Demo Test Accounts */}
+        <div className="mt-5 pt-4 border-t border-slate-200 dark:border-slate-700/80">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              Akun Uji Coba Cepat:
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs">
+            <button
+              type="button"
+              onClick={() => { setUsername('mhs001'); setPassword('mahasiswa001'); }}
+              className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-50 dark:bg-slate-700/60 dark:hover:bg-indigo-950/60 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-indigo-400 dark:hover:border-indigo-500 text-left transition-all"
+            >
+              <div className="font-bold text-[11px] truncate">👑 Super Admin</div>
+              <div className="text-[9px] text-slate-400 dark:text-slate-400 font-mono">mhs001</div>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setUsername('dokter'); setPassword('dokter123'); }}
+              className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-cyan-50 dark:bg-slate-700/60 dark:hover:bg-cyan-950/60 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-cyan-400 dark:hover:border-cyan-500 text-left transition-all"
+            >
+              <div className="font-bold text-[11px] truncate">🩺 Dokter Sp.PD</div>
+              <div className="text-[9px] text-slate-400 dark:text-slate-400 font-mono">dokter</div>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setUsername('perawat'); setPassword('perawat123'); }}
+              className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-emerald-50 dark:bg-slate-700/60 dark:hover:bg-emerald-950/60 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-emerald-400 dark:hover:border-emerald-500 text-left transition-all"
+            >
+              <div className="font-bold text-[11px] truncate">💉 Perawat</div>
+              <div className="text-[9px] text-slate-400 dark:text-slate-400 font-mono">perawat</div>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setUsername('rekammedis'); setPassword('rm123'); }}
+              className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-50 dark:bg-slate-700/60 dark:hover:bg-blue-950/60 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-blue-400 dark:hover:border-blue-500 text-left transition-all"
+            >
+              <div className="font-bold text-[11px] truncate">📁 Rekam Medis</div>
+              <div className="text-[9px] text-slate-400 dark:text-slate-400 font-mono">rekammedis</div>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setUsername('apoteker'); setPassword('apotek123'); }}
+              className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-teal-50 dark:bg-slate-700/60 dark:hover:bg-teal-950/60 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-teal-400 dark:hover:border-teal-500 text-left transition-all"
+            >
+              <div className="font-bold text-[11px] truncate">💊 Apoteker</div>
+              <div className="text-[9px] text-slate-400 dark:text-slate-400 font-mono">apoteker</div>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setUsername('kasir'); setPassword('kasir123'); }}
+              className="px-2 py-1.5 rounded-lg bg-slate-100 hover:bg-purple-50 dark:bg-slate-700/60 dark:hover:bg-purple-950/60 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:border-purple-400 dark:hover:border-purple-500 text-left transition-all"
+            >
+              <div className="font-bold text-[11px] truncate">💳 Kasir</div>
+              <div className="text-[9px] text-slate-400 dark:text-slate-400 font-mono">kasir</div>
+            </button>
+          </div>
+        </div>
+
+        <p className="text-center text-[10px] text-slate-400 mt-5 font-semibold tracking-widest uppercase opacity-70">
           © DIMAS PANGESTU P.A • ITARU SIK
         </p>
       </div>

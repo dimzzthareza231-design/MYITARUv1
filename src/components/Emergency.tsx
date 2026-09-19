@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   AlertTriangle, Activity, HeartPulse, Search, Plus, Save, ArrowRight, Clock, 
   ShieldAlert, PhoneCall, UserCheck, Stethoscope, CheckCircle2, User, FileText, 
-  BedDouble, Filter, RefreshCw, Check, ArrowRightLeft, TrendingUp
+  BedDouble, Filter, RefreshCw, Check, ArrowRightLeft, TrendingUp,
+  MapPin, Navigation, Ambulance, Sparkles, Route
 } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useHospital } from '../contexts/HospitalContext';
@@ -13,12 +14,14 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { generate50IGDPatients } from '../data/patientPelayananData';
 import { DATA_DOKTER_JAGA_LENGKAP } from '../data/dataDokterJagaLengkap';
 import PrintPDFButton from './PrintPDFButton';
+import { GoogleMapsHealthLocator } from './Common/GoogleMapsHealthLocator';
 
 export function Emergency() {
   const { activeTab } = useOutletContext<{ activeTab: string }>() || { activeTab: 'Triase' };
   const { pasien, kunjungan: kunjunganMaster } = useHospital();
   const patientFlow = usePatientFlow();
   const toast = useToast();
+  const [showAmbulanceMapsModal, setShowAmbulanceMapsModal] = useState(false);
   
   // Logical loading of IGD Triage Patients with LocalStorage persistence & Master sync
   const [triagePatients, setTriagePatients] = useState(() => {
@@ -691,6 +694,14 @@ export function Emergency() {
         </div>
         <div className="flex items-center gap-3">
           <button 
+            onClick={() => setShowAmbulanceMapsModal(true)}
+            className="bg-emerald-700 hover:bg-emerald-600 text-emerald-50 border border-emerald-500/40 px-3.5 py-2.5 rounded-xl font-bold text-xs shadow flex items-center gap-2 transition-all hover:scale-[1.02]"
+            title="Pantau Armada Ambulans & Rute Faskes Darurat via Google Maps"
+          >
+            <Ambulance className="w-4 h-4 text-emerald-300" />
+            <span>Peta & Rute Ambulans (Google Maps)</span>
+          </button>
+          <button 
             onClick={() => setIsTriageModalOpen(true)}
             className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md flex items-center gap-2 transition-all hover:scale-[1.02]"
           >
@@ -1084,6 +1095,37 @@ export function Emergency() {
           </div>
         </form>
       </Modal>
+
+      {/* MODAL 4: PETA & RUTE AMBULANS DISPATCH (GOOGLE MAPS) */}
+      {showAmbulanceMapsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-fade-in">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+            <div className="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center text-white">
+              <div className="flex items-center gap-2">
+                <Ambulance className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-bold text-sm sm:text-base">
+                  Pusat Kendali Ambulans & Penjemputan Darurat (Google Maps Grounded)
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowAmbulanceMapsModal(false)}
+                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-4 overflow-y-auto flex-1">
+              <GoogleMapsHealthLocator
+                initialQuery="Posko Ambulans Gawat Darurat dan Trauma Center terdekat"
+                defaultCategory="ambulance"
+                title="Peta Dispatch Ambulans & Fasilitas Gawat Darurat"
+                subtitle="Estimasi waktu tiba (ETA), rute penjemputan darurat, dan koordinat GPS"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

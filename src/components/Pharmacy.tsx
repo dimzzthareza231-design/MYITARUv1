@@ -47,8 +47,10 @@ import {
   Activity, 
   CheckCircle,
   Truck,
-  RotateCcw
+  RotateCcw,
+  MapPin
 } from 'lucide-react';
+import { GoogleMapsHealthLocator } from './Common/GoogleMapsHealthLocator';
 
 export function Pharmacy() {
   const location = useLocation();
@@ -57,7 +59,7 @@ export function Pharmacy() {
   
   // URL Module detection: /modul/apotek-ralan, /modul/apotek-ranap, /modul/stok-obat
   const pathname = location.pathname;
-  let initialTab: 'ralan' | 'ranap' | 'stok' | 'defecta' | 'narkotika' | 'fornas' = 'ralan';
+  let initialTab: 'ralan' | 'ranap' | 'stok' | 'defecta' | 'narkotika' | 'fornas' | 'maps' = 'ralan';
 
   if (pathname.includes('apotek-ranap')) {
     initialTab = 'ranap';
@@ -65,7 +67,7 @@ export function Pharmacy() {
     initialTab = 'stok';
   }
 
-  const [activeMainTab, setActiveMainTab] = useState<'ralan' | 'ranap' | 'stok' | 'defecta' | 'narkotika' | 'fornas'>(initialTab);
+  const [activeMainTab, setActiveMainTab] = useState<'ralan' | 'ranap' | 'stok' | 'defecta' | 'narkotika' | 'fornas' | 'maps'>(initialTab);
 
   // Sync tab if URL changes
   useEffect(() => {
@@ -363,10 +365,30 @@ export function Pharmacy() {
             <BookOpen className="w-3.5 h-3.5" />
             <span>Fornas &amp; KFA</span>
           </button>
+
+          <button
+            onClick={() => setActiveMainTab('maps')}
+            className={`px-3.5 py-2 rounded-lg text-xs font-black flex items-center gap-2 whitespace-nowrap transition-all ${
+              activeMainTab === 'maps'
+                ? 'bg-teal-600 text-white shadow'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800'
+            }`}
+          >
+            <MapPin className="w-3.5 h-3.5 text-teal-300" />
+            <span>Peta Apotek &amp; PBF (Google Maps)</span>
+          </button>
         </div>
       </div>
 
       {/* 2. RENDER ACTIVE TAB CONTENT */}
+      {activeMainTab === 'maps' && (
+        <GoogleMapsHealthLocator
+          initialQuery="Apotek 24 Jam dan Distributor Pedagang Besar Farmasi (PBF)"
+          defaultCategory="pharmacy"
+          title="Peta Jaringan Apotek, Gudang Obat & Pedagang Besar Farmasi (PBF)"
+          subtitle="Pencarian apotek rekanan terdekat, ketersediaan stok darurat, dan distributor resmi PBF dengan Google Maps"
+        />
+      )}
       {activeMainTab === 'ralan' && (
         <ApotekRalanTab
           prescriptions={prescriptions}

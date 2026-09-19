@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from './firebase';
 import { Pasien, Kunjungan, MasterDokter, MasterPerawat } from '../types';
+import { logDatabaseAccess } from './activityLogger';
 
 export enum OperationType {
   CREATE = 'create',
@@ -43,12 +44,12 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData?.map(provider => ({
+      userId: auth?.currentUser?.uid,
+      email: auth?.currentUser?.email,
+      emailVerified: auth?.currentUser?.emailVerified,
+      isAnonymous: auth?.currentUser?.isAnonymous,
+      tenantId: auth?.currentUser?.tenantId,
+      providerInfo: auth?.currentUser?.providerData?.map((provider: any) => ({
         providerId: provider.providerId,
         email: provider.email,
       })) || []
@@ -61,18 +62,52 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 
 // 1. Connection Validation as mandated by Firebase Skill
 export async function testConnection(): Promise<boolean> {
+  if (!db) {
+    setCloudStatus({ isConnected: false });
+    return false;
+  }
+  const start = performance.now();
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
+    const latency = Math.round(performance.now() - start);
     setCloudStatus({ isConnected: true, lastSync: new Date() });
+    logDatabaseAccess({
+      action: 'HEALTH_CHECK',
+      collectionName: 'test',
+      docId: 'connection',
+      operationType: 'READ',
+      status: 'SUCCESS',
+      latencyMs: latency,
+      message: 'Cloud Firestore database connection verified.'
+    });
     return true;
   } catch (error: any) {
+    const latency = Math.round(performance.now() - start);
     if (error instanceof Error && error.message.includes('the client is offline')) {
       console.warn('[Firestore] Client is offline. Using local cache.');
       setCloudStatus({ isConnected: false });
+      logDatabaseAccess({
+        action: 'HEALTH_CHECK',
+        collectionName: 'test',
+        docId: 'connection',
+        operationType: 'READ',
+        status: 'WARNING',
+        latencyMs: latency,
+        message: 'Client is offline. Operating in offline cached mode.'
+      });
       return false;
     }
     // Any other response (including document not found) confirms server connectivity
     setCloudStatus({ isConnected: true, lastSync: new Date() });
+    logDatabaseAccess({
+      action: 'HEALTH_CHECK',
+      collectionName: 'test',
+      docId: 'connection',
+      operationType: 'READ',
+      status: 'SUCCESS',
+      latencyMs: latency,
+      message: 'Cloud Firestore database server reachable.'
+    });
     return true;
   }
 }

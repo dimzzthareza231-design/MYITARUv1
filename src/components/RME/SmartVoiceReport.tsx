@@ -7,6 +7,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { parseMedicalTranscript, generateSOAPFromParsing } from '../../utils/medicalParser';
 import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+import { logAIAttempt } from '../../lib/activityLogger';
 
 export interface SmartVoiceReportProps {
   patient?: any;
@@ -339,14 +340,28 @@ export function SmartVoiceReport({
             medications: [],
             warnings: data.warnings || []
           });
+          logAIAttempt({
+            action: 'AI_CLINICAL_ANALYZE',
+            status: 'SUCCESS',
+            module: 'SmartVoiceReport',
+            queryOrContext: `Pasien: ${patient?.nama || '-'} (${patient?.no_rm || '-'})`,
+            resultSummary: `SOAP & ICD berhasil diekstraksi (${data.icd10?.length || 0} ICD-10, ${data.icd9?.length || 0} ICD-9)`
+          });
           toast.success('Analisis AI Scribe Berhasil!', { id: 'ai-parse' });
           setActiveTab('verify');
           setIsAiProcessing(false);
           return;
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       console.warn('Backend AI endpoint unavailable, using intelligent local medical parser fallback:', e);
+      logAIAttempt({
+        action: 'AI_CLINICAL_ANALYZE',
+        status: 'WARNING',
+        module: 'SmartVoiceReport',
+        queryOrContext: `Pasien: ${patient?.nama || '-'}`,
+        resultSummary: 'Fallback ke parser lokal regex'
+      });
     }
 
     // Fallback to local high-accuracy medical parser

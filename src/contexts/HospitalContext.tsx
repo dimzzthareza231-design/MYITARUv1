@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { collection, onSnapshot, doc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, isFirebaseConfigured } from '../lib/firebase';
 import { PASIEN, MASTER_POLIKLINIK, SEMUA_DOKTER, SEMUA_PERAWAT } from "../data/seedData";
 import { Pasien, Kunjungan, MasterDokter, MasterPoli, MasterPenjamin, MasterPerawat, BantuanArtikel, User } from '../types';
 import { HospitalInfo, DEFAULT_HOSPITAL_INFO } from '../types/document';
@@ -222,6 +222,7 @@ export function HospitalProvider({ children }: { children: ReactNode }) {
 
   // Real-time Firestore listeners for core hospital collections
   useEffect(() => {
+    if (!isFirebaseConfigured) return;
     let seededPasien = false;
     let seededKunjungan = false;
     let seededDokter = false;
@@ -352,40 +353,58 @@ export function HospitalProvider({ children }: { children: ReactNode }) {
   const addPasien = async (p: Pasien) => {
     const docId = p.id || `P-${Date.now()}`;
     const newPasien = { ...p, id: docId };
-    setPasien(prev => [newPasien, ...prev]);
-    storage.set('hospital_pasien', [newPasien, ...pasien]);
+    setPasien(prev => {
+      const next = [newPasien, ...prev];
+      storage.set('hospital_pasien', next);
+      return next;
+    });
     await savePasienCloud(newPasien);
   };
 
   const updatePasien = async (id: string, updated: Partial<Pasien>) => {
-    setPasien(prev => prev.map(p => p.id === id ? { ...p, ...updated } : p));
-    const nextList = pasien.map(p => p.id === id ? { ...p, ...updated } : p);
-    storage.set('hospital_pasien', nextList);
+    setPasien(prev => {
+      const next = prev.map(p => p.id === id ? { ...p, ...updated } : p);
+      storage.set('hospital_pasien', next);
+      return next;
+    });
     await updatePasienCloud(id, updated);
   };
 
   const addDokter = async (d: MasterDokter) => {
-    setDokter(prev => [d, ...prev]);
-    storage.set('hospital_dokter', [d, ...dokter]);
+    setDokter(prev => {
+      const next = [d, ...prev];
+      storage.set('hospital_dokter', next);
+      return next;
+    });
     await saveDokterCloud(d);
   };
 
   const addPerawat = async (n: MasterPerawat) => {
-    setPerawat(prev => [n, ...prev]);
-    storage.set('hospital_perawat', [n, ...perawat]);
+    setPerawat(prev => {
+      const next = [n, ...prev];
+      storage.set('hospital_perawat', next);
+      return next;
+    });
     await savePerawatCloud(n);
   };
 
   const addKunjungan = async (k: Kunjungan) => {
     const docId = k.id || `K-${Date.now()}`;
     const newKunjungan = { ...k, id: docId };
-    setKunjungan(prev => [newKunjungan, ...prev]);
-    storage.set('hospital_kunjungan', [newKunjungan, ...kunjungan]);
+    setKunjungan(prev => {
+      const next = [newKunjungan, ...prev];
+      storage.set('hospital_kunjungan', next);
+      return next;
+    });
     await saveKunjunganCloud(newKunjungan);
   };
 
   const updateKunjunganStatus = async (id: string, status: Kunjungan['status']) => {
-    setKunjungan(prev => prev.map(k => k.id === id ? { ...k, status } : k));
+    setKunjungan(prev => {
+      const next = prev.map(k => k.id === id ? { ...k, status } : k);
+      storage.set('hospital_kunjungan', next);
+      return next;
+    });
     await updateKunjunganCloud(id, { status });
   };
 

@@ -28,6 +28,9 @@ function getSubmenuIcon(label: string) {
   if (l.includes('lab') || l.includes('lis') || l.includes('darah') || l.includes('qc') || l.includes('permintaan')) return FlaskConical;
   if (l.includes('radiologi') || l.includes('pacs') || l.includes('dicom') || l.includes('viewer') || l.includes('orthanc') || l.includes('foto')) return ScanLine;
   if (l.includes('resume') || l.includes('dokumen') || l.includes('tanda tangan') || l.includes('consent') || l.includes('legal')) return FileSignature;
+  if (l.includes('peminjaman') || l.includes('tracer') || l.includes('arsip') || l.includes('berkas')) return Archive;
+  if (l.includes('klpcm') || l.includes('audit')) return ShieldCheck;
+  if (l.includes('pelepasan') || l.includes('visum') || l.includes('legalisir')) return FileBadge;
   if (l.includes('suara') || l.includes('scribe') || l.includes('voice')) return Mic;
   if (l.includes('grounding') || l.includes('search') || l.includes('web') || l.includes('online')) return Globe;
   if (l.includes('pasien') || l.includes('peserta') || l.includes('praktisi')) return Users;
@@ -58,24 +61,24 @@ function groupSubmenus(moduleId: string, submenus: any[]) {
   if (moduleId === 'rekam-medis') {
     return [
       {
-        title: 'PATIENT CHART',
+        title: 'BERKAS & REKAM MEDIS',
         items: submenus.filter(s => {
           const l = (typeof s === 'string' ? s : s.label).toLowerCase();
-          return l.includes('pasien') || l.includes('overview') || l.includes('encounter');
+          return l.includes('pasien') || l.includes('overview') || l.includes('berkas') || l.includes('peminjaman') || l.includes('tracer');
         })
       },
       {
-        title: 'LONGITUDINAL RECORD',
+        title: 'KODEFIKASI KLINIS (WHO)',
         items: submenus.filter(s => {
           const l = (typeof s === 'string' ? s : s.label).toLowerCase();
-          return l.includes('icd') || l.includes('problem') || l.includes('alergi') || l.includes('obat') || l.includes('vital') || l.includes('growth') || l.includes('imun');
+          return l.includes('icd') || l.includes('problem') || l.includes('diagnosis') || l.includes('tindakan');
         })
       },
       {
-        title: 'INVESTIGATIONS & RESUME',
+        title: 'DOKUMEN & MUTU RME',
         items: submenus.filter(s => {
           const l = (typeof s === 'string' ? s : s.label).toLowerCase();
-          return l.includes('resume') || l.includes('dokumen') || l.includes('lab') || l.includes('radiologi');
+          return l.includes('resume') || l.includes('audit') || l.includes('klpcm') || l.includes('pelepasan') || l.includes('dokumen') || l.includes('visum');
         })
       }
     ].filter(g => g.items.length > 0);
@@ -138,21 +141,18 @@ export default function ModuleLayout() {
   const pathParts = location.pathname.split('/');
   const moduleId = paramModuleId || pathParts[pathParts.length - 1];
 
-  const isGoogleBlocked = Boolean(currentUser?.isGoogleAuth);
-  const hasModuleAccess = !moduleId || !currentUser || (hasAccess(moduleId) && !isGoogleBlocked);
+  // Role-based module access check
+  const hasModuleAccess = !moduleId || !currentUser || hasAccess(moduleId);
 
   // Proteksi: jika user tidak punya akses, redirect ke dashboard
   useEffect(() => {
     if (moduleId && currentUser) {
-      if (isGoogleBlocked) {
-        toast.error('Anda tidak berhak mengakses modul ini', { id: 'pelayanan-block' });
-        navigate('/dashboard');
-      } else if (!hasAccess(moduleId)) {
+      if (!hasAccess(moduleId)) {
         toast.error('Anda tidak memiliki akses ke modul ini');
-        navigate('/');
+        navigate('/dashboard');
       }
     }
-  }, [moduleId, currentUser, navigate, hasAccess, isGoogleBlocked]);
+  }, [moduleId, currentUser, navigate, hasAccess]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -212,7 +212,7 @@ export default function ModuleLayout() {
   }, [moduleId, filteredSubmenus]);
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col w-full text-slate-200">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col w-full text-slate-900 dark:text-slate-200 transition-colors">
       
       {/* 1. NAVBAR (TOP) */}
       <TopNavbar currentTime={currentTime} />
@@ -221,31 +221,31 @@ export default function ModuleLayout() {
       <main className="flex-1 w-full relative pb-10 flex flex-col max-w-[1700px] mx-auto px-3 sm:px-5 lg:px-6 pt-4">
         
         {/* 2. BREADCRUMB & HEADER BAR */}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 bg-slate-900/80 p-3 rounded-2xl border border-slate-800 backdrop-blur-md shadow-sm">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 backdrop-blur-md shadow-xs">
           <nav className="flex items-center gap-2 text-xs sm:text-sm flex-wrap">
             <button
               onClick={() => navigate('/dashboard')}
-              className="text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1.5 transition-colors px-2 py-1 rounded-lg hover:bg-slate-800/80"
+              className="text-blue-600 dark:text-cyan-400 hover:text-blue-700 dark:hover:text-cyan-300 font-bold flex items-center gap-1.5 transition-colors px-2 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80"
             >
-              <Home className="w-4 h-4 text-cyan-400" />
+              <Home className="w-4 h-4 text-blue-600 dark:text-cyan-400" />
               <span>Dashboard</span>
             </button>
-            <span className="text-slate-600">/</span>
+            <span className="text-slate-400 dark:text-slate-600">/</span>
             {category && (
               <>
-                <span className="text-slate-400 font-medium flex items-center gap-1">
+                <span className="text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1">
                   <span>{category.icon}</span> {category.label}
                 </span>
-                <span className="text-slate-600">/</span>
+                <span className="text-slate-400 dark:text-slate-600">/</span>
               </>
             )}
-            <span className="text-white font-bold flex items-center gap-1.5 px-2 py-0.5 bg-slate-800 rounded-md border border-slate-700">
+            <span className="text-slate-900 dark:text-white font-bold flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md border border-slate-200 dark:border-slate-700">
               <span>{config.icon}</span> {config.label}
             </span>
             {hasSubmenus && activeTab && (
               <>
-                <span className="text-slate-600">/</span>
-                <span className="text-cyan-300 font-semibold px-2 py-0.5 bg-cyan-950/60 rounded-md border border-cyan-800/60">
+                <span className="text-slate-400 dark:text-slate-600">/</span>
+                <span className="text-blue-700 dark:text-cyan-300 font-semibold px-2 py-0.5 bg-blue-50 dark:bg-cyan-950/60 rounded-md border border-blue-200 dark:border-cyan-800/60">
                   {activeTab}
                 </span>
               </>
@@ -255,7 +255,7 @@ export default function ModuleLayout() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-sm transition-all hover:scale-105 active:scale-95"
+              className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-all hover:scale-105 active:scale-95"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Kembali</span>
@@ -263,27 +263,55 @@ export default function ModuleLayout() {
           </div>
         </div>
 
-        {/* 3. LAYOUT CONTAINER (RME-STYLE SIDEBAR + CONTENT OUTLET) */}
+        {/* MOBILE SUBMENU HORIZONTAL TAB BAR (Visible on < lg screens) */}
+        {hasSubmenus && (
+          <div className="lg:hidden mb-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 shadow-xs">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
+              {filteredSubmenus.map((sub: any) => {
+                const label = typeof sub === 'string' ? sub : sub.label;
+                const isActive = activeTab === label;
+                const IconComponent = getSubmenuIcon(label);
+
+                return (
+                  <button
+                    key={label}
+                    onClick={() => setSearchParams({ tab: label })}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+                      isActive
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <IconComponent className="w-3.5 h-3.5 shrink-0" />
+                    <span>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 3. LAYOUT CONTAINER (DESKTOP SIDEBAR + CONTENT OUTLET) */}
         <div className="flex flex-col lg:flex-row gap-4 items-start w-full flex-1">
           
-          {/* RME-STYLE COLLAPSIBLE SIDEBAR */}
+          {/* RME-STYLE COLLAPSIBLE SIDEBAR (Hidden on mobile, uses sticky scroller above) */}
           {hasSubmenus && (
             <aside 
-              className={`w-full ${
+              className={`hidden lg:flex ${
                 isSidebarCollapsed ? 'lg:w-20' : 'lg:w-72'
-              } bg-[#0a1122] border border-slate-800 rounded-2xl flex flex-col shrink-0 transition-all duration-300 ease-in-out shadow-2xl backdrop-blur-md overflow-hidden self-stretch lg:self-auto`}
+              } bg-white dark:bg-[#0a1122] border border-slate-200 dark:border-slate-800 rounded-2xl flex-col shrink-0 transition-all duration-300 ease-in-out shadow-sm dark:shadow-2xl backdrop-blur-md overflow-hidden self-stretch lg:self-auto sticky top-4`}
             >
-              {/* SIDEBAR HEADER / IDENTITY CARD (MATCHING RME AVATAR & BADGE DESIGN) */}
-              <div className={`p-3.5 border-b border-slate-800/80 flex items-center ${isSidebarCollapsed ? 'lg:justify-center' : 'justify-between'} transition-all duration-300 bg-[#0B132B]/70`}>
+              {/* SIDEBAR HEADER / IDENTITY CARD */}
+              <div className={`p-3.5 border-b border-slate-200 dark:border-slate-800/80 flex items-center ${isSidebarCollapsed ? 'lg:justify-center' : 'justify-between'} transition-all duration-300 bg-slate-50/80 dark:bg-[#0B132B]/70`}>
                 <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="w-12 h-12 rounded-2xl bg-[#14234b] border border-blue-900/60 text-blue-400 font-extrabold text-xl flex items-center justify-center shrink-0 shadow-inner">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-[#14234b] border border-blue-200 dark:border-blue-900/60 text-blue-600 dark:text-blue-400 font-extrabold text-xl flex items-center justify-center shrink-0 shadow-inner">
                     {config.icon || '📋'}
                   </div>
                   {!isSidebarCollapsed && (
                     <div className="overflow-hidden transition-all duration-300">
-                      <h2 className="font-bold text-white text-sm sm:text-base leading-tight truncate">{config.label}</h2>
-                      <div className="mt-1 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-rose-950/40 border border-rose-900/60 text-rose-300 text-[10px] font-bold w-fit">
-                        <ShieldAlert className="w-3 h-3 text-rose-400 shrink-0" />
+                      <h2 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base leading-tight truncate">{config.label}</h2>
+                      <div className="mt-1 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-blue-50 dark:bg-rose-950/40 border border-blue-200 dark:border-rose-900/60 text-blue-700 dark:text-rose-300 text-[10px] font-bold w-fit">
+                        <ShieldAlert className="w-3 h-3 text-blue-500 dark:text-rose-400 shrink-0" />
                         <span className="truncate">{category?.label || 'Pelayanan Terintegrasi'}</span>
                       </div>
                     </div>
@@ -291,7 +319,7 @@ export default function ModuleLayout() {
                 </div>
                 <button
                   onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                  className="hidden lg:flex p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200 shadow-2xs hover:scale-105 active:scale-95"
+                  className="hidden lg:flex p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 shadow-2xs hover:scale-105 active:scale-95 cursor-pointer"
                   title={isSidebarCollapsed ? 'Perluas Navigasi' : 'Sempitkan Navigasi'}
                 >
                   {isSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -300,7 +328,7 @@ export default function ModuleLayout() {
 
               {/* QUICK SEARCH (When Expanded and more than 4 submenus) */}
               {!isSidebarCollapsed && config.submenus && config.submenus.length > 4 && (
-                <div className="p-2.5 border-b border-slate-800/80 bg-slate-900/60">
+                <div className="p-2.5 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/60">
                   <div className="relative">
                     <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
@@ -308,22 +336,22 @@ export default function ModuleLayout() {
                       placeholder="Cari menu modul..."
                       value={sidebarSearch}
                       onChange={(e) => setSidebarSearch(e.target.value)}
-                      className="w-full pl-8 pr-2.5 py-1.5 bg-slate-950/80 border border-slate-800 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                      className="w-full pl-8 pr-2.5 py-1.5 bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
               )}
 
-              {/* SUBMENU CATEGORIES & ITEMS (MATCHING RME DESIGN) */}
-              <div className={`flex-1 overflow-y-auto space-y-4 custom-scrollbar transition-all duration-300 ${isSidebarCollapsed ? 'p-2' : 'p-3'} max-h-[calc(100vh-200px)]`}>
+              {/* SUBMENU CATEGORIES & ITEMS */}
+              <div className={`flex-1 overflow-y-auto space-y-4 custom-scrollbar transition-all duration-300 ${isSidebarCollapsed ? 'p-2' : 'p-3'} max-h-[calc(100vh-220px)]`}>
                 {sidebarGroups.map((group: any, gIdx: number) => (
                   <div key={gIdx} className="space-y-1.5">
                     {!isSidebarCollapsed ? (
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2.5 pt-2 pb-0.5 truncate">
+                      <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2.5 pt-2 pb-0.5 truncate">
                         {group.title}
                       </div>
                     ) : (
-                      <div className="h-px bg-slate-800/80 my-2 mx-1" />
+                      <div className="h-px bg-slate-200 dark:bg-slate-800/80 my-2 mx-1" />
                     )}
 
                     <div className="space-y-1">
@@ -336,12 +364,12 @@ export default function ModuleLayout() {
                           <button
                             key={label}
                             onClick={() => setSearchParams({ tab: label })}
-                            className={`group relative w-full flex items-center gap-3 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                            className={`group relative w-full flex items-center gap-3 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
                               isSidebarCollapsed ? 'justify-center p-2' : 'px-2.5 py-2'
                             } ${
                               isActive 
-                                ? 'bg-blue-950/40 text-blue-300 font-bold border border-blue-800/50 shadow-xs' 
-                                : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'
+                                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800/50 shadow-xs' 
+                                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white'
                             }`}
                           >
                             {/* Active Indicator Bar */}
@@ -349,11 +377,11 @@ export default function ModuleLayout() {
                               <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-blue-500 rounded-r-full shadow-sm shadow-blue-500/50" />
                             )}
 
-                            {/* Menu Icon with dedicated rounded container matching RME */}
+                            {/* Menu Icon with dedicated rounded container */}
                             <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 ${
                               isActive
                                 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                                : 'bg-slate-800/90 border border-slate-700/60 text-slate-400 group-hover:bg-slate-700 group-hover:text-blue-300 group-hover:border-slate-600 group-hover:scale-105'
+                                : 'bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 group-hover:text-blue-600 dark:group-hover:text-blue-300 group-hover:border-slate-300 dark:group-hover:border-slate-600 group-hover:scale-105'
                             }`}>
                               <IconComponent className="w-4 h-4 transition-transform duration-200" />
                             </div>
@@ -362,7 +390,7 @@ export default function ModuleLayout() {
                             {!isSidebarCollapsed && (
                               <>
                                 <span className="text-left truncate flex-1 leading-snug">{label}</span>
-                                <ChevronRight className={`w-3 h-3 ml-auto transition-transform duration-200 ${isActive ? 'opacity-100 text-blue-400 translate-x-0.5' : 'opacity-20 group-hover:opacity-70 group-hover:translate-x-0.5'}`} />
+                                <ChevronRight className={`w-3 h-3 ml-auto transition-transform duration-200 ${isActive ? 'opacity-100 text-blue-600 dark:text-blue-400 translate-x-0.5' : 'opacity-20 group-hover:opacity-70 group-hover:translate-x-0.5'}`} />
                               </>
                             )}
 
@@ -382,19 +410,19 @@ export default function ModuleLayout() {
 
               {/* SIDEBAR FOOTER */}
               {!isSidebarCollapsed && (
-                <div className="p-3 border-t border-slate-800/80 bg-[#0B132B]/50 text-[11px] text-slate-400 flex items-center justify-between">
+                <div className="p-3 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#0B132B]/50 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span>MYITARU SIMRS</span>
                   </span>
-                  <span className="font-mono text-[10px] text-slate-500">v1.0.0</span>
+                  <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500">v1.0.0</span>
                 </div>
               )}
             </aside>
           )}
 
           {/* CONTENT AREA (OUTLET) */}
-          <div className="flex-1 min-w-0 w-full bg-slate-900/60 rounded-2xl border border-slate-800/80 shadow-2xl relative overflow-hidden">
+          <div className="flex-1 min-w-0 w-full bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-2xl relative min-h-[calc(100vh-160px)]">
             <Outlet context={{ activeTab }} />
           </div>
 

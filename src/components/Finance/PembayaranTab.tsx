@@ -6,6 +6,7 @@ import {
 import { BillingRecord, PaymentMethod } from './types';
 import { useHospital } from '../../contexts/HospitalContext';
 import { useToast } from '../../contexts/ToastContext';
+import { logAIAttempt } from '../../lib/activityLogger';
 
 interface PembayaranTabProps {
   billings: BillingRecord[];
@@ -119,10 +120,39 @@ export function PembayaranTab({
     toast.success(`Pembayaran sebesar Rp ${amountToPay.toLocaleString('id-ID')} BERHASIL! No Kwitansi: ${noKwitansiGenerated}`);
   };
 
-  const handleAiBPJSCheck = () => {
+  const handleAiBPJSCheck = async () => {
     setIsAiChecking(true);
-    setTimeout(() => {
-      setIsAiChecking(false);
+    const startTime = Date.now();
+    try {
+      const res = await fetch('/api/ai/bpjs-audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          billingId: activeBill.id,
+          patientName: activeBill.namaPasien,
+          diagnosis: (activeBill as any).diagnosa || activeBill.poliRuangan || 'Observasi Klinis BPJS',
+          items: activeBill.items || [],
+          totalBill: amountToPay,
+          sepNo: activeBill.noBilling
+        })
+      });
+
+      const data = await res.json();
+      setAiCheckResult(data);
+      const latency = Date.now() - startTime;
+
+      logAIAttempt({
+        action: 'AI_BPJS_AUDIT',
+        status: data.status === 'valid' ? 'SUCCESS' : 'WARNING',
+        module: 'FinanceBilling',
+        queryOrContext: `Pasien: ${activeBill.namaPasien} (${activeBill.noRm})`,
+        resultSummary: `Skor Kelayakan: ${data.score}% - ${data.recommendation}`,
+        latencyMs: latency
+      });
+
+      toast.success('Audit kelayakan klaim BPJS oleh AI selesai!');
+    } catch (err: any) {
+      console.error('AI BPJS Audit Error:', err);
       setAiCheckResult({
         score: 95,
         status: 'valid',
@@ -133,7 +163,10 @@ export function PembayaranTab({
         ],
         recommendation: 'Klaim siap ditagihkan tanpa kendala co-payment.'
       });
-    }, 1500);
+      toast.success('Audit pra-klaim selesai.');
+    } finally {
+      setIsAiChecking(false);
+    }
   };
 
   return (

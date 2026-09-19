@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { RegistrationFormState } from './types';
-import { Search } from 'lucide-react';
+import { Search, MapPin, ExternalLink, Sparkles, Building2, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { dokterByPenempatan, SEMUA_DOKTER } from '../../../data/seedData';
+import { GoogleMapsHealthLocator, MedicalFacility } from '../../Common/GoogleMapsHealthLocator';
 
 interface Props {
   data: RegistrationFormState;
@@ -10,8 +11,15 @@ interface Props {
 }
 
 export function RujukanTab({ data, onChange }: Props) {
+  const [showMapsModal, setShowMapsModal] = useState(false);
   const inputClass = "w-full p-2.5 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyan-500 outline-none font-medium text-xs";
   const labelClass = "block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1";
+
+  const handleSelectFacility = (fac: MedicalFacility) => {
+    onChange('faskesPengirim', `${fac.name} (${fac.category})`);
+    setShowMapsModal(false);
+    toast.success(`Faskes rujukan "${fac.name}" berhasil dipilih dari Google Maps!`);
+  };
 
   const checkRujukan = () => {
     toast.success('Rujukan ditemukan! Data disinkronisasi.');
@@ -151,8 +159,28 @@ export function RujukanTab({ data, onChange }: Props) {
               </div>
             </div>
             <div>
-              <label className={labelClass}>Faskes Pengirim</label>
-              <input type="text" value={data.faskesPengirim} onChange={e => onChange('faskesPengirim', e.target.value)} className={inputClass} placeholder="Nama faskes pengirim..." />
+              <div className="flex items-center justify-between mb-1">
+                <label className={labelClass}>Faskes Pengirim</label>
+                <button
+                  type="button"
+                  onClick={() => setShowMapsModal(true)}
+                  className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                >
+                  <MapPin className="w-3 h-3" />
+                  <span>Cari di Google Maps</span>
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <input type="text" value={data.faskesPengirim} onChange={e => onChange('faskesPengirim', e.target.value)} className={inputClass} placeholder="Nama faskes pengirim..." />
+                <button
+                  type="button"
+                  onClick={() => setShowMapsModal(true)}
+                  title="Cari lokasi & jejaring faskes di Google Maps"
+                  className="px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center transition"
+                >
+                  <MapPin className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <div>
               <label className={labelClass}>Tanggal Rujukan</label>
@@ -203,6 +231,40 @@ export function RujukanTab({ data, onChange }: Props) {
           </div>
         )}
       </div>
+
+      {/* Google Maps Faskes Selector Modal */}
+      {showMapsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="p-4 bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <h4 className="font-bold text-sm text-slate-800 dark:text-white">
+                  Pilih Faskes Rujukan Terverifikasi di Google Maps
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMapsModal(false)}
+                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-800 dark:hover:text-white transition"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-4 overflow-y-auto flex-1">
+              <GoogleMapsHealthLocator
+                initialQuery="Puskesmas dan RS Rujukan BPJS terdekat"
+                defaultCategory="bpjs"
+                onSelectFacility={handleSelectFacility}
+                selectButtonLabel="Pilih Sebagai Faskes Pengirim"
+                title="Google Maps Faskes & Rujukan Selector"
+                subtitle="Cari dan hubungkan fasilitas kesehatan pengirim rujukan secara akurat"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

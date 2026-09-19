@@ -1,28 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, FileText, RefreshCw, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { initBPJSData } from '../bpjsData';
 
 export function ProgramRujukBalikBPJS() {
   const [prbList, setPrbList] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   
   useEffect(() => {
-    const saved = localStorage.getItem('simrs_bpjs_prb');
+    initBPJSData();
+    const saved = localStorage.getItem('simrs_bpjs_prb') || localStorage.getItem('bpjs_prb');
     if (saved) {
       setPrbList(JSON.parse(saved));
     } else {
-      const dummyData = [
-        {
-          id: 1,
-          no_prb: 'PRB-20260801-001',
-          nama_pasien: 'Budi Santoso',
-          diagnosis: 'Diabetes Mellitus',
-          obat: ['Metformin 500mg', 'Glibenclamide 5mg'],
-          tanggal_prb: '2026-08-01',
-          status: 'Aktif'
-        }
-      ];
-      setPrbList(dummyData);
+      setPrbList([]);
     }
   }, []);
   const handleAdd = () => setShowAddModal(true);

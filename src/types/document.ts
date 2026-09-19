@@ -51,7 +51,41 @@ export type DocumentType =
   | 'laporan_insiden'
   | 'kartu_pasien'
   | 'sep_bpjs'
-  | 'dokumen_umum';
+  | 'dokumen_umum'
+  // 1. Asesmen Spesifik & Skrining Risiko (Rawat Inap)
+  | 'asesmen_risiko_jatuh'
+  | 'skrining_gizi_lanjut'
+  | 'asesmen_nyeri'
+  | 'asesmen_barthel'
+  // 2. Dokumen Khusus Kelompok Pasien Tertentu
+  | 'partograf'
+  | 'asesmen_maternal_nifas'
+  | 'asesmen_neonatus_apgar'
+  | 'asesmen_jiwa'
+  // 3. Dokumen Hukum Medis (Legal-Medik)
+  | 'formulir_dnr'
+  | 'pulang_paksa'
+  | 'penolakan_tindakan'
+  | 'penitipan_barang'
+  // 4. Hasil Pemeriksaan Penunjang Asli (Exhibits)
+  | 'grafik_ekg_eeg'
+  | 'laporan_patologi_anatomi'
+  // 5. Dokumen Pasca-Perawatan & Pemulasaran
+  | 'surat_kematian'
+  | 'serah_terima_jenazah'
+  // 6. Prosedural & Observasi Khusus
+  | 'general_consent'
+  | 'hak_pasien'
+  | 'asesmen_medis'
+  | 'asesmen_keperawatan'
+  | 'informed_consent'
+  | 'laporan_operasi'
+  | 'laporan_anestesi'
+  | 'surgical_safety_checklist'
+  | 'pemantauan_pacu'
+  | 'rekonsiliasi_obat'
+  | 'fluid_balance'
+  | 'audit_trail_rme';
 
 export interface PatientSubjectData {
   nama: string;
@@ -102,6 +136,8 @@ export interface TableItemRow {
   nama: string;
   sediaan?: string;
   dosis_aturan?: string;
+  aturan_pakai?: string;
+  dosis?: string;
   rute?: string;
   durasi?: string;
   jumlah?: string | number;
@@ -110,7 +146,7 @@ export interface TableItemRow {
   hasil?: string;
   nilai_rujukan?: string;
   satuan?: string;
-  flag?: 'Normal' | 'High' | 'Low' | 'Abnormal' | 'Critical';
+  flag?: 'Normal' | 'High' | 'Low' | 'Abnormal' | 'Critical' | string;
   metode?: string;
   tarif?: number;
   subtotal?: number;
@@ -235,6 +271,86 @@ export interface HospitalDocumentModel {
   catatanKhusus?: string;
 
   itemBilling?: TableItemRow[];
+  
+  // Spesifik Dokumen Khusus & Mandiri (Mencegah Pencampuran Dokumen)
+  suratSakit?: {
+    lamaHari: number;
+    terhitungMulai: string;
+    terhitungSampai: string;
+    anjuranMedis?: string;
+    pekerjaan?: string;
+  };
+  suratSehat?: {
+    keperluan: string;
+    visusMataOD?: string;
+    visusMataOS?: string;
+    butaWarna?: 'Normal (Tidak Buta Warna)' | 'Buta Warna Parsial' | 'Buta Warna Total';
+    pendengaran?: 'Normal (Bilateral)' | 'Penurunan Ringan' | 'Abnormal';
+    gigiMulut?: string;
+    skriningNarkoba?: 'Negatif (Bebas Narkoba / Napza)' | 'Non-Reaktif' | 'Tidak Dilakukan';
+    kesimpulanFisik?: string;
+    masaBerlaku?: string;
+  };
+  suratRujukan?: {
+    faskesTujuan: string;
+    poliTujuan: string;
+    dokterTujuan?: string;
+    alasanRujukan: string;
+    terapiTindakanDiberikan: string;
+    fasilitasTransportasi?: string;
+    pendamping?: string;
+    tipeRujukan?: 'Horizontal' | 'Vertikal' | 'Balik / PRB';
+  };
+  resepData?: {
+    iterasi?: string;
+    telaahApoteker?: {
+      kesesuaianDosis: boolean;
+      duplikasiObat: boolean;
+      interaksiObatAman: boolean;
+      alergiAman: boolean;
+      namaApoteker: string;
+      sipaApoteker?: string;
+    };
+    instruksiKhususApotek?: string;
+  };
+  billingSummary?: {
+    noKuitansi: string;
+    kasir: string;
+    metodeBayar: string;
+    totalTarif: number;
+    diskonPenjamin: number;
+    totalDibayar: number;
+    terbilang: string;
+    statusLunas: boolean;
+    tanggalBayar: string;
+  };
+  labMetadata?: {
+    noLab: string;
+    tglSampling: string;
+    tglSelesai: string;
+    dokterSpPk: string;
+    analisLab: string;
+    catatanKlinis?: string;
+  };
+  radiologiMetadata?: {
+    noFoto: string;
+    proyeksi: string;
+    pesawatRontgen?: string;
+    dokterSpRad: string;
+  };
+  sepData?: {
+    noSep: string;
+    tglSep: string;
+    noKartu: string;
+    peserta: string;
+    noRujukan?: string;
+    faskesPerujuk?: string;
+    diagnosaAwal?: string;
+    catatanPeserta?: string;
+    hakKelas?: string;
+    jenisPelayanan?: string;
+  };
+
   keteranganTambahan?: Record<string, any>;
   signer: SignerInfo;
   rawRecord?: Record<string, any>;

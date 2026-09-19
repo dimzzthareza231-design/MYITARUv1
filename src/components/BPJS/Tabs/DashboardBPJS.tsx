@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { initBPJSData } from '../bpjsData';
 
 export function DashboardBPJS({ onNavigate }: { onNavigate?: (tab: string) => void }) {
   const [stats, setStats] = useState({
@@ -10,13 +11,14 @@ export function DashboardBPJS({ onNavigate }: { onNavigate?: (tab: string) => vo
   
   useEffect(() => {
     // Load stats dari localStorage
-    const raw = localStorage.getItem('simrs_bpjs_klaim');
+    initBPJSData();
+    const raw = localStorage.getItem('simrs_bpjs_klaim') || localStorage.getItem('bpjs_klaim');
     const klaim: any[] = raw ? JSON.parse(raw) : [];
     setStats({
       totalKlaim: klaim.length,
-      pending: klaim.filter((k: any) => k.status === 'Pending').length,
-      approved: klaim.filter((k: any) => k.status === 'Approved').length,
-      rate: klaim.length > 0 ? Number((klaim.filter((k: any) => k.status === 'Pending').length / klaim.length * 100).toFixed(1)) : 0
+      pending: klaim.filter((k: any) => ['Verifikasi Vedika', 'Dispute'].includes(k.status)).length,
+      approved: klaim.filter((k: any) => ['Disetujui', 'Klaim Cair'].includes(k.status)).length,
+      rate: klaim.length > 0 ? Number((klaim.filter((k: any) => ['Verifikasi Vedika', 'Dispute'].includes(k.status)).length / klaim.length * 100).toFixed(1)) : 0
     });
   }, []);
   

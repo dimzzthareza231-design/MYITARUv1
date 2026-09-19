@@ -15,12 +15,14 @@ import { RegistrationForm } from './Registration/RegistrationForm';
 import { ProfessionalTable } from './ProfessionalTable';
 import PrintPDFButton from './PrintPDFButton';
 import { Pasien, Kunjungan } from '../types';
+import { GoogleMapsHealthLocator } from './Common/GoogleMapsHealthLocator';
 
 type MainSection = '1. Master Pasien' | '2. Registrasi Kunjungan' | '3. Antrian' | '4. Riwayat Pendaftaran';
 
 export function Registration() {
   const { activeTab: outletTab } = useOutletContext<{ activeTab?: string }>() || {};
   const [searchParams, setSearchParams] = useSearchParams();
+  const [showGoogleMapsModal, setShowGoogleMapsModal] = useState(false);
   const { 
     pasien, 
     addPasien, 
@@ -312,6 +314,14 @@ export function Registration() {
 
           {/* Quick Action Pasien Baru */}
           <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setShowGoogleMapsModal(true)}
+              className="flex items-center gap-2 bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-500/50 text-emerald-100 font-bold px-3.5 py-2.5 rounded-xl text-xs sm:text-sm shadow transition-all hover:scale-[1.02]"
+              title="Akses Peta Faskes & Jejaring Rujukan Google Maps"
+            >
+              <MapPin className="w-4 h-4 text-emerald-300" />
+              <span>Peta Faskes & Rujukan</span>
+            </button>
             <button
               onClick={() => {
                 setActiveSection('1. Master Pasien');
@@ -1997,6 +2007,37 @@ export function Registration() {
                 <Printer className="w-3.5 h-3.5" />
                 <span>Cetak Thermal</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. MODAL GOOGLE MAPS FASKES & RUJUKAN LOCATOR */}
+      {showGoogleMapsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+          <div className="bg-slate-900 border border-slate-700 w-full max-w-5xl rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+            <div className="p-4 bg-slate-950 border-b border-slate-800 flex justify-between items-center text-white">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-bold text-sm sm:text-base">
+                  Peta Faskes, Jejaring Rujukan, & Apotek Terdekat (Google Maps)
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowGoogleMapsModal(false)}
+                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-4 overflow-y-auto flex-1">
+              <GoogleMapsHealthLocator
+                initialQuery="Rumah Sakit Rujukan BPJS dan Puskesmas terdekat"
+                defaultCategory="hospital"
+                title="Peta Layanan Kesehatan & Faskes Terverifikasi"
+                subtitle="Informasi jarak, rute tempuh, kontak, dan tautan navigasi Google Maps"
+              />
             </div>
           </div>
         </div>

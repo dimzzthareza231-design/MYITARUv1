@@ -1,50 +1,48 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // Default deny for unknown collections
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
-    // User accounts and profiles
+    // User accounts
     match /users/{userId} {
       allow read, write: if true;
     }
-
-    // Patients master collection
+    
+    // Core patient records
     match /pasien/{pasienId} {
       allow read, write: if true;
     }
-
-    // Visits and queue encounters
+    
+    // Hospital visits and queues
     match /kunjungan/{kunjunganId} {
       allow read, write: if true;
     }
-
-    // Master doctors
+    
+    // Medical personnel
     match /dokter/{dokterId} {
       allow read, write: if true;
     }
-
-    // Master nurses
+    
     match /perawat/{perawatId} {
       allow read, write: if true;
     }
-
-    // Hospital configuration
-    match /hospital_settings/{docId} {
+    
+    // Hospital global configuration
+    match /hospital_settings/{settingId} {
+      allow read, write: if true;
+    }
+    
+    // Synchronized module storage
+    match /system_data/{dataId} {
       allow read, write: if true;
     }
 
-    // Real-time system data & clinical module persistence
-    match /system_data/{docId} {
+    // Real-time security and activity audit logs
+    match /activity_logs/{logId} {
+      allow read, write: if true;
+    }
+
+    // Health check validation
+    match /test/{docId} {
       allow read, write: if true;
     }
   }
 }
-

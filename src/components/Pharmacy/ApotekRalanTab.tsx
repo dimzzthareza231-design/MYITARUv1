@@ -26,10 +26,12 @@ import {
   ChevronRight,
   Eye,
   AlertCircle,
-  HelpCircle
+  HelpCircle,
+  Loader2
 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { EtiketPrintModal } from './EtiketPrintModal';
+import { logAIAttempt } from '../../lib/activityLogger';
 
 interface ApotekRalanTabProps {
   prescriptions: PrescriptionOrder[];
@@ -52,6 +54,7 @@ export function ApotekRalanTab({
   const [selectedOrder, setSelectedOrder] = useState<PrescriptionOrder | null>(null);
   const [showEtiketModal, setShowEtiketModal] = useState(false);
   const [activeModalTab, setActiveModalTab] = useState<'detail' | 'telaah' | 'racikan' | 'penyerahan'>('telaah');
+  const [isCheckingAiDDI, setIsCheckingAiDDI] = useState(false);
 
   // NEW PRESCRIPTION MANUAL MODAL
   const [showAddModal, setShowAddModal] = useState(false);
@@ -121,6 +124,64 @@ export function ApotekRalanTab({
     onUpdatePrescription(updated);
     setSelectedOrder(updated);
     toast.success(`Resep ${order.no_resep} lolos telaah farmasi! Lanjut ke tahap dispensing.`);
+  };
+
+  // HANDLE AI DRUG INTERACTION AUDIT
+  const handleRunAIDrugCheck = async (order: PrescriptionOrder) => {
+    setIsCheckingAiDDI(true);
+    const startTime = Date.now();
+    try {
+      const drugNames = order.items.map(i => i.nama_obat);
+      const res = await fetch('/api/ai/drug-interaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          drugs: drugNames,
+          patientAge: order.umur,
+          allergies: order.riwayat_alergi,
+          diagnosis: `${order.diagnosis_primer} (${order.kode_icd10})`
+        })
+      });
+
+      const data = await res.json();
+      const latency = Date.now() - startTime;
+
+      const updated: PrescriptionOrder = {
+        ...order,
+        ai_clinical_check: {
+          status_keamanan: data.safety_status === 'Aman' ? 'Aman' : data.safety_status === 'Bahaya / Kontraindikasi' ? 'Bahaya / Kontraindikasi' : 'Peringatan Moderat',
+          interaksi_terdeteksi: data.interactions?.map((it: any) => ({
+            obat_1: it.drug1,
+            obat_2: it.drug2,
+            level: it.severity === 'Major' ? 'Mayor / Bahaya' : it.severity === 'Moderate' ? 'Moderat / Perhatian' : 'Minor / Ringan',
+            deskripsi: it.description,
+            rekomendasi: it.clinical_management
+          })) || [],
+          peringatan_alergi: data.fornas_recommendations || [],
+          penyesuaian_dosis_gfr: data.summary,
+          ringkasan_ai: data.summary
+        }
+      };
+
+      onUpdatePrescription(updated);
+      setSelectedOrder(updated);
+
+      logAIAttempt({
+        action: 'AI_DRUG_INTERACTION',
+        status: data.interactions?.length > 0 ? 'WARNING' : 'SUCCESS',
+        module: 'ApotekRalan',
+        queryOrContext: `Pasien: ${order.nama_pasien}, Obat: ${drugNames.join(', ')}`,
+        resultSummary: data.summary,
+        latencyMs: latency
+      });
+
+      toast.success('Audit interaksi obat AI selesai dianalisis.');
+    } catch (err: any) {
+      console.error('AI Drug Interaction Error:', err);
+      toast.error('Gagal menjalankan AI screening obat.');
+    } finally {
+      setIsCheckingAiDDI(false);
+    }
   };
 
   // HANDLE FINISH DISPENSING
@@ -568,20 +629,40 @@ export function ApotekRalanTab({
                 <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
                   {/* AI CLINICAL SCREENING BANNER */}
                   <div className="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-200 dark:border-indigo-800 rounded-xl space-y-2">
-                    <div className="flex items-center gap-2 text-indigo-900 dark:text-indigo-300 font-extrabold text-xs">
-                      <Sparkles className="w-4 h-4 text-indigo-600 animate-pulse" />
-                      <span>AI Clinical Pharmacist Assistant (Screening)</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-indigo-900 dark:text-indigo-300 font-extrabold text-xs">
+                        <Sparkles className="w-4 h-4 text-indigo-600 animate-pulse" />
+                        <span>AI Clinical Pharmacist Assistant (Screening)</span>
+                      </div>
+                      <button
+                        id="btn-run-ai-ddi-check"
+                        onClick={() => handleRunAIDrugCheck(selectedOrder)}
+                        disabled={isCheckingAiDDI}
+                        className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-colors shadow-sm"
+                      >
+                        {isCheckingAiDDI ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Menganalisis...</span>
+                          </>
+                        ) : (
+                          <>
+                            <RefreshCw className="w-3 h-3" />
+                            <span>Re-Audit AI Gemini</span>
+                          </>
+                        )}
+                      </button>
                     </div>
 
                     <div className="text-xs space-y-1 text-indigo-950 dark:text-indigo-200">
                       <p><strong>Diagnosis:</strong> {selectedOrder.diagnosis_primer} ({selectedOrder.kode_icd10})</p>
                       <p><strong>Riwayat Alergi:</strong> {selectedOrder.riwayat_alergi.join(', ') || 'Nihil'}</p>
                       {selectedOrder.ai_clinical_check.penyesuaian_dosis_gfr && (
-                        <p><strong>Fungsi Ginjal (eGFR):</strong> {selectedOrder.ai_clinical_check.penyesuaian_dosis_gfr}</p>
+                        <p><strong>Fungsi Ginjal & Rekomendasi:</strong> {selectedOrder.ai_clinical_check.penyesuaian_dosis_gfr}</p>
                       )}
                     </div>
 
-                    {selectedOrder.ai_clinical_check.interaksi_terdeteksi.length > 0 && (
+                    {selectedOrder.ai_clinical_check.interaksi_terdeteksi.length > 0 ? (
                       <div className="mt-2 p-2 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 rounded-lg text-xs">
                         <span className="font-bold text-rose-800 dark:text-rose-300 flex items-center gap-1 mb-1">
                           <AlertCircle className="w-3.5 h-3.5" />
@@ -594,6 +675,11 @@ export function ApotekRalanTab({
                             <p className="italic text-rose-700 dark:text-rose-400 font-semibold">Saran: {inter.rekomendasi}</p>
                           </div>
                         ))}
+                      </div>
+                    ) : (
+                      <div className="p-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Tidak ditemukan interaksi obat berbahaya antar item resep. Terapi aman diproses.</span>
                       </div>
                     )}
                   </div>

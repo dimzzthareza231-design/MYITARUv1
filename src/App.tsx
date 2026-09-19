@@ -110,19 +110,6 @@ function AppContent() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 font-sans transition-colors duration-300 flex flex-col">
       <Toaster position="top-right" />
 
-      {/* Fallback Logout Button for Debugging/Emergency */}
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={() => {
-            logout();
-            toast.success('Anda telah logout');
-          }}
-          className="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-bold hover:bg-rose-700 shadow-lg"
-        >
-          Logout ({currentUser.nama.split(' ')[0]})
-        </button>
-      </div>
-
       <main className="flex-1 flex flex-col min-w-0 relative w-full scroll-smooth">
         <ErrorBoundary>
           <Routes>

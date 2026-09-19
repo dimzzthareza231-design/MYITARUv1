@@ -8,7 +8,7 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
   const [soap, setSoap] = useState({
     subjective: { keluhan_utama: '', riwayat_penyakit_sekarang: '', riwayat_alergi: '' },
     objective: { tanda_vital: { tekanan_darah: '', nadi: '', suhu: '', rr: '', spo2: '' }, pemeriksaan_fisik: '' },
-    assessment: { diagnosis_primer: null as any, diagnosis_sekunder: [] as any[] },
+    assessment: { diagnosis_primer: null as any, diagnosis_sekunder: [] as any[], catatan_assessment: '' },
     plan: { obat: [] as any[], tindakan: [], edukasi: '' }
   });
   
@@ -191,6 +191,16 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
           
           {activeTab === 'assessment' && (
             <div className="space-y-4">
+              <div>
+                <label className="block font-semibold mb-2">Catatan Assessment</label>
+                <textarea
+                  value={soap.assessment.catatan_assessment}
+                  onChange={(e) => handleChange('assessment', 'catatan_assessment', e.target.value)}
+                  rows={4}
+                  placeholder="Catatan analisis medis dari AI atau dokter..."
+                  className="w-full p-3 border dark:border-gray-600 rounded-lg bg-transparent"
+                />
+              </div>
               <div>
                 <label className="block font-semibold mb-2">Diagnosis Primer (ICD-10)</label>
                 {soap.assessment.diagnosis_primer ? (

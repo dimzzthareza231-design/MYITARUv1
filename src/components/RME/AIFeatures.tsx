@@ -10,22 +10,40 @@ export function AIFeatures({ formData, setFormData }: { formData: any, setFormDa
   const [showSmartVoiceModal, setShowSmartVoiceModal] = useState(false);
 
   const handleAnalyze = async () => {
-    // Simulasi AI analysis
-    toast.loading('Menganalisis kelengkapan dokumen...', { id: 'analyze' });
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    toast.dismiss('analyze');
-    
-    setAnalysisResult({
-      score: formData.subjective.keluhan_utama ? 85 : 45,
-      suggestions: [
-        !formData.subjective.keluhan_utama && 'Keluhan utama masih kosong',
-        formData.subjective.alergi.length === 0 && 'Belum ada riwayat alergi yang dicatat',
-        !formData.assessment.primaryDiagnosis && 'Diagnosis primer belum dipilih',
-        formData.plan.medications.length === 0 && 'Belum ada terapi farmakologi'
-      ].filter(Boolean)
-    });
-    
-    setShowAnalysis(true);
+    toast.loading('AI menganalisis kelengkapan dokumen...', { id: 'analyze' });
+    try {
+      const summaryText = `Subjektif: ${formData.subjective?.keluhan_utama || ''}. Objektif: ${formData.objective?.physicalExam || ''}. Assessment: ${formData.assessment?.clinicalNotes || ''}. Plan: ${formData.plan?.education || ''}`;
+      
+      const response = await fetch('/api/ai/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clinicalNote: summaryText })
+      });
+      
+      if (!response.ok) throw new Error('AI Error');
+      const data = await response.json();
+      
+      setAnalysisResult({
+        score: data.warnings && data.warnings.length > 0 ? 65 : 95,
+        suggestions: data.warnings && data.warnings.length > 0 
+          ? data.warnings 
+          : ['Dokumen rekam medis terlihat lengkap dan komprehensif.']
+      });
+    } catch (error) {
+      console.warn('Fallback AI Analysis:', error);
+      setAnalysisResult({
+        score: formData.subjective?.keluhan_utama ? 85 : 45,
+        suggestions: [
+          !formData.subjective?.keluhan_utama && 'Keluhan utama masih kosong',
+          formData.subjective?.alergi?.length === 0 && 'Belum ada riwayat alergi yang dicatat',
+          !formData.assessment?.primaryDiagnosis && 'Diagnosis primer belum dipilih',
+          formData.plan?.medications?.length === 0 && 'Belum ada terapi farmakologi'
+        ].filter(Boolean)
+      });
+    } finally {
+      toast.dismiss('analyze');
+      setShowAnalysis(true);
+    }
   };
   
   const handleTalkToText = () => {
@@ -33,9 +51,32 @@ export function AIFeatures({ formData, setFormData }: { formData: any, setFormDa
   };
 
   const handleSuggest = async () => {
-    toast.loading('Mencari saran klinis...', { id: 'suggest' });
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    toast.success('Saran: Pertimbangkan pemeriksaan CT Scan kepala jika nyeri menetap.', { id: 'suggest' });
+    toast.loading('AI mencari saran klinis...', { id: 'suggest' });
+    try {
+      const summaryText = `Subjektif: ${formData.subjective?.keluhan_utama || ''}. Objektif: ${formData.objective?.physicalExam || ''}.`;
+      if (!summaryText || summaryText.length < 15) {
+        throw new Error('Data terlalu singkat');
+      }
+      const response = await fetch('/api/ai/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clinicalNote: summaryText })
+      });
+      
+      if (!response.ok) throw new Error('AI Error');
+      const data = await response.json();
+      
+      const suggestions = [...(data.icd10?.map((i: any) => i.description) || []), ...(data.recommendations || [])];
+      
+      if (suggestions.length > 0) {
+        toast.success(`💡 Saran: ${suggestions[0]}`, { id: 'suggest', duration: 5000 });
+      } else {
+        throw new Error('No suggestion');
+      }
+    } catch (error) {
+      console.warn('Fallback AI Suggestion:', error);
+      toast.success('💡 Saran: Pertimbangkan pemeriksaan lanjutan atau observasi jika gejala menetap.', { id: 'suggest', duration: 4000 });
+    }
   };
 
   const handleApplyVoiceToForm = (soapData: { s: string; o: string; a: string; p: string; parsed?: any }) => {

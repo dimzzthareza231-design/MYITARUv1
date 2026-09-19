@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   FileText
 } from 'lucide-react';
+import { GoogleMapsHealthLocator } from '../Common/GoogleMapsHealthLocator';
 
 export default function MultiBranchSystem() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -27,15 +28,16 @@ export default function MultiBranchSystem() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Multi-Branch Management</h1>
-          <p className="text-gray-500 text-sm">Centralized operations, patient transfer, and consolidated reporting</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Multi-Branch Management</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Centralized operations, patient transfer, branch locator via Google Maps, and consolidated reporting</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-x-auto custom-scrollbar">
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm overflow-x-auto custom-scrollbar">
         <div className="flex p-1 min-w-max">
           <TabButton active={activeTab === 'dashboard'} onClick={() => setActiveTab('dashboard')} icon={<Activity size={18} />} label="Overview" />
           <TabButton active={activeTab === 'facilities'} onClick={() => setActiveTab('facilities')} icon={<Building2 size={18} />} label="Facilities" />
+          <TabButton active={activeTab === 'maps'} onClick={() => setActiveTab('maps')} icon={<MapPin size={18} />} label="Peta Jaringan & Cabang (Maps)" />
           <TabButton active={activeTab === 'transfer'} onClick={() => setActiveTab('transfer')} icon={<ArrowRightLeft size={18} />} label="Patient Transfers" />
           <TabButton active={activeTab === 'reports'} onClick={() => setActiveTab('reports')} icon={<FileBarChart2 size={18} />} label="Consolidated Reports" />
         </div>
@@ -44,6 +46,16 @@ export default function MultiBranchSystem() {
       <div className="mt-6">
         {activeTab === 'dashboard' && <DashboardTab />}
         {activeTab === 'facilities' && <FacilityManagementTab />}
+        {activeTab === 'maps' && (
+          <div className="space-y-4">
+            <GoogleMapsHealthLocator
+              initialQuery="Rumah Sakit dan Klinik Cabang ITARU Medika Network"
+              defaultCategory="hospital"
+              title="Peta Interaktif Jaringan Rumah Sakit & Klinik Cabang"
+              subtitle="Pemetaan lokasi geografis seluruh cabang faskes, jarak antar-unit, dan rute transfer ambulans"
+            />
+          </div>
+        )}
         {activeTab === 'transfer' && <PatientTransferTab />}
         {activeTab === 'reports' && <ConsolidatedReportsTab />}
       </div>

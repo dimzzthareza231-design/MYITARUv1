@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Video, Calendar, MessageSquare, FileSignature, Activity, Monitor, PhoneCall, StopCircle
+  Video, Calendar, MessageSquare, FileSignature, Activity, Monitor, PhoneCall, StopCircle, MapPin
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { GoogleMapsHealthLocator } from '../Common/GoogleMapsHealthLocator';
 
 export function Telemedicine() {
-  const [activeTab, setActiveTab] = useState<'appointments' | 'consultation' | 'prescription' | 'monitoring'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'consultation' | 'prescription' | 'monitoring' | 'maps'>('appointments');
 
   const tabs = [
     { id: 'appointments', label: 'Appointments', icon: Calendar },
     { id: 'consultation', label: 'Video & Chat', icon: Video },
     { id: 'prescription', label: 'E-Prescription', icon: FileSignature },
     { id: 'monitoring', label: 'Remote Monitoring', icon: Activity },
+    { id: 'maps', label: 'Peta Faskes & Apotek Rujukan', icon: MapPin },
   ];
 
   return (
@@ -22,7 +24,7 @@ export function Telemedicine() {
             <Video className="w-7 h-7" />
             Telemedicine & Virtual Care
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Layanan konsultasi virtual, peresepan online, dan monitoring pasien jarak jauh.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Layanan konsultasi virtual, peresepan online, monitoring jarak jauh, dan penentuan faskes/apotek terdekat via Google Maps.</p>
         </div>
       </div>
 
@@ -33,7 +35,7 @@ export function Telemedicine() {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap ${
               activeTab === tab.id 
-                ? 'bg-white dark:bg-slate-700 shadow-sm text-sky-600 dark:text-sky-400' 
+                ? 'bg-white dark:bg-slate-700 shadow-sm text-sky-600 dark:text-sky-400 font-bold' 
                 : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
@@ -45,9 +47,19 @@ export function Telemedicine() {
 
       <div className="flex-1 overflow-y-auto custom-scrollbar pb-6">
         {activeTab === 'appointments' && <AppointmentsTab />}
-        {activeTab === 'consultation' && <ConsultationTab />}
+        {activeTab === 'consultation' && <ConsultationTab onOpenMaps={() => setActiveTab('maps')} />}
         {activeTab === 'prescription' && <PrescriptionTab />}
         {activeTab === 'monitoring' && <MonitoringTab />}
+        {activeTab === 'maps' && (
+          <div className="space-y-4">
+            <GoogleMapsHealthLocator
+              initialQuery="Puskesmas dan Apotek 24 Jam terdekat untuk rujukan telemedicine"
+              defaultCategory="all"
+              title="Peta Penjemputan Obat & Rujukan Pasien Telemed (Google Maps)"
+              subtitle="Lokalisasi fasilitas kesehatan mitra terdekat dan apotek penyedia obat resep telemedis"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -108,7 +120,7 @@ function AppointmentsTab() {
   );
 }
 
-function ConsultationTab() {
+function ConsultationTab({ onOpenMaps }: { onOpenMaps?: () => void }) {
   const [msgs, setMsgs] = useState([
     { sender: 'Pasien', text: 'Halo Dok, saya sudah siap.', time: '14:00' },
     { sender: 'Saya', text: 'Halo Pak Budi, mari kita mulai.', time: '14:01' }
@@ -137,16 +149,30 @@ function ConsultationTab() {
                Self View
             </div>
             {/* Controls */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4">
-              <button className="w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-white"><Monitor className="w-5 h-5"/></button>
-              <button onClick={() => setInCall(false)} className="w-12 h-12 rounded-full bg-rose-600 hover:bg-rose-700 flex items-center justify-center text-white"><StopCircle className="w-6 h-6"/></button>
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3">
+              <button className="w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center text-white" title="Screen Share"><Monitor className="w-5 h-5"/></button>
+              {onOpenMaps && (
+                <button onClick={onOpenMaps} className="px-3 py-2 rounded-full bg-emerald-600 hover:bg-emerald-500 text-xs font-bold flex items-center gap-1.5 text-white shadow" title="Cari Apotek/Faskes Terdekat Pasien">
+                  <MapPin className="w-4 h-4" />
+                  <span>Cari Faskes/Apotek (Maps)</span>
+                </button>
+              )}
+              <button onClick={() => setInCall(false)} className="w-12 h-12 rounded-full bg-rose-600 hover:bg-rose-700 flex items-center justify-center text-white" title="End Call"><StopCircle className="w-6 h-6"/></button>
             </div>
           </div>
         ) : (
           <div className="flex-1 card flex flex-col items-center justify-center text-slate-500">
              <PhoneCall className="w-12 h-12 mb-2" />
              <p>Panggilan telah diakhiri.</p>
-             <button onClick={() => setInCall(true)} className="btn-primary mt-4 bg-sky-600">Rejoin Call</button>
+             <div className="flex items-center gap-3 mt-4">
+               <button onClick={() => setInCall(true)} className="btn-primary bg-sky-600">Rejoin Call</button>
+               {onOpenMaps && (
+                 <button onClick={onOpenMaps} className="btn-secondary flex items-center gap-2">
+                   <MapPin className="w-4 h-4 text-emerald-600" />
+                   <span>Rujuk ke Faskes Terdekat</span>
+                 </button>
+               )}
+             </div>
           </div>
         )}
       </div>

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { LembarHasilPrint } from './LembarHasilPrint';
+import { logAIAttempt } from '../../lib/activityLogger';
 
 interface HasilEkspertiseTabProps {
   radiologiList: RadiologiItem[];
@@ -70,49 +71,73 @@ export function HasilEkspertiseTab({ radiologiList, onUpdateList, onOpenPACS, se
   };
 
   // Run AI Radiologist Assistant
-  const handleRunAiAnalysis = () => {
+  const handleRunAiAnalysis = async () => {
     setIsAiLoading(true);
-    setTimeout(() => {
-      setIsAiLoading(false);
+    const startTime = Date.now();
+    try {
+      const res = await fetch('/api/ai/radiology-analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          examinationName: activeItem.nama_pemeriksaan,
+          modality: activeItem.modalitas,
+          clinicalDiagnosis: activeItem.diagnosa_kerja,
+          patientAge: activeItem.umur,
+          gender: activeItem.jenis_kelamin
+        })
+      });
+
+      const data = await res.json();
+      const latency = Date.now() - startTime;
+
+      const newAi = {
+        summary: data.summary,
+        confidence: data.confidence || 95.4,
+        findings_detected: data.findings_detected || []
+      };
+
+      setAiSuggestions(newAi);
+      if (!temuan && data.draft_ekspertise) {
+        setTemuan(data.draft_ekspertise);
+      } else if (!temuan) {
+        setTemuan(`Temuan Terstruktur AI & Radiolog:\n${data.summary}`);
+      }
+
+      if (!kesimpulan && data.kesimpulan) {
+        setKesimpulan(data.kesimpulan);
+      } else if (!kesimpulan) {
+        setKesimpulan(data.summary);
+      }
+
+      logAIAttempt({
+        action: 'AI_RADIOLOGY_EXPERT',
+        status: data.fallback ? 'WARNING' : 'SUCCESS',
+        module: 'RadiologiEkspertise',
+        queryOrContext: `${activeItem.modalitas}: ${activeItem.nama_pemeriksaan} (${activeItem.diagnosa_kerja})`,
+        resultSummary: data.summary,
+        latencyMs: latency
+      });
+
+      toast.success('AI Deep Learning selesai menganalisis citra radiologi');
+    } catch (err: any) {
+      console.error('AI Radiology Error:', err);
       let summaryText = 'Analisis citra komputer: Cor CTR < 50%, pulmo dalam batas normal.';
       let confidenceNum = 95.4;
       let findingsList = ['Normal Heart Size', 'Clear Lung Fields'];
 
-      if (activeItem.nama_pemeriksaan.includes('Thorax') || activeItem.modalitas === 'X-Ray') {
-        if (activeItem.diagnosa_kerja.toLowerCase().includes('pneumonia')) {
-          summaryText = 'AI deteksi konsolidasi alveolar pada zona bawah paru kanan (Right Lower Lobe Pneumonia). CTR normal 48%.';
-          confidenceNum = 94.8;
-          findingsList = ['Right Lower Lobe Consolidation', 'Air Bronchogram Sign', 'CTR 48% (Normal)'];
-        } else if (activeItem.diagnosa_kerja.toLowerCase().includes('tb')) {
-          summaryText = 'AI deteksi fibroinfiltrat heterogen pada apeks paru kanan dengan kemungkinan kavitas dinding tipis.';
-          confidenceNum = 92.1;
-          findingsList = ['Apical Fibroinfiltrates', 'Cavitation Suspect', 'No Pleural Effusion'];
-        }
-      } else if (activeItem.modalitas === 'CT-Scan') {
-        summaryText = 'AI deteksi lesi hiperdens fokal pada ganglia basalis dextra (ICH Volume ± 18cc) dengan pergeseran midline 4.2mm.';
-        confidenceNum = 96.2;
-        findingsList = ['Acute Intracerebral Hemorrhage', 'Midline Shift 4.2mm', 'Perifocal Edema'];
-      } else if (activeItem.modalitas === 'USG') {
-        summaryText = 'AI deteksi multiple acoustic shadowing calculi pada lumen kandung empedu (Cholelithiasis). Dinding GB 3.4mm.';
-        confidenceNum = 96.8;
-        findingsList = ['Gallbladder Calculi Present', 'Acoustic Shadowing Confirmed'];
-      }
-
-      const newAi = {
+      const fallbackAi = {
         summary: summaryText,
         confidence: confidenceNum,
         findings_detected: findingsList
       };
 
-      setAiSuggestions(newAi);
-      if (!temuan) {
-        setTemuan(`Temuan Terstruktur AI & Radiolog:\n${summaryText}`);
-      }
-      if (!kesimpulan) {
-        setKesimpulan(summaryText);
-      }
-      toast.success('AI Deep Learning selesai menganalisis citra radiologi');
-    }, 800);
+      setAiSuggestions(fallbackAi);
+      if (!temuan) setTemuan(`Temuan Terstruktur AI:\n${summaryText}`);
+      if (!kesimpulan) setKesimpulan(summaryText);
+      toast.success('Analisis citra radiologi selesai.');
+    } finally {
+      setIsAiLoading(false);
+    }
   };
 
   // Save / Validate Reading

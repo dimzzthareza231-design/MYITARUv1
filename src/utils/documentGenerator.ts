@@ -5,6 +5,31 @@ import {
   TableItemRow 
 } from '../types/document';
 import { SEMUA_DOKTER, MASTER_POLIKLINIK } from '../data/seedData';
+import { detectIsRawatInap } from './resumeTemplateHelper';
+
+/**
+ * Helper to convert integer amount to Indonesian spelled words (Terbilang)
+ */
+export function numberToWordsId(amount: number): string {
+  if (amount === 0) return 'Nol Rupiah';
+  const units = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+  
+  function toWords(n: number): string {
+    if (n < 12) return units[n];
+    if (n < 20) return toWords(n - 10) + ' Belas';
+    if (n < 100) return toWords(Math.floor(n / 10)) + ' Puluh' + (n % 10 !== 0 ? ' ' + toWords(n % 10) : '');
+    if (n < 200) return 'Seratus' + (n % 100 !== 0 ? ' ' + toWords(n % 100) : '');
+    if (n < 1000) return toWords(Math.floor(n / 100)) + ' Ratus' + (n % 100 !== 0 ? ' ' + toWords(n % 100) : '');
+    if (n < 2000) return 'Seribu' + (n % 1000 !== 0 ? ' ' + toWords(n % 1000) : '');
+    if (n < 1000000) return toWords(Math.floor(n / 1000)) + ' Ribu' + (n % 1000 !== 0 ? ' ' + toWords(n % 1000) : '');
+    if (n < 1000000000) return toWords(Math.floor(n / 1000000)) + ' Juta' + (n % 1000000 !== 0 ? ' ' + toWords(n % 1000000) : '');
+    if (n < 1000000000000) return toWords(Math.floor(n / 1000000000)) + ' Milyar' + (n % 1000000000 !== 0 ? ' ' + toWords(n % 1000000000) : '');
+    return String(n);
+  }
+  
+  const words = toWords(Math.abs(Math.floor(amount))).trim();
+  return words ? `${words} Rupiah` : 'Nol Rupiah';
+}
 
 /**
  * Helper to find matching doctor and specialty based on unit/poli
@@ -167,14 +192,17 @@ export function generateHospitalDocument(
   const bpjsCardNo = data.no_kartu_bpjs || data.no_kartu || '0001889234551';
   const sepNumber = data.no_sep || `0194R0010826V00${Math.floor(1000 + Math.random() * 9000)}`;
   const examDate = data.tanggal || data.tgl_periksa || data.tgl_masuk || dateFormatted;
-  const visitType = data.tipe_kunjungan || data.jenis_kunjungan || (data.ruangan ? 'Rawat Inap' : 'Rawat Jalan (Poli Spesialis)');
+  const isRanap = detectIsRawatInap(data);
+  const visitType = data.tipe_kunjungan || data.jenis_kunjungan || (isRanap ? 'Rawat Inap' : 'Rawat Jalan (Poli Spesialis)');
 
   // Title logic
   let title = customTitle;
   if (!title) {
     switch (docType) {
       case 'resume_medis':
-        title = 'RINGKASAN REKAM MEDIS ELEKTRONIK (RESUME MEDIS RAWAT JALAN & INAP)';
+        title = isRanap 
+          ? 'RESUME MEDIS PASIEN (RAWAT INAP / DISCHARGE SUMMARY)' 
+          : 'RESUME MEDIS PASIEN (RAWAT JALAN / POLIKLINIK)';
         break;
       case 'surat_keterangan_sakit':
         title = 'SURAT KETERANGAN DOKTER (SURAT ISTIRAHAT SAKIT)';
@@ -458,6 +486,98 @@ export function generateHospitalDocument(
     sanationam: 'Dubia ad Bonam (Cenderung Baik)'
   };
 
+  // Billing Totals & Currency In Words
+  const totalTarif = itemBilling.reduce((acc, it) => acc + (Number(it.subtotal || (Number(it.jumlah || 1) * Number(it.tarif || 0))) || 0), 0);
+  const diskonPenjamin = (guarantor.includes('BPJS') || guarantor.includes('Asuransi')) ? Math.round(totalTarif * 0.85) : 0;
+  const totalDibayar = Math.max(0, totalTarif - diskonPenjamin);
+  const terbilangRupiah = numberToWordsId(totalDibayar);
+
+  // Dedicated Structured Data per Document Type
+  const suratSakit = {
+    lamaHari: data.lama_hari || data.hari_istirahat || 3,
+    terhitungMulai: data.tgl_mulai_istirahat || examDate,
+    terhitungSampai: data.tgl_selesai_istirahat || dateFormatted,
+    anjuranMedis: data.anjuran_istirahat || 'Tirah baring (bed rest) cukup, hindari aktivitas fisik berat & mengemudi, minum obat teratur, konsumsi air putih hangat.',
+    pekerjaan: occupation
+  };
+
+  const suratSehat = {
+    keperluan: data.keperluan || 'Persyaratan Administrasi Melamar Pekerjaan / Kelanjutan Pendidikan / Uji Kebugaran Fisik',
+    visusMataOD: data.visus_od || '6/6 (Normal emetropia)',
+    visusMataOS: data.visus_os || '6/6 (Normal emetropia)',
+    butaWarna: data.buta_warna || ('Normal (Tidak Buta Warna)' as const),
+    pendengaran: data.pendengaran || ('Normal (Bilateral)' as const),
+    gigiMulut: data.gigi_mulut || 'Kebersihan Oral Baik / Karies Negatif',
+    skriningNarkoba: data.narkoba || ('Negatif (Bebas Narkoba / Napza)' as const),
+    kesimpulanFisik: data.kesimpulan_sehat || 'SEHAT JASMANI / TIDAK DITEMUKAN KELAINAN FISIK BERMAKNA',
+    masaBerlaku: '1 (Satu) Bulan sejak tanggal diterbitkan'
+  };
+
+  const suratRujukan = {
+    faskesTujuan: data.faskes_tujuan || data.rs_tujuan || 'RSUP Nasional Dr. Cipto Mangunkusumo (RSCM) / RSUD Pasar Minggu',
+    poliTujuan: data.poli_tujuan || 'Poliklinik Spesialis Saraf (Neurologi) Konsultan Otologi',
+    dokterTujuan: data.dokter_tujuan || 'Dokter Spesialis Saraf Konsultan (Sp.N-K)',
+    alasanRujukan: data.alasan_rujuk || 'Mohon evaluasi dan tata laksana diagnostik lanjutan Video Nystagmography (VNG) / MRI Kepala untuk evaluasi episode vertigo posisi refrakter.',
+    terapiTindakanDiberikan: data.terapi_diberikan || 'Manuver Epley 1x, Betahistine 24mg 2x1 tab, Mecobalamin 500mcg 3x1 tab.',
+    fasilitasTransportasi: data.transportasi || 'Kendaraan Pribadi / Layanan Ambulans Standar',
+    pendamping: data.pendamping || 'Keluarga Pasien & Tenaga Medis (Bila Diperlukan)',
+    tipeRujukan: ('Vertikal' as const)
+  };
+
+  const resepData = {
+    iterasi: data.iter || 'Iter 1x',
+    telaahApoteker: {
+      kesesuaianDosis: true,
+      duplikasiObat: false,
+      interaksiObatAman: true,
+      alergiAman: true,
+      namaApoteker: 'apt. Nurul Aini, S.Farm',
+      sipaApoteker: 'SIPA: 19890412/SIPA-3174/2023'
+    },
+    instruksiKhususApotek: data.instruksi_apotek || 'Simpan obat di tempat sejuk dan kering (< 30°C) terlindung dari cahaya matahari langsung. Jauhkan dari jangkauan anak-anak.'
+  };
+
+  const billingSummary = {
+    noKuitansi: data.no_kuitansi || `KW-${yearStr}-${monthRoman}-${Math.floor(10000 + Math.random() * 90000)}`,
+    kasir: data.kasir || 'Dewi Lestari, S.E (Kasir & Keuangan)',
+    metodeBayar: data.metode_bayar || data.tipe_pembayaran || (guarantor.includes('BPJS') ? 'Klaim BPJS Kesehatan + Non-Tunai' : 'QRIS / EDC Mandiri / Transfer'),
+    totalTarif: totalTarif,
+    diskonPenjamin: diskonPenjamin,
+    totalDibayar: totalDibayar,
+    terbilang: terbilangRupiah,
+    statusLunas: true,
+    tanggalBayar: `${examDate}, 11:30 WIB`
+  };
+
+  const labMetadata = {
+    noLab: data.no_lab || `LAB-${yearStr}-${String(noRm || '0194').replace(/[^0-9]/g, '')}-${Math.floor(100 + Math.random() * 900)}`,
+    tglSampling: data.tgl_sampling || `${examDate}, 08:30 WIB`,
+    tglSelesai: data.tgl_selesai || `${examDate}, 10:15 WIB`,
+    dokterSpPk: data.dokter_sp_pk || 'dr. H. Hendra, MARS, Sp.PK',
+    analisLab: data.analis_lab || 'Siti Rahmawati, A.Md.AK',
+    catatanKlinis: data.catatan_lab || 'Spesimen serum jernih, tidak hemolisis/lipemik/ikterik. Kontrol kualitas harian (IQC) valid.'
+  };
+
+  const radiologiMetadata = {
+    noFoto: data.no_foto || `RAD-${yearStr}-${Math.floor(1000 + Math.random() * 9000)}`,
+    proyeksi: data.proyeksi || 'Postero-Anterior (PA) & Lateral',
+    pesawatRontgen: data.pesawat || 'Digital Radiography (DR) 500mA Stationary',
+    dokterSpRad: data.dokter_sp_rad || 'dr. Hendra Wijaya, Sp.Rad (K)'
+  };
+
+  const sepData = {
+    noSep: sepNumber,
+    tglSep: examDate,
+    noKartu: bpjsCardNo,
+    peserta: subjectName,
+    noRujukan: data.no_rujukan || `0115B0010826P00${Math.floor(1000 + Math.random() * 9000)}`,
+    faskesPerujuk: data.faskes_perujuk || 'Puskesmas Cilandak Timur (0115B001)',
+    diagnosaAwal: `${diagnosisUtama.kode} - ${diagnosisUtama.nama}`,
+    catatanPeserta: data.catatan_bpjs || 'Pelayanan rawat jalan rujukan FKTP tingkat pertama.',
+    hakKelas: data.hak_kelas || 'Kelas 1 (Satu)',
+    jenisPelayanan: visitType
+  };
+
   return {
     id: String(data.id || Date.now()),
     type: docType,
@@ -533,6 +653,17 @@ export function generateHospitalDocument(
     prognosis: prognosis,
     kondisiPulang: data.kondisi_pulang || data.status || 'Perbaikan Klinis / Berobat Jalan Mandiri',
     catatanKhusus: data.catatan_khusus || 'Rekam Medis Elektronik ini telah divalidasi dan dienkripsi secara digital sesuai standar Permenkes RI No. 24 Tahun 2022 tentang Rekam Medis.',
+    
+    // Dedicated Sub-document Payload (Mencegah Pencampuran Data Tidak Relevan)
+    suratSakit: suratSakit,
+    suratSehat: suratSehat,
+    suratRujukan: suratRujukan,
+    resepData: resepData,
+    billingSummary: billingSummary,
+    labMetadata: labMetadata,
+    radiologiMetadata: radiologiMetadata,
+    sepData: sepData,
+
     signer: {
       nama: doctor,
       gelar: data.gelar || doctorSpecialty || 'Spesialis',

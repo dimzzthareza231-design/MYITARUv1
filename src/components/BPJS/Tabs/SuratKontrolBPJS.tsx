@@ -2,40 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, FileText, Calendar, Edit2, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PrintPDFButton from '../../PrintPDFButton';
+import { initBPJSData } from '../bpjsData';
 
 export function SuratKontrolBPJS() {
   const [suratKontrolList, setSuratKontrolList] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   
   useEffect(() => {
-    const saved = localStorage.getItem('simrs_bpjs_surat_kontrol');
+    initBPJSData();
+    const saved = localStorage.getItem('simrs_bpjs_surat_kontrol') || localStorage.getItem('bpjs_surat_kontrol');
     if (saved) {
       setSuratKontrolList(JSON.parse(saved));
     } else {
-      // Data dummy jika belum ada
-      const dummyData = [
-        {
-          id: 1,
-          no_surat: 'SK-20260801-001',
-          nama_pasien: 'Budi Santoso',
-          tanggal_kontrol: '2026-08-15',
-          dokter: 'dr. Ahmad, Sp.PD',
-          poli: 'Poli Penyakit Dalam',
-          diagnosis: 'Diabetes Mellitus',
-          status: 'Aktif'
-        },
-        {
-          id: 2,
-          no_surat: 'SK-20260801-002',
-          nama_pasien: 'Siti Aminah',
-          tanggal_kontrol: '2026-08-20',
-          dokter: 'dr. Rina, Sp.JP',
-          poli: 'Poli Jantung',
-          diagnosis: 'Hipertensi',
-          status: 'Aktif'
-        }
-      ];
-      setSuratKontrolList(dummyData);
+      setSuratKontrolList([]);
     }
   }, []);
   const handleAdd = () => {

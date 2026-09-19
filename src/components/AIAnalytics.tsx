@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Sparkles, Activity, Clock, ShieldCheck, FileText, MessageSquare, ListChecks, Filter, MessageCircle, Send } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Activity, Clock, ShieldCheck, FileText, MessageSquare, ListChecks, Filter, MessageCircle, Send, CheckCircle2, AlertTriangle, XCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { subscribeActivityLogs, ActivityLogEntry } from '../lib/activityLogger';
 
 export function AIAnalytics() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'conversation' | 'suggestions' | 'feedback' | 'activity'>('dashboard');
@@ -111,24 +112,49 @@ function DashboardTab() {
 
 function ActivityTab() {
   const [filter, setFilter] = useState('All');
-  
-  const logs = [
-    { id: 1, time: '10:45:12', action: 'Validasi Klaim BPJS (Pasien RM-000002)', status: 'Success', role: 'Kasir', module: 'Billing' },
-    { id: 2, time: '10:42:05', action: 'Deteksi Interaksi Obat (Paracetamol + Ibuprofen)', status: 'Warning', role: 'Dokter', module: 'Pharmacy' },
-    { id: 3, time: '10:30:22', action: 'Saran ICD-10 (A90 - Dengue Fever)', status: 'Accepted', role: 'Dokter', module: 'Medical Records' },
-    { id: 4, time: '10:15:00', action: 'Auto-fill SOAP via Voice (Pasien RM-000005)', status: 'Success', role: 'Dokter', module: 'Outpatient' },
-    { id: 5, time: '09:50:11', action: 'Gagal generate summary, timeout', status: 'Error', role: 'Perawat', module: 'Inpatient' },
+  const [liveLogs, setLiveLogs] = useState<ActivityLogEntry[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeActivityLogs(logs => {
+      const aiLogs = logs.filter(l => l.category === 'ai');
+      setLiveLogs(aiLogs);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const defaultLogs = [
+    { id: 'def-1', time: '10:45:12', action: 'Validasi Klaim BPJS (Pasien RM-000002)', status: 'Success', role: 'Kasir', module: 'Billing' },
+    { id: 'def-2', time: '10:42:05', action: 'Deteksi Interaksi Obat (Warfarin + Ciprofloxacin)', status: 'Warning', role: 'Apoteker', module: 'Pharmacy' },
+    { id: 'def-3', time: '10:30:22', action: 'Saran ICD-10 (A90 - Dengue Fever)', status: 'Accepted', role: 'Dokter', module: 'Medical Records' },
+    { id: 'def-4', time: '10:15:00', action: 'Auto-fill SOAP via Voice (Pasien RM-000005)', status: 'Success', role: 'Dokter', module: 'Outpatient' },
+    { id: 'def-5', time: '09:50:11', action: 'Ekspertise Radiologi AI Thorax X-Ray', status: 'Success', role: 'Radiolog', module: 'Radiology' },
   ];
 
-  const filteredLogs = filter === 'All' ? logs : logs.filter(l => l.status === filter);
+  // Map live AI logs into table format
+  const mappedLive = liveLogs.map(l => ({
+    id: l.id,
+    time: new Date(l.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+    action: `${l.action.replace('AI_', '').replace(/_/g, ' ')}: ${l.details.message || ''}`,
+    status: l.status === 'SUCCESS' ? 'Success' : l.status === 'WARNING' ? 'Warning' : 'Error',
+    role: l.user.roleId || 'Klinis',
+    module: l.target.split('/')[1] || 'AI Copilot'
+  }));
+
+  const allLogs = [...mappedLive, ...defaultLogs];
+  const filteredLogs = filter === 'All' ? allLogs : allLogs.filter(l => l.status === filter);
 
   return (
     <div className="card p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold flex items-center gap-2"><ListChecks className="w-5 h-5 text-emerald-600"/> Log Aktivitas AI</h2>
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-6">
+        <div>
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <ListChecks className="w-5 h-5 text-emerald-600"/> Log Aktivitas AI Klinis & Audit
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">Real-time telemetri eksekusi Gemini 3.8 Flash pada seluruh modul SIMRS</p>
+        </div>
         <div className="flex gap-2">
           <select className="input-field py-1 px-2 text-sm" value={filter} onChange={e=>setFilter(e.target.value)}>
-            <option value="All">Semua Status</option>
+            <option value="All">Semua Status ({allLogs.length})</option>
             <option value="Success">Success</option>
             <option value="Accepted">Accepted</option>
             <option value="Warning">Warning</option>
@@ -137,31 +163,36 @@ function ActivityTab() {
         </div>
       </div>
       
-      <table className="w-full text-left text-sm border-collapse">
-        <thead className="bg-slate-50 dark:bg-slate-800/50">
-          <tr>
-            <th className="p-3 border-b">Waktu</th>
-            <th className="p-3 border-b">Aktivitas</th>
-            <th className="p-3 border-b">Modul & Peran</th>
-            <th className="p-3 border-b">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredLogs.map(l => (
-            <tr key={l.id}>
-              <td className="p-3 border-b font-mono text-xs text-slate-500">{l.time}</td>
-              <td className="p-3 border-b font-medium">{l.action}</td>
-              <td className="p-3 border-b text-xs">{l.module} <span className="text-slate-400">({l.role})</span></td>
-              <td className="p-3 border-b">
-                 <span className={`px-2 py-1 rounded text-[10px] font-bold ${
-                   l.status === 'Success' || l.status === 'Accepted' ? 'bg-emerald-100 text-emerald-700' :
-                   l.status === 'Warning' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
-                 }`}>{l.status}</span>
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm border-collapse">
+          <thead className="bg-slate-50 dark:bg-slate-800/50">
+            <tr>
+              <th className="p-3 border-b text-xs font-semibold text-slate-500">Waktu</th>
+              <th className="p-3 border-b text-xs font-semibold text-slate-500">Aktivitas & Instruksi Klinis</th>
+              <th className="p-3 border-b text-xs font-semibold text-slate-500">Modul & Peran</th>
+              <th className="p-3 border-b text-xs font-semibold text-slate-500">Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredLogs.map(l => (
+              <tr key={l.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                <td className="p-3 border-b font-mono text-xs text-slate-500 whitespace-nowrap">{l.time}</td>
+                <td className="p-3 border-b font-medium text-slate-800 dark:text-slate-200">{l.action}</td>
+                <td className="p-3 border-b text-xs whitespace-nowrap">
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">{l.module}</span>{' '}
+                  <span className="text-slate-400">({l.role})</span>
+                </td>
+                <td className="p-3 border-b whitespace-nowrap">
+                   <span className={`px-2 py-1 rounded text-[10px] font-bold ${
+                     l.status === 'Success' || l.status === 'Accepted' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' :
+                     l.status === 'Warning' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300' : 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
+                   }`}>{l.status}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

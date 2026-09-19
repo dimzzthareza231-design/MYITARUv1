@@ -250,7 +250,7 @@ export function LaboratoryTab({ patientData }: { patientData: any }) {
                 label="Cetak Hasil Lab"
                 className="text-xs bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl border border-slate-300 dark:border-slate-700 !text-slate-700 dark:!text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 py-2"
                 documentData={{ ...patientData, labOrder: activeOrder }}
-                docType="resume_medis"
+                docType="hasil_laboratorium"
                 title="HASIL PEMERIKSAAN LABORATORIUM KLINIK"
               />
             </div>

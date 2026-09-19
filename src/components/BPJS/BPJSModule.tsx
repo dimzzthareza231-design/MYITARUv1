@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, Ticket, ClipboardCheck,
   RefreshCcw, Receipt, Bot, FileCode2, TerminalSquare, Settings,
   Activity, Clock, History, ShieldCheck, CalendarClock,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, MapPin
 } from 'lucide-react';
 import { DashboardBPJS } from './Tabs/DashboardBPJS';
 import { DataPesertaBPJS } from './Tabs/DataPesertaBPJS';
@@ -19,10 +20,33 @@ import { PengaturanVClaim } from './Tabs/PengaturanVClaim';
 import { PCareKunjungan } from './Tabs/PCareKunjungan';
 import { AntreanOnlineBPJS } from './Tabs/AntreanOnlineBPJS';
 import { ICareJKN } from './Tabs/ICareJKN';
+import { GoogleMapsHealthLocator } from '../Common/GoogleMapsHealthLocator';
 
 export function BPJSModule() {
+  const outletCtx = useOutletContext<{ activeTab?: string }>();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Synchronize with activeTab from ModuleLayout router outlet
+  useEffect(() => {
+    if (outletCtx?.activeTab) {
+      const tab = outletCtx.activeTab.toLowerCase();
+      if (tab.includes('dashboard')) setActiveTab('dashboard');
+      else if (tab.includes('peserta')) setActiveTab('peserta');
+      else if (tab.includes('pcare') || tab.includes('p-care')) setActiveTab('pcare');
+      else if (tab.includes('sep')) setActiveTab('sep');
+      else if (tab.includes('surat kontrol') || tab.includes('sk')) setActiveTab('sk');
+      else if (tab.includes('rujuk balik') || tab.includes('prb')) setActiveTab('prb');
+      else if (tab.includes('rujukan')) setActiveTab('rujukan');
+      else if (tab.includes('klaim') || tab.includes('ina-cbg') || tab.includes('vedika') || tab.includes('validator')) setActiveTab('klaim');
+      else if (tab.includes('antrean') || tab.includes('antrian')) setActiveTab('antrean');
+      else if (tab.includes('icare') || tab.includes('i-care')) setActiveTab('icare');
+      else if (tab.includes('faskes') || tab.includes('maps') || tab.includes('peta')) setActiveTab('faskes-maps');
+      else if (tab.includes('mapping')) setActiveTab('mapping');
+      else if (tab.includes('log')) setActiveTab('log');
+      else if (tab.includes('pengaturan') || tab.includes('vclaim') || tab.includes('v-claim')) setActiveTab('pengaturan');
+    }
+  }, [outletCtx?.activeTab]);
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard BPJS', icon: LayoutDashboard },
@@ -32,6 +56,7 @@ export function BPJSModule() {
     { id: 'sk', label: 'Surat Kontrol', icon: ClipboardCheck },
     { id: 'prb', label: 'Program Rujuk Balik', icon: RefreshCcw },
     { id: 'rujukan', label: 'Rujukan', icon: FileText },
+    { id: 'faskes-maps', label: 'Peta Faskes BPJS', icon: MapPin },
     { id: 'klaim', label: 'Manajemen Klaim', icon: Receipt },
     { id: 'antrean', label: 'Antrean Online', icon: Clock },
     { id: 'icare', label: 'i-Care JKN', icon: History },
@@ -49,6 +74,16 @@ export function BPJSModule() {
       case 'sk': return <SuratKontrolBPJS />;
       case 'prb': return <ProgramRujukBalikBPJS />;
       case 'rujukan': return <RujukanBPJS />;
+      case 'faskes-maps': return (
+        <div className="p-6 max-w-7xl mx-auto h-full overflow-y-auto">
+          <GoogleMapsHealthLocator
+            initialQuery="Fasilitas Kesehatan Tingkat Pertama (FKTP) dan Rumah Sakit Rujukan BPJS Kesehatan"
+            defaultCategory="bpjs"
+            title="Peta Jejaring Faskes & Rujukan BPJS Kesehatan"
+            subtitle="Cari FKTP, Klinik Pratama, Puskesmas, dan RS Rujukan Berjenjang Terakreditasi BPJS dengan Google Maps"
+          />
+        </div>
+      );
       case 'klaim': return <KlaimBPJS />;
       case 'antrean': return <AntreanOnlineBPJS />;
       case 'icare': return <ICareJKN />;

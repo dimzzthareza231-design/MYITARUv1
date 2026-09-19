@@ -1,13 +1,42 @@
 import React, { useState, useEffect } from 'react';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { 
-  Shield, Users, Key, Lock, FileClock, CheckCircle, ShieldAlert
+  Shield, Users, Key, Lock, FileClock, CheckCircle, ShieldAlert, Activity,
+  RefreshCw, Save, Search, Check, X, AlertTriangle, Clock, Radio, UserCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { ActivityLogsTab } from './ActivityLogsTab';
+import { UserManagement } from './UserManagement';
+import { useAuth } from '../../contexts/AuthContext';
+import { ROLES, getRoleById, getCustomPermissions, saveCustomPermissions, COMMON_MODULES } from '../../data/roles';
+import { MODULE_REGISTRY } from '../../data/moduleRegistry';
+import { subscribeActivityLogs, ActivityLogEntry } from '../../lib/activityLogger';
 
 export function AuthManagement() {
-  const [activeTab, setActiveTab] = useState<'login' | 'users' | 'roles' | 'sessions' | 'audit'>('login');
+  const [searchParams] = useSearchParams();
+  const outletContext = useOutletContext<{ activeTab?: string }>();
+  const [activeTab, setActiveTab] = useState<'activity' | 'login' | 'users' | 'roles' | 'sessions' | 'audit'>('activity');
+
+  // Sync tab with URL query parameter or outlet context
+  useEffect(() => {
+    const requestedTab = (outletContext?.activeTab || searchParams.get('tab') || '').toLowerCase();
+    if (requestedTab.includes('activity') || requestedTab.includes('aktivitas') || requestedTab.includes('log')) {
+      setActiveTab('activity');
+    } else if (requestedTab.includes('user') || requestedTab.includes('pengguna')) {
+      setActiveTab('users');
+    } else if (requestedTab.includes('role') || requestedTab.includes('peran')) {
+      setActiveTab('roles');
+    } else if (requestedTab.includes('session') || requestedTab.includes('sesi')) {
+      setActiveTab('sessions');
+    } else if (requestedTab.includes('login') || requestedTab.includes('2fa')) {
+      setActiveTab('login');
+    } else if (requestedTab.includes('audit')) {
+      setActiveTab('audit');
+    }
+  }, [outletContext?.activeTab, searchParams]);
 
   const tabs = [
+    { id: 'activity', label: 'Activity Logs', icon: Activity, badge: 'Real-time' },
     { id: 'login', label: 'Login & 2FA', icon: Lock },
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'roles', label: 'Roles & Permissions', icon: Key },
@@ -23,7 +52,9 @@ export function AuthManagement() {
             <ShieldAlert className="w-7 h-7 text-indigo-600" />
             Security & Auth System
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manajemen akses, otentikasi, role, dan audit trail.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+            Manajemen akses, pemantauan log autentikasi Firebase & database Cloud Firestore waktu nyata, role matrix, dan audit trail.
+          </p>
         </div>
       </div>
 
@@ -40,13 +71,19 @@ export function AuthManagement() {
           >
             <tab.icon className="w-4 h-4" />
             {tab.label}
+            {tab.badge && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                {tab.badge}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
       <div className="flex-1 overflow-y-auto custom-scrollbar pb-6">
+        {activeTab === 'activity' && <ActivityLogsTab />}
         {activeTab === 'login' && <LoginSimulator />}
-        {activeTab === 'users' && <UserManagementTab />}
+        {activeTab === 'users' && <UserManagement />}
         {activeTab === 'roles' && <RolesTab />}
         {activeTab === 'sessions' && <SessionsTab />}
         {activeTab === 'audit' && <AuditTab />}
@@ -109,76 +146,6 @@ function LoginSimulator() {
     </div>
   );
 }
-
-function UserManagementTab() {
-  const [users, setUsers] = useState<any[]>([
-    { id: 'U-001', name: 'Dr. Andi', role: 'Dokter', status: 'Active' },
-    { id: 'U-002', name: 'Siti Aminah', role: 'Perawat', status: 'Active' }
-  ]);
-  const [form, setForm] = useState({ name: '', role: 'Admin' });
-
-  const addUser = (e: React.FormEvent) => {
-    e.preventDefault();
-    if(!form.name) return;
-    setUsers([{ id: `U-${Date.now().toString().slice(-3)}`, ...form, status: 'Active' }, ...users]);
-    toast.success("User ditambahkan");
-    setForm({ name: '', role: 'Admin' });
-  };
-
-  const toggleStatus = (id: string) => {
-    setUsers(users.map(u => u.id === id ? { ...u, status: u.status === 'Active' ? 'Suspended' : 'Active' } : u));
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="card p-6">
-        <h2 className="text-xl font-bold mb-4">User Management (CRUD)</h2>
-        <form onSubmit={addUser} className="flex gap-4 items-end mb-6">
-          <div className="flex-1"><label className="block text-sm mb-1">Nama Lengkap</label><input type="text" className="input-field" value={form.name} onChange={e=>setForm({...form, name: e.target.value})} required/></div>
-          <div><label className="block text-sm mb-1">Role</label>
-             <select className="input-field" value={form.role} onChange={e=>setForm({...form, role: e.target.value})}>
-               <option>Admin</option><option>Dokter</option><option>Perawat</option><option>Kasir</option>
-             </select>
-          </div>
-          <button type="submit" className="btn-primary">Add User</button>
-        </form>
-
-        <table className="w-full text-left text-sm border-collapse">
-          <thead className="bg-slate-50 dark:bg-slate-800/50">
-            <tr>
-              <th className="p-3 border-b">ID User</th>
-              <th className="p-3 border-b">Nama</th>
-              <th className="p-3 border-b">Role</th>
-              <th className="p-3 border-b">Status</th>
-              <th className="p-3 border-b text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(u => (
-              <tr key={u.id}>
-                <td className="p-3 border-b font-mono font-bold text-indigo-600">{u.id}</td>
-                <td className="p-3 border-b">{u.name}</td>
-                <td className="p-3 border-b"><span className="bg-slate-100 px-2 py-1 rounded text-xs font-bold">{u.role}</span></td>
-                <td className="p-3 border-b">
-                   <span className={`px-2 py-1 rounded text-xs font-bold ${u.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>{u.status}</span>
-                </td>
-                <td className="p-3 border-b text-right">
-                  <button onClick={() => toggleStatus(u.id)} className="text-xs text-slate-500 hover:text-indigo-600 underline">
-                    {u.status === 'Active' ? 'Suspend' : 'Activate'}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-import { ROLES, getRoleById, getCustomPermissions, saveCustomPermissions, COMMON_MODULES } from '../../data/roles';
-import { MODULE_REGISTRY } from '../../data/moduleRegistry';
-import { RefreshCw, Save, Check, X, Search, Info } from 'lucide-react';
 
 function RolesTab() {
   const [selectedRoleId, setSelectedRoleId] = useState<string>('dokter');
@@ -459,71 +426,175 @@ function RolesTab() {
 }
 
 function SessionsTab() {
+  const { currentUser, firebaseUser, logout } = useAuth();
+  const currentRole = currentUser ? getRoleById(currentUser.roleId) : null;
+  const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Browser Client';
+
+  const handleRevoke = async () => {
+    if (window.confirm('Keluar dari sesi saat ini?')) {
+      await logout();
+      toast.success('Sesi berhasil dihentikan');
+    }
+  };
+
   return (
-    <div className="card p-6">
-      <h2 className="text-xl font-bold mb-4">Active Sessions</h2>
-      <table className="w-full text-left text-sm border-collapse">
-        <thead className="bg-slate-50 dark:bg-slate-800/50">
-          <tr>
-            <th className="p-3 border-b">User</th>
-            <th className="p-3 border-b">IP Address / Device</th>
-            <th className="p-3 border-b">Last Active</th>
-            <th className="p-3 border-b text-right">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="p-3 border-b font-bold">Admin (You)</td>
-            <td className="p-3 border-b text-xs">192.168.1.5<br/>Chrome on Windows</td>
-            <td className="p-3 border-b text-emerald-600">Just now</td>
-            <td className="p-3 border-b text-right"><span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded">Current</span></td>
-          </tr>
-          <tr>
-            <td className="p-3 border-b font-bold">Dr. Andi</td>
-            <td className="p-3 border-b text-xs">10.0.0.12<br/>Safari on iPad</td>
-            <td className="p-3 border-b text-slate-500">10 mins ago</td>
-            <td className="p-3 border-b text-right"><button onClick={()=>toast.success("Session revoked")} className="text-xs text-rose-500 font-bold hover:underline">Revoke</button></td>
-          </tr>
-        </tbody>
-      </table>
+    <div className="space-y-6">
+      <div className="card p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <Shield className="w-5 h-5 text-indigo-600" />
+              Sesi Autentikasi Aktif (Live Sessions)
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Daftar sesi terotentikasi Firebase Auth & kredensial tersinkronisasi di sistem.
+            </p>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead className="bg-slate-50 dark:bg-slate-800/80">
+              <tr>
+                <th className="p-3 border-b text-xs font-bold text-slate-500 uppercase">Pengguna / Akun</th>
+                <th className="p-3 border-b text-xs font-bold text-slate-500 uppercase">Peran & Akses</th>
+                <th className="p-3 border-b text-xs font-bold text-slate-500 uppercase">Metode Autentikasi</th>
+                <th className="p-3 border-b text-xs font-bold text-slate-500 uppercase">Browser & Device</th>
+                <th className="p-3 border-b text-xs font-bold text-slate-500 uppercase text-right">Status & Tindakan</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+              <tr>
+                <td className="p-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                      {currentUser?.nama?.charAt(0) || 'U'}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
+                        {currentUser?.nama}
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 font-semibold">
+                          Anda (Sesi Saat Ini)
+                        </span>
+                      </p>
+                      <p className="text-xs text-slate-400 font-mono">{currentUser?.email || currentUser?.username}</p>
+                    </div>
+                  </div>
+                </td>
+                <td className="p-3">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                    <span>{currentRole?.icon || '🛡️'}</span>
+                    {currentRole?.nama || currentUser?.roleId}
+                  </span>
+                </td>
+                <td className="p-3">
+                  <div className="text-xs">
+                    <p className="font-bold text-slate-700 dark:text-slate-300">
+                      {currentUser?.isGoogleAuth ? 'Google OAuth 2.0 (Firebase)' : 'Kredensial Petugas (DB Internal)'}
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      UID: {currentUser?.id || firebaseUser?.uid || 'local-session'}
+                    </p>
+                  </div>
+                </td>
+                <td className="p-3 text-xs text-slate-600 dark:text-slate-400 max-w-xs truncate">
+                  {userAgent}
+                </td>
+                <td className="p-3 text-right">
+                  <button
+                    onClick={handleRevoke}
+                    className="text-xs text-rose-600 hover:text-rose-700 font-bold px-3 py-1 rounded-lg border border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                  >
+                    Akhiri Sesi
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
 
 function AuditTab() {
+  const [logs, setLogs] = useState<ActivityLogEntry[]>([]);
+
+  useEffect(() => {
+    return subscribeActivityLogs((newLogs) => {
+      setLogs(newLogs.slice(0, 20));
+    });
+  }, []);
+
   return (
-    <div className="card p-6">
-      <h2 className="text-xl font-bold mb-4">System Audit Trail</h2>
-      <table className="w-full text-left text-sm border-collapse">
-        <thead className="bg-slate-50 dark:bg-slate-800/50">
-          <tr>
-            <th className="p-3 border-b">Waktu</th>
-            <th className="p-3 border-b">User / Aktor</th>
-            <th className="p-3 border-b">Event (Aksi)</th>
-            <th className="p-3 border-b">IP & Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="p-3 border-b font-mono text-xs">2026-08-05 10:00:15</td>
-            <td className="p-3 border-b font-bold">Admin</td>
-            <td className="p-3 border-b text-xs">UPDATE_PERMISSION [Role: Perawat]</td>
-            <td className="p-3 border-b text-xs"><span className="text-emerald-500 font-bold">SUCCESS</span><br/>192.168.1.5</td>
-          </tr>
-          <tr>
-            <td className="p-3 border-b font-mono text-xs">2026-08-05 09:15:00</td>
-            <td className="p-3 border-b font-bold">Dr. Andi</td>
-            <td className="p-3 border-b text-xs">LOGIN_ATTEMPT [Failed Password]</td>
-            <td className="p-3 border-b text-xs"><span className="text-rose-500 font-bold">FAILED</span><br/>10.0.0.12</td>
-          </tr>
-          <tr>
-            <td className="p-3 border-b font-mono text-xs">2026-08-05 09:15:20</td>
-            <td className="p-3 border-b font-bold">Dr. Andi</td>
-            <td className="p-3 border-b text-xs">LOGIN_ATTEMPT [Success]</td>
-            <td className="p-3 border-b text-xs"><span className="text-emerald-500 font-bold">SUCCESS</span><br/>10.0.0.12</td>
-          </tr>
-        </tbody>
-      </table>
+    <div className="card p-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+            <FileClock className="w-5 h-5 text-indigo-600" />
+            System Audit Trail (Aktivitas Sistem)
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Jejak rekam aktivitas sistem, autentikasi, serta pembaharuan basis data real-time.
+          </p>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-sm border-collapse">
+          <thead className="bg-slate-50 dark:bg-slate-800/80">
+            <tr>
+              <th className="p-3 border-b text-xs font-bold text-slate-500 uppercase">Waktu</th>
+              <th className="p-3 border-b text-xs font-bold text-slate-500 uppercase">User / Aktor</th>
+              <th className="p-3 border-b text-xs font-bold text-slate-500 uppercase">Kategori & Event</th>
+              <th className="p-3 border-b text-xs font-bold text-slate-500 uppercase">Keterangan / Target</th>
+              <th className="p-3 border-b text-xs font-bold text-slate-500 uppercase text-right">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+            {logs.map((log) => {
+              const date = new Date(log.timestamp);
+              const timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+              const dateStr = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+
+              return (
+                <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-750">
+                  <td className="p-3 font-mono text-xs whitespace-nowrap text-slate-500">
+                    <span className="font-bold text-slate-700 dark:text-slate-300">{timeStr}</span>
+                    <span className="text-[10px] text-slate-400 block">{dateStr}</span>
+                  </td>
+                  <td className="p-3">
+                    <p className="font-bold text-xs text-slate-800 dark:text-white">{log.user?.nama || 'System'}</p>
+                    <p className="text-[10px] text-slate-400 font-mono truncate max-w-[140px]">{log.user?.email || '-'}</p>
+                  </td>
+                  <td className="p-3">
+                    <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 mr-1.5">
+                      {log.category}
+                    </span>
+                    <span className="font-semibold text-xs text-slate-700 dark:text-slate-200">
+                      {log.action}
+                    </span>
+                  </td>
+                  <td className="p-3 text-xs text-slate-600 dark:text-slate-400 max-w-sm">
+                    <p className="truncate font-mono text-[11px] text-indigo-600 dark:text-indigo-400">{log.target}</p>
+                    <p className="text-[11px] truncate text-slate-500">{log.details?.message || '-'}</p>
+                  </td>
+                  <td className="p-3 text-right">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      log.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300' :
+                      log.status === 'DENIED' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300' :
+                      log.status === 'FAILED' ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300' :
+                      'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
+                    }`}>
+                      {log.status}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

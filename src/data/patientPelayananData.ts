@@ -152,6 +152,11 @@ interface MedicalCaseDefinition {
   rps: string;
   rpd: string;
   alergi: string;
+  genderRequired?: 'L' | 'P';
+  minAge?: number;
+  maxAge?: number;
+  bbDefault?: number;
+  tbDefault?: number;
   icd10_p: { kode_icd10: string; nama: string };
   icd10_s: Array<{ kode_icd10: string; nama: string }>;
   icd9: Array<{ kode_icd9: string; nama: string }>;
@@ -167,18 +172,20 @@ interface MedicalCaseDefinition {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// MASTER KAMUS DIAGNOSIS & TINDAKAN KLINIS Klinik
+// MASTER KAMUS DIAGNOSIS & TINDAKAN KLINIS SPESIALISTIK RS LENGKAP
 // ═══════════════════════════════════════════════════════════════════════════
 const MEDICAL_CASES: MedicalCaseDefinition[] = [
   {
     poli: 'Poli Penyakit Dalam (Internis)',
-    layanan: 'Rawat Jalan' as const,
+    layanan: 'Rawat Jalan',
     dpjp: 'dr. Hendra Pratama, Sp.PD',
     spesialisasi: 'Sp.PD (Penyakit Dalam)',
     keluhan: 'Lemas, sering haus (polidipsia), sering kencing malam hari (poliuria), dan kesemutan di kedua kaki.',
     rps: 'Pasien mengeluh badan lemas sejak 3 minggu terakhir disertai sering haus dan penurunan berat badan 4 kg tanpa diet. Riwayat kadar gula darah sewaktu 280 mg/dL.',
     rpd: 'Hipertensi terkontrol 5 tahun, dislipidemia.',
     alergi: 'Aspirin (Bronkospasme ringan)',
+    minAge: 40,
+    maxAge: 70,
     icd10_p: { kode_icd10: 'E11.9', nama: 'Type 2 diabetes mellitus without complications' },
     icd10_s: [{ kode_icd10: 'I10', nama: 'Essential (primary) hypertension' }, { kode_icd10: 'E78.5', nama: 'Hyperlipidemia, unspecified' }],
     icd9: [{ kode_icd9: '89.52', nama: 'Electrocardiogram' }, { kode_icd9: '90.59', nama: 'Microscopic examination of blood' }],
@@ -191,19 +198,21 @@ const MEDICAL_CASES: MedicalCaseDefinition[] = [
       { nama_obat: 'Amlodipine 10 mg', dosis: '10 mg', frekuensi: '1x1 tablet', rute: 'Oral (Malam)' },
       { nama_obat: 'Atorvastatin 20 mg', dosis: '20 mg', frekuensi: '1x1 tablet', rute: 'Oral (Malam)' }
     ],
-    kondisi: 'Perbaikan' as const,
+    kondisi: 'Perbaikan',
     edukasi: 'Diet diabetes melitus 1700 kkal/hari, kurangi konsumsi karbohidrat sederhana, olahraga aerobik ringan 30 menit 3x/minggu, dan periksa kaki berkala.',
     kontrol: '2 minggu kemudian di Poli Penyakit Dalam'
   },
   {
     poli: 'Poli Jantung & Pembuluh Darah (Kardiologi)',
-    layanan: 'Rawat Jalan' as const,
+    layanan: 'Rawat Jalan',
     dpjp: 'dr. Joko Santoso, Sp.JP, FIHA',
     spesialisasi: 'Sp.JP (Kardiologi & Vaskular)',
     keluhan: 'Nyeri dada kiri seperti tertindih beban berat menjalar ke punggung saat berjalan menanjak, membaik saat istirahat.',
     rps: 'Nyeri dada substernal dirasakan sejak 2 bulan terakhir, frekuensi 2-3 kali seminggu, durasi 5-10 menit, disertai keringat dingin.',
     rpd: 'Hipertensi derajat 2, riwayat perokok aktif 20 tahun.',
     alergi: 'Tidak ada alergi obat',
+    minAge: 45,
+    maxAge: 75,
     icd10_p: { kode_icd10: 'I20.9', nama: 'Angina pectoris, unspecified (Chronic Stable Angina)' },
     icd10_s: [{ kode_icd10: 'I10', nama: 'Essential (primary) hypertension' }, { kode_icd10: 'Z72.0', nama: 'Tobacco use' }],
     icd9: [{ kode_icd9: '89.52', nama: 'Electrocardiogram 12-lead' }, { kode_icd9: '88.72', nama: 'Diagnostic ultrasound of heart (Echocardiography)' }],
@@ -216,19 +225,22 @@ const MEDICAL_CASES: MedicalCaseDefinition[] = [
       { nama_obat: 'Aspilet (Asam Asetilsalisilat) 80 mg', dosis: '80 mg', frekuensi: '1x1 tablet', rute: 'Oral (Siang)' },
       { nama_obat: 'Rosuvastatin 20 mg', dosis: '20 mg', frekuensi: '1x1 tablet', rute: 'Oral (Malam)' }
     ],
-    kondisi: 'Perbaikan' as const,
+    kondisi: 'Perbaikan',
     edukasi: 'Hindari aktivitas fisik berlebih mendadak, simpan ISDN sublingual jika serangan nyeri dada, berhenti merokok mutlak.',
     kontrol: '1 bulan kemudian di Poli Jantung'
   },
   {
     poli: 'Poli Obgyn (Kebidanan & Kandungan)',
-    layanan: 'Rawat Jalan' as const,
+    layanan: 'Rawat Jalan',
     dpjp: 'dr. Citra Lestari, Sp.OG, Subsp.Obginsos',
     spesialisasi: 'Sp.OG (Obstetri & Ginekologi)',
     keluhan: 'Kontrol kehamilan trimester 3, kencang-kencang palsu sesekali, gerakan janin aktif.',
     rps: 'G2P1A0 gravida 34-35 minggu datang untuk ANC terpadu ke-5. Mual muntah (-), keluar darah/air ketuban (-).',
     rpd: 'Riwayat persalinan pertama spontan cukup bulan 3200 gram.',
     alergi: 'Penisilin (Urtikaria kemerahan)',
+    genderRequired: 'P',
+    minAge: 21,
+    maxAge: 38,
     icd10_p: { kode_icd10: 'Z34.8', nama: 'Encounter for supervision of other normal pregnancy' },
     icd10_s: [{ kode_icd10: 'O99.0', nama: 'Anemia complicating pregnancy, childbirth' }],
     icd9: [{ kode_icd9: '88.78', nama: 'Diagnostic ultrasound of gravid uterus (USG 4D Fetomaternal)' }],
@@ -240,23 +252,54 @@ const MEDICAL_CASES: MedicalCaseDefinition[] = [
       { nama_obat: 'Kalsium Laktat (Calcifar) 500 mg', dosis: '500 mg', frekuensi: '2x1 tablet', rute: 'Oral' },
       { nama_obat: 'DHA Maternal 200 mg', dosis: '200 mg', frekuensi: '1x1 kapsul', rute: 'Oral' }
     ],
-    kondisi: 'Sembuh' as const,
+    kondisi: 'Sembuh',
     edukasi: 'Edukasi tanda bahaya kehamilan trimester 3 (perdarahan, rembes ketuban, his teratur, nyeri kepala hebat, pandangan kabur), hitung tendangan janin (Kick Count).',
     kontrol: '2 minggu kemudian di Poli Kandungan'
   },
   {
+    poli: 'Poli Fetomaternal',
+    layanan: 'Rawat Jalan',
+    dpjp: 'dr. Citra Lestari, Sp.OG, Subsp.KFM',
+    spesialisasi: 'Sp.OG-Subsp.KFM (Fetomaternal Risiko Tinggi)',
+    keluhan: 'Rujukan dari Puskesmas dengan tensi tinggi pada kehamilan 32 minggu dan bengkak kedua tungkai.',
+    rps: 'G1P0A0 usia kehamilan 32 minggu dengan riwayat tekanan darah 150/95 mmHg saat ANC di FKTP. Sakit kepala ringan (+), pandangan kabur (-), nyeri ulu hati (-).',
+    rpd: 'Tidak ada riwayat hipertensi sebelum hamil.',
+    alergi: 'Tidak ada riwayat alergi',
+    genderRequired: 'P',
+    minAge: 22,
+    maxAge: 38,
+    icd10_p: { kode_icd10: 'O14.0', nama: 'Mild to moderate pre-eclampsia' },
+    icd10_s: [{ kode_icd10: 'Z35.8', nama: 'Supervision of other high-risk pregnancies' }],
+    icd9: [{ kode_icd9: '88.78', nama: 'Doppler Ultrasound of uterine and umbilical arteries' }],
+    fisik: 'TD: 148/94 mmHg, Nadi: 84x/m, Suhu: 36.5C. TFU 28 cm, DJJ 146x/m. Edema pretibial (+/+) pitting derajat 1. Refleks patella normal (+/+).',
+    lab: 'Proteinuria: +1 kuantitatif (0.4 g/24jam), Trombosit: 210.000, SGOT: 28, SGPT: 22, Asam Urat: 5.6.',
+    radiologi: 'Doppler USG: Arteri umbilikalis S/D ratio 2.8 (normal), janin sesuai masa kehamilan 32 minggu.',
+    terapi: [
+      { nama_obat: 'Metildopa 250 mg', dosis: '250 mg', frekuensi: '3x1 tablet', rute: 'Oral' },
+      { nama_obat: 'Kalsium Karbonat 500 mg', dosis: '500 mg', frekuensi: '2x1 tablet', rute: 'Oral' },
+      { nama_obat: 'Asam Folat 1 mg', dosis: '1 mg', frekuensi: '1x1 tablet', rute: 'Oral' }
+    ],
+    kondisi: 'Perbaikan',
+    edukasi: 'Tirah baring miring ke kiri, monitor tekanan darah harian, waspada tanda preeklampsia berat (nyeri kepala, kabur, nyeri epigastrium).',
+    kontrol: '1 minggu kemudian di Poli Fetomaternal'
+  },
+  {
     poli: 'Poli Anak (Pediatri)',
-    layanan: 'Rawat Jalan' as const,
+    layanan: 'Rawat Jalan',
     dpjp: 'dr. Eka Putri, Sp.A, M.Kes',
     spesialisasi: 'Sp.A (Dokter Spesialis Anak)',
     keluhan: 'Demam 3 hari naik turun, batuk berdahak, pilek lendir encer, nafsu makan dan minum menurun.',
-    rps: 'Anak usia 4 tahun demam sejak 3 hari lalu, suhu tertinggi 38.8C. Batuk grok-grok terutama malam hari. Muntah 1 kali saat batuk keras.',
+    rps: 'Anak demam sejak 3 hari lalu, suhu tertinggi 38.8C. Batuk grok-grok terutama malam hari. Muntah 1 kali saat batuk keras.',
     rpd: 'Riwayat alergi dingin/rhinitis pada ayah. Imunisasi dasar lengkap.',
     alergi: 'Sulfa (Ruam kulit)',
+    minAge: 2,
+    maxAge: 10,
+    bbDefault: 16,
+    tbDefault: 104,
     icd10_p: { kode_icd10: 'J06.9', nama: 'Acute upper respiratory infection, unspecified' },
     icd10_s: [{ kode_icd10: 'R50.9', nama: 'Fever, unspecified' }],
     icd9: [{ kode_icd9: '93.94', nama: 'Respiratory medication administered by nebulizer' }],
-    fisik: 'BB: 15.5 kg, TB: 102 cm. Suhu: 38.2C, Nadi: 108x/m, RR: 24x/m, SpO2: 98%. Faring hiperemis (+), Tonsil T1-T1 tidak hiperemis. Pulmo: vesicular breath sounds, ronkhi basah halus minimal di kedua lapangan paru, wheezing (-).',
+    fisik: 'BB: 16 kg, TB: 104 cm. Suhu: 38.2C, Nadi: 108x/m, RR: 24x/m, SpO2: 98%. Faring hiperemis (+), Tonsil T1-T1 tidak hiperemis. Pulmo: vesicular breath sounds, ronkhi basah halus minimal di kedua lapangan paru, wheezing (-).',
     lab: 'Darah Rutin: Hb: 12.1 g/dL, Leukosit: 8.200/uL, Trombosit: 285.000/uL, Hematokrit: 36%.',
     radiologi: 'Tidak diperlukan radiologi pada episode saat ini.',
     terapi: [
@@ -265,19 +308,21 @@ const MEDICAL_CASES: MedicalCaseDefinition[] = [
       { nama_obat: 'Cetirizine Sirup 5mg/5ml', dosis: '1/2 cth (2.5 ml)', frekuensi: '1x1 cth (Malam)', rute: 'Oral' },
       { nama_obat: 'Vitamin C & Zinc Drops', dosis: '1 ml', frekuensi: '1x1 hari', rute: 'Oral' }
     ],
-    kondisi: 'Perbaikan' as const,
+    kondisi: 'Perbaikan',
     edukasi: 'Berikan cairan hangat lebih sering, kompres hangat bila demam, hindari es dan makanan berminyak, segera ke IGD jika ada tarikan dinding dada (sesak) atau kejang.',
     kontrol: '3 hari jika demam menetap'
   },
   {
     poli: 'Poli Saraf (Neurologi)',
-    layanan: 'Rawat Jalan' as const,
+    layanan: 'Rawat Jalan',
     dpjp: 'dr. Fajar Hidayat, Sp.N, Subsp.NN(K)',
     spesialisasi: 'Sp.N (Spesialis Saraf)',
     keluhan: 'Nyeri kepala sebelah kanan berdenyut (migrain), silau melihat cahaya (fotofobia), mual sejak tadi malam.',
     rps: 'Nyeri kepala berdenyut unilateral intensitas sedang-berat VAS 7/10 dirasakan sejak 14 jam lalu setelah begadang lembur kerja. Tidak ada kelemahan anggota gerak.',
     rpd: 'Riwayat episode serupa 2-3 bulan sekali.',
     alergi: 'Tidak ada alergi',
+    minAge: 20,
+    maxAge: 55,
     icd10_p: { kode_icd10: 'G43.0', nama: 'Migraine without aura, intractable' },
     icd10_s: [{ kode_icd10: 'G47.0', nama: 'Insomnia, unspecified' }],
     icd9: [{ kode_icd9: '89.14', nama: 'Electroencephalogram (EEG) / Neuro-evaluation' }],
@@ -290,19 +335,21 @@ const MEDICAL_CASES: MedicalCaseDefinition[] = [
       { nama_obat: 'Flunarizine 5 mg (Profilaksis)', dosis: '5 mg', frekuensi: '1x1 tablet (Malam)', rute: 'Oral' },
       { nama_obat: 'Domperidone 10 mg', dosis: '10 mg', frekuensi: '3x1 tablet (Sebelum Makan)', rute: 'Oral' }
     ],
-    kondisi: 'Perbaikan' as const,
+    kondisi: 'Perbaikan',
     edukasi: 'Tidur cukup 7-8 jam per hari, kenali dan hindari pemicu migrain (keju, cokelat, kafein berlebih, stres, sinar silau), istirahat di ruangan redup dan tenang.',
     kontrol: '1 bulan kemudian di Poli Saraf'
   },
   {
     poli: 'Poli Paru (Pulmonologi)',
-    layanan: 'Rawat Jalan' as const,
+    layanan: 'Rawat Jalan',
     dpjp: 'dr. Lukman Hakim, Sp.P, FAPSR',
     spesialisasi: 'Sp.P (Pulmonologi & Kedokteran Respirasi)',
     keluhan: 'Batuk berdahak sudah 3 minggu, kadang bercak darah samar, demam sumeng-sumeng sore hari, keringat malam.',
     rps: 'Pasien batuk produktif warna putih kekuningan selama 21 hari, nafsu makan turun drastis, berat badan turun 5 kg dalam 1 bulan.',
     rpd: 'Riwayat kontak dengan kerabat serumah yang menjalani pengobatan OAT 6 bulan.',
     alergi: 'Tidak ada alergi obat',
+    minAge: 25,
+    maxAge: 65,
     icd10_p: { kode_icd10: 'A15.0', nama: 'Tuberculosis of lung, confirmed by sputum microscopy' },
     icd10_s: [{ kode_icd10: 'R63.4', nama: 'Abnormal weight loss' }],
     icd9: [{ kode_icd9: '87.44', nama: 'Routine chest x-ray' }, { kode_icd9: '90.41', nama: 'Microscopic examination of sputum' }],
@@ -314,19 +361,21 @@ const MEDICAL_CASES: MedicalCaseDefinition[] = [
       { nama_obat: 'Vitamin B6 (Pyridoxine) 10 mg', dosis: '10 mg', frekuensi: '1x1 tablet', rute: 'Oral' },
       { nama_obat: 'Curcuma Tablet 200 mg', dosis: '200 mg', frekuensi: '3x1 tablet', rute: 'Oral' }
     ],
-    kondisi: 'Perbaikan' as const,
+    kondisi: 'Perbaikan',
     edukasi: 'Wajib minum obat teratur setiap hari selama 6 bulan tanpa putus, gunakan masker bedah di rumah, etika batuk yang benar, jemur kasur/buka jendela untuk sirkulasi sinar UV matahari, anggota keluarga serumah wajib skrining.',
     kontrol: '2 minggu kemudian untuk evaluasi efek samping OAT di Poli Paru DOTS'
   },
   {
     poli: 'Poli Orthopedi (Tulang & Sendi)',
-    layanan: 'Rawat Jalan' as const,
+    layanan: 'Rawat Jalan',
     dpjp: 'dr. Wahyu Nugroho, Sp.OT(K)',
     spesialisasi: 'Sp.OT (Orthopedi & Traumatologi)',
     keluhan: 'Nyeri kedua lutut terutama saat berdiri dari duduk dan menuruni tangga, bunyi gemeretak (krepitasi).',
     rps: 'Nyeri lutut dirasakan makin memberat sejak 6 bulan terakhir. Kekakuan pagi hari < 30 menit. Pasien kesulitan jongkok dan sholat.',
     rpd: 'Obesitas grade 1, riwayat cedera ligamen lutut 10 tahun lalu.',
     alergi: 'Tidak ada alergi',
+    minAge: 48,
+    maxAge: 75,
     icd10_p: { kode_icd10: 'M17.0', nama: 'Bilateral primary osteoarthritis of knee (Grade 3 Kellgren-Lawrence)' },
     icd10_s: [{ kode_icd10: 'E66.0', nama: 'Obesity due to excess calories' }],
     icd9: [{ kode_icd9: '88.27', nama: 'Other x-ray of lower limb (Foto Genu AP/Lat Bilateral)' }, { kode_icd9: '81.92', nama: 'Injection of therapeutic substance into joint or ligament' }],
@@ -336,47 +385,157 @@ const MEDICAL_CASES: MedicalCaseDefinition[] = [
     terapi: [
       { nama_obat: 'Celecoxib 200 mg', dosis: '200 mg', frekuensi: '1x1 kapsul (Sesudah Makan)', rute: 'Oral' },
       { nama_obat: 'Glucosamine Sulfate + Chondroitin', dosis: '1 sachet', frekuensi: '1x1 sachet', rute: 'Oral' },
-      { nama_obat: 'Injeksi Intra-artikuler Asam Hialuronat (Hyaluronic Acid) 2ml', dosis: '2 ml per sendi', frekuensi: 'Protokol 1x seminggu x 3 sesi', rute: 'Intra-articular Genu Bilateral' },
+      { nama_obat: 'Injeksi Intra-artikuler Asam Hialuronat 2ml', dosis: '2 ml per sendi', frekuensi: 'Protokol 1x seminggu x 3 sesi', rute: 'Intra-articular Genu Bilateral' },
       { nama_obat: 'Knee Brace Support Elastic', dosis: '1 pasang', frekuensi: 'Digunakan saat berjalan', rute: 'Topikal / Alat' }
     ],
-    kondisi: 'Perbaikan' as const,
+    kondisi: 'Perbaikan',
     edukasi: 'Program penurunan berat badan bertahap, fisioterapi penguatan otot paha (quadriceps strengthening exercise), hindari naik-turun tangga berlebih dan hindari posisi jongkok lama.',
     kontrol: '1 minggu kemudian untuk injeksi HA sesi ke-2 di Poli Orthopedi'
   },
   {
     poli: 'Poli Mata (Oftalmologi)',
-    layanan: 'Rawat Jalan' as const,
+    layanan: 'Rawat Jalan',
     dpjp: 'dr. Gita Permata, Sp.M',
     spesialisasi: 'Sp.M (Spesialis Mata)',
     keluhan: 'Penglihatan mata kanan perlahan makin kabur seperti melihat asap atau berkabut, silau saat melihat lampu malam hari.',
     rps: 'Mata kanan kabur sejak 8 bulan lalu, makin lama makin gelap. Mata merah (-), nyeri (-), gatal (-).',
     rpd: 'Hipertensi terkontrol, riwayat kacamata baca (+2.50D).',
     alergi: 'Tidak ada alergi',
+    minAge: 52,
+    maxAge: 78,
     icd10_p: { kode_icd10: 'H25.1', nama: 'Senile nuclear cataract, right eye (Katarak Senilis Matur OD)' },
     icd10_s: [{ kode_icd10: 'H52.4', nama: 'Presbyopia' }],
-    icd9: [{ kode_icd9: '95.02', nama: 'Comprehensive ophthalmological examination (Slit Lamp, Tonometri, Keratometri)' }, { kode_icd9: '13.41', nama: 'Phacoemulsification and aspiration of cataract (Direncanakan)' }],
-    fisik: 'Visus OD: 1/60 (pinhole tetap), Visus OS: 6/18 (dengan koreksi S-0.75 C-0.50x90 -> 6/6). TIO OD: 15 mmHg, TIO OS: 14 mmHg (Schiotz). Segmen Anterior OD: Kornea jernih, COA sedang, iris reguler, pupil bulat refleks (+), Lensa: Keruh menyeluruh warna kecoklatan, shadow test (-). Funduskopi OD: Refleks fundus suram/tertutup kekeruhan lensa.',
+    icd9: [{ kode_icd9: '95.02', nama: 'Comprehensive ophthalmological examination (Slit Lamp, Tonometri, Keratometri)' }, { kode_icd9: '13.41', nama: 'Phacoemulsification and aspiration of cataract' }],
+    fisik: 'Visus OD: 1/60 (pinhole tetap), Visus OS: 6/18. TIO OD: 15 mmHg, TIO OS: 14 mmHg (Schiotz). Lensa OD: Keruh menyeluruh warna kecoklatan, shadow test (-).',
     lab: 'Gula Darah Sewaktu: 112 mg/dL, BT/CT: Normal, HBsAg: Non-reaktif.',
     radiologi: 'Biometri Mata OD: Power IOL +21.5 D (Metode SRK/T).',
     terapi: [
       { nama_obat: 'C-Catarlac Eye Drops', dosis: '1 tetes', frekuensi: '4x1 tetes OD', rute: 'Tetes Mata' },
       { nama_obat: 'Artificial Tears Eye Drops', dosis: '1 tetes', frekuensi: '4x1 tetes ODS', rute: 'Tetes Mata' }
     ],
-    kondisi: 'Perbaikan' as const,
-    edukasi: 'Direncanakan operasi katarak modern Phacoemulsification + Implan Lensa Lipat Intraokular (Foldable IOL) OD rawat jalan (One Day Care Surgery). Pasien setuju dan dijadwalkan.',
+    kondisi: 'Perbaikan',
+    edukasi: 'Direncanakan operasi katarak modern Phacoemulsification + Implan Lensa Lipat Intraokular (Foldable IOL) OD rawat jalan.',
     kontrol: 'Jadwal Operasi Phacoemulsifikasi di Kamar Bedah Mata'
+  },
+  {
+    poli: 'Poli Bedah Umum',
+    layanan: 'Rawat Jalan',
+    dpjp: 'dr. Bambang Alamsyah, Sp.B',
+    spesialisasi: 'Sp.B (Bedah Umum)',
+    keluhan: 'Benjolan di lipat paha kanan yang keluar masuk saat berdiri atau batuk dan mengecil saat berbaring.',
+    rps: 'Benjolan di inguinal dextra disadari sejak 5 bulan lalu. Kadang terasa pegal saat mengangkat beban berat. Mual (-), muntah (-), BAB normal.',
+    rpd: 'Pekerjaan kuli bangunan / angkat beban.',
+    alergi: 'Tidak ada alergi',
+    genderRequired: 'L',
+    minAge: 35,
+    maxAge: 68,
+    icd10_p: { kode_icd10: 'K40.9', nama: 'Unilateral inguinal hernia, without obstruction or gangrene' },
+    icd10_s: [{ kode_icd10: 'Z96.6', nama: 'Presence of other orthopedic joint implants' }],
+    icd9: [{ kode_icd9: '53.05', nama: 'Repair of other direct inguinal hernia with graft or prosthesis' }],
+    fisik: 'Status Lokalis Regio Inguinalis Dextra: Tampak massa lonjong berukuran 4x3 cm saat valsava maneuver, bising usus (+), impuls batuk (+), massa dapat dimasukkan kembali (reponibel).',
+    lab: 'Darah Lengkap: Hb 14.2 g/dL, Leukosit 6.900/uL, Trombosit 260.000/uL, Masa Pembekuan (CT): 5 menit.',
+    radiologi: 'USG Inguinoskrotal: Defek fascia anulus inguinalis internus dextra diameter 1.8 cm berisi omentum dan usus.',
+    terapi: [
+      { nama_obat: 'Asam Mefenamat 500 mg', dosis: '500 mg', frekuensi: '3x1 tablet (prn)', rute: 'Oral' },
+      { nama_obat: 'Laktulosa Sirup', dosis: '15 ml', frekuensi: '1x1 malam', rute: 'Oral' }
+    ],
+    kondisi: 'Perbaikan',
+    edukasi: 'Direncanakan tindakan elektif Herniorrhaphy Mesh Plug Repair. Hindari mengangkat beban berat dan batuk keras.',
+    kontrol: 'Jadwal Operasi Bedah Elektif di Ruang Operasi (OK 2)'
+  },
+  {
+    poli: 'Poli Urologi',
+    layanan: 'Rawat Jalan',
+    dpjp: 'dr. Dimas Kurniawan, Sp.U',
+    spesialisasi: 'Sp.U (Urologi & Andrologi)',
+    keluhan: 'Pancaran kencing melemah, harus mengejan (straining), buang air kecil tidak lampias, sering terbangun kencing malam hari 4-5 kali.',
+    rps: 'Keluhan LUTS dialami sejak 1 tahun terakhir memberat 3 bulan ini. Tidak ada kencing berdarah maupun nyeri pinggang.',
+    rpd: 'Riwayat hipertensi terkontrol.',
+    alergi: 'Tidak ada alergi obat',
+    genderRequired: 'L',
+    minAge: 55,
+    maxAge: 78,
+    icd10_p: { kode_icd10: 'N40.1', nama: 'Benign prostatic hyperplasia with lower urinary tract symptoms' },
+    icd10_s: [{ kode_icd10: 'R39.1', nama: 'Other difficulties with micturition (Hesitancy)' }],
+    icd9: [{ kode_icd9: '60.29', nama: 'Other transurethral prostatectomy' }, { kode_icd9: '88.75', nama: 'Diagnostic ultrasound of urinary system' }],
+    fisik: 'Suprapubik: distensi buli minimal. Colok Dubur (DRE): Prostat teraba membesar grade II (volume est 35-40 gram), konsistensi kenyal elastis, sulkus medianus dangkal, nodul (-), nyeri tekan (-).',
+    lab: 'PSA Serum: 2.1 ng/mL (Normal <4.0 ng/mL), Ureum: 28 mg/dL, Kreatinin: 1.0 mg/dL, Urinalisis: Eritrosit 0-1/LPB.',
+    radiologi: 'USG Saluran Kemih: Volume prostat 38 cc, PVR (Post-Void Residual Urine) 75 mL.',
+    terapi: [
+      { nama_obat: 'Tamsulosin HCl 0.4 mg', dosis: '0.4 mg', frekuensi: '1x1 kapsul (Malam hari)', rute: 'Oral' },
+      { nama_obat: 'Finasteride 5 mg', dosis: '5 mg', frekuensi: '1x1 tablet', rute: 'Oral' }
+    ],
+    kondisi: 'Perbaikan',
+    edukasi: 'Batasi konsumsi kopi dan alkohol, kurangi asupan air 2 jam sebelum tidur, jangan menahan kencing.',
+    kontrol: '1 bulan kemudian di Poli Urologi'
+  },
+  {
+    poli: 'Poli Onkologi',
+    layanan: 'Rawat Jalan',
+    dpjp: 'dr. Bambang Alamsyah, Sp.B, Subsp.Onk(K)',
+    spesialisasi: 'Sp.B(K)Onk (Bedah Onkologi)',
+    keluhan: 'Kontrol rutin evaluasi karsinoma mammae sinistra pasca kemoterapi siklus ke-6.',
+    rps: 'Pasien post MRM mammae sinistra 8 bulan lalu dan telah menuntaskan regimen kemoterapi adjuvant AC-T. Saat ini tidak ada keluhan sesak napas maupun nyeri tulang.',
+    rpd: 'Carcinoma Mammae Sinistra T2N1M0 Stage IIB.',
+    alergi: 'Ciprofloxacin (Mual muntah berat)',
+    genderRequired: 'P',
+    minAge: 38,
+    maxAge: 68,
+    icd10_p: { kode_icd10: 'C50.9', nama: 'Malignant neoplasm of breast, unspecified' },
+    icd10_s: [{ kode_icd10: 'Z85.3', nama: 'Personal history of malignant neoplasm of breast' }],
+    icd9: [{ kode_icd9: '87.44', nama: 'Chest x-ray routine' }, { kode_icd9: '88.76', nama: 'Ultrasound of abdomen' }],
+    fisik: 'KU baik, compos mentis. Status Lokalis Regio Mammae Sinistra: Parut bekas operasi tenang, massa residif (-), pembesaran KGB supraklavikula & aksila dextra (-).',
+    lab: 'Tumor Marker CA 15-3: 14.2 U/mL (Normal <30 U/mL), SGOT: 21, SGPT: 24, Hb: 12.4 g/dL.',
+    radiologi: 'USG Mammae Dextra & Abdomen: Tidak tampak lesi mencurigakan malignansi maupun nodul metastasis hepar.',
+    terapi: [
+      { nama_obat: 'Tamoxifen 20 mg', dosis: '20 mg', frekuensi: '1x1 tablet', rute: 'Oral' },
+      { nama_obat: 'Kalsium + Vitamin D3', dosis: '1 tablet', frekuensi: '1x1 tablet', rute: 'Oral' }
+    ],
+    kondisi: 'Perbaikan',
+    edukasi: 'Konsumsi terapi hormonal Tamoxifen secara disiplin harian, periksa payudara kanan sendiri (SADARI) tiap bulan.',
+    kontrol: '3 bulan kemudian di Poli Onkologi'
+  },
+  {
+    poli: 'Poli Geriatri',
+    layanan: 'Rawat Jalan',
+    dpjp: 'dr. Hendra Pratama, Sp.PD-KGer',
+    spesialisasi: 'Sp.PD-KGer (Geriatri & Multimorbiditas)',
+    keluhan: 'Lemas menyeluruh, nafsu makan menurun, penurunan berat badan, serta sering hampir terjatuh saat berjalan.',
+    rps: 'Pasien lansia 72 tahun dibawa keluarga karena mobilitas lambat, kesulitan bangun dari kursi, dan penurunan massa otot.',
+    rpd: 'Hipertensi 15 tahun, Osteoarthritis genu bilateral.',
+    alergi: 'Tidak ada alergi',
+    minAge: 65,
+    maxAge: 85,
+    icd10_p: { kode_icd10: 'R54', nama: 'Age-related physical debility (Frailty & Sarcopenia)' },
+    icd10_s: [{ kode_icd10: 'M81.0', nama: 'Age-related osteoporosis without current pathological fracture' }, { kode_icd10: 'I10', nama: 'Essential hypertension' }],
+    icd9: [{ kode_icd9: '89.04', nama: 'Comprehensive geriatric assessment (CGA)' }],
+    fisik: 'KU tampak kurus dan renta, skor Barthel ADL: 85 (ketergantungan ringan), TUG Test (Timed Up and Go): 18 detik (>12 detik risiko jatuh tinggi). Massa otot quadriceps menurun.',
+    lab: 'Albumin: 3.4 g/dL (Sedikit rendah), Vitamin D 25-OH: 16 ng/mL (Defisiensi), Hb: 11.2 g/dL.',
+    radiologi: 'DEXA Bone Mineral Density: T-Score L1-L4 -2.8 (Osteoporosis).',
+    terapi: [
+      { nama_obat: 'Kolekalsiferol (Vitamin D3) 5000 IU', dosis: '5000 IU', frekuensi: '1x1 kapsul (Pagi)', rute: 'Oral' },
+      { nama_obat: 'Kalsium Karbonat 500 mg', dosis: '500 mg', frekuensi: '2x1 tablet', rute: 'Oral' },
+      { nama_obat: 'Suplemen Asam Amino Esensial & Protein Whey', dosis: '1 scoop', frekuensi: '2x sehari', rute: 'Oral' }
+    ],
+    kondisi: 'Perbaikan',
+    edukasi: 'Pencegahan jatuh di rumah (pasang handrail di kamar mandi, singkirkan karpet licin, penerangan cukup), latihan keseimbangan dan resistensi ringan.',
+    kontrol: '1 bulan kemudian di Poli Geriatri'
   }
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
-// GENERATOR 100+ PASIEN DENGAN RESUME MEDIS LENGKAP UNTUK SEMUA PELAYANAN
+// GENERATOR 100+ PASIEN DENGAN KESESUAIAN GENDER & KLINIS LENGKAP
 // ═══════════════════════════════════════════════════════════════════════════
-const NAMA_DEPAN = [
-  'Ahmad', 'Budi', 'Citra', 'Dimas', 'Eko', 'Fani', 'Gunawan', 'Hendra', 'Indra', 'Joko',
-  'Kartika', 'Lestari', 'Maulana', 'Nurul', 'Oki', 'Putri', 'Rahmat', 'Siti', 'Taufik', 'Utami',
-  'Vina', 'Wahyu', 'Yogi', 'Zainal', 'Agus', 'Bayu', 'Chandra', 'Dewi', 'Endang', 'Farhan',
-  'Gita', 'Haris', 'Ika', 'Juita', 'Kurnia', 'Lukman', 'Mega', 'Nugroho', 'Pratama', 'Rini',
-  'Surya', 'Tirta', 'Wulan', 'Yulia', 'Zulkifli', 'Bambang', 'Dian', 'Fachri', 'Hany', 'Irawan'
+const MALE_FIRST_NAMES = [
+  'Ahmad', 'Budi', 'Dimas', 'Eko', 'Gunawan', 'Hendra', 'Indra', 'Joko', 'Lukman', 'Maulana',
+  'Nugroho', 'Pratama', 'Rahmat', 'Taufik', 'Wahyu', 'Yogi', 'Zainal', 'Agus', 'Bayu', 'Chandra',
+  'Farhan', 'Haris', 'Kurniawan', 'Bambang', 'Fachri', 'Irawan', 'Darmawan', 'Surya', 'Tirta', 'Zulkifli'
+];
+
+const FEMALE_FIRST_NAMES = [
+  'Citra', 'Dewi', 'Endang', 'Fani', 'Gita', 'Hany', 'Ika', 'Indah', 'Juita', 'Kartika',
+  'Lestari', 'Maya', 'Mega', 'Nurul', 'Oki', 'Putri', 'Rina', 'Rini', 'Siti', 'Utami',
+  'Vina', 'Wulan', 'Yulia', 'Dian', 'Ayu', 'Ratna', 'Sari', 'Tri', 'Anisa', 'Nadia'
 ];
 
 const NAMA_BELAKANG = [
@@ -395,36 +554,96 @@ export function generateAllPatientsWithResumes(): PatientFullRecord[] {
   const result: PatientFullRecord[] = [];
 
   for (let i = 1; i <= 250; i++) {
-    const fName = NAMA_DEPAN[(i - 1) % NAMA_DEPAN.length];
+    const caseTemplate = MEDICAL_CASES[(i - 1) % MEDICAL_CASES.length];
+    
+    // Strict gender matching based on clinical indication
+    let jk: 'L' | 'P';
+    if (caseTemplate.genderRequired) {
+      jk = caseTemplate.genderRequired;
+    } else {
+      jk = i % 2 === 1 ? 'L' : 'P';
+    }
+
+    const fName = jk === 'L' 
+      ? MALE_FIRST_NAMES[(i - 1) % MALE_FIRST_NAMES.length] 
+      : FEMALE_FIRST_NAMES[(i - 1) % FEMALE_FIRST_NAMES.length];
     const lName = NAMA_BELAKANG[((i * 3) + 7) % NAMA_BELAKANG.length];
     const namaLengkap = `${fName} ${lName}`;
-    const jk: 'L' | 'P' = i % 2 === 1 ? 'L' : 'P';
-    const age = 18 + ((i * 7) % 65);
+
+    // Age calculation according to clinical specialty bounds
+    let age: number;
+    if (caseTemplate.minAge !== undefined && caseTemplate.maxAge !== undefined) {
+      const span = caseTemplate.maxAge - caseTemplate.minAge;
+      age = caseTemplate.minAge + ((i * 3) % (span + 1));
+    } else {
+      age = 22 + ((i * 7) % 50);
+    }
+
     const birthYear = 2026 - age;
     const birthMonth = String(((i * 3) % 12) + 1).padStart(2, '0');
     const birthDay = String(((i * 5) % 28) + 1).padStart(2, '0');
     const tglLahir = `${birthYear}-${birthMonth}-${birthDay}`;
     const golDarah: ('A' | 'B' | 'AB' | 'O') = ['A', 'B', 'AB', 'O'][i % 4] as any;
-    const penjaminList = ['BPJS Kesehatan (PBI)', 'BPJS Kesehatan (Non-PBI)', 'Umum / Pribadi', 'Asuransi Mandiri Inhealth', 'Asuransi Allianz Care', 'PT Pertamina (Persero)'];
+    const penjaminList = [
+      'BPJS Kesehatan (PBI)',
+      'BPJS Kesehatan (Non-PBI)',
+      'Umum / Pribadi',
+      'Asuransi Mandiri Inhealth',
+      'Asuransi Allianz Care',
+      'PT Pertamina (Persero)'
+    ];
     const penjamin = penjaminList[i % penjaminList.length];
 
-    const caseTemplate = MEDICAL_CASES[(i - 1) % MEDICAL_CASES.length];
     const noRm = `RM-${String(i).padStart(4, '0')}`;
     const noResume = `RES-2026-${String(i).padStart(4, '0')}`;
     const nik = `3171${String(100000000000 + (i * 12345678)).substring(0, 12)}`;
     const phone = `0812${String(10000000 + (i * 87654)).substring(0, 8)}`;
     const alamat = `${KOTA_ALAMAT[i % KOTA_ALAMAT.length]} ${i * 4}, Jakarta Pusat`;
 
-    const tdSys = 110 + ((i * 3) % 40);
-    const tdDia = 70 + ((i * 2) % 25);
-    const hr = 72 + (i % 24);
-    const temp = (36.4 + ((i % 10) * 0.1)).toFixed(1);
-    const rr = 16 + (i % 6);
+    // Vital signs calculation adapted to age and condition
+    let tdSys = 110 + ((i * 3) % 35);
+    let tdDia = 70 + ((i * 2) % 20);
+    if (age < 12) {
+      tdSys = 95 + (age * 2);
+      tdDia = 60 + Math.floor(age * 1.5);
+    }
+
+    const hr = age < 12 ? (95 + (i % 20)) : (72 + (i % 22));
+    const temp = (36.4 + ((i % 8) * 0.1)).toFixed(1);
+    const rr = age < 12 ? 22 : (16 + (i % 5));
     const spo2 = 97 + (i % 3);
-    const bb = (50 + (i % 40)).toFixed(0);
-    const tb = (155 + (i % 25)).toFixed(0);
+
+    let bb: string;
+    let tb: string;
+    if (caseTemplate.bbDefault && caseTemplate.tbDefault) {
+      bb = String(caseTemplate.bbDefault);
+      tb = String(caseTemplate.tbDefault);
+    } else if (age < 12) {
+      bb = (12 + (i % 14)).toFixed(1);
+      tb = (85 + (i % 30)).toFixed(0);
+    } else {
+      bb = (52 + (i % 36)).toFixed(0);
+      tb = (153 + (i % 23)).toFixed(0);
+    }
+
     const heightInM = parseFloat(tb) / 100;
     const imtVal = (parseFloat(bb) / (heightInM * heightInM)).toFixed(1);
+
+    // Realistic profession assignment
+    let pekerjaan: string;
+    if (age < 7) {
+      pekerjaan = 'Balita / Belum Bekerja';
+    } else if (age < 18) {
+      pekerjaan = 'Pelajar';
+    } else if (age < 23) {
+      pekerjaan = 'Mahasiswa';
+    } else if (age >= 65) {
+      pekerjaan = 'Pensiunan';
+    } else if (jk === 'P') {
+      pekerjaan = ['Ibu Rumah Tangga', 'Karyawan Swasta', 'PNS / Guru', 'Wiraswasta', 'Apoteker'][i % 5];
+    } else {
+      pekerjaan = ['Karyawan Swasta', 'PNS / ASN', 'Wiraswasta', 'Insinyur / Teknisi', 'Guru / Dosen'][i % 5];
+    }
 
     const resume: ClinicalResume = {
       id: `RES-${i}`,
@@ -495,7 +714,7 @@ export function generateAllPatientsWithResumes(): PatientFullRecord[] {
       telepon: phone,
       alamat: alamat,
       golongan_darah: golDarah,
-      pekerjaan: ['Karyawan Swasta', 'PNS / ASN', 'Wiraswasta', 'Guru / Dosen', 'Ibu Rumah Tangga', 'Pelajar / Mahasiswa', 'Pensiunan'][i % 7],
+      pekerjaan: pekerjaan,
       agama: ['Islam', 'Kristen Protestan', 'Katolik', 'Hindu', 'Buddha'][i % 5],
       poli_tujuan: caseTemplate.poli,
       status: 'Aktif',
@@ -525,7 +744,7 @@ export function generateAllPatientsWithResumes(): PatientFullRecord[] {
         startDate: '2026-08-20',
         status: 'Active'
       })),
-      allergies: caseTemplate.alergi !== 'Tidak ada alergi' && caseTemplate.alergi !== 'Tidak ada alergi obat' ? [
+      allergies: caseTemplate.alergi !== 'Tidak ada alergi' && caseTemplate.alergi !== 'Tidak ada alergi obat' && caseTemplate.alergi !== 'Tidak ada riwayat alergi' ? [
         {
           id: 1,
           allergen: caseTemplate.alergi.split(' (')[0],
@@ -599,7 +818,8 @@ export function generate50IGDPatients() {
 
   return Array.from({ length: 55 }, (_, idx) => {
     const i = idx + 1;
-    const fName = NAMA_DEPAN[idx % NAMA_DEPAN.length];
+    const isFemale = idx % 2 === 0;
+    const fName = isFemale ? FEMALE_FIRST_NAMES[idx % FEMALE_FIRST_NAMES.length] : MALE_FIRST_NAMES[idx % MALE_FIRST_NAMES.length];
     const lName = NAMA_BELAKANG[((idx * 4) + 3) % NAMA_BELAKANG.length];
     const item = KONDISI_IGD[idx % KONDISI_IGD.length];
     const hour = String(6 + (idx % 16)).padStart(2, '0');
@@ -658,18 +878,18 @@ export function generate50InpatientBeds() {
   ];
 
   const DIAGNOSA_RANAP = [
-    'DHF Grade II dengan Trombositopenia (A91)',
-    'Pneumonia Komuniti Berat (J18.9)',
-    'Stroke Iskemik Akut Trombotik (I63.9)',
-    'Post-Op Laparoskopi Kolesistektomi H+2 (K80.2)',
-    'Post-Op ORIF Fraktur Femur Dextra H+3 (S72.3)',
-    'Gagal Jantung Kongestif NYHA FC III (I50.9)',
-    'DM Tipe 2 dengan Ulkus Diabetikum Pedis Sinistra Wagner 3 (E11.7)',
-    'Gastroenteritis Akut dengan Dehidrasi Sedang (A09)',
-    'Penyakit Ginjal Kronik Stage 5 on HD Reguler (N18.5)',
-    'Sepsis ec Infeksi Saluran Kemih Komplikata (A41.9)',
-    'Post-Op Seksio Sesarea Hari ke-2 + Bayi Sehat (O82)',
-    'Tuberkulosis Paru Kasus Baru dengan Efusi Pleura (A15.6)'
+    { dx: 'DHF Grade II dengan Trombositopenia (A91)', dpjp: 'dr. Hendra Pratama, Sp.PD', genderReq: undefined },
+    { dx: 'Pneumonia Komuniti Berat (J18.9)', dpjp: 'dr. Lukman Hakim, Sp.P', genderReq: undefined },
+    { dx: 'Stroke Iskemik Akut Trombotik (I63.9)', dpjp: 'dr. Fajar Hidayat, Sp.N', genderReq: undefined },
+    { dx: 'Post-Op Laparoskopi Kolesistektomi H+2 (K80.2)', dpjp: 'dr. Bambang Alamsyah, Sp.B', genderReq: undefined },
+    { dx: 'Post-Op ORIF Fraktur Femur Dextra H+3 (S72.3)', dpjp: 'dr. Wahyu Nugroho, Sp.OT', genderReq: undefined },
+    { dx: 'Gagal Jantung Kongestif NYHA FC III (I50.9)', dpjp: 'dr. Joko Santoso, Sp.JP', genderReq: undefined },
+    { dx: 'DM Tipe 2 dengan Ulkus Diabetikum Pedis Sinistra Wagner 3 (E11.7)', dpjp: 'dr. Hendra Pratama, Sp.PD', genderReq: undefined },
+    { dx: 'Gastroenteritis Akut dengan Dehidrasi Sedang (A09)', dpjp: 'dr. Hendra Pratama, Sp.PD', genderReq: undefined },
+    { dx: 'Penyakit Ginjal Kronik Stage 5 on HD Reguler (N18.5)', dpjp: 'dr. Hendra Pratama, Sp.PD', genderReq: undefined },
+    { dx: 'Sepsis ec Infeksi Saluran Kemih Komplikata (A41.9)', dpjp: 'dr. Hendra Pratama, Sp.PD', genderReq: undefined },
+    { dx: 'Post-Op Seksio Sesarea Hari ke-2 + Bayi Sehat (O82)', dpjp: 'dr. Citra Lestari, Sp.OG', genderReq: 'P' as const },
+    { dx: 'Tuberkulosis Paru Kasus Baru dengan Efusi Pleura (A15.6)', dpjp: 'dr. Lukman Hakim, Sp.P', genderReq: undefined }
   ];
 
   const bedsList: any[] = [];
@@ -679,10 +899,15 @@ export function generate50InpatientBeds() {
     for (let b = 1; b <= r.totalBeds; b++) {
       const isOccupied = bedCounter % 5 !== 0; // 80% occupied
       const isCleaning = bedCounter % 5 === 0 && bedCounter % 2 === 0;
-      const patientIndex = (bedCounter * 3) % NAMA_DEPAN.length;
-      const pName = `${NAMA_DEPAN[patientIndex]} ${NAMA_BELAKANG[(bedCounter * 2) % NAMA_BELAKANG.length]}`;
-      const dx = DIAGNOSA_RANAP[bedCounter % DIAGNOSA_RANAP.length];
-      const dpjp = ['dr. Hendra Pratama, Sp.PD', 'dr. Joko Santoso, Sp.JP', 'dr. Wahyu Nugroho, Sp.OT', 'dr. Citra Lestari, Sp.OG', 'dr. Fajar Hidayat, Sp.N', 'dr. Lukman Hakim, Sp.P'][bedCounter % 6];
+      const diagItem = DIAGNOSA_RANAP[bedCounter % DIAGNOSA_RANAP.length];
+      const isFemale = diagItem.genderReq === 'P' || (diagItem.genderReq === undefined && bedCounter % 2 === 0);
+      const fName = isFemale 
+        ? FEMALE_FIRST_NAMES[bedCounter % FEMALE_FIRST_NAMES.length] 
+        : MALE_FIRST_NAMES[bedCounter % MALE_FIRST_NAMES.length];
+      const lName = NAMA_BELAKANG[(bedCounter * 2) % NAMA_BELAKANG.length];
+      const pName = `${fName} ${lName}`;
+      const dx = diagItem.dx;
+      const dpjp = diagItem.dpjp;
       const admitDay = 20 + (bedCounter % 4);
 
       bedsList.push({
@@ -715,26 +940,29 @@ export function generate50InpatientBeds() {
 // ═══════════════════════════════════════════════════════════════════════════
 export function generate50SurgeryPatients() {
   const SURGERIES = [
-    { tindakan: 'Laparoskopi Kolesistektomi (Eksisi Kantung Empedu)', icd9: '51.23', operator: 'dr. Bambang Alamsyah, Sp.B, Subsp.BD(K)', anastesi: 'dr. Indra Gunawan, Sp.An-TI', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 1 - Mayor Laparoskopi', durasi: '120 Menit' },
-    { tindakan: 'Seksio Sesarea Cito (Persalinan Bedah Sesar)', icd9: '74.1', operator: 'dr. Citra Lestari, Sp.OG', anastesi: 'dr. Rahmat Setiawan, Sp.An', tipe_anastesi: 'Regional Spinal Anesthesia', ok: 'OK 4 - Emergency & Obstetri', durasi: '60 Menit' },
-    { tindakan: 'ORIF Fraktur Femur Dextra dengan Locking Plate', icd9: '79.35', operator: 'dr. Wahyu Nugroho, Sp.OT(K)', anastesi: 'dr. Indra Gunawan, Sp.An-TI', tipe_anastesi: 'Regional Spinal / Epidural', ok: 'OK 2 - Orthopedi & Trauma', durasi: '150 Menit' },
-    { tindakan: 'TURP (Transurethral Resection of the Prostate)', icd9: '60.29', operator: 'dr. Dimas Kurniawan, Sp.U', anastesi: 'dr. Rahmat Setiawan, Sp.An', tipe_anastesi: 'Regional Spinal Anesthesia', ok: 'OK 3 - Urologi & Endourologi', durasi: '90 Menit' },
-    { tindakan: 'Fakoemulsifikasi + Implan Lensa Lipat OD (Katarak)', icd9: '13.41', operator: 'dr. Gita Permata, Sp.M', anastesi: 'dr. Hany Lestari, Sp.An', tipe_anastesi: 'Topikal + Blok Peribulbar', ok: 'OK 5 - Bedah Mata Mikro', durasi: '30 Menit' },
-    { tindakan: 'Apendektomi Laparoskopi Akut', icd9: '47.01', operator: 'dr. Bambang Alamsyah, Sp.B', anastesi: 'dr. Indra Gunawan, Sp.An-TI', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 1 - Mayor Laparoskopi', durasi: '75 Menit' },
-    { tindakan: 'Tonsilektomi & Adenoidektomi Bilateral', icd9: '28.3', operator: 'dr. Irawan Hakim, Sp.THT-BKL', anastesi: 'dr. Hany Lestari, Sp.An', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 3 - THT & Bedah Mulut', durasi: '45 Menit' },
-    { tindakan: 'Mastektomi Radikal Modifikasi (MRM) Dextra', icd9: '85.43', operator: 'dr. Bambang Alamsyah, Sp.B, Subsp.Onk(K)', anastesi: 'dr. Rahmat Setiawan, Sp.An', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 2 - Bedah Onkologi', durasi: '180 Menit' },
-    { tindakan: 'Tiroidektomi Subtotalis ec Struma Nodusa Non-Toksik', icd9: '06.39', operator: 'dr. Bambang Alamsyah, Sp.B', anastesi: 'dr. Indra Gunawan, Sp.An-TI', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 1 - Mayor Laparoskopi', durasi: '120 Menit' },
-    { tindakan: 'Hernioraphy Mesh Plug Inguinalis Lateralis Dextra', icd9: '53.05', operator: 'dr. Bambang Alamsyah, Sp.B', anastesi: 'dr. Rahmat Setiawan, Sp.An', tipe_anastesi: 'Regional Spinal Anesthesia', ok: 'OK 2 - Bedah Umum', durasi: '60 Menit' },
-    { tindakan: 'Artroskopi Rekonstruksi ACL Genu Sinistra', icd9: '81.45', operator: 'dr. Wahyu Nugroho, Sp.OT(K)', anastesi: 'dr. Indra Gunawan, Sp.An-TI', tipe_anastesi: 'General Anesthesia / Spinal', ok: 'OK 2 - Orthopedi & Sports', durasi: '120 Menit' },
-    { tindakan: 'Odontektomi M3 Impaksi Gigi Rahang Bawah Bilateral', icd9: '23.19', operator: 'drg. Fachri Alif, Sp.BM', anastesi: 'dr. Hany Lestari, Sp.An', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 3 - Bedah Mulut', durasi: '45 Menit' }
+    { tindakan: 'Laparoskopi Kolesistektomi (Eksisi Kantung Empedu)', icd9: '51.23', operator: 'dr. Bambang Alamsyah, Sp.B, Subsp.BD(K)', anastesi: 'dr. Indra Gunawan, Sp.An-TI', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 1 - Mayor Laparoskopi', durasi: '120 Menit', genderReq: undefined },
+    { tindakan: 'Seksio Sesarea Cito (Persalinan Bedah Sesar)', icd9: '74.1', operator: 'dr. Citra Lestari, Sp.OG', anastesi: 'dr. Rahmat Setiawan, Sp.An', tipe_anastesi: 'Regional Spinal Anesthesia', ok: 'OK 4 - Emergency & Obstetri', durasi: '60 Menit', genderReq: 'P' as const },
+    { tindakan: 'ORIF Fraktur Femur Dextra dengan Locking Plate', icd9: '79.35', operator: 'dr. Wahyu Nugroho, Sp.OT(K)', anastesi: 'dr. Indra Gunawan, Sp.An-TI', tipe_anastesi: 'Regional Spinal / Epidural', ok: 'OK 2 - Orthopedi & Trauma', durasi: '150 Menit', genderReq: undefined },
+    { tindakan: 'TURP (Transurethral Resection of the Prostate)', icd9: '60.29', operator: 'dr. Dimas Kurniawan, Sp.U', anastesi: 'dr. Rahmat Setiawan, Sp.An', tipe_anastesi: 'Regional Spinal Anesthesia', ok: 'OK 3 - Urologi & Endourologi', durasi: '90 Menit', genderReq: 'L' as const },
+    { tindakan: 'Fakoemulsifikasi + Implan Lensa Lipat OD (Katarak)', icd9: '13.41', operator: 'dr. Gita Permata, Sp.M', anastesi: 'dr. Hany Lestari, Sp.An', tipe_anastesi: 'Topikal + Blok Peribulbar', ok: 'OK 5 - Bedah Mata Mikro', durasi: '30 Menit', genderReq: undefined },
+    { tindakan: 'Apendektomi Laparoskopi Akut', icd9: '47.01', operator: 'dr. Bambang Alamsyah, Sp.B', anastesi: 'dr. Indra Gunawan, Sp.An-TI', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 1 - Mayor Laparoskopi', durasi: '75 Menit', genderReq: undefined },
+    { tindakan: 'Tonsilektomi & Adenoidektomi Bilateral', icd9: '28.3', operator: 'dr. Irawan Hakim, Sp.THT-BKL', anastesi: 'dr. Hany Lestari, Sp.An', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 3 - THT & Bedah Mulut', durasi: '45 Menit', genderReq: undefined },
+    { tindakan: 'Mastektomi Radikal Modifikasi (MRM) Dextra', icd9: '85.43', operator: 'dr. Bambang Alamsyah, Sp.B, Subsp.Onk(K)', anastesi: 'dr. Rahmat Setiawan, Sp.An', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 2 - Bedah Onkologi', durasi: '180 Menit', genderReq: 'P' as const },
+    { tindakan: 'Tiroidektomi Subtotalis ec Struma Nodusa Non-Toksik', icd9: '06.39', operator: 'dr. Bambang Alamsyah, Sp.B', anastesi: 'dr. Indra Gunawan, Sp.An-TI', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 1 - Mayor Laparoskopi', durasi: '120 Menit', genderReq: undefined },
+    { tindakan: 'Hernioraphy Mesh Plug Inguinalis Lateralis Dextra', icd9: '53.05', operator: 'dr. Bambang Alamsyah, Sp.B', anastesi: 'dr. Rahmat Setiawan, Sp.An', tipe_anastesi: 'Regional Spinal Anesthesia', ok: 'OK 2 - Bedah Umum', durasi: '60 Menit', genderReq: 'L' as const },
+    { tindakan: 'Artroskopi Rekonstruksi ACL Genu Sinistra', icd9: '81.45', operator: 'dr. Wahyu Nugroho, Sp.OT(K)', anastesi: 'dr. Indra Gunawan, Sp.An-TI', tipe_anastesi: 'General Anesthesia / Spinal', ok: 'OK 2 - Orthopedi & Sports', durasi: '120 Menit', genderReq: undefined },
+    { tindakan: 'Odontektomi M3 Impaksi Gigi Rahang Bawah Bilateral', icd9: '23.19', operator: 'drg. Fachri Alif, Sp.BM', anastesi: 'dr. Hany Lestari, Sp.An', tipe_anastesi: 'General Anesthesia (GA)', ok: 'OK 3 - Bedah Mulut', durasi: '45 Menit', genderReq: undefined }
   ];
 
   return Array.from({ length: 52 }, (_, idx) => {
     const i = idx + 1;
-    const fName = NAMA_DEPAN[(idx * 2) % NAMA_DEPAN.length];
+    const op = SURGERIES[idx % SURGERIES.length];
+    const isFemale = op.genderReq === 'P' || (op.genderReq === undefined && idx % 2 === 0);
+    const fName = isFemale
+      ? FEMALE_FIRST_NAMES[(idx * 2) % FEMALE_FIRST_NAMES.length]
+      : MALE_FIRST_NAMES[(idx * 2) % MALE_FIRST_NAMES.length];
     const lName = NAMA_BELAKANG[((idx * 3) + 5) % NAMA_BELAKANG.length];
     const pName = `${fName} ${lName}`;
-    const op = SURGERIES[idx % SURGERIES.length];
     const hour = String(7 + (idx % 12)).padStart(2, '0');
     const day = 20 + (idx % 5);
     const statuses = ['Terjadwal', 'Sedang Operasi', 'Selesai - Recovery PACU', 'Selesai - Rawat Inap'];
@@ -792,7 +1020,8 @@ export function generate50LabAndRadRequests() {
 
   // Generate 30 Lab records
   for (let i = 1; i <= 30; i++) {
-    const fName = NAMA_DEPAN[(i * 3) % NAMA_DEPAN.length];
+    const isFemale = i % 2 === 0;
+    const fName = isFemale ? FEMALE_FIRST_NAMES[(i * 3) % FEMALE_FIRST_NAMES.length] : MALE_FIRST_NAMES[(i * 3) % MALE_FIRST_NAMES.length];
     const lName = NAMA_BELAKANG[(i * 5) % NAMA_BELAKANG.length];
     const pName = `${fName} ${lName}`;
     const t = LAB_TESTS[(i - 1) % LAB_TESTS.length];
@@ -823,7 +1052,8 @@ export function generate50LabAndRadRequests() {
 
   // Generate 25 Radiology records
   for (let i = 1; i <= 25; i++) {
-    const fName = NAMA_DEPAN[((i + 15) * 3) % NAMA_DEPAN.length];
+    const isFemale = i % 2 !== 0;
+    const fName = isFemale ? FEMALE_FIRST_NAMES[((i + 15) * 3) % FEMALE_FIRST_NAMES.length] : MALE_FIRST_NAMES[((i + 15) * 3) % MALE_FIRST_NAMES.length];
     const lName = NAMA_BELAKANG[((i + 15) * 5) % NAMA_BELAKANG.length];
     const pName = `${fName} ${lName}`;
     const t = RAD_TESTS[(i - 1) % RAD_TESTS.length];

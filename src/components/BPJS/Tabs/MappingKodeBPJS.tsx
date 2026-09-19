@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { initBPJSData } from '../bpjsData';
 
 export function MappingKodeBPJS() {
   const [activeTab, setActiveTab] = useState('poli');
@@ -21,22 +22,12 @@ export function MappingKodeBPJS() {
   });
 
   useEffect(() => {
-    const saved = localStorage.getItem('simrs_bpjs_mapping');
+    initBPJSData();
+    const saved = localStorage.getItem('simrs_bpjs_mapping') || localStorage.getItem('bpjs_mapping');
     if (saved) {
       setMappingData(JSON.parse(saved));
     } else {
-      const dummyData = {
-        poli: [
-          { id: 1, kode_internal: 'PDU', nama_internal: 'Poli Umum', kode_bpjs: '005', nama_bpjs: 'Poli Umum' },
-          { id: 2, kode_internal: 'PDG', nama_internal: 'Poli Penyakit Dalam', kode_bpjs: '009', nama_bpjs: 'Poli Penyakit Dalam' }
-        ],
-        dokter: [
-          { id: 1, kode_internal: 'D001', nama_internal: 'dr. Ahmad', kode_bpjs: '12345', nama_bpjs: 'dr. Ahmad, Sp.PD' }
-        ],
-        obat: [],
-        tindakan: []
-      };
-      setMappingData(dummyData);
+      setMappingData({ poli: [], dokter: [], obat: [], tindakan: [] });
     }
   }, []);
   const tabs = [

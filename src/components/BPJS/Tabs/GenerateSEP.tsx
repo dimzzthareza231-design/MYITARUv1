@@ -232,7 +232,7 @@ export function GenerateSEP() {
                 penjamin: 'BPJS Kesehatan (V-Claim Terverifikasi)',
                 edukasi_instruksi: 'Surat Eligibilitas Peserta (SEP) ini berlaku sebagai bukti jaminan pelayanan kesehatan BPJS di Klinik MYITARU.'
               }}
-              docType="general"
+              docType="sep_bpjs"
               filename={`SEP_${sepList[0]?.noSep || 'Resmi'}`} 
               label="Cetak / Pratinjau SEP" 
               title="SURAT ELIGIBILITAS PESERTA (SEP)"
@@ -282,7 +282,7 @@ export function GenerateSEP() {
                           penjamin: 'BPJS Kesehatan (V-Claim Terverifikasi)',
                           edukasi_instruksi: 'Surat Eligibilitas Peserta (SEP) ini berlaku sebagai bukti jaminan pelayanan kesehatan BPJS di Klinik MYITARU.'
                         }}
-                        docType="general"
+                        docType="sep_bpjs"
                         filename={`SEP_${sep.noSep}`}
                         label="Cetak"
                         title="SURAT ELIGIBILITAS PESERTA (SEP)"

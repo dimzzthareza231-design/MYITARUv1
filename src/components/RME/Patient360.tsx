@@ -4,13 +4,15 @@ import { LayoutDashboard, CalendarDays, Building2, User, Activity, AlertTriangle
   ShieldAlert, Printer, Edit2, Trash2, X, Lock, Unlock, Eye,
   Calculator, FileSignature, ShieldCheck, Scale, Apple, Brain,
   ListChecks, FileCode2, FlaskConical, ScanLine, CheckCircle2, Mic, Globe, ChevronDown, UserCheck,
-  ChevronLeft, ChevronRight, PanelLeftClose, PanelLeftOpen
+  ChevronLeft, ChevronRight, PanelLeftClose, PanelLeftOpen, QrCode, FolderCheck
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import PrintPDFButton from '../PrintPDFButton';
+import { PatientQRCodeModal } from './PatientQRCodeModal';
+import { GeneralConsentTab, HakPasienTab, AsesmenMedisTab, AsesmenKeperawatanTab, InformedConsentTab, LaporanOperasiTab, LaporanAnestesiTab, HasilPenunjangTab, DischargeSummaryTab } from './PatientTabsInap';
 import { SmartVoiceReport } from './SmartVoiceReport';
 import { MedicalSearchGrounding } from '../MedicalSearchGrounding';
 import { LaboratoryTab } from './LaboratoryTab';
@@ -19,6 +21,11 @@ import { ImmunizationsTab } from './ImmunizationsTab';
 import { GrowthChartTab } from './GrowthChartTab';
 import { PendingAlertsModal } from './PendingAlertsModal';
 import { AddendumModal } from './AddendumModal';
+import { DossierDocumentHub } from './CompleteDossier/DossierDocumentHub';
+import { ModalProblem } from './Modals/ModalProblem';
+import { ModalObat } from './Modals/ModalObat';
+import { ModalAlergi } from './Modals/ModalAlergi';
+import { ModalVitals } from './Modals/ModalVitals';
 
 // ═══════════════════════════════════════════════════════════
 // INFORMED CONSENT MODAL (dipindah dari MedicalRecords)
@@ -176,33 +183,22 @@ function InformedConsentModal({ onClose, patient }: { onClose: () => void, patie
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════
 export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => void }) {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('face_sheet');
   const [patientData, setPatientData] = useState<any>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
   const [showSmartVoice, setShowSmartVoice] = useState(false);
   const [showPendingAlerts, setShowPendingAlerts] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [currentRole, setCurrentRole] = useState<'Dokter DPJP' | 'Perawat (Ns.)' | 'Perekam Medis' | 'Pendaftaran'>('Dokter DPJP');
 
   useEffect(() => {
     const defaultData = {
       ...(patient || {}),
-      allergies: patient?.allergies || [
-        { id: 1, allergen: 'Penicillin', reaction: 'Urticaria, Anaphylaxis risk', severity: 'Severe', tanggal_diketahui: '10 Jan 2020', verified_by: 'Dr. Sarah' },
-        { id: 2, allergen: 'Seafood', reaction: 'Itching', severity: 'Mild', tanggal_diketahui: '05 Mar 2018', verified_by: 'Dr. Budi' }
-      ],
-      problem_list: patient?.problem_list || [
-        { id: 1, nama: 'Type 2 Diabetes Mellitus', kode_icd10: 'E11.9', tanggal_onset: '2022-03-10', severity: 'Moderate', status: 'Active' },
-        { id: 2, nama: 'Essential (primary) hypertension', kode_icd10: 'I10', tanggal_onset: '2021-06-20', severity: 'Moderate', status: 'Active' }
-      ],
-      medications: patient?.medications || [
-        { id: 1, name: 'Metformin', dose: '500 mg - Oral', frequency: '2x1', startDate: '2022-03-15', status: 'Active' },
-        { id: 2, name: 'Amlodipine', dose: '5 mg - Oral', frequency: '1x1', startDate: '2021-06-25', status: 'Active' }
-      ],
-      vitals: patient?.vitals || [
-        { id: 1, date: '01 Aug 2026 08:00', bp: '130/85', hr: '78', temp: '36.5', rr: '18', spo2: '98', tb: '170', bb: '75' },
-        { id: 2, date: '01 Jul 2026 09:30', bp: '125/80', hr: '75', temp: '36.6', rr: '16', spo2: '99', tb: '170', bb: '74.5' }
-      ]
+      allergies: patient?.allergies || [],
+      problem_list: patient?.problem_list || [],
+      medications: patient?.medications || [],
+      vitals: patient?.vitals || []
     };
     setPatientData(defaultData);
   }, [patient]);
@@ -229,7 +225,7 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
     if (data.parsed?.icd10 && data.parsed.icd10.length > 0) {
       const newProblems = data.parsed.icd10.map((d: any, idx: number) => ({
         id: Date.now() + idx,
-        nama: d.name,
+        nama: d.name || d.description,
         kode_icd10: d.code,
         tanggal_onset: new Date().toISOString().split('T')[0],
         severity: 'Moderate',
@@ -240,43 +236,72 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
         problem_list: [...newProblems, ...(prev?.problem_list || [])]
       }));
     }
+
+    // Save the SOAP text to localStorage so the SoapTab picks it up
+    localStorage.setItem('simrs_rme_soap', JSON.stringify({
+      s: data.s || data.parsed?.subjective || '',
+      o: data.o || data.parsed?.objective || '',
+      a: data.a || data.parsed?.assessment || '',
+      p: data.p || data.parsed?.plan || ''
+    }));
+    // Dispatch storage event so SoapTab updates its state if it's currently mounted
+    window.dispatchEvent(new Event('storage'));
+
     toast.success('Rekam medis pasien diperbarui dari Laporan Suara Cerdas');
-    setActiveTab('encounters');
+    setActiveTab('soap');
   };
 
   if (!patientData) return null;
 
   const sidebarGroups = [
     {
-      title: 'PATIENT CHART',
+      title: 'BERKAS LENGKAP PASIEN',
       items: [
-        { id: 'overview', label: 'Clinical Overview', icon: User },
-        { id: 'encounters', label: 'Encounters', icon: CalendarDays },
+        { id: 'dossier_lengkap', label: 'Dossier Lengkap (100%)', icon: FolderCheck },
       ]
     },
     {
-      title: 'LONGITUDINAL RECORD',
+      title: 'ADMINISTRASI & LEGALITAS',
       items: [
-        { id: 'problems', label: 'Problem List', icon: ClipboardList },
-        { id: 'allergies', label: 'Allergies', icon: AlertTriangle },
-        { id: 'medications', label: 'Medication History', icon: Pill },
-        { id: 'vitals', label: 'Vital Signs', icon: HeartPulse },
-        { id: 'immunizations', label: 'Immunizations', icon: Syringe },
-        { id: 'growth', label: 'Growth Chart', icon: Scale },
+        { id: 'face_sheet', label: 'Ringkasan Masuk & Keluar', icon: User },
+        { id: 'general_consent', label: 'Persetujuan Rawat Inap', icon: FileSignature },
+        { id: 'hak_pasien', label: 'Hak Pasien & Keluarga', icon: ShieldCheck },
       ]
     },
     {
-      title: 'INVESTIGATIONS',
+      title: 'PENILAIAN & ASUHAN',
       items: [
-        { id: 'laboratory', label: 'Laboratory', icon: FlaskConical },
-        { id: 'radiology', label: 'Radiology', icon: ScanLine },
+        { id: 'asesmen_medis', label: 'Asesmen Awal Medis', icon: Stethoscope },
+        { id: 'asesmen_keperawatan', label: 'Asesmen Awal Keperawatan', icon: ClipboardList },
+        { id: 'cppt', label: 'CPPT (Terintegrasi)', icon: ListChecks },
+        { id: 'problems', label: 'Problem List & ICD-10', icon: FileCode2 },
+        { id: 'allergies', label: 'Riwayat Alergi', icon: ShieldAlert },
       ]
     },
     {
-      title: 'ADMINISTRATION',
+      title: 'TINDAKAN & PERSETUJUAN',
       items: [
-        { id: 'legal', label: 'Documents & Resume', icon: FileSignature },
-        { id: 'audit', label: 'Keamanan & Audit', icon: ShieldCheck },
+        { id: 'informed_consent', label: 'Informed Consent', icon: AlertTriangle },
+        { id: 'laporan_operasi', label: 'Laporan Operasi', icon: Activity },
+        { id: 'laporan_anestesi', label: 'Laporan Anestesi', icon: Brain },
+      ]
+    },
+    {
+      title: 'GRAFIK & PEMANTAUAN',
+      items: [
+        { id: 'vitals', label: 'Grafik Tanda Vital', icon: HeartPulse },
+        { id: 'cpo_kardeks', label: 'CPO / Kardeks Obat', icon: Pill },
+        { id: 'growth', label: 'Kurva Pertumbuhan (Gizi)', icon: Scale },
+        { id: 'immunizations', label: 'Imunisasi & Vaksinasi', icon: Syringe },
+      ]
+    },
+    {
+      title: 'PENUNJANG & RINGKASAN',
+      items: [
+        { id: 'hasil_penunjang', label: 'Ringkasan Penunjang', icon: FlaskConical },
+        { id: 'laboratory', label: 'Detail Laboratorium (LIS)', icon: FlaskConical },
+        { id: 'radiology', label: 'Detail Radiologi (PACS)', icon: ScanLine },
+        { id: 'discharge_summary', label: 'Resume Medis Akhir', icon: FileText },
       ]
     },
     {
@@ -287,7 +312,6 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
       ]
     }
   ];
-
   return (
     <div className="flex flex-col h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden relative">
       {/* ───────────────────────────────────────────────────────── */}
@@ -372,6 +396,16 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
               <option value="Pendaftaran">Pendaftaran</option>
             </select>
           </div>
+
+          <button 
+            id="btn-patient360-qr"
+            onClick={() => setShowQRModal(true)} 
+            className="text-xs bg-cyan-50 dark:bg-cyan-950/40 border border-cyan-300 dark:border-cyan-800 text-cyan-700 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/60 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+            title="Cetak Stiker & QR Code Berkas Rekam Medis Pasien"
+          >
+            <QrCode className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+            <span className="hidden sm:inline">QR Berkas RM</span>
+          </button>
 
           <PrintPDFButton 
             filename={`RME_${patientData?.nama || 'Pasien'}`} 
@@ -501,6 +535,33 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
         {/* CONTENT AREA */}
         <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 lg:p-8">
           <div className="max-w-5xl mx-auto">
+            {/* Berkas Lengkap Pasien 100% */}
+            {activeTab === 'dossier_lengkap' && <DossierDocumentHub patient={patientData} />}
+
+            {/* Administrasi & Legalitas */}
+            {activeTab === 'face_sheet' && <OverviewTab patientData={patientData} />}
+            {activeTab === 'general_consent' && <GeneralConsentTab />}
+            {activeTab === 'hak_pasien' && <HakPasienTab />}
+            
+            {/* Penilaian & Asuhan */}
+            {activeTab === 'asesmen_medis' && <AsesmenMedisTab />}
+            {activeTab === 'asesmen_keperawatan' && <AsesmenKeperawatanTab />}
+            {activeTab === 'cppt' && <EncountersTab patientData={patientData} onOpenVoice={() => setShowSmartVoice(true)} />}
+
+            {/* Tindakan & Persetujuan */}
+            {activeTab === 'informed_consent' && <InformedConsentTab />}
+            {activeTab === 'laporan_operasi' && <LaporanOperasiTab />}
+            {activeTab === 'laporan_anestesi' && <LaporanAnestesiTab />}
+
+            {/* Grafik & Pemantauan */}
+            {activeTab === 'vitals' && <VitalsTab patientData={patientData} setPatientData={setPatientData} />}
+            {activeTab === 'cpo_kardeks' && <MedicationsTab patientData={patientData} setPatientData={setPatientData} />}
+
+            {/* Penunjang & Ringkasan */}
+            {activeTab === 'hasil_penunjang' && <HasilPenunjangTab patientData={patientData} />}
+            {activeTab === 'discharge_summary' && <DischargeSummaryTab patientData={patientData} />}
+            
+            {/* AI Assistants & Other Legacy */}
             {activeTab === 'overview' && <OverviewTab patientData={patientData} />}
             {activeTab === 'timeline' && <TimelineTab />}
             {activeTab === 'encounters' && <EncountersTab patientData={patientData} onOpenVoice={() => setShowSmartVoice(true)} />}
@@ -538,7 +599,7 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
             {activeTab === 'problems' && <ProblemListTab patientData={patientData} setPatientData={setPatientData} />}
             {activeTab === 'medications' && <MedicationsTab patientData={patientData} setPatientData={setPatientData} />}
             {activeTab === 'allergies' && <AllergiesTab patientData={patientData} setPatientData={setPatientData} />}
-            {activeTab === 'vitals' && <VitalsTab patientData={patientData} />}
+            {activeTab === 'vitals' && <VitalsTab patientData={patientData} setPatientData={setPatientData} />}
             {activeTab === 'immunizations' && <ImmunizationsTab patientData={patientData} />}
             {activeTab === 'growth' && <GrowthChartTab patientData={patientData} />}
             {activeTab === 'laboratory' && <LaboratoryTab patientData={patientData} />}
@@ -579,6 +640,14 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
           onApplyToRecord={(rec) => {
             toast.success('Laporan suara terverifikasi dan masuk ke audit log pasien.');
           }}
+        />
+      )}
+
+      {showQRModal && (
+        <PatientQRCodeModal
+          isOpen={showQRModal}
+          onClose={() => setShowQRModal(false)}
+          patient={patientData}
         />
       )}
     </div>
@@ -1266,14 +1335,20 @@ function AuditTab() {
 // ═══════════════════════════════════════════════════════════
 function ProblemListTab({ patientData, setPatientData }: any) {
   const [filter, setFilter] = useState('Active');
+  const [showAddModal, setShowAddModal] = useState(false);
   
   const handleDelete = (id: number) => {
-    const updated = patientData.problem_list.filter((p: any) => p.id !== id);
+    const updated = (patientData.problem_list || []).filter((p: any) => p.id !== id);
     setPatientData({ ...patientData, problem_list: updated });
-    toast.success('Problem dihapus');
+    toast.success('Problem berhasil dihapus');
   };
 
-  const filteredProblems = patientData.problem_list.filter((p: any) => filter === 'All' || p.status === filter);
+  const handleAddProblem = (newProb: any) => {
+    const updated = [newProb, ...(patientData.problem_list || [])];
+    setPatientData({ ...patientData, problem_list: updated });
+  };
+
+  const filteredProblems = (patientData.problem_list || []).filter((p: any) => filter === 'All' || p.status === filter);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -1299,8 +1374,8 @@ function ProblemListTab({ patientData, setPatientData }: any) {
               <option value="Suspected">Suspected</option>
               <option value="Ruled Out">Ruled Out</option>
             </select>
-            <button onClick={() => toast('Form tambah problem', { icon: '🚧' })} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm">
-              <Plus className="w-4 h-4" /> Add Problem
+            <button onClick={() => setShowAddModal(true)} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm transition-colors">
+              <Plus className="w-4 h-4" /> Tambah Problem
             </button>
           </div>
         </div>
@@ -1335,7 +1410,7 @@ function ProblemListTab({ patientData, setPatientData }: any) {
                     <select 
                       value={p.status}
                       onChange={(e) => {
-                        const updated = patientData.problem_list.map((item: any) => item.id === p.id ? { ...item, status: e.target.value } : item);
+                        const updated = (patientData.problem_list || []).map((item: any) => item.id === p.id ? { ...item, status: e.target.value } : item);
                         setPatientData({ ...patientData, problem_list: updated });
                         toast.success(`Status diagnosis diubah menjadi ${e.target.value}`);
                       }}
@@ -1355,12 +1430,11 @@ function ProblemListTab({ patientData, setPatientData }: any) {
                     </select>
                   </td>
                   <td className="p-4 text-xs text-slate-500">
-                    <div>dr. Budi Santoso</div>
+                    <div>dr. DPJP</div>
                     <div className="text-[10px]">{p.tanggal_onset}</div>
                   </td>
                   <td className="p-4 flex gap-2">
-                    <button className="p-1.5 text-slate-400 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
-                    <button onClick={() => handleDelete(p.id)} className="p-1.5 text-slate-400 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete(p.id)} className="p-1.5 text-slate-400 hover:text-rose-600 bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
                   </td>
                 </tr>
               ))}
@@ -1368,20 +1442,42 @@ function ProblemListTab({ patientData, setPatientData }: any) {
           </table>
         </div>
       </div>
+
+      {showAddModal && (
+        <ModalProblem
+          onClose={() => setShowAddModal(false)}
+          onSave={handleAddProblem}
+        />
+      )}
     </div>
   );
 }
 
 function MedicationsTab({ patientData, setPatientData }: any) {
   const [filter, setFilter] = useState('All');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const handleDelete = (id: number) => {
-    const updated = patientData.medications.filter((m: any) => m.id !== id);
+    const updated = (patientData.medications || []).filter((m: any) => m.id !== id);
     setPatientData({ ...patientData, medications: updated });
     toast.success('Obat dihapus');
   };
 
-  const filteredMeds = patientData.medications.filter((m: any) => filter === 'All' || m.status === filter);
+  const handleAddMed = (data: any) => {
+    const newMed = {
+      id: Date.now(),
+      name: data.nama,
+      dose: `${data.dosis} (${data.aturan})`,
+      frequency: data.aturan,
+      startDate: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+      status: 'Active'
+    };
+    const updated = [newMed, ...(patientData.medications || [])];
+    setPatientData({ ...patientData, medications: updated });
+    setShowAddModal(false);
+  };
+
+  const filteredMeds = (patientData.medications || []).filter((m: any) => filter === 'All' || m.status === filter);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -1405,8 +1501,8 @@ function MedicationsTab({ patientData, setPatientData }: any) {
               <option value="Stopped">Stopped</option>
               <option value="Hold">Hold</option>
             </select>
-            <button onClick={() => toast('Form tambah obat', { icon: '🚧' })} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm">
-              <Plus className="w-4 h-4" /> Add Record
+            <button onClick={() => setShowAddModal(true)} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm transition-colors">
+              <Plus className="w-4 h-4" /> Tambah Obat
             </button>
           </div>
         </div>
@@ -1424,7 +1520,11 @@ function MedicationsTab({ patientData, setPatientData }: any) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredMeds.map((m: any) => (
+              {filteredMeds.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-slate-500">Tidak ada riwayat obat</td>
+                </tr>
+              ) : filteredMeds.map((m: any) => (
                 <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                   <td className="p-4 font-bold text-slate-900 dark:text-white">{m.name}</td>
                   <td className="p-4 text-slate-600 dark:text-slate-300">{m.dose}</td>
@@ -1434,7 +1534,7 @@ function MedicationsTab({ patientData, setPatientData }: any) {
                     <select
                       value={m.status}
                       onChange={(e) => {
-                        const updated = patientData.medications.map((item: any) => item.id === m.id ? { ...item, status: e.target.value } : item);
+                        const updated = (patientData.medications || []).map((item: any) => item.id === m.id ? { ...item, status: e.target.value } : item);
                         setPatientData({ ...patientData, medications: updated });
                       }}
                       className={`px-2 py-1 rounded-full text-xs font-bold border outline-none cursor-pointer ${
@@ -1449,8 +1549,7 @@ function MedicationsTab({ patientData, setPatientData }: any) {
                     </select>
                   </td>
                   <td className="p-4 flex gap-2">
-                    <button className="p-1.5 text-slate-400 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
-                    <button onClick={() => handleDelete(m.id)} className="p-1.5 text-slate-400 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete(m.id)} className="p-1.5 text-slate-400 hover:text-rose-600 bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
                   </td>
                 </tr>
               ))}
@@ -1458,22 +1557,49 @@ function MedicationsTab({ patientData, setPatientData }: any) {
           </table>
         </div>
       </div>
+
+      {showAddModal && (
+        <ModalObat
+          onClose={() => setShowAddModal(false)}
+          onSave={handleAddMed}
+        />
+      )}
     </div>
   );
 }
 
 function AllergiesTab({ patientData, setPatientData }: any) {
+  const [showAddModal, setShowAddModal] = useState(false);
+
   const handleDelete = (id: number) => {
-    const updated = patientData.allergies.filter((a: any) => a.id !== id);
+    const updated = (patientData.allergies || []).filter((a: any) => a.id !== id);
     setPatientData({ ...patientData, allergies: updated });
     toast.success('Alergi dihapus');
   };
+
+  const handleAddAllergy = (data: any) => {
+    const newAllergy = {
+      id: Date.now(),
+      allergen: data.allergen,
+      reaction: data.reaction,
+      severity: data.severity,
+      tanggal_diketahui: new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }),
+      verified_by: 'dr. DPJP'
+    };
+    const updated = [newAllergy, ...(patientData.allergies || [])];
+    setPatientData({ ...patientData, allergies: updated });
+    setShowAddModal(false);
+  };
+
   return (
     <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 border-t-4 border-t-red-500">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-bold text-red-600">Allergy List</h2>
-        <button onClick={() => toast('Form tambah alergi', { icon: '🚧' })} className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
-          <Plus className="w-4 h-4" /> Add Allergy
+        <div>
+          <h2 className="text-lg font-bold text-red-600">Daftar Riwayat Alergi (Allergy List)</h2>
+          <p className="text-xs text-slate-500">Reaksi hipersensitivitas obat, makanan, dan zat lainnya</p>
+        </div>
+        <button onClick={() => setShowAddModal(true)} className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors">
+          <Plus className="w-4 h-4" /> Tambah Alergi
         </button>
       </div>
       <table className="w-full text-left text-sm">
@@ -1486,30 +1612,50 @@ function AllergiesTab({ patientData, setPatientData }: any) {
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-          {patientData.allergies.map((a: any) => (
+          {(!patientData.allergies || patientData.allergies.length === 0) ? (
+            <tr>
+              <td colSpan={4} className="p-8 text-center text-slate-500">Tidak ada riwayat alergi yang tercatat (No Known Allergies)</td>
+            </tr>
+          ) : patientData.allergies.map((a: any) => (
             <tr key={a.id}>
-              <td className="p-4 font-bold text-red-700">{a.allergen}</td>
+              <td className="p-4 font-bold text-red-700 dark:text-red-400">{a.allergen}</td>
               <td className="p-4">{a.reaction}</td>
               <td className="p-4">
-                <span className={`px-2 py-1 rounded text-xs font-bold ${a.severity === 'Severe' ? 'bg-red-100 text-red-700' : a.severity === 'Moderate' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>{a.severity}</span>
+                <span className={`px-2 py-1 rounded text-xs font-bold ${a.severity === 'Severe' || a.severity === 'Life-Threatening' ? 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300' : a.severity === 'Moderate' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'}`}>{a.severity}</span>
               </td>
-              <td className="p-4"><button onClick={() => handleDelete(a.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded"><Trash2 className="w-4 h-4" /></button></td>
+              <td className="p-4"><button onClick={() => handleDelete(a.id)} className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded transition-colors"><Trash2 className="w-4 h-4" /></button></td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {showAddModal && (
+        <ModalAlergi
+          onClose={() => setShowAddModal(false)}
+          onSave={handleAddAllergy}
+        />
+      )}
     </div>
   );
 }
 
-function VitalsTab({ patientData }: any) {
+function VitalsTab({ patientData, setPatientData }: any) {
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  const handleAddVitals = (data: any) => {
+    const updated = [data, ...(patientData.vitals || [])];
+    if (setPatientData) {
+      setPatientData({ ...patientData, vitals: updated });
+    }
+  };
+
   const chartData = [...(patientData.vitals || [])].reverse().map(v => {
-    const bpParts = v.bp.split('/');
+    const bpParts = (v.bp || '120/80').split('/');
     return {
-      date: v.date.split(' ')[0],
-      systolic: parseInt(bpParts[0]),
-      diastolic: parseInt(bpParts[1]),
-      hr: parseInt(v.hr)
+      date: (v.date || '').split(' ')[0],
+      systolic: parseInt(bpParts[0]) || 120,
+      diastolic: parseInt(bpParts[1]) || 80,
+      hr: parseInt(v.hr) || 80
     };
   });
 
@@ -1520,27 +1666,33 @@ function VitalsTab({ patientData }: any) {
           <HeartPulse className="w-5 h-5 text-rose-500" /> Tren Tanda Vital (Blood Pressure & Heart Rate)
         </h3>
         <div className="h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-              <XAxis dataKey="date" tick={{fontSize: 12}} tickLine={false} axisLine={false} />
-              <YAxis tick={{fontSize: 12}} tickLine={false} axisLine={false} />
-              <Tooltip 
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-              />
-              <Line type="monotone" dataKey="systolic" stroke="#ef4444" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} name="Sistolik" />
-              <Line type="monotone" dataKey="diastolic" stroke="#3b82f6" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} name="Diastolik" />
-              <Line type="monotone" dataKey="hr" stroke="#10b981" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} name="Nadi" />
-            </LineChart>
-          </ResponsiveContainer>
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="date" tick={{fontSize: 12}} tickLine={false} axisLine={false} />
+                <YAxis tick={{fontSize: 12}} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+                <Line type="monotone" dataKey="systolic" stroke="#ef4444" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} name="Sistolik" />
+                <Line type="monotone" dataKey="diastolic" stroke="#3b82f6" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} name="Diastolik" />
+                <Line type="monotone" dataKey="hr" stroke="#10b981" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} name="Nadi" />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-slate-400 text-sm">
+              Belum ada data grafik tanda vital
+            </div>
+          )}
         </div>
       </div>
 
       <div className="card p-6 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-bold">Vital Signs History</h2>
-          <button onClick={() => toast('Form tambah vital', { icon: '🚧' })} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Add Vitals
+          <button onClick={() => setShowAddModal(true)} className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors">
+            <Plus className="w-4 h-4" /> Catat Tanda Vital
           </button>
         </div>
         <div className="overflow-x-auto">
@@ -1556,7 +1708,11 @@ function VitalsTab({ patientData }: any) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {patientData.vitals.map((v: any) => (
+              {(!patientData.vitals || patientData.vitals.length === 0) ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-slate-500">Belum ada riwayat tanda vital</td>
+                </tr>
+              ) : patientData.vitals.map((v: any) => (
                 <tr key={v.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                   <td className="p-4">{v.date}</td>
                   <td className="p-4 font-bold text-rose-600 dark:text-rose-400">{v.bp}</td>
@@ -1570,6 +1726,13 @@ function VitalsTab({ patientData }: any) {
           </table>
         </div>
       </div>
+
+      {showAddModal && (
+        <ModalVitals
+          onClose={() => setShowAddModal(false)}
+          onSave={handleAddVitals}
+        />
+      )}
     </div>
   );
 }

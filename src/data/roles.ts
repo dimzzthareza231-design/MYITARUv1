@@ -111,6 +111,7 @@ export const ROLES: Role[] = [
     moduleAccess: [
       'rekam-medis', 'rawat-jalan', 'igd', 'rawat-inap', 'operasi', 'triase',
       'laboratorium', 'radiologi', 'orthanc', 'cssd',
+      'apotek-ralan', 'stok-obat',
       'vclaim', 'bpjs-emr', 'satu-sehat', 'telemedicine', 'rehab', 'gizi', 'icu',
       'patient-flow', 'mutu', 'laporan',
       ...COMMON_MODULES
@@ -125,6 +126,7 @@ export const ROLES: Role[] = [
     kategori: 'Medis',
     moduleAccess: [
       'igd', 'rawat-inap', 'rawat-jalan', 'triase', 'rekam-medis', 'icu', 'cssd', 'operasi',
+      'apotek-ranap', 'stok-obat',
       'pendaftaran', 'patient-flow', 'gizi', 'sdm', 'satu-sehat',
       ...COMMON_MODULES
     ]

@@ -8,7 +8,8 @@ import {
   browserLocalPersistence
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, onSnapshot, collection, deleteDoc } from 'firebase/firestore';
-import { auth, db, googleProvider } from '../lib/firebase';
+import { auth, db, googleProvider, isFirebaseConfigured } from '../lib/firebase';
+import { logAuthAttempt } from '../lib/activityLogger';
 import { ROLES, hasModuleAccess, getRoleById } from '../data/roles';
 import { saveAuthSession, getAuthSession, clearAuthSession } from '../utils/sessionStore';
 
@@ -71,24 +72,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<User[]>(DEFAULT_USERS);
 
-  // Initialize Firebase Auth persistence in IndexedDB & clear legacy localStorage session keys
+  // Initialize Firebase Auth persistence in IndexedDB
   useEffect(() => {
-    setPersistence(auth, browserLocalPersistence).catch((err) => {
-      console.warn('Firebase Auth persistence setup notice:', err);
-    });
-
-    try {
-      
-      
-      
-      
-      
-      
-    } catch (_) {}
+    if (isFirebaseConfigured) {
+      setPersistence(auth, browserLocalPersistence).catch((err) => {
+        console.warn('Firebase Auth persistence setup notice:', err);
+      });
+    }
   }, []);
 
   // Sync users list from Cloud Firestore in real time (Zero localStorage consumption)
   useEffect(() => {
+    if (!isFirebaseConfigured) {
+      setUsers(DEFAULT_USERS);
+      return;
+    }
     const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
       if (!snapshot.empty) {
         const loadedUsers: User[] = [];
@@ -156,7 +154,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (isMounted) setLoading(false);
     });
 
-    const unsubscribe = onAuthStateChanged(auth, async (fUser) => {
+    const unsubscribe = isFirebaseConfigured ? onAuthStateChanged(auth, async (fUser) => {
       setFirebaseUser(fUser);
       if (fUser) {
         try {
@@ -168,13 +166,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (userDocSnap.exists()) {
             const data = userDocSnap.data();
             const isGoogle = fUser.providerData?.some(p => p.providerId === 'google.com') || data.isGoogleAuth;
+            const isSuperAdminEmail = fUser.email?.toLowerCase().trim() === 'dimzzthareza231@gmail.com';
+            const finalRoleId = isSuperAdminEmail ? 'super_admin' : (data.roleId || (isGoogle ? 'viewer' : 'admin'));
+
             resolvedProfile = {
               id: fUser.uid,
               username: data.username || fUser.email?.split('@')[0] || 'staff',
               nama: data.nama || fUser.displayName || 'Staff Klinik',
               email: data.email || fUser.email || '',
               photoURL: data.photoURL || fUser.photoURL || undefined,
-              roleId: isGoogle ? 'viewer' : (data.roleId || 'admin'),
+              roleId: finalRoleId,
               aktif: data.aktif ?? true,
               dibuatPada: data.dibuatPada || new Date().toISOString().split('T')[0],
               isGoogleAuth: isGoogle
@@ -182,11 +183,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } else {
             // New user authenticated via Firebase Auth
             const isGoogle = fUser.providerData?.some(p => p.providerId === 'google.com');
+            const isSuperAdminEmail = fUser.email?.toLowerCase().trim() === 'dimzzthareza231@gmail.com';
             const matchedSeed = DEFAULT_USERS.find(
               u => u.email && u.email.toLowerCase() === fUser.email?.toLowerCase()
             );
 
-            const defaultRole = matchedSeed?.roleId || (isGoogle ? 'viewer' : 'admin');
+            const defaultRole = isSuperAdminEmail ? 'super_admin' : (matchedSeed?.roleId || (isGoogle ? 'viewer' : 'admin'));
 
             resolvedProfile = {
               id: fUser.uid,
@@ -226,7 +228,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             nama: fUser.displayName || 'Staff Klinik',
             email: fUser.email || '',
             photoURL: fUser.photoURL || undefined,
-            roleId: isGoogle ? 'viewer' : 'super_admin',
+            roleId: (isGoogle && fUser.email === 'dimzzthareza231@gmail.com') ? 'super_admin' : (isGoogle ? 'viewer' : 'super_admin'),
             aktif: true,
             dibuatPada: new Date().toISOString().split('T')[0],
             isGoogleAuth: isGoogle
@@ -251,7 +253,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (isMounted) {
         setLoading(false);
       }
-    });
+    }) : () => {};
 
     return () => {
       isMounted = false;
@@ -262,20 +264,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Google Sign-In with Firebase Auth persistence
   const signInWithGoogle = async (): Promise<{ success: boolean; message: string; isCancelled?: boolean }> => {
+    if (!isFirebaseConfigured) {
+      return { success: false, message: 'Firebase belum dikonfigurasi. Silakan tambahkan konfigurasi Firebase Anda.' };
+    }
     try {
-      await setPersistence(auth, browserLocalPersistence);
+      if (isFirebaseConfigured) await setPersistence(auth, browserLocalPersistence);
       const result = await signInWithPopup(auth, googleProvider);
       const fUser = result.user;
       
       const userDocRef = doc(db, 'users', fUser.uid);
       const userDocSnap = await getDoc(userDocRef);
 
-      let roleId = 'viewer';
+      const isSuperAdminEmail = fUser.email?.toLowerCase().trim() === 'dimzzthareza231@gmail.com';
+      let roleId = isSuperAdminEmail ? 'super_admin' : 'viewer';
       let aktif = true;
 
       if (userDocSnap.exists()) {
         const data = userDocSnap.data();
-        roleId = data.roleId || 'viewer';
+        roleId = isSuperAdminEmail ? 'super_admin' : (data.roleId || 'viewer');
         aktif = data.aktif ?? true;
       } else {
         await setDoc(userDocRef, {
@@ -283,7 +289,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           nama: fUser.displayName || 'Pengguna Google',
           email: fUser.email || '',
           photoURL: fUser.photoURL || '',
-          roleId: 'viewer',
+          roleId: isSuperAdminEmail ? 'super_admin' : 'viewer',
           username: fUser.email?.split('@')[0] || 'google_user',
           aktif: true,
           dibuatPada: new Date().toISOString().split('T')[0],
@@ -295,6 +301,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!aktif) {
         await firebaseSignOut(auth);
         await clearAuthSession();
+        logAuthAttempt({
+          action: 'GOOGLE_SIGN_IN',
+          status: 'DENIED',
+          email: fUser.email || undefined,
+          nama: fUser.displayName || undefined,
+          authProvider: 'google.com',
+          message: 'Akun dinonaktifkan oleh administrator.'
+        });
         return { success: false, message: 'Akun Google Anda dinonaktifkan oleh administrator.' };
       }
 
@@ -313,8 +327,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await saveAuthSession(loggedUser);
       setCurrentUser(loggedUser);
       setFirebaseUser(fUser);
+
+      logAuthAttempt({
+        action: 'GOOGLE_SIGN_IN',
+        status: 'SUCCESS',
+        email: loggedUser.email,
+        nama: loggedUser.nama,
+        roleId: loggedUser.roleId,
+        authProvider: 'google.com',
+        message: 'Google Sign-in popup token successfully verified by Firebase Auth.'
+      });
+
       return { success: true, message: `Selamat datang, ${loggedUser.nama}!` };
     } catch (error: any) {
+      logAuthAttempt({
+        action: 'GOOGLE_SIGN_IN',
+        status: error?.code?.includes('cancelled') || error?.code?.includes('closed') ? 'WARNING' : 'FAILED',
+        email: 'unauthenticated',
+        authProvider: 'google.com',
+        errorCode: error?.code,
+        message: error?.message || 'Login dengan Google dibatalkan atau gagal.'
+      });
+
       if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
         return { success: false, isCancelled: true, message: 'Login dengan Google dibatalkan.' };
       }
@@ -341,18 +375,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     if (!user) {
+      logAuthAttempt({
+        action: 'STAFF_LOGIN',
+        status: 'FAILED',
+        email: cleanInput,
+        message: 'Pengguna atau email tidak ditemukan.'
+      });
       return { success: false, message: 'Username atau email tidak ditemukan' };
     }
     if (!user.aktif) {
+      logAuthAttempt({
+        action: 'STAFF_LOGIN',
+        status: 'DENIED',
+        email: user.email,
+        nama: user.nama,
+        roleId: user.roleId,
+        message: 'Percobaan masuk akun dinonaktifkan.'
+      });
       return { success: false, message: 'Akun Anda dinonaktifkan. Hubungi administrator.' };
     }
     if (user.password && user.password !== password) {
+      logAuthAttempt({
+        action: 'STAFF_LOGIN',
+        status: 'FAILED',
+        email: user.email,
+        nama: user.nama,
+        roleId: user.roleId,
+        message: 'Kata sandi salah.'
+      });
       return { success: false, message: 'Password salah' };
     }
 
     // Persist authenticated staff user to IndexedDB
     await saveAuthSession(user);
     setCurrentUser(user);
+
+    logAuthAttempt({
+      action: 'STAFF_LOGIN',
+      status: 'SUCCESS',
+      email: user.email,
+      nama: user.nama,
+      roleId: user.roleId,
+      authProvider: 'local',
+      message: 'Staff session authenticated successfully.'
+    });
 
     const role = getRoleById(user.roleId);
     return { 
@@ -363,22 +429,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Logout via Firebase Auth and clear IndexedDB session
   const logout = async () => {
+    if (currentUser) {
+      logAuthAttempt({
+        action: 'LOGOUT',
+        status: 'SUCCESS',
+        email: currentUser.email,
+        nama: currentUser.nama,
+        roleId: currentUser.roleId,
+        message: 'Pengguna keluar dari sesi aplikasi.'
+      });
+    }
+
     try {
-      await firebaseSignOut(auth).catch(() => {});
+      if (isFirebaseConfigured) await firebaseSignOut(auth).catch(() => {});
     } catch (_) {}
 
     await clearAuthSession();
     setCurrentUser(null);
     setFirebaseUser(null);
-
-    try {
-      
-      
-      
-      
-      
-      
-    } catch (_) {}
   };
 
   const hasAccess = (moduleId: string): boolean => {
@@ -396,7 +464,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUsers(prev => [...prev, newUser]);
 
     try {
-      await setDoc(doc(db, 'users', newId), {
+      if (isFirebaseConfigured) await setDoc(doc(db, 'users', newId), {
         ...newUser,
         updatedAt: new Date().toISOString()
       });
@@ -414,7 +482,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      await setDoc(doc(db, 'users', id), {
+      if (isFirebaseConfigured) await setDoc(doc(db, 'users', id), {
         ...data,
         updatedAt: new Date().toISOString()
       }, { merge: true });
@@ -426,14 +494,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const deleteUser = async (id: string) => {
     setUsers(prev => prev.filter(u => u.id !== id));
     try {
-      await deleteDoc(doc(db, 'users', id));
+      if (isFirebaseConfigured) await deleteDoc(doc(db, 'users', id));
     } catch (err) {
       console.warn('Could not delete user from Firestore:', err);
     }
   };
 
   const isAdmin = currentUser?.roleId === 'super_admin' || currentUser?.roleId === 'admin';
-  const isReadOnly = currentUser?.roleId === 'viewer' || currentUser?.isGoogleAuth === true;
+  const isReadOnly = currentUser?.roleId === 'viewer';
 
   useEffect(() => {
     if (isReadOnly) {

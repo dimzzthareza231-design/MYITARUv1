@@ -2,43 +2,40 @@
   "entities": {
     "User": {
       "title": "User",
-      "description": "User profile and authentication data",
+      "description": "Hospital staff and user profiles",
       "type": "object",
       "properties": {
-        "uid": { "type": "string" },
-        "nama": { "type": "string" },
-        "email": { "type": "string" },
-        "photoURL": { "type": "string" },
-        "roleId": { "type": "string" },
+        "id": { "type": "string" },
         "username": { "type": "string" },
+        "nama": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "roleId": { "type": "string" },
         "aktif": { "type": "boolean" },
-        "updatedAt": { "type": "string" }
+        "dibuatPada": { "type": "string" },
+        "isGoogleAuth": { "type": "boolean" }
       },
-      "required": ["uid", "nama", "roleId"]
+      "required": ["nama", "roleId"]
     },
     "Pasien": {
       "title": "Pasien",
-      "description": "Patient medical record master document",
+      "description": "Hospital patient demographic and medical records",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "no_rm": { "type": "string" },
-        "nama": { "type": "string" },
         "nik": { "type": "string" },
+        "nama": { "type": "string" },
         "tanggal_lahir": { "type": "string" },
         "jenis_kelamin": { "type": "string" },
         "alamat": { "type": "string" },
-        "telepon": { "type": "string" },
-        "golongan_darah": { "type": "string" },
         "penjamin": { "type": "string" },
-        "status": { "type": "string" },
-        "updatedAt": { "type": "string" }
+        "status": { "type": "string" }
       },
-      "required": ["id", "nama", "no_rm"]
+      "required": ["nama", "no_rm"]
     },
     "Kunjungan": {
       "title": "Kunjungan",
-      "description": "Patient visit, admission, or outpatient queue",
+      "description": "Outpatient, inpatient, and emergency patient visits",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
@@ -46,79 +43,88 @@
         "tanggal": { "type": "string" },
         "poli_id": { "type": "string" },
         "dokter_id": { "type": "string" },
-        "penjamin_id": { "type": "string" },
         "status": { "type": "string" },
         "tipe": { "type": "string" },
-        "nomor_antrian": { "type": "string" },
-        "keluhan_utama": { "type": "string" },
-        "updatedAt": { "type": "string" }
+        "nomor_antrian": { "type": "string" }
       },
-      "required": ["id", "pasien_id", "status"]
+      "required": ["pasien_id", "tanggal", "status"]
     },
     "Dokter": {
       "title": "Dokter",
-      "description": "Hospital medical doctor staff",
+      "description": "Medical doctors and specialists master data",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "nama": { "type": "string" },
-        "spesialisasi": { "type": "string" },
-        "poli_id": { "type": "string" },
-        "nip": { "type": "string" },
-        "sip": { "type": "string" },
-        "status": { "type": "string" },
-        "updatedAt": { "type": "string" }
-      }
+        "spesialisasi": { "type": "string" }
+      },
+      "required": ["nama"]
     },
     "Perawat": {
       "title": "Perawat",
-      "description": "Hospital nursing staff",
+      "description": "Nurses master data",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "nama": { "type": "string" },
-        "unit": { "type": "string" },
-        "nip": { "type": "string" },
-        "status": { "type": "string" },
-        "updatedAt": { "type": "string" }
-      }
+        "nama": { "type": "string" }
+      },
+      "required": ["nama"]
     },
     "HospitalSettings": {
       "title": "HospitalSettings",
-      "description": "Hospital identity and configuration",
+      "description": "Hospital general metadata and settings",
       "type": "object",
       "properties": {
-        "name": { "type": "string" },
-        "address": { "type": "string" },
-        "phone": { "type": "string" },
-        "email": { "type": "string" },
-        "website": { "type": "string" },
-        "updatedAt": { "type": "string" }
-      }
+        "nama": { "type": "string" },
+        "alamat": { "type": "string" }
+      },
+      "required": ["nama"]
     },
     "SystemData": {
       "title": "SystemData",
-      "description": "Clinical operational module data (pharmacy, triage, icu, workflows, etc.)",
+      "description": "Module state persistence",
       "type": "object",
       "properties": {
         "key": { "type": "string" },
-        "data": { "type": "string" },
-        "updatedAt": { "type": "string" }
-      }
+        "data": { "type": "string" }
+      },
+      "required": ["key"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Security audit logs for Firebase authentication and database access attempts",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "category": { "type": "string" },
+        "action": { "type": "string" },
+        "target": { "type": "string" },
+        "status": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "userName": { "type": "string" },
+        "userRole": { "type": "string" },
+        "details": { "type": "object" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["category", "action", "status", "timestamp"]
     }
   },
   "firestore": {
+    "/activity_logs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "Real-time security and database activity logs"
+    },
     "/users/{userId}": {
       "schema": "User",
-      "description": "User account documents"
+      "description": "User profile documents"
     },
     "/pasien/{pasienId}": {
       "schema": "Pasien",
-      "description": "Patient medical records"
+      "description": "Patient records"
     },
     "/kunjungan/{kunjunganId}": {
       "schema": "Kunjungan",
-      "description": "Patient encounter and queue entries"
+      "description": "Encounter records"
     },
     "/dokter/{dokterId}": {
       "schema": "Dokter",
@@ -128,14 +134,17 @@
       "schema": "Perawat",
       "description": "Nurse master records"
     },
-    "/hospital_settings/{docId}": {
+    "/hospital_settings/{settingId}": {
       "schema": "HospitalSettings",
-      "description": "Hospital configuration documents"
+      "description": "Hospital configuration"
     },
-    "/system_data/{docId}": {
+    "/system_data/{dataId}": {
       "schema": "SystemData",
-      "description": "Operational datasets and module records"
+      "description": "Generic persistent module documents"
+    },
+    "/test/{docId}": {
+      "schema": "SystemData",
+      "description": "Health check and connection validation document"
     }
   }
 }
-

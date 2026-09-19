@@ -22,7 +22,16 @@ export const MODULE_REGISTRY = [
       label: 'Rekam Medis (RME)',
       icon: '📋',
       color: 'from-blue-500 to-indigo-600',
-      submenus: ['Daftar Pasien', 'ICD-10 Diagnosis', 'ICD-9 Tindakan', 'Resume Medis']
+      submenus: [
+        'Daftar Pasien', 
+        'Berkas Lengkap (100%)',
+        'ICD-10 Diagnosis', 
+        'ICD-9 Tindakan', 
+        'Resume Medis',
+        'Peminjaman Berkas',
+        'Audit KLPCM',
+        'Pelepasan Informasi'
+      ]
     },
     
     { id: 'pendaftaran', label: 'Pendaftaran Pasien', icon: '📝', color: 'from-blue-500 to-blue-600', SPECIAL: true,
@@ -125,7 +134,7 @@ export const MODULE_REGISTRY = [
     { id: 'panduan', label: 'Panduan', icon: '📖', color: 'from-blue-500 to-blue-600', submenus: [{ label: 'Artikel', cols: 'dokumen' }] },
     { id: 'notifikasi', label: 'Notifikasi', icon: '🔔', color: 'from-red-500 to-red-600', submenus: [{ label: 'Semua', cols: 'dokumen' }] },
     { id: 'profile', label: 'Profile', icon: '👤', color: 'from-fuchsia-500 to-fuchsia-600', SPECIAL: true, submenus: [] },
-    { id: 'security', label: 'Security', icon: '🔐', color: 'from-gray-600 to-gray-700', submenus: [{ label: 'Users', cols: 'pegawai' }, { label: 'Roles', cols: 'dokumen' }] },
+    { id: 'security', label: 'Security', icon: '🔐', color: 'from-gray-600 to-gray-700', submenus: [{ label: 'Activity Logs', cols: 'dokumen' }, { label: 'Users', cols: 'pegawai' }, { label: 'Roles', cols: 'dokumen' }, { label: 'Session Management', cols: 'dokumen' }, { label: 'Login & 2FA', cols: 'dokumen' }] },
     { id: 'audit', label: 'Audit Trail', icon: '📜', color: 'from-amber-500 to-amber-600', submenus: [{ label: 'Logs', cols: 'dokumen' }] },
     { id: 'backup', label: 'Backup & DR', icon: '💾', color: 'from-slate-500 to-slate-600', submenus: [{ label: 'Backup', cols: 'dokumen' }] },
     { id: 'monitoring', label: 'Monitoring', icon: '📡', color: 'from-cyan-500 to-cyan-600', submenus: [{ label: 'Logs', cols: 'dokumen' }] }

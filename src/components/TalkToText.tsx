@@ -42,6 +42,9 @@ export default function TalkToText({ onTranscriptReady, currentSOAP, setCurrentS
         const result = await response.json();
         const parsed = {
           keluhan_utama: result.soap?.subjective || result.resume || text,
+          soap_objective: result.soap?.objective || "",
+          soap_assessment: result.soap?.assessment || "",
+          soap_plan: result.soap?.plan || "",
           confidence: 90,
           tanda_vital: {},
           diagnosis_suggestion: result.icd10?.map((d: any) => ({
@@ -58,6 +61,9 @@ export default function TalkToText({ onTranscriptReady, currentSOAP, setCurrentS
         // Fallback
         setParsedResult({
           keluhan_utama: text,
+          soap_objective: "",
+          soap_assessment: "",
+          soap_plan: "",
           confidence: 70,
           tanda_vital: {},
           diagnosis_suggestion: [],
@@ -69,6 +75,9 @@ export default function TalkToText({ onTranscriptReady, currentSOAP, setCurrentS
     } catch (err) {
       setParsedResult({
         keluhan_utama: text,
+        soap_objective: "",
+        soap_assessment: "",
+        soap_plan: "",
         confidence: 70,
         tanda_vital: {},
         diagnosis_suggestion: [],
@@ -90,6 +99,20 @@ export default function TalkToText({ onTranscriptReady, currentSOAP, setCurrentS
       subjective: {
         ...currentSOAP?.subjective,
         keluhan_utama: parsedResult.keluhan_utama
+      },
+      objective: {
+        ...currentSOAP?.objective,
+        pemeriksaan_fisik: parsedResult.soap_objective || currentSOAP?.objective?.pemeriksaan_fisik
+      },
+      assessment: {
+        ...currentSOAP?.assessment,
+        catatan_assessment: parsedResult.soap_assessment || currentSOAP?.assessment?.catatan_assessment,
+        diagnosis_primer: parsedResult.diagnosis_suggestion?.[0] || currentSOAP?.assessment?.diagnosis_primer,
+        diagnosis_sekunder: parsedResult.diagnosis_suggestion?.slice(1) || currentSOAP?.assessment?.diagnosis_sekunder
+      },
+      plan: {
+        ...currentSOAP?.plan,
+        edukasi: parsedResult.soap_plan || currentSOAP?.plan?.edukasi
       }
     };
 

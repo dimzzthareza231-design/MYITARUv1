@@ -375,7 +375,7 @@ export function RadiologyTab({ patientData }: { patientData: any }) {
                 label="Cetak Lembar Ekspertise Radiologi"
                 className="w-full justify-center text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl shadow-sm"
                 documentData={{ ...patientData, radOrder: activeOrder }}
-                docType="resume_medis"
+                docType="hasil_radiologi"
                 title="LEMBAR HASIL EKSPERTISE RADIOLOGI & IMAGING"
               />
             </div>

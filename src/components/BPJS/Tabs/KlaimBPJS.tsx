@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Bot, Search, RefreshCw, Eye } from 'lucide-react';
 import PrintPDFButton from '../../PrintPDFButton';
+import { initBPJSData } from '../bpjsData';
 
 export function KlaimBPJS() {
   const [klaimList, setKlaimList] = useState<any[]>([]);
@@ -10,6 +11,8 @@ export function KlaimBPJS() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    // Ensure BPJS data is initialized before loading
+    initBPJSData();
     loadKlaimData();
   }, []);
 
@@ -18,7 +21,7 @@ export function KlaimBPJS() {
       const saved = localStorage.getItem('simrs_bpjs_klaim');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           setKlaimList(parsed);
           return;
         }
@@ -26,22 +29,7 @@ export function KlaimBPJS() {
     } catch (e) {
       console.error('Error loading bpjs_klaim:', e);
     }
-
-    const dummyData = [
-      {
-        id: 1,
-        no_klaim: 'KLM-20260801-001',
-        no_sep: '0284R001260801000001',
-        nama_pasien: 'Budi Santoso',
-        diagnosis_utama: 'E11.9 - Type 2 Diabetes Mellitus',
-        tindakan_utama: '89.14 - Electroencephalography',
-        total_biaya: 5000000,
-        status: 'Draft',
-        tanggal: '2026-08-01'
-      }
-    ];
-    setKlaimList(dummyData);
-
+    setKlaimList([]);
   };
 
   const handleViewDetail = (klaim: any) => {
@@ -111,9 +99,10 @@ export function KlaimBPJS() {
                 <td className="p-3 font-medium text-slate-800 dark:text-white">Rp {(klaim.total_biaya || 0).toLocaleString()}</td>
                 <td className="p-3">
                   <span className={`px-2 py-1 rounded text-xs font-bold ${
-                    klaim.status === 'Approved' ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300' :
-                    klaim.status === 'Pending' ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300' :
-                    klaim.status === 'Rejected' ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300' :
+                    ['Disetujui', 'Klaim Cair'].includes(klaim.status) ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300' :
+                    ['Draft', 'Siap Kirim', 'Diajukan'].includes(klaim.status) ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300' :
+                    ['Verifikasi Vedika'].includes(klaim.status) ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300' :
+                    ['Dispute'].includes(klaim.status) ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-300' :
                     'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-300'
                   }`}>
                     {klaim.status}

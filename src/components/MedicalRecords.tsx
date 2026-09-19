@@ -1,249 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHospital } from '../contexts/HospitalContext';
 import { useToast } from '../contexts/ToastContext';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { ProfessionalTable } from './ProfessionalTable';
 import { Patient360 } from './RME/Patient360';
 import { SmartVoiceReport } from './RME/SmartVoiceReport';
-import { Search, FileText, Activity, Mic, Sparkles, Printer, CheckCircle2, ShieldCheck, User, Stethoscope, HeartPulse, Pill, Calendar, X, Eye } from 'lucide-react';
+import { ResumeMedisTemplate } from './RME/ResumeMedisTemplate';
+import { PatientQRCodeModal } from './RME/PatientQRCodeModal';
+import { PatientQRScannerModal } from './RME/PatientQRScannerModal';
+import { ICD10WorkspaceTab } from './RME/Tabs/ICD10WorkspaceTab';
+import { ICD9WorkspaceTab } from './RME/Tabs/ICD9WorkspaceTab';
+import { PeminjamanBerkasTab } from './RME/Tabs/PeminjamanBerkasTab';
+import { AuditKLPCMTab } from './RME/Tabs/AuditKLPCMTab';
+import { PelepasanInformasiTab } from './RME/Tabs/PelepasanInformasiTab';
+import { ModalBuatResumeMedis } from './RME/Modals/ModalBuatResumeMedis';
+import { DossierDocumentHub } from './RME/CompleteDossier/DossierDocumentHub';
+
+import { 
+  Search, FileText, Activity, Mic, Sparkles, Printer, CheckCircle2, 
+  ShieldCheck, User, Stethoscope, HeartPulse, Pill, Calendar, X, Eye, 
+  QrCode, Camera, Plus, FolderSync, ShieldAlert, BadgeCheck, FileClock, FolderCheck
+} from 'lucide-react';
 import PrintPDFButton from './PrintPDFButton';
 
-// ═══════════════════════════════════════════
-// DATA ICD-10
-// ═══════════════════════════════════════════
-const ICD10_DATA = [
-{ code: 'A09', desc: 'Infectious gastroenteritis and colitis, unspecified', category: 'Penyakit Infeksi' },
-{ code: 'A90', desc: 'Dengue fever', category: 'Penyakit Infeksi' },
-{ code: 'E11.9', desc: 'Type 2 diabetes mellitus without complications', category: 'Endokrin' },
-{ code: 'I10', desc: 'Essential (primary) hypertension', category: 'Kardiovaskular' },
-{ code: 'J06.9', desc: 'Acute upper respiratory infection, unspecified', category: 'Respirasi' },
-{ code: 'J18.9', desc: 'Pneumonia, unspecified organism', category: 'Respirasi' },
-{ code: 'K21.0', desc: 'GERD with esophagitis', category: 'Pencernaan' },
-{ code: 'M54.5', desc: 'Low back pain', category: 'Muskuloskeletal' },
-{ code: 'N39.0', desc: 'Urinary tract infection, site not specified', category: 'Genitourinari' },
-{ code: 'R50.9', desc: 'Fever, unspecified', category: 'Gejala Umum' },
-{ code: 'R51', desc: 'Headache', category: 'Gejala Umum' },
-{ code: 'G43.9', desc: 'Migraine, unspecified', category: 'Neurologi' },
-{ code: 'F32.9', desc: 'Major depressive disorder, single episode, unspecified', category: 'Psikiatri' },
-{ code: 'O80', desc: 'Encounter for full-term uncomplicated delivery', category: 'Obstetri' },
-{ code: 'S52.5', desc: 'Fracture of lower end of radius', category: 'Trauma' },
-];
-
-// ═══════════════════════════════════════════
-// DATA ICD-9-CM (Tindakan)
-// ═══════════════════════════════════════════
-const ICD9_DATA = [
-{ code: '89.52', desc: 'Electrocardiogram', category: 'Diagnostik' },
-{ code: '99.21', desc: 'Injection of antibiotic', category: 'Terapi' },
-{ code: '47.09', desc: 'Other appendectomy', category: 'Operasi' },
-{ code: '93.90', desc: 'Non-invasive mechanical ventilation', category: 'Terapi' },
-{ code: '87.44', desc: 'Routine chest x-ray', category: 'Radiologi' },
-{ code: '38.93', desc: 'Venous catheterization, not elsewhere classified', category: 'Prosedur' },
-{ code: '96.04', desc: 'Insertion of endotracheal tube', category: 'Prosedur' },
-{ code: '96.71', desc: 'Continuous invasive mechanical ventilation < 96 hours', category: 'Prosedur' },
-{ code: '54.91', desc: 'Percutaneous abdominal drainage', category: 'Operasi' },
-{ code: '79.35', desc: 'Open reduction of fracture with internal fixation, femur', category: 'Operasi' },
-{ code: '99.04', desc: 'Transfusion of packed cells', category: 'Terapi' },
-{ code: '88.72', desc: 'Diagnostic ultrasound of heart', category: 'Diagnostik' },
-{ code: '93.54', desc: 'Application of other cast', category: 'Prosedur' },
-{ code: '86.22', desc: 'Excisional debridement of wound, infection, or burn', category: 'Operasi' },
-{ code: '99.15', desc: 'Parenteral infusion of concentrated nutritional substances', category: 'Terapi' },
-];
-
-// ═══════════════════════════════════════════
-// TAB ICD-10
-// ═══════════════════════════════════════════
-function ICD10Tab() {
-const [search, setSearch] = useState('');
-const [selectedCodes, setSelectedCodes] = useState<any[]>([]);
-const toast = useToast();
-
-const filtered = ICD10_DATA.filter(d =>
-  d.code.toLowerCase().includes(search.toLowerCase()) ||
-  d.desc.toLowerCase().includes(search.toLowerCase()) ||
-  d.category.toLowerCase().includes(search.toLowerCase())
-);
-
-const addCode = (item: any) => {
-  if (!selectedCodes.find(c => c.code === item.code)) {
-    setSelectedCodes([...selectedCodes, item]);
-    toast.success(`ICD-10 ${item.code} ditambahkan`);
+// Safe formatters to prevent "Objects are not valid as a React child"
+function formatIcdDisplay(item: any): string {
+  if (!item) return '';
+  if (typeof item === 'string') return item;
+  if (typeof item === 'object') {
+    if (item.kode_icd10 && item.nama) {
+      return `[${item.kode_icd10}] ${item.nama}`;
+    }
+    if (item.kode && item.nama) {
+      return `[${item.kode}] ${item.nama}`;
+    }
+    if (item.code && item.desc_id) {
+      return `[${item.code}] ${item.desc_id}`;
+    }
+    if (item.nama) return String(item.nama);
+    if (item.kode_icd10) return String(item.kode_icd10);
+    if (item.code) return String(item.code);
+    return '';
   }
-};
-
-const removeCode = (code: string) => {
-  setSelectedCodes(selectedCodes.filter(c => c.code !== code));
-};
-
-return (
- <div className="p-6 space-y-6">
- <div className="flex justify-between items-center">
- <div>
- <h2 className="text-xl font-bold text-slate-900 dark:text-white">Kodefikasi ICD-10 (Diagnosis)</h2>
- <p className="text-slate-500 text-sm">Pencarian dan penetapan kode diagnosis WHO</p>
- </div>
- </div>
-  <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-     <div className="relative mb-4">
-       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-       <input
-         type="text"
-         placeholder="Cari kode atau nama penyakit ICD-10..."
-         className="w-full pl-10 pr-4 py-3 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-         value={search}
-         onChange={e => setSearch(e.target.value)}
-       />
-     </div>
-     {selectedCodes.length > 0 && (
-       <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-         <h4 className="font-bold text-blue-800 dark:text-blue-300 text-sm mb-2">Kode Terpilih ({selectedCodes.length}):</h4>
-         <div className="flex flex-wrap gap-2">
-           {selectedCodes.map(c => (
-             <span key={c.code} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full text-xs font-bold">
-               {c.code} - {c.desc.substring(0, 40)}...
-               <button onClick={() => removeCode(c.code)} className="ml-1 text-blue-500 hover:text-blue-800">×</button>
-             </span>
-           ))}
-         </div>
-       </div>
-     )}
-     <div className="overflow-x-auto">
-       <table className="w-full text-left border-collapse">
-         <thead>
-           <tr className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 border-b border-slate-200 dark:border-slate-700">
-             <th className="p-3 text-xs font-bold text-slate-500 uppercase">Kode</th>
-             <th className="p-3 text-xs font-bold text-slate-500 uppercase">Deskripsi</th>
-             <th className="p-3 text-xs font-bold text-slate-500 uppercase">Kategori</th>
-             <th className="p-3 text-xs font-bold text-slate-500 uppercase text-center">Aksi</th>
-           </tr>
-         </thead>
-         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-           {filtered.map(item => (
-             <tr key={item.code} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-               <td className="p-3 font-mono font-bold text-blue-600">{item.code}</td>
-               <td className="p-3 text-sm text-slate-700 dark:text-slate-300">{item.desc}</td>
-               <td className="p-3">
-                 <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs">{item.category}</span>
-               </td>
-               <td className="p-3 text-center">
-                 <button
-                   onClick={() => addCode(item)}
-                   className="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700"
-                 >
-                   + Pilih
-                 </button>
-               </td>
-             </tr>
-           ))}
-           {filtered.length === 0 && (
-             <tr>
-               <td colSpan={4} className="p-6 text-center text-slate-500">Tidak ditemukan kode ICD-10 untuk "{search}"</td>
-             </tr>
-           )}
-         </tbody>
-       </table>
-     </div>
-   </div>
- </div>
-);
+  return String(item);
 }
 
-// ═══════════════════════════════════════════
-// TAB ICD-9-CM
-// ═══════════════════════════════════════════
-function ICD9Tab() {
-const [search, setSearch] = useState('');
-const [selectedCodes, setSelectedCodes] = useState<any[]>([]);
-const toast = useToast();
-
-const filtered = ICD9_DATA.filter(d =>
-  d.code.toLowerCase().includes(search.toLowerCase()) ||
-  d.desc.toLowerCase().includes(search.toLowerCase()) ||
-  d.category.toLowerCase().includes(search.toLowerCase())
-);
-
-const addCode = (item: any) => {
-  if (!selectedCodes.find(c => c.code === item.code)) {
-    setSelectedCodes([...selectedCodes, item]);
-    toast.success(`ICD-9-CM ${item.code} ditambahkan`);
+function formatIcdListDisplay(items: any): string {
+  if (!items) return '';
+  if (typeof items === 'string') return items;
+  if (Array.isArray(items)) {
+    return items.map(formatIcdDisplay).filter(Boolean).join(', ');
   }
-};
-
-const removeCode = (code: string) => {
-  setSelectedCodes(selectedCodes.filter(c => c.code !== code));
-};
-
-return (
- <div className="p-6 space-y-6">
- <div className="flex justify-between items-center">
- <div>
- <h2 className="text-xl font-bold text-slate-900 dark:text-white">Kodefikasi ICD-9-CM (Tindakan/Prosedur)</h2>
- <p className="text-slate-500 text-sm">Pencarian dan penetapan kode tindakan medis</p>
- </div>
- </div>
-  <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-     <div className="relative mb-4">
-       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-       <input
-         type="text"
-         placeholder="Cari kode atau nama tindakan ICD-9-CM..."
-         className="w-full pl-10 pr-4 py-3 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-         value={search}
-         onChange={e => setSearch(e.target.value)}
-       />
-     </div>
-     {selectedCodes.length > 0 && (
-       <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
-         <h4 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm mb-2">Tindakan Terpilih ({selectedCodes.length}):</h4>
-         <div className="flex flex-wrap gap-2">
-           {selectedCodes.map(c => (
-             <span key={c.code} className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-bold">
-               {c.code} - {c.desc.substring(0, 40)}...
-               <button onClick={() => removeCode(c.code)} className="ml-1 text-emerald-500 hover:text-emerald-800">×</button>
-             </span>
-           ))}
-         </div>
-       </div>
-     )}
-     <div className="overflow-x-auto">
-       <table className="w-full text-left border-collapse">
-         <thead>
-           <tr className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 border-b border-slate-200 dark:border-slate-700">
-             <th className="p-3 text-xs font-bold text-slate-500 uppercase">Kode</th>
-             <th className="p-3 text-xs font-bold text-slate-500 uppercase">Deskripsi</th>
-             <th className="p-3 text-xs font-bold text-slate-500 uppercase">Kategori</th>
-             <th className="p-3 text-xs font-bold text-slate-500 uppercase text-center">Aksi</th>
-           </tr>
-         </thead>
-         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-           {filtered.map(item => (
-             <tr key={item.code} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-               <td className="p-3 font-mono font-bold text-emerald-600">{item.code}</td>
-               <td className="p-3 text-sm text-slate-700 dark:text-slate-300">{item.desc}</td>
-               <td className="p-3">
-                 <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded text-xs">{item.category}</span>
-               </td>
-               <td className="p-3 text-center">
-                 <button
-                   onClick={() => addCode(item)}
-                   className="px-3 py-1 bg-emerald-600 text-white rounded text-xs font-bold hover:bg-emerald-700"
-                 >
-                   + Pilih
-                 </button>
-               </td>
-             </tr>
-           ))}
-           {filtered.length === 0 && (
-             <tr>
-               <td colSpan={4} className="p-6 text-center text-slate-500">Tidak ditemukan kode ICD-9-CM untuk "{search}"</td>
-             </tr>
-           )}
-         </tbody>
-       </table>
-     </div>
-   </div>
- </div>
-);
+  return formatIcdDisplay(items);
 }
 
 // ═══════════════════════════════════════════
@@ -255,6 +63,7 @@ function ResumeMedisTab() {
   const [selectedResume, setSelectedResume] = useState<any>(null);
   const [filterUnit, setFilterUnit] = useState<string>('Semua');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [isNewResumeModalOpen, setIsNewResumeModalOpen] = useState(false);
 
   // Extract all resumes from patients
   const allResumes = (pasien || [])
@@ -269,64 +78,79 @@ function ResumeMedisTab() {
     .filter(Boolean);
 
   const filteredResumes = allResumes.filter((res: any) => {
-    const matchesUnit = filterUnit === 'Semua' || (res.unit_pelayanan && res.unit_pelayanan.toLowerCase().includes(filterUnit.toLowerCase()));
+    const unitStr = typeof res.unit_pelayanan === 'string' ? res.unit_pelayanan : '';
+    const matchesUnit = filterUnit === 'Semua' || unitStr.toLowerCase().includes(filterUnit.toLowerCase());
     const term = searchTerm.toLowerCase();
+    const pDiag = formatIcdDisplay(res.diagnosa_utama) || formatIcdDisplay(res.diagnosis_primer);
+    const sDiag = formatIcdListDisplay(res.diagnosis_sekunder || res.diagnosa_sekunder);
     const matchesSearch = !searchTerm ||
-      (res.nama_pasien && res.nama_pasien.toLowerCase().includes(term)) ||
-      (res.no_rm && res.no_rm.toLowerCase().includes(term)) ||
-      (res.no_resume && res.no_resume.toLowerCase().includes(term)) ||
-      (res.dokter_dpjp && res.dokter_dpjp.toLowerCase().includes(term)) ||
-      (res.diagnosis_primer?.nama && res.diagnosis_primer.nama.toLowerCase().includes(term)) ||
-      (res.diagnosis_primer?.kode_icd10 && res.diagnosis_primer.kode_icd10.toLowerCase().includes(term));
+      (res.nama_pasien && String(res.nama_pasien).toLowerCase().includes(term)) ||
+      (res.no_rm && String(res.no_rm).toLowerCase().includes(term)) ||
+      (res.no_resume && String(res.no_resume).toLowerCase().includes(term)) ||
+      (res.dokter_dpjp && String(res.dokter_dpjp).toLowerCase().includes(term)) ||
+      (res.dpjp && String(res.dpjp).toLowerCase().includes(term)) ||
+      (pDiag && pDiag.toLowerCase().includes(term)) ||
+      (sDiag && sDiag.toLowerCase().includes(term));
     return matchesUnit && matchesSearch;
   });
 
-  const countRJ = allResumes.filter((r: any) => r.unit_pelayanan && r.unit_pelayanan.includes('Poli')).length;
-  const countIGD = allResumes.filter((r: any) => r.unit_pelayanan && r.unit_pelayanan.includes('IGD')).length;
-  const countRanap = allResumes.filter((r: any) => r.unit_pelayanan && (r.unit_pelayanan.includes('Rawat Inap') || r.unit_pelayanan.includes('Bangsal') || r.unit_pelayanan.includes('ICU'))).length;
-  const countBedah = allResumes.filter((r: any) => r.unit_pelayanan && (r.unit_pelayanan.includes('Bedah') || r.unit_pelayanan.includes('Operasi'))).length;
+  const countRJ = allResumes.filter((r: any) => typeof r.unit_pelayanan === 'string' && r.unit_pelayanan.includes('Poli')).length;
+  const countIGD = allResumes.filter((r: any) => typeof r.unit_pelayanan === 'string' && r.unit_pelayanan.includes('IGD')).length;
+  const countRanap = allResumes.filter((r: any) => typeof r.unit_pelayanan === 'string' && (r.unit_pelayanan.includes('Rawat Inap') || r.unit_pelayanan.includes('Bangsal') || r.unit_pelayanan.includes('ICU'))).length;
+  const countBedah = allResumes.filter((r: any) => typeof r.unit_pelayanan === 'string' && (r.unit_pelayanan.includes('Bedah') || r.unit_pelayanan.includes('Operasi'))).length;
 
   return (
-    <div className="p-6 h-full max-w-7xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 h-full max-w-7xl mx-auto space-y-6">
       {/* HEADER */}
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            Resume Medis Pasien (Clinical Discharge & Outpatient Summary)
+            Resume Medis Pasien (Clinical Discharge Summary)
           </h1>
           <p className="text-slate-500 text-sm">
             Ringkasan rekam medis lengkap per pelayanan (Rawat Jalan, IGD, Rawat Inap, Bedah & Penunjang) sesuai standar PMK 24/2022 & SatuSehat
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <PrintPDFButton filename="Daftar_Resume_Medis_RS" label="Cetak Ringkasan Eksekutif" className="text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg" />
+          <button
+            onClick={() => setIsNewResumeModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Terbitkan Resume Medis</span>
+          </button>
+          <PrintPDFButton 
+            filename="Daftar_Resume_Medis_RS" 
+            label="Cetak Ringkasan" 
+            className="text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 font-bold px-4 py-2 rounded-xl" 
+          />
         </div>
       </div>
 
       {/* METRIC CARDS */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase">Total Resume</p>
           <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{allResumes.length}</h3>
           <p className="text-xs text-emerald-600 font-medium mt-1">100% Terverifikasi TTE</p>
         </div>
-        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase">Rawat Jalan / Poli</p>
           <h3 className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{countRJ}</h3>
           <p className="text-xs text-slate-400 mt-1">24 Poliklinik</p>
         </div>
-        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase">Gawat Darurat (IGD)</p>
           <h3 className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{countIGD}</h3>
           <p className="text-xs text-slate-400 mt-1">Triase ATS & ESI</p>
         </div>
-        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase">Rawat Inap</p>
           <h3 className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{countRanap}</h3>
           <p className="text-xs text-slate-400 mt-1">Bangsal & ICU</p>
         </div>
-        <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase">Bedah & Operasi</p>
           <h3 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-1">{countBedah}</h3>
           <p className="text-xs text-slate-400 mt-1">Kamar Operasi (OK)</p>
@@ -334,7 +158,7 @@ function ResumeMedisTab() {
       </div>
 
       {/* FILTER & SEARCH */}
-      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
         <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1">
           {['Semua', 'Poli', 'IGD', 'Rawat Inap', 'Bedah'].map((unit) => (
             <button
@@ -358,16 +182,16 @@ function ResumeMedisTab() {
             placeholder="Cari pasien, No. RM, diagnosis, dokter..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50/50 dark:bg-slate-900/50 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
 
       {/* TABLE RESUME MEDIS */}
-      <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
-            <thead className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 border-b border-slate-200 dark:border-slate-700">
+            <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th className="p-3.5 text-xs font-bold text-slate-500 uppercase">No. Resume & RM</th>
                 <th className="p-3.5 text-xs font-bold text-slate-500 uppercase">Nama Pasien</th>
@@ -396,14 +220,16 @@ function ResumeMedisTab() {
                   </td>
                   <td className="p-3.5">
                     <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs block">
-                      [{res.diagnosis_primer?.kode_icd10}] {res.diagnosis_primer?.nama}
+                      {formatIcdDisplay(res.diagnosa_utama) || formatIcdDisplay(res.diagnosis_primer) || '-'}
                     </span>
-                    {res.diagnosis_sekunder?.length > 0 && (
-                      <span className="text-xs text-slate-400">+{res.diagnosis_sekunder.length} diagnosa sekunder</span>
-                    )}
+                    {formatIcdListDisplay(res.diagnosis_sekunder || res.diagnosa_sekunder) ? (
+                      <span className="text-xs text-slate-400 truncate block max-w-xs" title={formatIcdListDisplay(res.diagnosis_sekunder || res.diagnosa_sekunder)}>
+                        {formatIcdListDisplay(res.diagnosis_sekunder || res.diagnosa_sekunder)}
+                      </span>
+                    ) : null}
                   </td>
                   <td className="p-3.5 text-xs font-medium text-slate-700 dark:text-slate-300">
-                    {res.dokter_dpjp}
+                    {res.dpjp || res.dokter_dpjp || 'dr. Andi Pratama, Sp.PD'}
                   </td>
                   <td className="p-3.5">
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50">
@@ -432,10 +258,19 @@ function ResumeMedisTab() {
         </div>
       </div>
 
+      {/* MODAL BUAT RESUME */}
+      {isNewResumeModalOpen && (
+        <ModalBuatResumeMedis
+          isOpen={isNewResumeModalOpen}
+          onClose={() => setIsNewResumeModalOpen(false)}
+          onSuccess={() => toast.success('Daftar resume medis berhasil diperbarui!')}
+        />
+      )}
+
       {/* DETAIL RESUME MODAL */}
       {selectedResume && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col">
             {/* MODAL HEADER */}
             <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-5 rounded-t-2xl flex justify-between items-center sticky top-0 z-10">
               <div className="flex items-center gap-3">
@@ -445,233 +280,91 @@ function ResumeMedisTab() {
                 <div>
                   <h2 className="text-lg font-bold">Ringkasan Resume Medis (Medical Discharge Summary)</h2>
                   <p className="text-xs text-blue-100">
-                    No: {selectedResume.no_resume} • No. RM: {selectedResume.no_rm} • {selectedResume.nama_pasien}
+                    Standar PMK No. 24 Tahun 2022 & Standar Akreditasi STARKES • {selectedResume.no_resume}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <PrintPDFButton 
-                  filename={`Resume_${selectedResume.no_rm}_${selectedResume.nama_pasien}`} 
-                  label="📄 Cetak PDF Resume" 
-                  className="text-xs bg-white text-blue-900 hover:bg-blue-50 font-bold px-3.5 py-1.5 rounded-lg shadow-sm" 
+                <PrintPDFButton
+                  filename={`Resume_${selectedResume.no_rm}_${selectedResume.nama_pasien}`}
+                  label="Cetak Resume (PDF)"
+                  className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg"
                   documentData={selectedResume}
                   docType="resume_medis"
-                  title="RINGKASAN REKAM MEDIS RAWAT JALAN (RESUME MEDIS)"
+                  title="RESUME MEDIS PASIEN"
                 />
                 <button
                   onClick={() => setSelectedResume(null)}
-                  className="p-1.5 rounded-lg hover:bg-white/20 text-white text-lg transition-colors"
+                  className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
-            {/* MODAL BODY */}
-            <div className="p-6 space-y-6 text-sm text-slate-800 dark:text-slate-200">
-              {/* 1. IDENTITAS & ADMISI */}
-              <div className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Nama Lengkap</p>
-                  <p className="font-bold text-slate-900 dark:text-white">{selectedResume.nama_pasien}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">No. Rekam Medis</p>
-                  <p className="font-mono font-bold text-blue-600 dark:text-blue-400">{selectedResume.no_rm}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Unit Pelayanan</p>
-                  <p className="font-semibold">{selectedResume.unit_pelayanan}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Dokter DPJP</p>
-                  <p className="font-semibold text-slate-900 dark:text-white">{selectedResume.dokter_dpjp}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Tanggal Pelayanan</p>
-                  <p className="font-medium">{selectedResume.tanggal_masuk || '2026-08-24'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Penjamin</p>
-                  <p className="font-medium">{selectedResume.patient_ref?.penjamin || 'BPJS Kesehatan'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Alasan Masuk</p>
-                  <p className="font-medium">{selectedResume.alasan_masuk || 'Keluhan medis akut'}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-400 font-semibold uppercase">Status Keluar</p>
-                  <p className="font-bold text-emerald-600 dark:text-emerald-400">{selectedResume.kondisi_pulang || 'Perbaikan / Sembuh'}</p>
-                </div>
-              </div>
-
-              {/* 2. ANAMNESIS & TANDA VITAL */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <h4 className="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-1.5 text-xs uppercase tracking-wide text-blue-600">
-                    <Activity className="w-4 h-4" /> Anamnesis Klinis
-                  </h4>
-                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-                    {selectedResume.ringkasan_riwayat || 'Pasien datang dengan keluhan spesifik sesuai pelayanan dan telah dilakukan anamnesis mendalam oleh DPJP.'}
-                  </p>
-                  {selectedResume.patient_ref?.riwayat_alergi && (
-                    <div className="mt-3 p-2 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-800/50">
-                      <span className="text-xs font-bold text-red-700 dark:text-red-300">Riwayat Alergi: </span>
-                      <span className="text-xs text-red-600 dark:text-red-400">{selectedResume.patient_ref.riwayat_alergi}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <h4 className="font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-1.5 text-xs uppercase tracking-wide text-red-600">
-                    <HeartPulse className="w-4 h-4" /> Tanda Vital Saat Pelayanan
-                  </h4>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
-                      <p className="text-[10px] text-slate-400 uppercase">Tekanan Darah</p>
-                      <p className="font-bold text-xs">{selectedResume.tanda_vital_keluar?.td || '120/80'} mmHg</p>
-                    </div>
-                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
-                      <p className="text-[10px] text-slate-400 uppercase">Nadi</p>
-                      <p className="font-bold text-xs">{selectedResume.tanda_vital_keluar?.nadi || 80} x/mnt</p>
-                    </div>
-                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
-                      <p className="text-[10px] text-slate-400 uppercase">Suhu</p>
-                      <p className="font-bold text-xs">{selectedResume.tanda_vital_keluar?.suhu || 36.5} °C</p>
-                    </div>
-                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
-                      <p className="text-[10px] text-slate-400 uppercase">Laju Napas</p>
-                      <p className="font-bold text-xs">{selectedResume.tanda_vital_keluar?.rr || 20} x/mnt</p>
-                    </div>
-                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
-                      <p className="text-[10px] text-slate-400 uppercase">SpO2</p>
-                      <p className="font-bold text-xs">{selectedResume.tanda_vital_keluar?.spo2 || 99}%</p>
-                    </div>
-                    <div className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg">
-                      <p className="text-[10px] text-slate-400 uppercase">Kesadaran</p>
-                      <p className="font-bold text-xs">Compos Mentis</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. DIAGNOSIS ICD-10 & PROSEDUR ICD-9-CM */}
-              <div className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4">
-                <div>
-                  <h4 className="font-bold text-slate-900 dark:text-white mb-2 text-xs uppercase tracking-wide text-indigo-600">
-                    Diagnosis Akhir (ICD-10)
-                  </h4>
-                  <div className="p-3 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-bold text-blue-600 dark:text-blue-400">Diagnosis Utama:</span>
-                      <p className="font-bold text-sm text-slate-900 dark:text-white">
-                        {selectedResume.diagnosis_primer?.nama}
-                      </p>
-                    </div>
-                    <span className="font-mono font-bold px-2.5 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded text-xs">
-                      {selectedResume.diagnosis_primer?.kode_icd10}
-                    </span>
-                  </div>
-
-                  {selectedResume.diagnosis_sekunder && selectedResume.diagnosis_sekunder.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {selectedResume.diagnosis_sekunder.map((sec: any, idx: number) => (
-                        <div key={idx} className="p-2 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
-                          <span><strong>Sekunder {idx + 1}:</strong> {sec.nama}</span>
-                          <span className="font-mono font-bold text-slate-600 dark:text-slate-400">{sec.kode_icd10}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {selectedResume.tindakan_prosedur && selectedResume.tindakan_prosedur.length > 0 && (
-                  <div>
-                    <h4 className="font-bold text-slate-900 dark:text-white mb-2 text-xs uppercase tracking-wide text-emerald-600">
-                      Tindakan & Prosedur Medis (ICD-9-CM)
-                    </h4>
-                    <div className="space-y-1">
-                      {selectedResume.tindakan_prosedur.map((proc: any, idx: number) => (
-                        <div key={idx} className="p-2 bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
-                          <span>{proc.nama}</span>
-                          <span className="font-mono font-bold px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 rounded">
-                            {proc.kode_icd9}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 4. HASIL PENUNJANG & TERAPI OBAT PULANG */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <h4 className="font-bold text-slate-900 dark:text-white mb-2 text-xs uppercase tracking-wide text-purple-600">
-                    🔬 Hasil Pemeriksaan Penunjang
-                  </h4>
-                  <div className="p-3 bg-purple-50/50 dark:bg-purple-950/20 rounded-lg border border-purple-100 dark:border-purple-900/40 text-xs space-y-1">
-                    <p><strong>Laboratorium:</strong> {selectedResume.hasil_penunjang?.lab || 'Darah lengkap normal, GDS dalam batas target'}</p>
-                    <p><strong>Radiologi:</strong> {selectedResume.hasil_penunjang?.radiologi || 'Foto Thorax/USG konfirmasi klinis'}</p>
-                  </div>
-                </div>
-
-                <div className="bg-white/[0.02] dark:bg-slate-900/40 backdrop-blur-xl p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <h4 className="font-bold text-slate-900 dark:text-white mb-2 text-xs uppercase tracking-wide text-amber-600">
-                    💊 Terapi Obat & Resep Pulang
-                  </h4>
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {selectedResume.obat_pulang && selectedResume.obat_pulang.length > 0 ? (
-                      selectedResume.obat_pulang.map((med: any, idx: number) => (
-                        <div key={idx} className="p-2 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md rounded-lg text-xs flex justify-between items-center">
-                          <span className="font-semibold">{med.nama_obat}</span>
-                          <span className="text-slate-500">{med.dosis} • {med.aturan_pakai}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-slate-400">Terapi oral sesuai resep DPJP terlampir.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* 5. EDUKASI, KONTROL & TANDA TANGAN ELEKTRONIK */}
-              <div className="bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div className="space-y-1 text-xs">
-                  <p><strong>Jadwal Kontrol Ulang:</strong> {selectedResume.jadwal_kontrol || '1 minggu setelah tanggal pelayanan di Poli Terkait'}</p>
-                  <p><strong>Instruksi Khusus / Edukasi:</strong> {selectedResume.instruksi_edukasi || 'Istirahat cukup, minum obat teratur, segera kembali bila ada keluhan memberat.'}</p>
-                </div>
-
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800 flex items-center gap-3 text-xs">
-                  <ShieldCheck className="w-8 h-8 text-emerald-600 flex-shrink-0" />
-                  <div>
-                    <p className="font-bold text-emerald-800 dark:text-emerald-300">Tanda Tangan Elektronik (TTE)</p>
-                    <p className="text-[11px] text-emerald-700 dark:text-emerald-400">{selectedResume.dokter_dpjp}</p>
-                    <p className="text-[10px] text-emerald-600 dark:text-emerald-500 font-mono">Tersertifikasi Balai Sertifikasi Elektronik (BSrE)</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* MODAL FOOTER */}
-            <div className="p-4 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 flex justify-end gap-2 rounded-b-2xl">
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(JSON.stringify(selectedResume, null, 2));
-                  toast.success('Salinan ringkasan rekam medis berhasil disalin ke clipboard.');
-                }}
-                className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-lg text-xs hover:bg-slate-300 dark:hover:bg-slate-600"
-              >
-                📋 Salin Teks Resume
-              </button>
-              <button
-                onClick={() => setSelectedResume(null)}
-                className="px-4 py-2 bg-slate-800 text-white font-bold rounded-lg text-xs hover:bg-slate-700"
-              >
-                Tutup
-              </button>
+            {/* MODAL CONTENT */}
+            <div className="p-6 space-y-6">
+              <ResumeMedisTemplate data={selectedResume} />
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// TAB BERKAS LENGKAP 100% DOSSIER PASIEN
+// ═══════════════════════════════════════════
+function BerkasLengkapTab() {
+  const { pasien } = useHospital();
+  const [selectedPatientId, setSelectedPatientId] = useState<string>(
+    pasien && pasien.length > 0 ? (pasien[0].no_rm || pasien[0].id) : ''
+  );
+  const [filterSearch, setFilterSearch] = useState('');
+
+  const currentPatient = (pasien || []).find((p: any) => (p.no_rm || p.id) === selectedPatientId) || (pasien && pasien.length > 0 ? pasien[0] : null);
+
+  const filteredPatientList = (pasien || []).filter((p: any) => {
+    const q = filterSearch.toLowerCase().trim();
+    return !q || (p.nama && p.nama.toLowerCase().includes(q)) || (p.no_rm && p.no_rm.toLowerCase().includes(q));
+  });
+
+  return (
+    <div className="p-4 sm:p-6 h-full flex flex-col max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div>
+          <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <FolderCheck className="w-6 h-6 text-emerald-600" />
+            Audit Berkas Lengkap Pasien 100% (Permenkes 24/2022)
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Pilih rekam medis pasien untuk memeriksa, mengisi, dan memverifikasi seluruh kelengkapan formulir e-RME.
+          </p>
+        </div>
+
+        {/* PATIENT SELECTOR DROPDOWN */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <span className="text-xs font-bold text-slate-500 whitespace-nowrap">Pilih Pasien:</span>
+          <select
+            value={selectedPatientId}
+            onChange={(e) => setSelectedPatientId(e.target.value)}
+            className="p-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-72"
+          >
+            {(pasien || []).map((p: any) => (
+              <option key={p.no_rm || p.id} value={p.no_rm || p.id}>
+                {p.no_rm} - {p.nama} ({p.penjamin || 'Umum'})
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {currentPatient ? (
+        <DossierDocumentHub patient={currentPatient} />
+      ) : (
+        <div className="text-center p-12 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <p className="text-sm font-bold text-slate-500">Belum ada data pasien tersedia di sistem.</p>
         </div>
       )}
     </div>
@@ -682,95 +375,446 @@ function ResumeMedisTab() {
 // KOMPONEN UTAMA MEDICAL RECORDS
 // ═══════════════════════════════════════════
 export function MedicalRecords() {
-const { pasien } = useHospital();
-const toast = useToast();
-const { activeTab } = useOutletContext<{ activeTab: string }>() || { activeTab: 'Daftar Pasien' };
-const [activePatient, setActivePatient] = useState<any>(null);
-const [voicePatient, setVoicePatient] = useState<any>(null);
-const [isModalOpen, setIsModalOpen] = useState(false);
+  const { pasien } = useHospital();
+  const toast = useToast();
+  const [searchParams] = useSearchParams();
+  const { activeTab } = useOutletContext<{ activeTab: string }>() || { activeTab: 'Daftar Pasien' };
+  
+  const [activePatient, setActivePatient] = useState<any>(null);
+  const [voicePatient, setVoicePatient] = useState<any>(null);
+  const [qrPatient, setQrPatient] = useState<any>(null);
+  const [dossierPatient, setDossierPatient] = useState<any>(null);
+  const [resumePatient, setResumePatient] = useState<any>(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
 
-// Routing berdasarkan tab aktif dari moduleRegistry
-if (activeTab === 'ICD-10 Diagnosis') {
-  return <ICD10Tab />;
-}
+  // Search & Filter state for Daftar Pasien
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterPenjamin, setFilterPenjamin] = useState('Semua');
+  const [filterStatus, setFilterStatus] = useState('Semua');
 
-if (activeTab === 'ICD-9 Tindakan') {
-  return <ICD9Tab />;
-}
+  // Deteksi parameter URL jika staf memindai QR Code dari luar atau scanner
+  useEffect(() => {
+    const targetRm = searchParams.get('rm') || searchParams.get('no_rm') || searchParams.get('patientId');
+    if (targetRm && pasien && pasien.length > 0) {
+      const cleanTarget = targetRm.toLowerCase().trim();
+      const found = pasien.find((p: any) => {
+        const pRm = (p.no_rm || p.noRm || p.id || '').toLowerCase().trim();
+        const pNik = (p.nik || '').toLowerCase().trim();
+        return pRm === cleanTarget || 
+               pRm.replace(/[^a-z0-9]/g, '') === cleanTarget.replace(/[^a-z0-9]/g, '') ||
+               pNik === cleanTarget ||
+               p.id === targetRm;
+      });
 
-if (activeTab === 'Resume Medis') {
-  return <ResumeMedisTab />;
-}
+      if (found) {
+        setActivePatient(found);
+        setIsModalOpen(true);
+        toast.success(`Membuka Ringkasan EMR Pasien: ${found.nama} (${found.no_rm})`);
+      }
+    }
+  }, [searchParams, pasien]);
 
-// Default: Daftar Pasien
-const columns = [
-{ key: 'no_rm', label: 'No. RM', sortable: true, render: (val: string) => <span className="font-medium font-mono text-blue-600">{val}</span> },
-{ key: 'nama', label: 'Nama Pasien', sortable: true, render: (val: string) => <span className="font-bold">{val}</span> },
-{ key: 'jenis_kelamin', label: 'L/P', sortable: true, filterable: true },
-{ key: 'last_visit', label: 'Terakhir Berkunjung', render: () => 'Hari ini' },
-{
-  key: 'action',
-  label: 'Aksi',
-  render: (_: any, p: any) => (
-    <div className="flex gap-2 justify-end">
-      <button 
-        onClick={(e) => { e.stopPropagation(); setVoicePatient(p); }} 
-        className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-300 px-2.5 py-1.5 rounded-md text-xs font-bold flex items-center gap-1 border border-indigo-200 dark:border-indigo-800"
-        title="Dikte Laporan Suara Cerdas"
-      >
-        <Mic className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Suara
-      </button>
-      <button onClick={(e) => { e.stopPropagation(); setActivePatient(p); setIsModalOpen(true); }} className="bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 text-sm font-medium flex items-center gap-1 shadow-sm">
-        📄 Buka RME
-      </button>
+  // ═══════════════════════════════════════════
+  // ROUTING TAB DARI MODULE REGISTRY
+  // ═══════════════════════════════════════════
+  if (activeTab === 'Berkas Lengkap (100%)') {
+    return <BerkasLengkapTab />;
+  }
+
+  if (activeTab === 'ICD-10 Diagnosis') {
+    return <ICD10WorkspaceTab />;
+  }
+
+  if (activeTab === 'ICD-9 Tindakan') {
+    return <ICD9WorkspaceTab />;
+  }
+
+  if (activeTab === 'Resume Medis') {
+    return <ResumeMedisTab />;
+  }
+
+  if (activeTab === 'Peminjaman Berkas') {
+    return <PeminjamanBerkasTab />;
+  }
+
+  if (activeTab === 'Audit KLPCM') {
+    return <AuditKLPCMTab />;
+  }
+
+  if (activeTab === 'Pelepasan Informasi') {
+    return <PelepasanInformasiTab />;
+  }
+
+  // ═══════════════════════════════════════════
+  // DEFAULT TAB: DAFTAR PASIEN & REKAM MEDIS
+  // ═══════════════════════════════════════════
+  const totalPasien = (pasien || []).length;
+  const bpjsCount = (pasien || []).filter(p => (p.penjamin || '').toLowerCase().includes('bpjs')).length;
+  const umumCount = totalPasien - bpjsCount;
+  const hasResumeCount = (pasien || []).filter(p => p.resume_medis).length;
+  const resumePercentage = totalPasien > 0 ? Math.round((hasResumeCount / totalPasien) * 100) : 0;
+
+  // Filtered patient list
+  const filteredPatients = (pasien || []).filter(p => {
+    const q = searchQuery.toLowerCase().trim();
+    const matchSearch = !q || 
+      (p.nama && p.nama.toLowerCase().includes(q)) ||
+      (p.no_rm && p.no_rm.toLowerCase().includes(q)) ||
+      (p.nik && p.nik.toLowerCase().includes(q)) ||
+      (p.no_hp && p.no_hp.toLowerCase().includes(q)) ||
+      (p.alamat && p.alamat.toLowerCase().includes(q));
+
+    const matchPenjamin = filterPenjamin === 'Semua' || 
+      (p.penjamin && p.penjamin.toLowerCase().includes(filterPenjamin.toLowerCase()));
+
+    const matchStatus = filterStatus === 'Semua' ||
+      (filterStatus === 'Lengkap' && p.resume_medis) ||
+      (filterStatus === 'Belum' && !p.resume_medis);
+
+    return matchSearch && matchPenjamin && matchStatus;
+  });
+
+  const columns = [
+    { 
+      key: 'no_rm', 
+      label: 'No. RM', 
+      sortable: true, 
+      render: (val: string, p: any) => (
+        <div>
+          <span className="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded border border-blue-200 dark:border-blue-800 text-xs">
+            {val || p.noRm}
+          </span>
+          <span className="block text-[10px] text-slate-400 mt-0.5">NIK: {p.nik || '-'}</span>
+        </div>
+      ) 
+    },
+    { 
+      key: 'nama', 
+      label: 'Identitas Pasien', 
+      sortable: true, 
+      render: (val: string, p: any) => (
+        <div>
+          <span className="font-bold text-slate-900 dark:text-white block">{val}</span>
+          <span className="text-xs text-slate-500">
+            {p.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'} • {p.umur || 35} thn • {p.tgl_lahir || '-'}
+          </span>
+        </div>
+      ) 
+    },
+    { 
+      key: 'penjamin', 
+      label: 'Penjamin & Status', 
+      sortable: true,
+      render: (val: string, p: any) => (
+        <div>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
+            (val || '').toLowerCase().includes('bpjs') 
+              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+              : 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
+          }`}>
+            {val || 'Umum / Mandiri'}
+          </span>
+          <span className="block text-[10px] text-slate-400 mt-0.5">Poli: {p.poli || 'Umum'}</span>
+        </div>
+      )
+    },
+    {
+      key: 'diagnosa_primer',
+      label: 'Diagnosis Utama (ICD-10)',
+      render: (val: any, p: any) => {
+        const diag = formatIcdDisplay(val) || 
+                     formatIcdDisplay(p.diagnosa_primer) ||
+                     formatIcdDisplay(p.resume_medis?.diagnosa_utama) || 
+                     formatIcdDisplay(p.resume_medis?.diagnosis_primer) || 
+                     (Array.isArray(p.problem_list) && p.problem_list.length > 0 ? formatIcdDisplay(p.problem_list[0]) : '');
+        return (
+          <div className="max-w-xs">
+            {diag ? (
+              <span className="font-mono text-xs font-bold text-slate-800 dark:text-slate-200 block truncate" title={diag}>
+                {diag}
+              </span>
+            ) : (
+              <span className="text-xs text-slate-400 italic">Belum terkodefikasi</span>
+            )}
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${p.resume_medis ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'}`}>
+                {p.resume_medis ? '✓ Resume Ready' : '⏳ Menunggu Resume'}
+              </span>
+            </div>
+          </div>
+        );
+      }
+    },
+    {
+      key: 'action',
+      label: 'Aksi Pelayanan Rekam Medis',
+      render: (_: any, p: any) => (
+        <div className="flex items-center gap-1.5 justify-end">
+          <button
+            id={`btn-qr-${p.no_rm || p.id}`}
+            onClick={(e) => { e.stopPropagation(); setQrPatient(p); }}
+            className="bg-cyan-50 text-cyan-700 hover:bg-cyan-100 dark:bg-cyan-900/40 dark:text-cyan-300 px-2 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border border-cyan-200 dark:border-cyan-800 transition-colors"
+            title="Cetak Stiker Barcode & QR Berkas RM"
+          >
+            <QrCode className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+            <span className="hidden sm:inline">QR Berkas</span>
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); setVoicePatient(p); }} 
+            className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-300 px-2 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border border-indigo-200 dark:border-indigo-800"
+            title="Dikte Laporan Suara Cerdas (AI Scribe)"
+          >
+            <Mic className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+            <span className="hidden sm:inline">Suara</span>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); setResumePatient(p); setIsResumeModalOpen(true); }}
+            className="bg-purple-50 text-purple-700 hover:bg-purple-100 dark:bg-purple-900/40 dark:text-purple-300 px-2 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border border-purple-200 dark:border-purple-800"
+            title="Terbitkan Resume Medis"
+          >
+            <Plus className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+            <span className="hidden sm:inline">Resume</span>
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); setDossierPatient(p); }} 
+            className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/40 dark:text-emerald-300 px-2 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-800"
+            title="Buka Berkas Rekam Medis 100% Lengkap (Permenkes 24/2022)"
+          >
+            <FolderCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span className="hidden sm:inline">Dossier 100%</span>
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); setActivePatient(p); setIsModalOpen(true); }} 
+            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 text-xs font-bold flex items-center gap-1 shadow-sm"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Buka RME</span>
+          </button>
+        </div>
+      )
+    }
+  ];
+
+  return (
+    <div className="p-4 sm:p-6 h-full flex flex-col max-w-7xl mx-auto space-y-6">
+      {/* 1. HEADER SECTION */}
+      <div className="flex flex-wrap justify-between items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+            <FileText className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+            <span>Rekam Medis Elektronik (RME)</span>
+          </h1>
+          <p className="text-slate-500 text-xs sm:text-sm">
+            Sentralisasi data klinis pasien, resume medis terintegrasi PMK 24/2022, pelacakan berkas (Tracer), audit mutu KLPCM, dan kodefikasi ICD.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            id="btn-scan-qr-header"
+            onClick={() => setIsScannerOpen(true)}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            title="Pindai QR Code Berkas Rekam Medis Pasien"
+          >
+            <Camera className="w-4 h-4 text-emerald-200" />
+            <span>Pindai QR Berkas</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setResumePatient(pasien && pasien.length > 0 ? pasien[0] : null);
+              setIsResumeModalOpen(true);
+            }}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-all"
+          >
+            <Plus className="w-4 h-4 text-indigo-200" />
+            <span>+ Resume Baru</span>
+          </button>
+
+          {pasien && pasien.length > 0 && (
+            <button
+              onClick={() => setVoicePatient(pasien[0])}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-sm transition-all"
+            >
+              <Mic className="w-4 h-4 text-cyan-200 animate-pulse" />
+              <span>🎙️ AI Scribe</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 2. STATISTICAL OVERVIEW CARDS */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500 uppercase">Total Berkas Pasien</span>
+            <User className="w-4 h-4 text-blue-500" />
+          </div>
+          <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{totalPasien}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Aktif di SIMRS Myitaru</p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500 uppercase">Penjamin BPJS / Umum</span>
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          </div>
+          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{bpjsCount} / {umumCount}</p>
+          <p className="text-[11px] text-slate-400 mt-1">JKN terhubung VClaim</p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500 uppercase">Kepatuhan Resume Medis</span>
+            <BadgeCheck className="w-4 h-4 text-purple-500" />
+          </div>
+          <p className="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1">{resumePercentage}%</p>
+          <p className="text-[11px] text-slate-400 mt-1">{hasResumeCount} berkas ber-TTE</p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500 uppercase">Standar Akreditasi STARKES</span>
+            <HeartPulse className="w-4 h-4 text-rose-500" />
+          </div>
+          <p className="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1">99.2%</p>
+          <p className="text-[11px] text-slate-400 mt-1">Kelengkapan Form & Audit</p>
+        </div>
+      </div>
+
+      {/* 3. SEARCH & FILTER TOOLBAR */}
+      <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+        <div className="relative w-full md:w-96">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Cari No. RM, NIK, Nama Pasien, No HP, Alamat..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 text-xs border border-slate-300 dark:border-slate-600 rounded-lg bg-slate-50/50 dark:bg-slate-900/50 text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <div className="flex items-center gap-1 text-xs">
+            <span className="text-slate-500 font-bold">Penjamin:</span>
+            <select
+              value={filterPenjamin}
+              onChange={(e) => setFilterPenjamin(e.target.value)}
+              className="p-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg"
+            >
+              <option value="Semua">Semua Penjamin</option>
+              <option value="BPJS">BPJS Kesehatan</option>
+              <option value="Umum">Umum / Mandiri</option>
+              <option value="Asuransi">Asuransi Swasta</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-1 text-xs">
+            <span className="text-slate-500 font-bold">Status Resume:</span>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="p-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg"
+            >
+              <option value="Semua">Semua Status</option>
+              <option value="Lengkap">Sudah Ada Resume</option>
+              <option value="Belum">Belum Ada Resume</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. PROFESSIONAL PATIENT TABLE */}
+      <ProfessionalTable 
+        title={`Daftar Rekam Medis Pasien (${filteredPatients.length})`}
+        columns={columns}
+        data={filteredPatients}
+        pageSize={10}
+        emptyMessage="Tidak ada data pasien yang sesuai dengan filter."
+      />
+
+      {/* 5. MODALS & SUB-COMPONENTS */}
+      {isModalOpen && activePatient && (
+        <div className="fixed inset-0 z-50 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md overflow-hidden">
+          <Patient360 
+            patient={activePatient} 
+            onBack={() => setIsModalOpen(false)} 
+          />
+        </div>
+      )}
+
+      {qrPatient && (
+        <PatientQRCodeModal
+          isOpen={!!qrPatient}
+          onClose={() => setQrPatient(null)}
+          patient={qrPatient}
+          onOpenEMR={() => {
+            setActivePatient(qrPatient);
+            setIsModalOpen(true);
+            setQrPatient(null);
+          }}
+        />
+      )}
+
+      {isScannerOpen && (
+        <PatientQRScannerModal
+          isOpen={isScannerOpen}
+          onClose={() => setIsScannerOpen(false)}
+          onPatientSelected={(selected) => {
+            setActivePatient(selected);
+            setIsModalOpen(true);
+            setIsScannerOpen(false);
+          }}
+        />
+      )}
+
+      {voicePatient && (
+        <SmartVoiceReport
+          patient={voicePatient}
+          isOpen={!!voicePatient}
+          onClose={() => setVoicePatient(null)}
+          onApplyToRecord={() => {
+            toast.success('Laporan suara pasien berhasil dicatat!');
+          }}
+        />
+      )}
+
+      {isResumeModalOpen && (
+        <ModalBuatResumeMedis
+          isOpen={isResumeModalOpen}
+          onClose={() => setIsResumeModalOpen(false)}
+          patient={resumePatient}
+          onSuccess={() => {
+            toast.success('Data resume pasien berhasil diperbarui!');
+          }}
+        />
+      )}
+
+      {dossierPatient && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+          <div className="bg-slate-50 dark:bg-slate-950 rounded-2xl w-full max-w-6xl max-h-[92vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="bg-slate-900 text-white p-4 flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-2">
+                <FolderCheck className="w-5 h-5 text-emerald-400" />
+                <h3 className="font-bold text-sm sm:text-base">
+                  Berkas Rekam Medis 100% Lengkap: {dossierPatient?.nama} ({dossierPatient?.no_rm})
+                </h3>
+              </div>
+              <button
+                onClick={() => setDossierPatient(null)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1">
+              <DossierDocumentHub patient={dossierPatient} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )
-}
-];
-
-return (
- <div className="p-6 h-full flex flex-col max-w-7xl mx-auto space-y-6">
- <div className="flex flex-wrap justify-between items-center gap-4">
- <div>
- <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Rekam Medis Elektronik (RME)</h1>
- <p className="text-slate-500">Manajemen berkas rekam medis, kodefikasi ICD-10/ICD-9-CM, dan Dikte Suara Klinis Terintegrasi</p>
- </div>
- {pasien && pasien.length > 0 && (
-   <button
-     onClick={() => setVoicePatient(pasien[0])}
-     className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 shadow-sm transform hover:scale-105 transition-all"
-   >
-     <Mic className="w-4 h-4 text-cyan-300 animate-pulse" />
-     <span>🎙️ Laporan Suara Cerdas Pasien</span>
-   </button>
- )}
- </div>
-  <ProfessionalTable 
-     title="Daftar Pasien"
-     columns={columns}
-     data={pasien}
-     pageSize={10}
-     emptyMessage="Tidak ada data pasien."
-   />
-   {isModalOpen && activePatient && (
-     <div className="fixed inset-0 z-50 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-md overflow-hidden">
-       <Patient360 
-         patient={activePatient} 
-         onBack={() => setIsModalOpen(false)} 
-       />
-     </div>
-   )}
-
-   {voicePatient && (
-     <SmartVoiceReport
-       patient={voicePatient}
-       isOpen={!!voicePatient}
-       onClose={() => setVoicePatient(null)}
-       onApplyToRecord={() => {
-         toast.success('Laporan suara pasien berhasil dicatat!');
-       }}
-     />
-   )}
- </div>
-);
+  );
 }

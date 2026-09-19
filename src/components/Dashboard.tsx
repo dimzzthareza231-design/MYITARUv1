@@ -9,6 +9,7 @@ import TopNavbar from './TopNavbar';
 import { storage } from '../utils/storage';
 import { DashboardWidgetAntrian } from './DashboardWidgetAntrian';
 import { DashboardNewsWidget } from './DashboardNewsWidget';
+import { AIClinicalInsightsGrid } from './Dashboard/AIClinicalInsightsGrid';
 import { DATA_PEGAWAI } from '../data/dataPegawai';
 import { DATA_DOKTER } from '../data/dataDokter';
 import { Sparkles, Quote } from 'lucide-react';
@@ -29,7 +30,7 @@ const HEALTH_QUOTES = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { activeUser } = useHospital();
+  const { activeUser, pasien, kunjungan } = useHospital();
   const { currentUser, hasAccess } = useAuth();
   const currentRole = currentUser ? getRoleById(currentUser.roleId) : null;
   const toast = useToast();
@@ -63,9 +64,11 @@ export default function Dashboard() {
     return HEALTH_QUOTES[dayOfYear % HEALTH_QUOTES.length];
   }, []);
   
-  const totalPasien = storage.get('db_pasien', []).length;
+  const totalPasien = pasien && pasien.length > 0 ? pasien.length : storage.get('db_pasien', []).length;
   const totalIgd = storage.get('myitaru_igd_triase', []).length;
-  const totalPoli = storage.get('hospital_kunjungan', []).filter((k: any) => k.tipe === 'Rawat Jalan' && (k.status === 'Menunggu' || k.status === 'Antri' || k.status === 'Diperiksa')).length;
+  const totalPoli = kunjungan && kunjungan.length > 0
+    ? kunjungan.filter((k: any) => k.tipe === 'Rawat Jalan' && (k.status === 'Menunggu' || k.status === 'Antri' || k.status === 'Diperiksa')).length
+    : storage.get('hospital_kunjungan', []).filter((k: any) => k.tipe === 'Rawat Jalan' && (k.status === 'Menunggu' || k.status === 'Antri' || k.status === 'Diperiksa')).length;
   
   const formatDate = (d: Date) => d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   
@@ -166,6 +169,9 @@ export default function Dashboard() {
           </div>
         </div>
         
+        {/* AI CLINICAL INSIGHTS MODULAR DRAG-AND-DROP GRID */}
+        <AIClinicalInsightsGrid />
+        
         {/* SEARCH */}
         <div className="mb-10 relative group max-w-3xl mx-auto">
           <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none z-10">
@@ -188,8 +194,8 @@ export default function Dashboard() {
             const matchingModules = cat.modules.filter(m => {
               // Proteksi berdasarkan role
               if (!hasAccess(m.id)) return false;
-              // Proteksi security hanya untuk admin
-              if ((m.id === 'security' || m.label === 'Security') && currentUser?.roleId !== 'super_admin' && currentUser?.roleId !== 'admin') return false;
+              // Proteksi security hanya untuk super_admin, admin, dan it_support
+              if ((m.id === 'security' || m.label === 'Security') && currentUser?.roleId !== 'super_admin' && currentUser?.roleId !== 'admin' && currentUser?.roleId !== 'it_support') return false;
               return m.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
                      m.submenus.some((s: any) => (typeof s === 'string' ? s : s.label).toLowerCase().includes(searchQuery.toLowerCase()));
             });

@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  User, CalendarClock, FileText, CreditCard, MessageSquare, Activity, LogOut, CheckCircle
+  User, CalendarClock, FileText, CreditCard, MessageSquare, Activity, LogOut, CheckCircle, MapPin
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { GoogleMapsHealthLocator } from '../Common/GoogleMapsHealthLocator';
 
 export function PatientPortal() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'booking' | 'records' | 'billing' | 'chat'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'booking' | 'records' | 'billing' | 'chat' | 'maps'>('dashboard');
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
     { id: 'booking', label: 'Book Appointment', icon: CalendarClock },
     { id: 'records', label: 'Medical Records', icon: FileText },
     { id: 'billing', label: 'Billing & Payment', icon: CreditCard },
+    { id: 'maps', label: 'Lokasi & Rute RS', icon: MapPin },
     { id: 'chat', label: 'Chat Support', icon: MessageSquare },
   ];
 
@@ -37,7 +39,7 @@ export function PatientPortal() {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap ${
               activeTab === tab.id 
-                ? 'bg-white dark:bg-slate-700 shadow-sm text-teal-600 dark:text-teal-400' 
+                ? 'bg-white dark:bg-slate-700 shadow-sm text-teal-600 dark:text-teal-400 font-bold' 
                 : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
@@ -52,6 +54,16 @@ export function PatientPortal() {
         {activeTab === 'booking' && <BookingTab />}
         {activeTab === 'records' && <RecordsTab />}
         {activeTab === 'billing' && <BillingTab />}
+        {activeTab === 'maps' && (
+          <div className="space-y-4">
+            <GoogleMapsHealthLocator
+              initialQuery="Rumah Sakit ITARU Medika dan Fasilitas Kesehatan terdekat"
+              defaultCategory="hospital"
+              title="Peta Lokasi RS & Petunjuk Arah Menuju Fasilitas Kesehatan"
+              subtitle="Navigasi langsung menggunakan Google Maps, estimasi jarak dan rute berkendara terdekat"
+            />
+          </div>
+        )}
         {activeTab === 'chat' && <ChatTab />}
       </div>
     </div>

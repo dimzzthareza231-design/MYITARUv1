@@ -4,8 +4,9 @@ import { MODULE_REGISTRY } from '../data/moduleRegistry';
 import { useAuth } from '../contexts/AuthContext';
 import { useHospital } from '../contexts/HospitalContext';
 import UserMenu from './UserMenu';
-import { Activity, Globe, Sparkles } from 'lucide-react';
+import { Activity, Globe, Sparkles, QrCode } from 'lucide-react';
 import { MedicalSearchGrounding } from './MedicalSearchGrounding';
+import { PatientQRScannerModal } from './RME/PatientQRScannerModal';
 
 export default function TopNavbar({ currentTime }: { currentTime: Date }) {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function TopNavbar({ currentTime }: { currentTime: Date }) {
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showQRScanner, setShowQRScanner] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
   
   // Filter kategori dan modul yang hanya memiliki izin akses sesuai role pengguna
@@ -149,7 +151,18 @@ export default function TopNavbar({ currentTime }: { currentTime: Date }) {
         </nav>
         
         {/* KANAN: Search Grounding + Jam + UserMenu */}
-        <div className="flex items-center gap-3 ml-auto">
+        <div className="flex items-center gap-2.5 ml-auto">
+          {/* Tombol Pindai QR Berkas RM */}
+          <button
+            id="btn-navbar-scan-qr"
+            onClick={() => setShowQRScanner(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white text-xs font-bold border border-emerald-400/40 shadow-[0_2px_10px_rgba(16,185,129,0.2)] transition-all cursor-pointer"
+            title="Pindai QR Berkas Rekam Medis Pasien untuk Buka EMR Cepat"
+          >
+            <QrCode className="w-3.5 h-3.5 text-emerald-200" />
+            <span className="hidden sm:inline">Scan QR RM</span>
+          </button>
+
           {/* Tombol Search Grounding */}
           <button
             onClick={() => setShowSearchModal(true)}
@@ -186,6 +199,18 @@ export default function TopNavbar({ currentTime }: { currentTime: Date }) {
           ))}
         </select>
       </div>
+
+      {/* Modal Popup Scan QR Berkas RM */}
+      {showQRScanner && (
+        <PatientQRScannerModal
+          isOpen={showQRScanner}
+          onClose={() => setShowQRScanner(false)}
+          onPatientSelected={(selected) => {
+            setShowQRScanner(false);
+            navigate(`/modul/rekam-medis?rm=${encodeURIComponent(selected.no_rm)}`);
+          }}
+        />
+      )}
 
       {/* Modal Popup Search Grounding */}
       {showSearchModal && (
