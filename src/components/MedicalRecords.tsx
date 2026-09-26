@@ -13,6 +13,7 @@ import { ICD9WorkspaceTab } from './RME/Tabs/ICD9WorkspaceTab';
 import { PeminjamanBerkasTab } from './RME/Tabs/PeminjamanBerkasTab';
 import { AuditKLPCMTab } from './RME/Tabs/AuditKLPCMTab';
 import { PelepasanInformasiTab } from './RME/Tabs/PelepasanInformasiTab';
+import { RetensiMusnahTab } from './RME/Tabs/RetensiMusnahTab';
 import { ModalBuatResumeMedis } from './RME/Modals/ModalBuatResumeMedis';
 import { DossierDocumentHub } from './RME/CompleteDossier/DossierDocumentHub';
 
@@ -419,11 +420,11 @@ export function MedicalRecords() {
   // ═══════════════════════════════════════════
   // ROUTING TAB DARI MODULE REGISTRY
   // ═══════════════════════════════════════════
-  if (activeTab === 'Berkas Lengkap (100%)') {
+  if (activeTab === 'Berkas Lengkap (100%)' || activeTab === 'Berkas RM') {
     return <BerkasLengkapTab />;
   }
 
-  if (activeTab === 'ICD-10 Diagnosis') {
+  if (activeTab === 'ICD-10 Diagnosis' || activeTab === 'Coding ICD-10') {
     return <ICD10WorkspaceTab />;
   }
 
@@ -435,7 +436,7 @@ export function MedicalRecords() {
     return <ResumeMedisTab />;
   }
 
-  if (activeTab === 'Peminjaman Berkas') {
+  if (activeTab === 'Peminjaman Berkas' || activeTab === 'Peminjaman') {
     return <PeminjamanBerkasTab />;
   }
 
@@ -445,6 +446,10 @@ export function MedicalRecords() {
 
   if (activeTab === 'Pelepasan Informasi') {
     return <PelepasanInformasiTab />;
+  }
+
+  if (activeTab === 'Retensi & Musnah' || activeTab === 'Retensi') {
+    return <RetensiMusnahTab />;
   }
 
   // ═══════════════════════════════════════════

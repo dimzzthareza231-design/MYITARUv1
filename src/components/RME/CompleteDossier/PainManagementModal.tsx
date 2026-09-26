@@ -60,7 +60,14 @@ export function PainManagementModal({ isOpen, onClose, patient }: PainModalProps
       evaluasi: evaluasiNyeri,
       petugas: 'Ns. Hendri Saputra, S.Kep'
     };
-    const saved = JSON.parse(localStorage.getItem(key) || '[]');
+    let saved: any[] = [];
+    try {
+      const raw = localStorage.getItem(key);
+      saved = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(saved)) saved = [];
+    } catch (e) {
+      saved = [];
+    }
     localStorage.setItem(key, JSON.stringify([logItem, ...saved]));
     toast.success('Asesmen & Evaluasi Manajemen Nyeri berhasil disimpan!');
     onClose();

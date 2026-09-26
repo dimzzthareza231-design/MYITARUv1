@@ -73,7 +73,17 @@ export const MODULE_REGISTRY = [
         { label: 'Hasil & Ekspertise', cols: 'dokumen' },
         { label: 'Katalog & Tarif', cols: 'dokumen' },
         { label: 'Status Alat & QA/QC', cols: 'dokumen' }
-      ] }
+      ] },
+    { id: 'icu', label: 'ICU & Critical Care', icon: '🫀', color: 'from-red-600 to-rose-700', SPECIAL: true,
+      submenus: [{ label: 'Bed Map & Dashboard', cols: 'bed' }, { label: 'Vital Signs & Grafik', cols: 'dokumen' }, { label: 'Ventilator Mgt', cols: 'dokumen' }, { label: 'Scoring System', cols: 'dokumen' }, { label: 'Fluid Balance', cols: 'dokumen' }] },
+    { id: 'rehab', label: 'Rehabilitasi Medik', icon: '🏃', color: 'from-violet-500 to-purple-600', SPECIAL: true,
+      submenus: [{ label: 'Dashboard', cols: 'pasien' }, { label: 'Asesmen (Barthel)', cols: 'dokumen' }, { label: 'Catat Sesi (SOAP)', cols: 'dokumen' }, { label: 'Progress Tracking', cols: 'dokumen' }, { label: 'Home Program', cols: 'dokumen' }] },
+    { id: 'gizi', label: 'Gizi & Diet', icon: '🥗', color: 'from-emerald-500 to-teal-600', SPECIAL: true,
+      submenus: [{ label: 'Screening Gizi (MST)', cols: 'dokumen' }, { label: 'Preskripsi Diet', cols: 'dokumen' }, { label: 'Monitoring Asupan', cols: 'dokumen' }, { label: 'Edukasi Gizi', cols: 'dokumen' }] },
+    { id: 'telemedicine', label: 'Telemedicine', icon: '📹', color: 'from-sky-500 to-blue-600', SPECIAL: true,
+      submenus: [{ label: 'Appointments', cols: 'jadwal' }, { label: 'Video & Chat', cols: 'dokumen' }, { label: 'E-Prescription', cols: 'resep' }, { label: 'Remote Monitoring', cols: 'dokumen' }] },
+    { id: 'patient-portal', label: 'Portal Pasien', icon: '👤', color: 'from-teal-500 to-cyan-600', SPECIAL: true,
+      submenus: [{ label: 'Dashboard', cols: 'pasien' }, { label: 'Booking', cols: 'jadwal' }, { label: 'Medical Records', cols: 'dokumen' }, { label: 'Billing & Payment', cols: 'klaim' }, { label: 'Chat Support', cols: 'dokumen' }] }
   ]},
   { id: 'manajemen', label: 'Manajemen', icon: '🏢', navColor: 'hover:bg-slate-600', modules: [
     { id: 'sdm', label: 'SDM & Shift', icon: '👥', color: 'from-slate-500 to-slate-700',
@@ -81,7 +91,11 @@ export const MODULE_REGISTRY = [
     { id: 'inventory', label: 'Inventory', icon: '📦', color: 'from-orange-500 to-orange-600',
       submenus: [{ label: 'Stok Barang', cols: 'obat' }, { label: 'Gudang', cols: 'obat' }, { label: 'Purchase Order', cols: 'klaim' }, { label: 'Stok Opname', cols: 'obat' }] },
     { id: 'mutu', label: 'Mutu & Safety', icon: '🛡️', color: 'from-yellow-500 to-yellow-600',
-      submenus: [{ label: 'Patient Safety', cols: 'dokumen' }, { label: 'Clinical Pathway', cols: 'dokumen' }, { label: 'CSSD', cols: 'dokumen' }, { label: 'Insiden', cols: 'dokumen' }] }
+      submenus: [{ label: 'Patient Safety', cols: 'dokumen' }, { label: 'Clinical Pathway', cols: 'dokumen' }, { label: 'CSSD', cols: 'dokumen' }, { label: 'Insiden', cols: 'dokumen' }] },
+    { id: 'multi-branch', label: 'Multi-Branch', icon: '🌐', color: 'from-slate-600 to-slate-800', SPECIAL: true,
+      submenus: [{ label: 'Overview', cols: 'dokumen' }, { label: 'Facilities', cols: 'dokumen' }, { label: 'Patient Transfers', cols: 'pasien' }, { label: 'Consolidated Reports', cols: 'dokumen' }] },
+    { id: 'crm', label: 'CRM & Engagement', icon: '🤝', color: 'from-indigo-500 to-indigo-700', SPECIAL: true,
+      submenus: [{ label: 'Campaign Builder', cols: 'dokumen' }, { label: 'Message Log', cols: 'dokumen' }, { label: 'Survey Analytics', cols: 'dokumen' }, { label: 'Complaints', cols: 'dokumen' }, { label: 'Loyalty Program', cols: 'dokumen' }] }
   ]},
   { id: 'farmasi', label: 'Farmasi', icon: '💊', navColor: 'hover:bg-purple-600', modules: [
     { id: 'apotek-ralan', label: 'Apotek Ralan', icon: '💊', color: 'from-purple-500 to-purple-600', SPECIAL: true,

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Shortcut {
   key: string;
@@ -17,22 +18,24 @@ const KeyboardShortcutsContext = createContext<KeyboardShortcutsContextType | un
 
 export function KeyboardShortcutsProvider({ children }: { children: React.ReactNode }) {
   const [showHelp, setShowHelp] = useState(false);
-  
-  const navigate = (module: string) => {
-    window.dispatchEvent(new CustomEvent('navigate', { detail: { module } }));
-  };
+  const navigate = useNavigate();
   
   const shortcuts: Shortcut[] = [
-    { key: 'Ctrl+K', description: 'Command Palette', action: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true })), category: 'Global' },
+    { key: 'Ctrl+K', description: 'Command Palette', action: () => window.dispatchEvent(new CustomEvent('open-command-palette')), category: 'Global' },
     { key: '?', description: 'Show Shortcuts Help', action: () => setShowHelp(true), category: 'Global' },
     { key: 'Ctrl+/', description: 'Toggle Help', action: () => setShowHelp(prev => !prev), category: 'Global' },
     { key: 'Escape', description: 'Close Modal/Dialog', action: () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })), category: 'Global' },
     
-    { key: 'g h', description: 'Go to Dashboard', action: () => navigate('dashboard'), category: 'Navigation' },
-    { key: 'g m', description: 'Go to Monitoring', action: () => navigate('monitoring'), category: 'Navigation' },
-    { key: 'g p', description: 'Go to Patients (Registration)', action: () => navigate('registrasi'), category: 'Navigation' },
-    { key: 'g a', description: 'Go to Analytics', action: () => navigate('analytics_dash'), category: 'Navigation' },
-    { key: 'g w', description: 'Go to Workflow', action: () => navigate('workflow'), category: 'Navigation' },
+    { key: 'g h', description: 'Ke Dashboard Utama', action: () => navigate('/dashboard'), category: 'Navigation' },
+    { key: 'g p', description: 'Ke Pendaftaran Pasien', action: () => navigate('/modul/pendaftaran'), category: 'Navigation' },
+    { key: 'g r', description: 'Ke Rawat Jalan (Poli)', action: () => navigate('/modul/rawat-jalan'), category: 'Navigation' },
+    { key: 'g i', description: 'Ke Rawat Inap', action: () => navigate('/modul/rawat-inap'), category: 'Navigation' },
+    { key: 'g e', description: 'Ke IGD & Triase', action: () => navigate('/modul/igd'), category: 'Navigation' },
+    { key: 'g f', description: 'Ke Farmasi & Apotek', action: () => navigate('/modul/apotek-ralan'), category: 'Navigation' },
+    { key: 'g b', description: 'Ke Kasir & Billing', action: () => navigate('/modul/kasir'), category: 'Navigation' },
+    { key: 'g l', description: 'Ke Laboratorium', action: () => navigate('/modul/laboratorium'), category: 'Navigation' },
+    { key: 'g m', description: 'Ke Monitoring Sistem', action: () => navigate('/modul/monitoring'), category: 'Navigation' },
+    { key: 'g a', description: 'Ke Laporan & Mutu', action: () => navigate('/modul/laporan'), category: 'Navigation' },
     
     { key: 'Ctrl+P', description: 'Print Current Page', action: () => window.print(), category: 'Actions' },
     { key: 'Ctrl+F', description: 'Focus Search', action: () => {

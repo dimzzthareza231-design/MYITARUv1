@@ -53,10 +53,8 @@ export function UserManagement() {
       toast.error('Tidak bisa menghapus akun sendiri');
       return;
     }
-    if (window.confirm(`Hapus user ${user.nama}?`)) {
-      deleteUser(user.id);
-      toast.success('User berhasil dihapus');
-    }
+    deleteUser(user.id);
+    toast.success(`User ${user.nama} berhasil dihapus`);
   };
 
   const toggleAktif = (user: any) => {

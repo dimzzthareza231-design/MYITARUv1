@@ -4,9 +4,11 @@ import { MODULE_REGISTRY } from '../data/moduleRegistry';
 import { useAuth } from '../contexts/AuthContext';
 import { useHospital } from '../contexts/HospitalContext';
 import UserMenu from './UserMenu';
-import { Activity, Globe, Sparkles, QrCode } from 'lucide-react';
+import { Activity, Globe, Sparkles, QrCode, Brain } from 'lucide-react';
 import { MedicalSearchGrounding } from './MedicalSearchGrounding';
 import { PatientQRScannerModal } from './RME/PatientQRScannerModal';
+import ClinicalDecisionSupportWidget from './ClinicalDecisionSupportWidget';
+import NotificationBell from './NotificationBell';
 
 export default function TopNavbar({ currentTime }: { currentTime: Date }) {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ export default function TopNavbar({ currentTime }: { currentTime: Date }) {
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
+  const [showCDSSModal, setShowCDSSModal] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
   
   // Filter kategori dan modul yang hanya memiliki izin akses sesuai role pengguna
@@ -174,9 +177,22 @@ export default function TopNavbar({ currentTime }: { currentTime: Date }) {
             <span className="bg-[#C9A94E]/20 text-[#E5CA78] text-[10px] px-1.5 py-0.2 rounded font-mono border border-[#C9A94E]/30">AI Web</span>
           </button>
 
+          {/* Tombol Clinical Decision Support (CDSS & ICD-10) */}
+          <button
+            id="btn-navbar-cdss"
+            onClick={() => setShowCDSSModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-700 via-purple-700 to-indigo-900 hover:from-indigo-600 hover:to-purple-800 text-white text-xs font-bold border border-indigo-400/40 shadow-[0_2px_10px_rgba(99,102,241,0.25)] transition-all cursor-pointer"
+            title="AI Clinical Decision Support System: Analisis Tanda Vital, Gejala & Rekomendasi ICD-10"
+          >
+            <Brain className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
+            <span className="hidden lg:inline">AI CDSS</span>
+            <span className="bg-cyan-500/20 text-cyan-200 text-[10px] px-1.5 py-0.2 rounded font-mono border border-cyan-400/30">ICD-10</span>
+          </button>
+
           <div className="text-right hidden md:block">
             <div className="text-sm font-bold text-[#E5CA78] tabular-nums bg-[#08182B]/80 px-3 py-1 rounded-lg border border-[#C9A94E]/30 shadow-inner">{formatTime(currentTime)}</div>
           </div>
+          <NotificationBell />
           <UserMenu />
         </div>
       </div>
@@ -222,6 +238,15 @@ export default function TopNavbar({ currentTime }: { currentTime: Date }) {
             />
           </div>
         </div>
+      )}
+
+      {/* Modal Popup Clinical Decision Support Widget */}
+      {showCDSSModal && (
+        <ClinicalDecisionSupportWidget
+          isOpen={showCDSSModal}
+          onClose={() => setShowCDSSModal(false)}
+          mode="modal"
+        />
       )}
     </header>
   );

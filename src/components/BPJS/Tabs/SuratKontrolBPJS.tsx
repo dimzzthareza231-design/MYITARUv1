@@ -36,12 +36,10 @@ export function SuratKontrolBPJS() {
   };
   
   const handleDelete = (id: number) => {
-    if (window.confirm('Yakin ingin menghapus surat kontrol ini?')) {
-      const updated = suratKontrolList.filter(s => s.id !== id);
-      setSuratKontrolList(updated);
-      localStorage.setItem('simrs_bpjs_surat_kontrol', JSON.stringify(updated));
-      toast.success('Surat kontrol berhasil dihapus');
-    }
+    const updated = suratKontrolList.filter(s => s.id !== id);
+    setSuratKontrolList(updated);
+    localStorage.setItem('simrs_bpjs_surat_kontrol', JSON.stringify(updated));
+    toast.success('Surat kontrol berhasil dihapus');
   };
 
   return (

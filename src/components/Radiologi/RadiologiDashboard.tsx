@@ -101,7 +101,7 @@ export function RadiologiDashboard() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 min-h-screen text-left">
+    <div className="p-4 sm:p-6 space-y-6 flex-1 w-full text-left">
       {/* HEADER BANNER */}
       <div className="bg-gradient-to-r from-pink-900/90 via-slate-900 to-indigo-950 p-6 rounded-3xl border border-pink-500/20 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>

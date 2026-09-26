@@ -82,10 +82,8 @@ export function PasienOperasiTab({
 
   // Handle Delete
   const handleDeletePatient = (patientId: number | string) => {
-    if (confirm('Apakah Anda yakin ingin membatalkan/menghapus data operasi pasien ini?')) {
-      setPasienList(prev => prev.filter(p => p.id !== patientId));
-      toast.success('Data operasi pasien telah dihapus');
-    }
+    setPasienList(prev => prev.filter(p => p.id !== patientId));
+    toast.success('Data operasi pasien telah dibatalkan/dihapus');
   };
 
   return (

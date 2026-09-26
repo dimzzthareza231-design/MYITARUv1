@@ -123,10 +123,8 @@ export function KatalogTarifTab() {
   };
 
   const handleDelete = (id: string | number) => {
-    if (confirm('Hapus tarif pemeriksaan ini?')) {
-      saveTarifs(tarifs.filter(t => t.id !== id));
-      toast.success('Tarif pemeriksaan berhasil dihapus');
-    }
+    saveTarifs(tarifs.filter(t => t.id !== id));
+    toast.success('Tarif pemeriksaan berhasil dihapus');
   };
 
   const handleExportCSV = () => {

@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useNotification, Notification } from '../contexts/NotificationContext';
 import { Bell, CheckCircle2, AlertTriangle, Info, XCircle, Trash2, Check, X } from 'lucide-react';
 
 function NotificationBell() {
+  const navigate = useNavigate();
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, clearAll } = useNotification();
   const [isOpen, setIsOpen] = useState(false);
   const [filter, setFilter] = useState('all');
@@ -128,7 +130,8 @@ function NotificationBell() {
                   onClick={() => {
                     markAsRead(notif.id);
                     if (notif.link) {
-                      console.log('Navigate to:', notif.link);
+                      navigate(notif.link);
+                      setIsOpen(false);
                     }
                   }}
                 >

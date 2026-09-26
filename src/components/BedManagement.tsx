@@ -12,6 +12,8 @@ import { usePatientFlow } from '../contexts/PatientFlowContext';
 import { generate50InpatientBeds } from '../data/patientPelayananData';
 import { DATA_DOKTER_JAGA_LENGKAP } from '../data/dataDokterJagaLengkap';
 import PrintPDFButton from './PrintPDFButton';
+import { AdmisiRanapTab } from './Ranap/AdmisiRanapTab';
+import { AsuhanKeperawatanTab } from './Ranap/AsuhanKeperawatanTab';
 
 export function BedManagement() {
   const { activeTab } = useOutletContext<{ activeTab: string }>() || { activeTab: 'Ketersediaan Bed' };
@@ -220,6 +222,48 @@ export function BedManagement() {
 
     return matchClass && matchStatus && matchSearch;
   });
+
+  const handleAssignBedFromAdmisi = (bedId: string, patientData: any) => {
+    const updated = beds.map((b: any) => {
+      if (b.id === bedId) {
+        return {
+          ...b,
+          status: 'Terisi',
+          patient: patientData.patient,
+          nama_pasien: patientData.patient,
+          no_rm: patientData.no_rm,
+          diagnosa: patientData.diagnosa,
+          dpjp: patientData.doctor || 'dr. Hendra Pratama, Sp.PD',
+          penjamin: patientData.penjamin || 'BPJS Kesehatan',
+          masuk: patientData.masuk || new Date().toISOString().split('T')[0]
+        };
+      }
+      return b;
+    });
+    setBeds(updated);
+  };
+
+  // =========================================================================
+  // SUBMENU 0: ADMISI RANAP
+  // =========================================================================
+  if (activeTab === 'Admisi') {
+    return (
+      <div className="p-6 h-full overflow-y-auto custom-scrollbar">
+        <AdmisiRanapTab beds={beds} onAssignBed={handleAssignBedFromAdmisi} />
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // SUBMENU 0.5: ASUHAN KEPERAWATAN (ASKEP & TTV)
+  // =========================================================================
+  if (activeTab === 'Asuhan Keperawatan') {
+    return (
+      <div className="p-6 h-full overflow-y-auto custom-scrollbar">
+        <AsuhanKeperawatanTab beds={beds} />
+      </div>
+    );
+  }
 
   // =========================================================================
   // SUBMENU 1: DOKTER RANAP & VISITE

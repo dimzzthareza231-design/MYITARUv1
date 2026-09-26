@@ -89,7 +89,7 @@ export function LaboratoriumDashboard() {
   const needValidationCount = orders.filter(o => o.status === 'Menunggu Validasi').length;
 
   return (
-    <div className="p-4 sm:p-6 min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col gap-6">
+    <div className="p-4 sm:p-6 flex-1 flex flex-col gap-6 w-full text-slate-900 dark:text-slate-100">
       {/* TOP TITLE & MODULE BANNER */}
       <div className="bg-gradient-to-r from-cyan-600 via-teal-600 to-blue-700 rounded-3xl p-6 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-3.5">

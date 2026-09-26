@@ -34,12 +34,10 @@ export function ProgramRujukBalikBPJS() {
   };
   
   const handleDelete = (id: number) => {
-    if (window.confirm('Yakin ingin menghapus PRB ini?')) {
-      const updated = prbList.filter(p => p.id !== id);
-      setPrbList(updated);
-      localStorage.setItem('simrs_bpjs_prb', JSON.stringify(updated));
-      toast.success('PRB berhasil dihapus');
-    }
+    const updated = prbList.filter(p => p.id !== id);
+    setPrbList(updated);
+    localStorage.setItem('simrs_bpjs_prb', JSON.stringify(updated));
+    toast.success('PRB berhasil dihapus');
   };
   
   return (

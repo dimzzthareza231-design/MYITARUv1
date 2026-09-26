@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { 
   Package, Box, Plus, Search, AlertTriangle, FileText, Download, 
   ShoppingCart, RefreshCw, Scan, Save, Edit, Trash2
@@ -7,7 +8,23 @@ import toast from 'react-hot-toast';
 import { Modal } from './Modal';
 
 export function InventoryManagement() {
+  const outletCtx = useOutletContext<{ activeTab?: string }>();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'master' | 'stok' | 'po' | 'opname'>('dashboard');
+
+  useEffect(() => {
+    if (outletCtx?.activeTab) {
+      const tab = outletCtx.activeTab.toLowerCase();
+      if (tab.includes('barang') || tab.includes('item') || tab.includes('master')) {
+        setActiveTab('master');
+      } else if (tab.includes('gudang') || tab.includes('stok') && !tab.includes('opname')) {
+        setActiveTab('stok');
+      } else if (tab.includes('purchase') || tab.includes('po') || tab.includes('order')) {
+        setActiveTab('po');
+      } else if (tab.includes('opname')) {
+        setActiveTab('opname');
+      }
+    }
+  }, [outletCtx?.activeTab]);
 
   const [items, setItems] = useState<any[]>([]);
   if (items.length === 0) {

@@ -54,28 +54,87 @@ function getSubmenuIcon(label: string) {
   return FileText;
 }
 
-// Group submenus into structured RME-style categories
-function groupSubmenus(moduleId: string, submenus: any[]) {
+// Helper to classify if a submenu item is a secondary/auxiliary item based on active route context
+function isSecondaryItem(label: string, moduleId: string, activeTab: string): boolean {
+  const l = label.toLowerCase();
+  const act = activeTab.toLowerCase();
+
+  // If the item is currently active, it is NEVER secondary
+  if (label === activeTab) return false;
+
+  // Global secondary/administrative/utility keywords
+  if (
+    l.includes('pengaturan') || l.includes('setting') || l.includes('audit') || 
+    l.includes('log') || l.includes('mapping') || l.includes('tarif') || 
+    l.includes('katalog') || l.includes('qa/qc') || l.includes('quality control') || 
+    l.includes('pelepasan') || l.includes('peminjaman') || l.includes('tracer') ||
+    l.includes('klpcm') || l.includes('status alat') || l.includes('kredensial') ||
+    l.includes('hak akses') || l.includes('dokumen pendukung')
+  ) {
+    return true;
+  }
+
+  // Module-specific context awareness:
+  // In Clinical / Examination tasks, doctor roster and master setup become secondary
+  if (moduleId === 'rawat-jalan' && (act.includes('periksa') || act.includes('booking') || act.includes('flow'))) {
+    if (l.includes('dokter rawat jalan') || l.includes('jadwal')) return true;
+  }
+
+  if (moduleId === 'rekam-medis' && (act.includes('pasien') || act.includes('resume') || act.includes('icd'))) {
+    if (l.includes('audit') || l.includes('pelepasan') || l.includes('peminjaman')) return true;
+  }
+
+  if (moduleId === 'laboratorium' && (act.includes('worklist') || act.includes('hasil') || act.includes('validasi'))) {
+    if (l.includes('katalog') || l.includes('quality control') || l.includes('bank darah')) return true;
+  }
+
+  if (moduleId === 'radiologi' && (act.includes('pacs') || act.includes('worklist') || act.includes('hasil'))) {
+    if (l.includes('katalog') || l.includes('status alat')) return true;
+  }
+
+  if (moduleId === 'igd' && (act.includes('triase') || act.includes('penanganan') || act.includes('observasi'))) {
+    if (l.includes('dokter igd')) return true;
+  }
+
+  if (moduleId === 'rawat-inap' && (act.includes('admisi') || act.includes('visite') || act.includes('asuhan'))) {
+    if (l.includes('dokter ranap')) return true;
+  }
+
+  if (moduleId === 'apotek-ralan' && (act.includes('resep') || act.includes('dispensing'))) {
+    if (l.includes('master stok')) return true;
+  }
+
+  return false;
+}
+
+// Group submenus into structured RME-style categories with primary/secondary tagging
+function groupSubmenus(moduleId: string, submenus: any[], activeTab: string) {
   if (!submenus || submenus.length === 0) return [];
 
   if (moduleId === 'rekam-medis') {
     return [
       {
+        id: 'rme_berkas',
         title: 'BERKAS & REKAM MEDIS',
+        isPrimaryCategory: true,
         items: submenus.filter(s => {
           const l = (typeof s === 'string' ? s : s.label).toLowerCase();
           return l.includes('pasien') || l.includes('overview') || l.includes('berkas') || l.includes('peminjaman') || l.includes('tracer');
         })
       },
       {
+        id: 'rme_icd',
         title: 'KODEFIKASI KLINIS (WHO)',
+        isPrimaryCategory: true,
         items: submenus.filter(s => {
           const l = (typeof s === 'string' ? s : s.label).toLowerCase();
           return l.includes('icd') || l.includes('problem') || l.includes('diagnosis') || l.includes('tindakan');
         })
       },
       {
+        id: 'rme_dokumen',
         title: 'DOKUMEN & MUTU RME',
+        isPrimaryCategory: false,
         items: submenus.filter(s => {
           const l = (typeof s === 'string' ? s : s.label).toLowerCase();
           return l.includes('resume') || l.includes('audit') || l.includes('klpcm') || l.includes('pelepasan') || l.includes('dokumen') || l.includes('visum');
@@ -87,7 +146,9 @@ function groupSubmenus(moduleId: string, submenus: any[]) {
   if (moduleId === 'rawat-jalan') {
     return [
       {
+        id: 'ralan_utama',
         title: 'PELAYANAN POLIKLINIK',
+        isPrimaryCategory: true,
         items: submenus
       }
     ];
@@ -100,7 +161,7 @@ function groupSubmenus(moduleId: string, submenus: any[]) {
 
   submenus.forEach(s => {
     const l = (typeof s === 'string' ? s : s.label).toLowerCase();
-    if (l.includes('master') || l.includes('registrasi') || l.includes('triase') || l.includes('pemeriksaan') || l.includes('admisi') || l.includes('worklist') || l.includes('resep') || l.includes('billing') || l.includes('pegawai') || l.includes('booking') || l.includes('pasien') || l.includes('dashboard') || l.includes('peserta')) {
+    if (l.includes('master') || l.includes('registrasi') || l.includes('triase') || l.includes('pemeriksaan') || l.includes('admisi') || l.includes('worklist') || l.includes('resep') || l.includes('billing') || l.includes('booking') || l.includes('pasien') || l.includes('dashboard') || l.includes('peserta')) {
       groupA.push(s);
     } else if (l.includes('antrian') || l.includes('jadwal') || l.includes('bed') || l.includes('observasi') || l.includes('hasil') || l.includes('lis') || l.includes('pacs') || l.includes('dispensing') || l.includes('stok') || l.includes('shift') || l.includes('riwayat') || l.includes('visite') || l.includes('asuhan') || l.includes('sep') || l.includes('rujukan') || l.includes('prb') || l.includes('sk')) {
       groupB.push(s);
@@ -110,15 +171,15 @@ function groupSubmenus(moduleId: string, submenus: any[]) {
   });
 
   if (submenus.length <= 4) {
-    return [{ title: 'LAYANAN UTAMA', items: submenus }];
+    return [{ id: 'group_main', title: 'LAYANAN UTAMA', isPrimaryCategory: true, items: submenus }];
   }
 
   const groups = [];
-  if (groupA.length > 0) groups.push({ title: 'LAYANAN & OPERASIONAL', items: groupA });
-  if (groupB.length > 0) groups.push({ title: 'PENCATATAN & REKAM DATA', items: groupB });
-  if (groupC.length > 0) groups.push({ title: 'PENGATURAN & KELOLA', items: groupC });
+  if (groupA.length > 0) groups.push({ id: 'group_a', title: 'LAYANAN & OPERASIONAL', isPrimaryCategory: true, items: groupA });
+  if (groupB.length > 0) groups.push({ id: 'group_b', title: 'PENCATATAN & REKAM DATA', isPrimaryCategory: true, items: groupB });
+  if (groupC.length > 0) groups.push({ id: 'group_c', title: 'PENGATURAN & KELOLA', isPrimaryCategory: false, items: groupC });
 
-  return groups.length > 0 ? groups : [{ title: 'MENU & FITUR', items: submenus }];
+  return groups.length > 0 ? groups : [{ id: 'group_fallback', title: 'MENU & FITUR', isPrimaryCategory: true, items: submenus }];
 }
 
 export default function ModuleLayout() {
@@ -128,9 +189,22 @@ export default function ModuleLayout() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
+  
+  // Context-Aware Sidebar state: 'focus' hides secondary clutter for medical tasks, 'all' reveals all
+  const [focusMode, setFocusMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem('myitaru_sidebar_focus_mode');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  // Category Accordion State
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
 
   const { hasAccess, currentUser } = useAuth();
   const { moduleId: paramModuleId } = useParams();
+
+  useEffect(() => {
+    localStorage.setItem('myitaru_sidebar_focus_mode', JSON.stringify(focusMode));
+  }, [focusMode]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -162,6 +236,15 @@ export default function ModuleLayout() {
         if (!hasOpenModal) {
           navigate('/dashboard');
         }
+      }
+      // Keyboard shortcut: Shift+F to toggle Clinical Focus Mode
+      if (e.shiftKey && (e.key === 'F' || e.key === 'f')) {
+        e.preventDefault();
+        setFocusMode(prev => {
+          const next = !prev;
+          toast.success(next ? 'Mode Fokus Klinis Diaktifkan (Menu sekunder disembunyikan)' : 'Mode Lengkap Diaktifkan (Semua menu ditampilkan)');
+          return next;
+        });
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -196,8 +279,65 @@ export default function ModuleLayout() {
 
   const hasSubmenus = Boolean(config.submenus && config.submenus.length > 0);
 
-  // Filtered submenus if search is active
-  const filteredSubmenus = useMemo(() => {
+  // Grouped submenus for RME sidebar layout
+  const rawSidebarGroups = useMemo(() => {
+    return groupSubmenus(moduleId, config.submenus || [], activeTab);
+  }, [moduleId, config.submenus, activeTab]);
+
+  // Context-aware filtered submenus & groups
+  const { sidebarGroups, totalHiddenCount, hasSecondaryItems } = useMemo(() => {
+    let hiddenCount = 0;
+    let foundSecondary = false;
+
+    const filtered = rawSidebarGroups.map(group => {
+      // Filter by search text first
+      let items = group.items;
+      if (sidebarSearch.trim()) {
+        items = items.filter((sub: any) => {
+          const label = typeof sub === 'string' ? sub : sub.label;
+          return label.toLowerCase().includes(sidebarSearch.toLowerCase());
+        });
+      }
+
+      // If search is active or focusMode is off, show all matching items
+      if (sidebarSearch.trim() || !focusMode) {
+        return {
+          ...group,
+          items: items.map((sub: any) => {
+            const label = typeof sub === 'string' ? sub : sub.label;
+            const isSec = isSecondaryItem(label, moduleId, activeTab);
+            if (isSec) foundSecondary = true;
+            return { raw: sub, label, isSecondary: isSec };
+          })
+        };
+      }
+
+      // Under Focus Mode, hide secondary items unless they are the currently active tab
+      const mapped = items.map((sub: any) => {
+        const label = typeof sub === 'string' ? sub : sub.label;
+        const isSec = isSecondaryItem(label, moduleId, activeTab);
+        if (isSec) foundSecondary = true;
+        return { raw: sub, label, isSecondary: isSec };
+      });
+
+      const visibleItems = mapped.filter((item: any) => !item.isSecondary || item.label === activeTab);
+      hiddenCount += (mapped.length - visibleItems.length);
+
+      return {
+        ...group,
+        items: visibleItems
+      };
+    }).filter(group => group.items.length > 0);
+
+    return { 
+      sidebarGroups: filtered, 
+      totalHiddenCount: hiddenCount, 
+      hasSecondaryItems: foundSecondary 
+    };
+  }, [rawSidebarGroups, sidebarSearch, focusMode, moduleId, activeTab]);
+
+  // Mobile horizontal submenu items
+  const mobileSubmenus = useMemo(() => {
     if (!config.submenus) return [];
     if (!sidebarSearch.trim()) return config.submenus;
     return config.submenus.filter((sub: any) => {
@@ -206,10 +346,12 @@ export default function ModuleLayout() {
     });
   }, [config.submenus, sidebarSearch]);
 
-  // Grouped submenus for RME sidebar layout
-  const sidebarGroups = useMemo(() => {
-    return groupSubmenus(moduleId, filteredSubmenus);
-  }, [moduleId, filteredSubmenus]);
+  const toggleCategory = (groupId: string) => {
+    setCollapsedCategories(prev => ({
+      ...prev,
+      [groupId]: !prev[groupId]
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col w-full text-slate-900 dark:text-slate-200 transition-colors">
@@ -253,6 +395,30 @@ export default function ModuleLayout() {
           </nav>
 
           <div className="flex items-center gap-2">
+            {/* Quick Context-Aware Focus Mode Button in Header */}
+            {hasSubmenus && hasSecondaryItems && (
+              <button
+                onClick={() => {
+                  setFocusMode(!focusMode);
+                  toast.success(!focusMode ? 'Mode Fokus Aktif (Menu sekunder disembunyikan)' : 'Menampilkan semua menu');
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  focusMode
+                    ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-cyan-300 border-blue-200 dark:border-blue-800/60 shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+                title="Tekan Shift+F untuk beralih mode fokus kerja medis"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
+                <span className="hidden sm:inline">{focusMode ? 'Fokus Medis' : 'Semua Menu'}</span>
+                {focusMode && totalHiddenCount > 0 && (
+                  <span className="px-1.5 py-0.2 text-[10px] bg-blue-200/60 dark:bg-cyan-900/80 text-blue-900 dark:text-cyan-200 rounded-full font-mono">
+                    -{totalHiddenCount}
+                  </span>
+                )}
+              </button>
+            )}
+
             <button
               onClick={() => navigate('/dashboard')}
               className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-all hover:scale-105 active:scale-95"
@@ -265,10 +431,31 @@ export default function ModuleLayout() {
 
         {/* MOBILE SUBMENU HORIZONTAL TAB BAR (Visible on < lg screens) */}
         {hasSubmenus && (
-          <div className="lg:hidden mb-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 shadow-xs">
+          <div className="lg:hidden mb-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 shadow-xs space-y-2">
+            <div className="flex items-center justify-between px-1 text-xs">
+              <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <span>{config.icon}</span>
+                <span>Menu Modul</span>
+              </span>
+              {hasSecondaryItems && (
+                <button
+                  onClick={() => setFocusMode(!focusMode)}
+                  className="text-[11px] font-bold text-blue-600 dark:text-cyan-400 flex items-center gap-1"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>{focusMode ? 'Tampilkan Semua' : 'Mode Fokus'}</span>
+                </button>
+              )}
+            </div>
+
             <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
-              {filteredSubmenus.map((sub: any) => {
+              {mobileSubmenus.map((sub: any) => {
                 const label = typeof sub === 'string' ? sub : sub.label;
+                const isSec = isSecondaryItem(label, moduleId, activeTab);
+                if (focusMode && isSec && label !== activeTab && !sidebarSearch.trim()) {
+                  return null;
+                }
+
                 const isActive = activeTab === label;
                 const IconComponent = getSubmenuIcon(label);
 
@@ -298,8 +485,8 @@ export default function ModuleLayout() {
           {hasSubmenus && (
             <aside 
               className={`hidden lg:flex ${
-                isSidebarCollapsed ? 'lg:w-20' : 'lg:w-72'
-              } bg-white dark:bg-[#0a1122] border border-slate-200 dark:border-slate-800 rounded-2xl flex-col shrink-0 transition-all duration-300 ease-in-out shadow-sm dark:shadow-2xl backdrop-blur-md overflow-hidden self-stretch lg:self-auto sticky top-4`}
+                isSidebarCollapsed ? 'lg:w-20 overflow-visible' : 'lg:w-72 overflow-hidden'
+              } bg-white dark:bg-[#0a1122] border border-slate-200 dark:border-slate-800 rounded-2xl flex-col shrink-0 transition-all duration-300 ease-in-out shadow-sm dark:shadow-2xl backdrop-blur-md self-stretch lg:self-auto sticky top-20 z-30`}
             >
               {/* SIDEBAR HEADER / IDENTITY CARD */}
               <div className={`p-3.5 border-b border-slate-200 dark:border-slate-800/80 flex items-center ${isSidebarCollapsed ? 'lg:justify-center' : 'justify-between'} transition-all duration-300 bg-slate-50/80 dark:bg-[#0B132B]/70`}>
@@ -326,6 +513,32 @@ export default function ModuleLayout() {
                 </button>
               </div>
 
+              {/* CONTEXT-AWARE CLINICAL FOCUS SWITCH (Visible when Expanded) */}
+              {!isSidebarCollapsed && hasSecondaryItems && (
+                <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800/80 bg-blue-50/50 dark:bg-slate-900/90 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 font-semibold">
+                    <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-cyan-400" />
+                    <span>Fokus Tugas Medis</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setFocusMode(!focusMode);
+                      toast.success(!focusMode ? 'Mode Fokus Aktif (Menyembunyikan menu sekunder)' : 'Menampilkan semua menu');
+                    }}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      focusMode ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'
+                    }`}
+                    title="Beralih Mode Fokus Klinis (Shift+F)"
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        focusMode ? 'translate-x-4' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
+
               {/* QUICK SEARCH (When Expanded and more than 4 submenus) */}
               {!isSidebarCollapsed && config.submenus && config.submenus.length > 4 && (
                 <div className="p-2.5 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/60">
@@ -342,70 +555,100 @@ export default function ModuleLayout() {
                 </div>
               )}
 
-              {/* SUBMENU CATEGORIES & ITEMS */}
-              <div className={`flex-1 overflow-y-auto space-y-4 custom-scrollbar transition-all duration-300 ${isSidebarCollapsed ? 'p-2' : 'p-3'} max-h-[calc(100vh-220px)]`}>
-                {sidebarGroups.map((group: any, gIdx: number) => (
-                  <div key={gIdx} className="space-y-1.5">
-                    {!isSidebarCollapsed ? (
-                      <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2.5 pt-2 pb-0.5 truncate">
-                        {group.title}
-                      </div>
-                    ) : (
-                      <div className="h-px bg-slate-200 dark:bg-slate-800/80 my-2 mx-1" />
-                    )}
+              {/* SUBMENU CATEGORIES & ITEMS WITH ACCORDION */}
+              <div className={`flex-1 overflow-y-auto space-y-4 custom-scrollbar transition-all duration-300 ${isSidebarCollapsed ? 'p-2' : 'p-3'} max-h-[calc(100vh-250px)]`}>
+                {sidebarGroups.map((group: any, gIdx: number) => {
+                  const isCollapsed = Boolean(collapsedCategories[group.id || `group_${gIdx}`]);
+                  const containsActiveTab = group.items.some((item: any) => item.label === activeTab);
 
-                    <div className="space-y-1">
-                      {group.items.map((sub: any) => {
-                        const label = typeof sub === 'string' ? sub : sub.label;
-                        const isActive = activeTab === label;
-                        const IconComponent = getSubmenuIcon(label);
+                  return (
+                    <div key={group.id || gIdx} className="space-y-1.5">
+                      {!isSidebarCollapsed ? (
+                        <button
+                          type="button"
+                          onClick={() => toggleCategory(group.id || `group_${gIdx}`)}
+                          className="w-full flex items-center justify-between text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2.5 pt-2 pb-0.5 hover:text-slate-700 dark:hover:text-slate-300 transition-colors group cursor-pointer"
+                        >
+                          <span className="truncate flex items-center gap-1.5">
+                            {containsActiveTab && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />}
+                            {group.title}
+                          </span>
+                          <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : 'rotate-0'}`} />
+                        </button>
+                      ) : (
+                        <div className="h-px bg-slate-200 dark:bg-slate-800/80 my-2 mx-1" />
+                      )}
 
-                        return (
-                          <button
-                            key={label}
-                            onClick={() => setSearchParams({ tab: label })}
-                            className={`group relative w-full flex items-center gap-3 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                              isSidebarCollapsed ? 'justify-center p-2' : 'px-2.5 py-2'
-                            } ${
-                              isActive 
-                                ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800/50 shadow-xs' 
-                                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white'
-                            }`}
-                          >
-                            {/* Active Indicator Bar */}
-                            {isActive && !isSidebarCollapsed && (
-                              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-blue-500 rounded-r-full shadow-sm shadow-blue-500/50" />
-                            )}
+                      {(!isCollapsed || isSidebarCollapsed) && (
+                        <div className="space-y-1">
+                          {group.items.map((itemObj: any) => {
+                            const label = itemObj.label;
+                            const isActive = activeTab === label;
+                            const IconComponent = getSubmenuIcon(label);
 
-                            {/* Menu Icon with dedicated rounded container */}
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 ${
-                              isActive
-                                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                                : 'bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 group-hover:text-blue-600 dark:group-hover:text-blue-300 group-hover:border-slate-300 dark:group-hover:border-slate-600 group-hover:scale-105'
-                            }`}>
-                              <IconComponent className="w-4 h-4 transition-transform duration-200" />
-                            </div>
+                            return (
+                              <button
+                                key={label}
+                                onClick={() => setSearchParams({ tab: label })}
+                                className={`group relative w-full flex items-center gap-3 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                                  isSidebarCollapsed ? 'justify-center p-2' : 'px-2.5 py-2'
+                                } ${
+                                  isActive 
+                                    ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800/50 shadow-xs' 
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70 hover:text-slate-900 dark:hover:text-white'
+                                }`}
+                              >
+                                {/* Active Indicator Bar */}
+                                {isActive && !isSidebarCollapsed && (
+                                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-blue-500 rounded-r-full shadow-sm shadow-blue-500/50" />
+                                )}
 
-                            {/* Text Label */}
-                            {!isSidebarCollapsed && (
-                              <>
-                                <span className="text-left truncate flex-1 leading-snug">{label}</span>
-                                <ChevronRight className={`w-3 h-3 ml-auto transition-transform duration-200 ${isActive ? 'opacity-100 text-blue-600 dark:text-blue-400 translate-x-0.5' : 'opacity-20 group-hover:opacity-70 group-hover:translate-x-0.5'}`} />
-                              </>
-                            )}
+                                {/* Menu Icon with dedicated rounded container */}
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 ${
+                                  isActive
+                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                                    : 'bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 text-slate-500 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 group-hover:text-blue-600 dark:group-hover:text-blue-300 group-hover:border-slate-300 dark:group-hover:border-slate-600 group-hover:scale-105'
+                                }`}>
+                                  <IconComponent className="w-4 h-4 transition-transform duration-200" />
+                                </div>
 
-                            {/* Floating Tooltip when collapsed */}
-                            {isSidebarCollapsed && (
-                              <div className="hidden lg:block absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl border border-slate-700 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible pointer-events-none transition-all duration-200 z-50 translate-x-1 group-hover:translate-x-0">
-                                {label}
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
+                                {/* Text Label */}
+                                {!isSidebarCollapsed && (
+                                  <>
+                                    <span className="text-left truncate flex-1 leading-snug">{label}</span>
+                                    <ChevronRight className={`w-3 h-3 ml-auto transition-transform duration-200 ${isActive ? 'opacity-100 text-blue-600 dark:text-blue-400 translate-x-0.5' : 'opacity-20 group-hover:opacity-70 group-hover:translate-x-0.5'}`} />
+                                  </>
+                                )}
+
+                                {/* Floating Tooltip when collapsed */}
+                                {isSidebarCollapsed && (
+                                  <div className="hidden lg:block absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl border border-slate-700 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible pointer-events-none transition-all duration-200 z-50 translate-x-1 group-hover:translate-x-0">
+                                    {label}
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
+                  );
+                })}
+
+                {/* HIDDEN SECONDARY ITEMS NOTICE BANNER (IN FOCUS MODE) */}
+                {!isSidebarCollapsed && focusMode && totalHiddenCount > 0 && (
+                  <div className="p-3 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl text-center space-y-1.5 mt-2">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                      {totalHiddenCount} menu sekunder disembunyikan
+                    </p>
+                    <button
+                      onClick={() => setFocusMode(false)}
+                      className="px-2.5 py-1 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-blue-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] font-bold transition-all shadow-2xs"
+                    >
+                      Buka Semua Menu
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
 
               {/* SIDEBAR FOOTER */}
@@ -422,7 +665,7 @@ export default function ModuleLayout() {
           )}
 
           {/* CONTENT AREA (OUTLET) */}
-          <div className="flex-1 min-w-0 w-full bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-2xl relative min-h-[calc(100vh-160px)]">
+          <div className="flex-1 min-w-0 w-full bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-sm dark:shadow-2xl relative min-h-[calc(100vh-160px)] flex flex-col">
             <Outlet context={{ activeTab }} />
           </div>
 

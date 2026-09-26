@@ -1,16 +1,48 @@
 import React, { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { 
-  ShieldAlert, FileText, Search, Activity, GitCommit, CheckCircle, Clock, AlertTriangle
+  ShieldAlert, FileText, Search, Activity, GitCommit, CheckCircle, Clock, AlertTriangle,
+  GitMerge, PackageSearch
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { ClinicalPathway } from '../CP/ClinicalPathway';
+import { CSSDManagement } from '../CSSD/CSSDManagement';
 
 export function PatientSafety() {
-  const [activeTab, setActiveTab] = useState<'incident' | 'investigation' | 'risk'>('incident');
+  const outletCtx = useOutletContext<{ activeTab?: string }>();
+  const [activeTab, setActiveTab] = useState<'incident' | 'investigation' | 'risk' | 'cp' | 'cssd'>('incident');
+
+  useEffect(() => {
+    if (outletCtx?.activeTab) {
+      const tab = outletCtx.activeTab.toLowerCase();
+      if (tab.includes('clinical pathway') || tab.includes('pathway') || tab.includes('cp')) {
+        setActiveTab('cp');
+      } else if (tab.includes('cssd') || tab.includes('sterilisasi')) {
+        setActiveTab('cssd');
+      } else if (tab.includes('insiden') || tab.includes('incident')) {
+        setActiveTab('incident');
+      } else if (tab.includes('investigasi') || tab.includes('rca')) {
+        setActiveTab('investigation');
+      } else if (tab.includes('risk') || tab.includes('risiko') || tab.includes('safety')) {
+        setActiveTab('risk');
+      }
+    }
+  }, [outletCtx?.activeTab]);
+
+  if (activeTab === 'cp') {
+    return <ClinicalPathway />;
+  }
+
+  if (activeTab === 'cssd') {
+    return <CSSDManagement />;
+  }
 
   const tabs = [
     { id: 'incident', label: 'Incident Reporting', icon: FileText },
     { id: 'investigation', label: 'Investigation & RCA', icon: Search },
     { id: 'risk', label: 'Risk Register Matrix', icon: Activity },
+    { id: 'cp', label: 'Clinical Pathway', icon: GitMerge },
+    { id: 'cssd', label: 'CSSD Sterilisasi', icon: PackageSearch },
   ];
 
   return (
@@ -21,7 +53,7 @@ export function PatientSafety() {
             <ShieldAlert className="w-7 h-7" />
             Patient Safety & Quality
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Sistem pelaporan insiden, RCA, dan manajemen risiko klinik.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Sistem pelaporan insiden, RCA, manajemen risiko, clinical pathway, dan sterilisasi CSSD.</p>
         </div>
       </div>
 

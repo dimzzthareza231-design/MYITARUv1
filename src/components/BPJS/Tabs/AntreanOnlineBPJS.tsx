@@ -58,12 +58,10 @@ export function AntreanOnlineBPJS() {
   };
 
   const handleBatal = (id: string) => {
-    if (window.confirm('Batalkan antrean ini?')) {
-      setAntreanList(antreanList.map(a =>
-        a.id === id ? { ...a, status: 'Batal' } : a
-      ));
-      toast.success('Antrean dibatalkan');
-    }
+    setAntreanList(antreanList.map(a =>
+      a.id === id ? { ...a, status: 'Batal' } : a
+    ));
+    toast.success('Antrean berhasil dibatalkan');
   };
 
   const handleRefresh = () => {

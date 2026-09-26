@@ -49,6 +49,14 @@ import { JKNMobile } from './components/JKNMobile/JKNMobile';
 import { AntrianProvider } from "./contexts/AntrianContext";
 import { PoliPelayanan } from "./components/Poli/PoliPelayanan";
 import { DisplayAntrianPoli } from "./components/Poli/DisplayAntrianPoli";
+import CommandPalette from './components/CommandPalette';
+import { ICUMonitoring } from './components/ICU/ICUMonitoring';
+import { RehabMedik } from './components/Rehab/RehabMedik';
+import { GiziDiet } from './components/Gizi/GiziDiet';
+import { Telemedicine } from './components/Telemed/Telemedicine';
+import { PatientPortal } from './components/Portal/PatientPortal';
+import MultiBranchSystem from './components/MultiBranch/MultiBranchSystem';
+import { CRMManagement } from './components/CRM/CRMManagement';
 
 // Bridging Modules
 import { BridgingHub } from './components/Bridging/BridgingHub';
@@ -109,6 +117,7 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 font-sans transition-colors duration-300 flex flex-col">
       <Toaster position="top-right" />
+      <CommandPalette />
 
       <main className="flex-1 flex flex-col min-w-0 relative w-full scroll-smooth">
         <ErrorBoundary>
@@ -168,6 +177,16 @@ function AppContent() {
               <Route path="jkn-mobile" element={<ErrorBoundary><ProtectedRoute moduleId="jkn-mobile"><JKNMobile /></ProtectedRoute></ErrorBoundary>} />
               <Route path="poli" element={<ErrorBoundary><ProtectedRoute moduleId="rawat-jalan"><PoliPelayanan /></ProtectedRoute></ErrorBoundary>} />
               <Route path="display-antrian" element={<ErrorBoundary><ProtectedRoute moduleId="pendaftaran"><DisplayAntrianPoli /></ProtectedRoute></ErrorBoundary>} />
+              
+              {/* Clinical & Patient Engagement Modules */}
+              <Route path="icu" element={<ErrorBoundary><ProtectedRoute moduleId="rawat-inap"><ICUMonitoring /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="rehab" element={<ErrorBoundary><ProtectedRoute moduleId="rawat-jalan"><RehabMedik /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="gizi" element={<ErrorBoundary><ProtectedRoute moduleId="rawat-inap"><GiziDiet /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="telemedicine" element={<ErrorBoundary><ProtectedRoute moduleId="rawat-jalan"><Telemedicine /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="patient-portal" element={<ErrorBoundary><ProtectedRoute moduleId="pendaftaran"><PatientPortal /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="multi-branch" element={<ErrorBoundary><ProtectedRoute moduleId="pengaturan-klinik"><MultiBranchSystem /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="crm" element={<ErrorBoundary><ProtectedRoute moduleId="pendaftaran"><CRMManagement /></ProtectedRoute></ErrorBoundary>} />
+
               <Route path=":moduleId" element={<ErrorBoundary><GenericModuleContent /></ErrorBoundary>} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

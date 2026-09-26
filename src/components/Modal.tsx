@@ -87,34 +87,38 @@ export function Modal({
   const currentVariant = variantStyles[variant] || variantStyles.default;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md transition-all">
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-md transition-all animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div 
-        className="fixed inset-0" 
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div className={`relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl shadow-2xl w-full ${widthClass} flex flex-col max-h-[92vh] overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200`}>
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        onClick={(e) => e.stopPropagation()}
+        className={`relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl shadow-2xl w-full max-w-[calc(100vw-1.5rem)] ${widthClass} flex flex-col max-h-[92vh] overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200`}
+      >
         {/* MODAL HEADER */}
-        <div className={`flex items-center justify-between px-5 py-4 border-b border-slate-200/80 dark:border-slate-700/80 ${currentVariant.headerBg} backdrop-blur-sm`}>
-          <div className="flex items-center gap-3">
+        <div className={`flex items-center justify-between px-5 py-4 border-b border-slate-200/80 dark:border-slate-700/80 ${currentVariant.headerBg} backdrop-blur-sm shrink-0`}>
+          <div className="flex items-center gap-3 min-w-0">
             {icon && (
-              <div className={`p-2 rounded-xl border flex items-center justify-center ${currentVariant.iconBox}`}>
+              <div className={`p-2 rounded-xl border flex items-center justify-center shrink-0 ${currentVariant.iconBox}`}>
                 {icon}
               </div>
             )}
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 id="modal-title" className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight truncate">
                   {title}
                 </h3>
                 {badgeText && (
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${currentVariant.badge}`}>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${currentVariant.badge}`}>
                     {badgeText}
                   </span>
                 )}
               </div>
               {subtitle && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
                   {subtitle}
                 </p>
               )}
@@ -122,7 +126,7 @@ export function Modal({
           </div>
           <button 
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-700/60"
+            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-700/60 shrink-0 ml-2"
             title="Tutup (Esc)"
           >
             <X className="w-5 h-5" />
@@ -136,7 +140,7 @@ export function Modal({
 
         {/* MODAL FOOTER */}
         {footer && (
-          <div className="border-t border-slate-200/80 dark:border-slate-700/80 px-5 py-3.5 bg-slate-50/90 dark:bg-slate-800/90 backdrop-blur-sm flex items-center justify-end gap-2.5">
+          <div className="border-t border-slate-200/80 dark:border-slate-700/80 px-5 py-3.5 bg-slate-50/90 dark:bg-slate-800/90 backdrop-blur-sm flex items-center justify-end gap-2.5 shrink-0">
             {footer}
           </div>
         )}

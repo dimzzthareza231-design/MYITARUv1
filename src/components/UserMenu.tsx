@@ -17,7 +17,7 @@ export default function UserMenu() {
 
   const handleLogout = async () => {
     await logout();
-    toast.success('Anda telah logout dari SIMK');
+    toast.success('Anda telah logout dari MYITARU SIMRS');
   };
 
   return (

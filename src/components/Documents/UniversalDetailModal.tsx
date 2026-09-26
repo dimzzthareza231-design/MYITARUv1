@@ -38,6 +38,14 @@ export function UniversalDetailModal({
   const [showFullPreview, setShowFullPreview] = useState(false);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !showFullPreview) onClose();
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onClose, showFullPreview]);
+
   if (!isOpen || !data) return null;
 
   // Determine appropriate document type based on fields
@@ -69,8 +77,16 @@ export function UniversalDetailModal({
 
   return (
     <>
-      <div className="fixed inset-0 z-[105] bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-4xl max-h-[92vh] border border-slate-200 dark:border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+      <div 
+        className="fixed inset-0 z-[105] bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-hidden animate-in fade-in duration-200"
+        onClick={onClose}
+      >
+        <div 
+          role="dialog"
+          aria-modal="true"
+          onClick={e => e.stopPropagation()}
+          className="bg-white dark:bg-slate-800 rounded-2xl w-full max-w-4xl max-h-[92vh] border border-slate-200 dark:border-slate-700 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        >
           
           {/* HEADER MODAL */}
           <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-slate-900 text-white p-5 flex items-center justify-between shrink-0">

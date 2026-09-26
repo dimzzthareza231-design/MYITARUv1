@@ -42,6 +42,19 @@ export function DocumentPreviewModal({
     setTempNotes(initialDoc?.edukasiInstruksi || '');
   }, [initialDoc]);
 
+  // Keyboard Escape listener
+  React.useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    if (isOpen) {
+      document.addEventListener('keydown', handleEsc);
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   // 1. DIRECT NATIVE PRINT (Tajam 100% Vector browser print)
@@ -149,7 +162,12 @@ DPJP/Pejabat: ${doc?.signer.nama} (${doc?.signer.sip_nip || '-'})
   };
 
   return (
-    <div className="fixed inset-0 z-[120] bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-start overflow-hidden">
+    <div 
+      role="dialog"
+      aria-modal="true"
+      aria-label="Overview & Pratinjau Dokumen Resmi"
+      className="fixed inset-0 z-[120] bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-start overflow-hidden animate-in fade-in duration-200"
+    >
       {/* TOP CONTROL BAR */}
       <header className="no-print w-full bg-slate-900 border-b border-slate-800 px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-xl z-20 shrink-0">
         <div className="flex items-center gap-3">

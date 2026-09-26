@@ -434,6 +434,14 @@ function FilterModal<T>({
 }) {
   const [localFilters, setLocalFilters] = useState(filters);
   
+  React.useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
+
   const getOptions = (key: string) => {
     return Array.from(new Set(data.map(item => item[key as keyof T]).filter(Boolean)));
   };
@@ -443,8 +451,16 @@ function FilterModal<T>({
   };
   
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-800 rounded-xl w-full max-w-md shadow-xl overflow-hidden animate-in zoom-in-95 duration-200">
+    <div 
+      className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div 
+        role="dialog"
+        aria-modal="true"
+        onClick={e => e.stopPropagation()}
+        className="bg-white dark:bg-slate-800 rounded-xl w-full max-w-md shadow-xl overflow-hidden animate-in zoom-in-95 duration-200"
+      >
         <div className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center">
           <h2 className="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

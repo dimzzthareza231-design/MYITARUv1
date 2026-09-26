@@ -140,11 +140,9 @@ export function MasterTarifTab({
   };
 
   const handleDelete = (id: string, name: string) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus tarif "${name}"?`)) {
-      const updated = tarifs.filter(t => t.id !== id);
-      onSaveTarifs(updated);
-      toast.success(`Tarif ${name} dihapus.`);
-    }
+    const updated = tarifs.filter(t => t.id !== id);
+    onSaveTarifs(updated);
+    toast.success(`Tarif ${name} berhasil dihapus.`);
   };
 
   return (

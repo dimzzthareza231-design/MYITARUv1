@@ -71,7 +71,14 @@ export function ICD9WorkspaceTab() {
       total_estimasi: assignedProcedures.reduce((acc, curr) => acc + (curr.tarif_estimasi || 0), 0)
     };
 
-    const existing = JSON.parse(localStorage.getItem('hospital_patient_procedures') || '[]');
+    let existing: any[] = [];
+    try {
+      const raw = localStorage.getItem('hospital_patient_procedures');
+      existing = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(existing)) existing = [];
+    } catch (e) {
+      existing = [];
+    }
     localStorage.setItem('hospital_patient_procedures', JSON.stringify([record, ...existing]));
 
     toast.success(`${assignedProcedures.length} tindakan ICD-9-CM berhasil disimpan ke rekam medis pasien.`);

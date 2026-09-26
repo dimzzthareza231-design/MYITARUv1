@@ -120,11 +120,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     setNotifications(updated);
     storage.set('notifications', updated);
     
-    // Simulasi kirim ke channel lain
-    if (preferences.email) console.log('📧 Email sent:', notification);
-    if (preferences.whatsapp) console.log('💬 WhatsApp sent:', notification);
-    if (preferences.sms) console.log('📱 SMS sent:', notification);
-    
     return newNotif;
   };
   

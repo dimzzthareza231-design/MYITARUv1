@@ -231,8 +231,15 @@ export function Registration() {
   const handleConfirmCancelVisit = async () => {
     if (!selectedVisit) return;
     await updateKunjunganStatus(selectedVisit.id, 'Selesai');
-    // Store cancellation record in localStorage
-    const cancelLogs = JSON.parse(localStorage.getItem('hospital_riwayat_pembatalan') || '[]');
+    // Store cancellation record in localStorage safely
+    let cancelLogs: any[] = [];
+    try {
+      const raw = localStorage.getItem('hospital_riwayat_pembatalan');
+      cancelLogs = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(cancelLogs)) cancelLogs = [];
+    } catch (e) {
+      cancelLogs = [];
+    }
     cancelLogs.unshift({
       id: `BATAL-${Date.now()}`,
       kunjungan_id: selectedVisit.id,
@@ -289,10 +296,10 @@ export function Registration() {
   }, [pasien, kunjungan]);
 
   return (
-    <div className="p-4 sm:p-6 min-h-screen bg-slate-900 text-slate-100 flex flex-col gap-6">
+    <div className="p-4 sm:p-6 flex-1 flex flex-col gap-6 w-full text-slate-900 dark:text-slate-100">
       
       {/* 1. HEADER RINGKASAN & STATISTIK REAL-TIME */}
-      <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 shadow-xl backdrop-blur-md">
+      <div className="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-xs dark:shadow-xl backdrop-blur-md">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-white text-2xl shadow-lg shadow-blue-500/20">
@@ -300,13 +307,13 @@ export function Registration() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black text-white">PENDAFTARAN & ADMISI PASIEN</h1>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">PENDAFTARAN & ADMISI PASIEN</h1>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
                   Terpadu Poliklinik & RME
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Sistem Registrasi Master Pasien, Admisi Kunjungan, Manajemen Antrian Loket & Riwayat Pelayanan Terintegrasi.
               </p>
             </div>
@@ -1488,7 +1495,14 @@ export function Registration() {
               </div>
 
               {(() => {
-                const cancelLogs = JSON.parse(localStorage.getItem('hospital_riwayat_pembatalan') || '[]');
+                let cancelLogs: any[] = [];
+                try {
+                  const raw = localStorage.getItem('hospital_riwayat_pembatalan');
+                  cancelLogs = raw ? JSON.parse(raw) : [];
+                  if (!Array.isArray(cancelLogs)) cancelLogs = [];
+                } catch (e) {
+                  cancelLogs = [];
+                }
                 if (cancelLogs.length === 0) {
                   return (
                     <div className="p-8 text-center bg-slate-900 rounded-xl border border-slate-700 text-slate-400 text-sm">

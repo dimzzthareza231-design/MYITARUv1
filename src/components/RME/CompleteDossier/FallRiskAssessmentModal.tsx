@@ -75,7 +75,14 @@ export function FallRiskAssessmentModal({ isOpen, onClose, patient }: FallRiskMo
       petugas: 'Ns. Ratna Sari, S.Kep',
       intervensi: interventions
     };
-    const saved = JSON.parse(localStorage.getItem(key) || '[]');
+    let saved: any[] = [];
+    try {
+      const raw = localStorage.getItem(key);
+      saved = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(saved)) saved = [];
+    } catch (e) {
+      saved = [];
+    }
     localStorage.setItem(key, JSON.stringify([logItem, ...saved]));
     toast.success(`Asesmen Risiko Jatuh (${scaleType.toUpperCase()}) berhasil disimpan untuk Shift ${shift}`);
     onClose();

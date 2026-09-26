@@ -220,6 +220,14 @@ export function HospitalProvider({ children }: { children: ReactNode }) {
     }
   }, [isDarkMode]);
 
+  useEffect(() => {
+    const handleToggleTheme = () => {
+      setIsDarkMode(prev => !prev);
+    };
+    window.addEventListener('toggle-theme', handleToggleTheme);
+    return () => window.removeEventListener('toggle-theme', handleToggleTheme);
+  }, []);
+
   // Real-time Firestore listeners for core hospital collections
   useEffect(() => {
     if (!isFirebaseConfigured) return;

@@ -3,6 +3,8 @@ import { useToast } from "../contexts/ToastContext";
 import React, { useState } from 'react';
 import TalkToText from './TalkToText';
 import { MedicalSearchGrounding } from './MedicalSearchGrounding';
+import ClinicalDecisionSupportWidget from './ClinicalDecisionSupportWidget';
+import { Brain, Sparkles, Stethoscope } from 'lucide-react';
 
 export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId?: number, pasien?: any, onClose?: () => void }) {
   const [soap, setSoap] = useState({
@@ -14,6 +16,7 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
   
   const [activeTab, setActiveTab] = useState('subjective');
   const [isSaving, setIsSaving] = useState(false);
+  const [showCDSModal, setShowCDSModal] = useState(false);
   
   const handleTranscriptReady = (newSoap: any) => {
     setSoap(newSoap);
@@ -51,17 +54,53 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
     { id: 'subjective', label: '📝 Subjective' },
     { id: 'objective', label: '🔍 Objective' },
     { id: 'assessment', label: '🎯 Assessment' },
+    { id: 'cdss', label: '🧠 AI Decision Support (ICD-10)' },
     { id: 'plan', label: '💊 Plan' },
     { id: 'grounding', label: '🌐 Search Grounding' }
   ];
   
+  // Parse vitals from SOAP
+  const parsedSystolic = soap.objective.tanda_vital.tekanan_darah?.split('/')[0]?.trim() || '';
+  const parsedDiastolic = soap.objective.tanda_vital.tekanan_darah?.split('/')[1]?.trim() || '';
+  
+  const handleApplyCDSDiagnosis = (diag: { code: string; nameId: string; nameEn?: string; reasoning?: string }) => {
+    handleChange('assessment', 'diagnosis_primer', { code: diag.code, name: diag.nameId });
+    if (diag.reasoning) {
+      handleChange('assessment', 'catatan_assessment', 
+        (soap.assessment.catatan_assessment ? soap.assessment.catatan_assessment + '\n\n' : '') +
+        `[CDSS ${diag.code} - ${diag.nameId}]:\n${diag.reasoning}`
+      );
+    }
+    setActiveTab('assessment');
+  };
+
+  const handleApplyCDSWorkup = (workups: Array<{ category: string; testName: string; reason: string }>) => {
+    const summary = workups.map(w => `[${w.category}] ${w.testName}: ${w.reason}`).join('\n');
+    handleChange('plan', 'edukasi', 
+      (soap.plan.edukasi ? soap.plan.edukasi + '\n\n' : '') +
+      `[Pemeriksaan Penunjang yang Direkomendasikan AI]:\n${summary}`
+    );
+    setActiveTab('plan');
+  };
+
   return (
     <div className="p-6 max-w-6xl mx-auto min-h-[80vh]">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">📋 Rekam Medis {pasien?.nama_pasien ? `- ${pasien.nama_pasien}` : ''}</h1>
-        {onClose && (
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">Tutup</button>
-        )}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowCDSModal(true)}
+            className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-xs font-bold shadow flex items-center gap-1.5 transition-all cursor-pointer"
+            title="Buka Clinical Decision Support Widget"
+          >
+            <Brain className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
+            <span>AI Decision Support (CDSS)</span>
+          </button>
+          {onClose && (
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">Tutup</button>
+          )}
+        </div>
       </div>
       
       {/* TalkToText - di atas form */}
@@ -191,6 +230,27 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
           
           {activeTab === 'assessment' && (
             <div className="space-y-4">
+              {/* CDSS Quick Launcher Banner */}
+              <div className="p-4 bg-gradient-to-r from-indigo-50 to-cyan-50 dark:from-slate-800 dark:to-slate-800/80 rounded-xl border border-indigo-200 dark:border-indigo-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div>
+                  <h5 className="text-xs font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5">
+                    <Brain className="w-4 h-4 text-indigo-600 dark:text-cyan-400 animate-pulse" />
+                    Clinical Decision Support (CDSS) • Gemini AI
+                  </h5>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                    Analisis tanda vital & keluhan untuk rekomendasi diagnosis ICD-10, diagnosis banding, dan ICD-9-CM
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowCDSModal(true)}
+                  className="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shrink-0 flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
+                  <span>Buka Widget CDSS</span>
+                </button>
+              </div>
+
               <div>
                 <label className="block font-semibold mb-2">Catatan Assessment</label>
                 <textarea
@@ -212,6 +272,38 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
                   <input type="text" placeholder="Kode ICD-10..." className="w-full p-3 border dark:border-gray-600 rounded-lg bg-transparent" />
                 )}
               </div>
+            </div>
+          )}
+
+          {activeTab === 'cdss' && (
+            <div className="py-2">
+              <ClinicalDecisionSupportWidget
+                mode="inline"
+                initialPatient={{
+                  name: pasien?.nama_pasien || pasien?.nama || '',
+                  noRm: pasien?.no_rm || '',
+                  age: pasien?.umur || '',
+                  gender: pasien?.jenis_kelamin || '',
+                  allergies: soap.subjective.riwayat_alergi || 'Tidak ada',
+                  history: soap.subjective.riwayat_penyakit_sekarang || ''
+                }}
+                initialVitals={{
+                  systolic: parsedSystolic,
+                  diastolic: parsedDiastolic,
+                  heartRate: soap.objective.tanda_vital.nadi || '',
+                  temperature: soap.objective.tanda_vital.suhu || '',
+                  respiratoryRate: soap.objective.tanda_vital.rr || '',
+                  spO2: soap.objective.tanda_vital.spo2 || ''
+                }}
+                initialSymptoms={{
+                  chiefComplaint: soap.subjective.keluhan_utama || '',
+                  duration: '',
+                  additionalSymptoms: soap.subjective.riwayat_penyakit_sekarang || ''
+                }}
+                clinicalNotes={soap.objective.pemeriksaan_fisik}
+                onApplyDiagnosis={handleApplyCDSDiagnosis}
+                onApplyWorkup={handleApplyCDSWorkup}
+              />
             </div>
           )}
           
@@ -250,6 +342,45 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
           </button>
         </div>
       </div>
+
+      {/* Modal Popup Clinical Decision Support Widget */}
+      {showCDSModal && (
+        <ClinicalDecisionSupportWidget
+          isOpen={showCDSModal}
+          onClose={() => setShowCDSModal(false)}
+          mode="modal"
+          initialPatient={{
+            name: pasien?.nama_pasien || pasien?.nama || '',
+            noRm: pasien?.no_rm || '',
+            age: pasien?.umur || '',
+            gender: pasien?.jenis_kelamin || '',
+            allergies: soap.subjective.riwayat_alergi || 'Tidak ada',
+            history: soap.subjective.riwayat_penyakit_sekarang || ''
+          }}
+          initialVitals={{
+            systolic: parsedSystolic,
+            diastolic: parsedDiastolic,
+            heartRate: soap.objective.tanda_vital.nadi || '',
+            temperature: soap.objective.tanda_vital.suhu || '',
+            respiratoryRate: soap.objective.tanda_vital.rr || '',
+            spO2: soap.objective.tanda_vital.spo2 || ''
+          }}
+          initialSymptoms={{
+            chiefComplaint: soap.subjective.keluhan_utama || '',
+            duration: '',
+            additionalSymptoms: soap.subjective.riwayat_penyakit_sekarang || ''
+          }}
+          clinicalNotes={soap.objective.pemeriksaan_fisik}
+          onApplyDiagnosis={(diag) => {
+            handleApplyCDSDiagnosis(diag);
+            setShowCDSModal(false);
+          }}
+          onApplyWorkup={(workups) => {
+            handleApplyCDSWorkup(workups);
+            setShowCDSModal(false);
+          }}
+        />
+      )}
     </div>
   );
 

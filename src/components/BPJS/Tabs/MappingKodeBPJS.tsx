@@ -63,12 +63,10 @@ export function MappingKodeBPJS() {
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm('Yakin ingin menghapus mapping ini?')) {
-      const newData = { ...mappingData };
-      newData[activeTab] = newData[activeTab].filter((item: any) => item.id !== id);
-      setMappingData(newData);
-      toast.success('Mapping berhasil dihapus');
-    }
+    const newData = { ...mappingData };
+    newData[activeTab] = newData[activeTab].filter((item: any) => item.id !== id);
+    setMappingData(newData);
+    toast.success('Mapping berhasil dihapus');
   };
 
   const handleEdit = (item: any) => {

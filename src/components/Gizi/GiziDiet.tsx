@@ -12,13 +12,30 @@ export function GiziDiet() {
     { id: 'RM-002', name: 'Ny. Siti Aminah', ruangan: 'Melati 03' },
   ]);
 
-  const [screenings, setScreenings] = useState<any[]>([]);
-  const [prescriptions, setPrescriptions] = useState<any[]>([]);
-  const [intakes, setIntakes] = useState<any[]>([]);
+  const [screenings, setScreenings] = useState<any[]>(() => {
+    const saved = localStorage.getItem('simrs_gizi_screenings');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [prescriptions, setPrescriptions] = useState<any[]>(() => {
+    const saved = localStorage.getItem('simrs_gizi_prescriptions');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [intakes, setIntakes] = useState<any[]>(() => {
+    const saved = localStorage.getItem('simrs_gizi_intakes');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  
-  
-  
+  useEffect(() => {
+    localStorage.setItem('simrs_gizi_screenings', JSON.stringify(screenings));
+  }, [screenings]);
+
+  useEffect(() => {
+    localStorage.setItem('simrs_gizi_prescriptions', JSON.stringify(prescriptions));
+  }, [prescriptions]);
+
+  useEffect(() => {
+    localStorage.setItem('simrs_gizi_intakes', JSON.stringify(intakes));
+  }, [intakes]);
 
   const tabs = [
     { id: 'screening', label: 'Screening Gizi (MST)', icon: ClipboardList },

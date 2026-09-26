@@ -54,6 +54,7 @@ import { GoogleMapsHealthLocator } from './Common/GoogleMapsHealthLocator';
 
 export function Pharmacy() {
   const location = useLocation();
+  const outletCtx = useOutletContext<{ activeTab?: string }>();
   const { kunjungan, updateKunjunganStatus } = useHospital();
   const toast = useToast();
   
@@ -79,6 +80,28 @@ export function Pharmacy() {
       setActiveMainTab('ralan');
     }
   }, [pathname]);
+
+  // Sync tab when submenu is clicked from ModuleLayout sidebar
+  useEffect(() => {
+    if (outletCtx?.activeTab) {
+      const tab = outletCtx.activeTab.toLowerCase();
+      if (tab.includes('ralan') || tab.includes('dispensing') || tab.includes('pio') || tab.includes('resep')) {
+        setActiveMainTab('ralan');
+      } else if (tab.includes('ranap') || tab.includes('udd') || tab.includes('rekonsiliasi') || tab.includes('retur')) {
+        setActiveMainTab('ranap');
+      } else if (tab.includes('defecta') || tab.includes('pesanan') || tab.includes('sp')) {
+        setActiveMainTab('defecta');
+      } else if (tab.includes('narkotika') || tab.includes('lasa')) {
+        setActiveMainTab('narkotika');
+      } else if (tab.includes('fornas') || tab.includes('kfa')) {
+        setActiveMainTab('fornas');
+      } else if (tab.includes('stok') || tab.includes('depo')) {
+        setActiveMainTab('stok');
+      } else if (tab.includes('peta') || tab.includes('maps')) {
+        setActiveMainTab('maps');
+      }
+    }
+  }, [outletCtx?.activeTab]);
 
   // PERSISTENT STORAGE WITH RESILIENT FALLBACK
   const [stocks, setStocks] = useState<MedicationStock[]>(() => {
@@ -272,7 +295,7 @@ export function Pharmacy() {
   };
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 max-w-[1600px] mx-auto min-h-screen">
+    <div className="p-4 sm:p-6 space-y-6 max-w-[1600px] mx-auto flex-1 w-full">
       {/* 1. TOP HEADER & MAIN MODULE NAVIGATION TABS */}
       <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex items-center gap-3">

@@ -431,10 +431,8 @@ function SessionsTab() {
   const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : 'Browser Client';
 
   const handleRevoke = async () => {
-    if (window.confirm('Keluar dari sesi saat ini?')) {
-      await logout();
-      toast.success('Sesi berhasil dihentikan');
-    }
+    await logout();
+    toast.success('Sesi berhasil dihentikan');
   };
 
   return (

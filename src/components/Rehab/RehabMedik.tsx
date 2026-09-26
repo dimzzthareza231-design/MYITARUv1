@@ -13,13 +13,30 @@ export function RehabMedik() {
     { id: 'RM-002', name: 'Ny. Siti Aminah', diagnosis: 'Osteoarthritis Genu' },
   ]);
 
-  const [assessments, setAssessments] = useState<any[]>([]);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [programs, setPrograms] = useState<any[]>([]);
+  const [assessments, setAssessments] = useState<any[]>(() => {
+    const saved = localStorage.getItem('simrs_rehab_assessments');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [sessions, setSessions] = useState<any[]>(() => {
+    const saved = localStorage.getItem('simrs_rehab_sessions');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [programs, setPrograms] = useState<any[]>(() => {
+    const saved = localStorage.getItem('simrs_rehab_programs');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  
-  
-  
+  useEffect(() => {
+    localStorage.setItem('simrs_rehab_assessments', JSON.stringify(assessments));
+  }, [assessments]);
+
+  useEffect(() => {
+    localStorage.setItem('simrs_rehab_sessions', JSON.stringify(sessions));
+  }, [sessions]);
+
+  useEffect(() => {
+    localStorage.setItem('simrs_rehab_programs', JSON.stringify(programs));
+  }, [programs]);
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
