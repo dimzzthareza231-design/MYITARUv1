@@ -37,8 +37,27 @@ export function LaboratoriumDashboard() {
   });
 
   useEffect(() => {
-
+    localStorage.setItem('simrs_lab_orders', JSON.stringify(orders));
   }, [orders]);
+
+  // Listen to cross-module interline sync events
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const saved = localStorage.getItem('simrs_lab_orders');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setOrders(parsed);
+          }
+        }
+      } catch (err) {
+        console.warn('Sync error:', err);
+      }
+    };
+    window.addEventListener('simrs-interline-sync', handleSync);
+    return () => window.removeEventListener('simrs-interline-sync', handleSync);
+  }, []);
   // Active selected order for cross-tab workflows
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 

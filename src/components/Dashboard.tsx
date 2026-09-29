@@ -12,7 +12,8 @@ import { DashboardNewsWidget } from './DashboardNewsWidget';
 import { AIClinicalInsightsGrid } from './Dashboard/AIClinicalInsightsGrid';
 import { DATA_PEGAWAI } from '../data/dataPegawai';
 import { DATA_DOKTER } from '../data/dataDokter';
-import { Sparkles, Quote } from 'lucide-react';
+import { Sparkles, Quote, Workflow, CheckCircle2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { BlueprintModal } from './Blueprint/BlueprintModal';
 
 // Koleksi Quotes Kesehatan Harian
 const HEALTH_QUOTES = [
@@ -38,6 +39,7 @@ export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedModuleForModal, setSelectedModuleForModal] = useState<any>(null);
+  const [showBlueprintModal, setShowBlueprintModal] = useState(false);
   
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -47,13 +49,14 @@ export default function Dashboard() {
   // Handle Escape key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && selectedModuleForModal) {
-        setSelectedModuleForModal(null);
+      if (e.key === 'Escape') {
+        if (selectedModuleForModal) setSelectedModuleForModal(null);
+        if (showBlueprintModal) setShowBlueprintModal(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedModuleForModal]);
+  }, [selectedModuleForModal, showBlueprintModal]);
 
   // Quotes yang berganti otomatis setiap hari berdasarkan tanggal
   const dailyQuote = useMemo(() => {
@@ -82,13 +85,6 @@ export default function Dashboard() {
         <div className="absolute top-[40%] left-[60%] w-[30%] h-[30%] bg-cyan-900/15 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '12s', animationDelay: '1s' }}></div>
       </div>
       
-      {/* WATERMARK */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden z-0 opacity-20 mix-blend-overlay">
-        <div className="text-[12rem] font-black text-white/5 rotate-[-12deg] whitespace-nowrap tracking-tighter">
-          MYITARU
-        </div>
-      </div>
-      
       {/* NAVBAR */}
       <TopNavbar currentTime={currentTime} />
       
@@ -115,7 +111,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="flex items-end gap-4 mt-1">
-                  <div className="text-5xl md:text-7xl font-extrabold tracking-tighter tabular-nums text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]">
+                  <div className="text-5xl md:text-7xl font-extrabold tracking-tighter tabular-nums text-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)] font-mono">
                     {currentTime.getHours().toString().padStart(2, '0')}<span className="animate-[pulse_1s_ease-in-out_infinite] text-[#E5CA78]/80">:</span>{currentTime.getMinutes().toString().padStart(2, '0')}
                   </div>
                   <div className="text-sm md:text-base font-medium text-slate-300 flex flex-col gap-1 mb-2">
@@ -142,17 +138,17 @@ export default function Dashboard() {
                 <div className="bg-white/[0.04] backdrop-blur-xl rounded-2xl p-4 border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] transform transition-all duration-300 hover:bg-white/[0.08] hover:border-[#C9A94E]/40 hover:-translate-y-0.5 flex-1 flex flex-col justify-center relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition-colors"></div>
                   <div className="text-xs text-slate-400 font-medium tracking-wide uppercase">Total Pasien</div>
-                  <div className="text-3xl font-black mt-1 text-white">{totalPasien}</div>
+                  <div className="text-3xl font-black mt-1 text-white font-mono tabular-nums">{totalPasien}</div>
                 </div>
                 <div className="bg-white/[0.04] backdrop-blur-xl rounded-2xl p-4 border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] transform transition-all duration-300 hover:bg-white/[0.08] hover:border-rose-400/40 hover:-translate-y-0.5 flex-1 flex flex-col justify-center relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-16 h-16 bg-rose-500/10 rounded-full blur-xl group-hover:bg-rose-500/20 transition-colors"></div>
                   <div className="text-xs text-slate-400 font-medium tracking-wide uppercase">Pasien IGD</div>
-                  <div className="text-3xl font-black mt-1 text-rose-400">{totalIgd}</div>
+                  <div className="text-3xl font-black mt-1 text-rose-400 font-mono tabular-nums">{totalIgd}</div>
                 </div>
                 <div className="bg-white/[0.04] backdrop-blur-xl rounded-2xl p-4 border border-white/[0.08] shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] transform transition-all duration-300 hover:bg-white/[0.08] hover:border-[#C9A94E]/40 hover:-translate-y-0.5 flex-1 flex flex-col justify-center relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-16 h-16 bg-[#C9A94E]/10 rounded-full blur-xl group-hover:bg-[#C9A94E]/20 transition-colors"></div>
                   <div className="text-xs text-slate-400 font-medium tracking-wide uppercase">Antrean Poli</div>
-                  <div className="text-3xl font-black mt-1 text-[#E5CA78]">{totalPoli}</div>
+                  <div className="text-3xl font-black mt-1 text-[#E5CA78] font-mono tabular-nums">{totalPoli}</div>
                 </div>
               </div>
             </div>
@@ -171,7 +167,74 @@ export default function Dashboard() {
         
         {/* AI CLINICAL INSIGHTS MODULAR DRAG-AND-DROP GRID */}
         <AIClinicalInsightsGrid />
-        
+
+        {/* BLUEPRINT SISTEM EVALUASI & PENGEMBANGAN HERO CARD */}
+        <div className="mb-10 bg-gradient-to-r from-[#072448]/95 via-[#0D3B66]/90 to-[#0B525B]/90 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.35)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-400/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xl">🗺️</span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 tracking-wider uppercase">
+                  Arsitektur Resmi MYITARU
+                </span>
+                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" /> 10 Prinsip Dasar &amp; 14 Kriteria DoD Terpenuhi
+                </span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                BLUEPRINT EVALUASI &amp; PENGEMBANGAN APLIKASI
+              </h3>
+              <p className="text-xs sm:text-sm text-cyan-100/90 max-w-3xl leading-relaxed">
+                Sistem Informasi Manajemen Klinik / Hospital Information System + RME + AI • 
+                <span className="italic ml-1 text-cyan-200">"Satu Sistem, Satu Data, Untuk Pelayanan Kesehatan yang Lebih Baik"</span>
+              </p>
+
+              {/* 8-Step mini pipeline */}
+              <div className="pt-2 flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 text-[11px] font-bold">
+                {[
+                  { n: '1', l: 'Pendaftaran', r: '/modul/pendaftaran' },
+                  { n: '2', l: 'Encounter', r: '/modul/pendaftaran?tab=2.+Registrasi+Kunjungan' },
+                  { n: '3', l: 'Klinis (SOAP)', r: '/modul/rawat-jalan' },
+                  { n: '4', l: 'Penunjang', r: '/modul/laboratorium' },
+                  { n: '5', l: 'Farmasi', r: '/modul/apotek-ralan' },
+                  { n: '6', l: 'Billing', r: '/modul/kasir' },
+                  { n: '7', l: 'Disposisi', r: '/modul/rawat-inap' },
+                  { n: '8', l: 'RME Final', r: '/modul/rekam-medis' }
+                ].map((s, idx) => (
+                  <React.Fragment key={s.n}>
+                    <button
+                      onClick={() => navigate(s.r)}
+                      className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-cyan-500 hover:text-slate-950 text-white border border-white/15 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1"
+                    >
+                      <span className="w-4 h-4 rounded-full bg-cyan-400/30 text-cyan-200 text-[9px] flex items-center justify-center font-mono">{s.n}</span>
+                      <span>{s.l}</span>
+                    </button>
+                    {idx < 7 && <span className="text-cyan-400/60 font-bold">→</span>}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex sm:flex-row flex-col items-stretch sm:items-center gap-3 shrink-0">
+              <button
+                onClick={() => setShowBlueprintModal(true)}
+                className="px-5 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-cyan-900/40 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <span>Buka Blueprint Lengkap</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => navigate('/modul/blueprint')}
+                className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              >
+                <span>Halaman Modul</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* SEARCH */}
         <div className="mb-10 relative group max-w-3xl mx-auto">
           <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none z-10">
@@ -318,6 +381,14 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* MODAL BLUEPRINT EVALUASI & PENGEMBANGAN APLIKASI */}
+      {showBlueprintModal && (
+        <BlueprintModal
+          isOpen={showBlueprintModal}
+          onClose={() => setShowBlueprintModal(false)}
+        />
       )}
     </div>
   );

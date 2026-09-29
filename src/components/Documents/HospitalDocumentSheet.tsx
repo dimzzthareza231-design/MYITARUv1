@@ -7,6 +7,7 @@ import {
   TableItemRow
 } from '../../types/document';
 import { formatResumeMedisData } from '../../utils/resumeTemplateHelper';
+import { DossierTemplateRenderer } from './DossierTemplates';
 import { 
   ShieldCheck, AlertTriangle, Stethoscope, Pill, 
   FlaskConical, CheckCircle2, DollarSign, 
@@ -181,6 +182,20 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
     backgroundColor: '#ffffff',
     color: '#0f172a'
   };
+
+  // =========================================================================
+  // 0. BERKAS DOSSIER REKAM MEDIS LENGKAP 100% (PERMENKES 24/2022 & KARS)
+  // =========================================================================
+  const dossierOutput = DossierTemplateRenderer({
+    document,
+    renderHeader,
+    renderFooter,
+    renderWatermark,
+    containerStyle
+  });
+  if (dossierOutput) {
+    return dossierOutput;
+  }
 
   // =========================================================================
   // 1. DEDICATED TEMPLATE: RESUME MEDIS (RAWAT JALAN / RAWAT INAP)
@@ -1126,7 +1141,341 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
   }
 
   // =========================================================================
-  // 10. DEFAULT / DOKUMEN REKAM MEDIS BERSIH (TANPA PENCAMPURAN DOKUMEN)
+  // 10. DEDICATED TEMPLATE: PROFIL SDM & KETERANGAN KEPEGAWAIAN
+  // =========================================================================
+  if (document.type === 'profil_sdm') {
+    const sdm = document.profilSdmData || {
+      nip: subject.nip || '198812122022011002',
+      nama: subject.nama,
+      jabatan: subject.jabatan || 'Staf Medis / Tenaga Kesehatan',
+      divisi: subject.divisi || subject.unit_pelayanan || 'Pelayanan Medis',
+      str: subject.no_rm ? undefined : 'STR-3174-2023-88912',
+      sip: 'SIP: 445/DS/091/2024',
+      pendidikan: 'Profesi Kedokteran / Keperawatan Terakreditasi',
+      statusKepegawaian: 'Pegawai Tetap',
+      tglMasuk: '01 Januari 2022',
+      kontak: subject.telepon || subject.no_hp || '0812-3456-7890',
+      email: 'staf@tarumanagara.ac.id',
+      alamat: subject.alamat || subject.alamat_ktp || '-'
+    };
+
+    return (
+      <div className="printable-hospital-doc bg-white text-slate-900 shadow-2xl mx-auto my-0 p-8 sm:p-12 relative overflow-hidden font-sans border border-slate-300" style={containerStyle}>
+        {renderWatermark()}
+        {renderHeader('SURAT KETERANGAN & PROFIL RESMI KEPEGAWAIAN', 'BAGIAN SUMBER DAYA MANUSIA (SDM) & PENGEMBANGAN ORGANISASI')}
+
+        <div className="relative z-10 text-center my-4">
+          <h2 className="text-base sm:text-lg font-black text-slate-950 tracking-wide uppercase border-b-2 border-slate-900 inline-block pb-0.5">
+            SURAT KETERANGAN & DATA RESMI KEPEGAWAIAN
+          </h2>
+          <div className="flex justify-center items-center gap-4 text-xs font-mono text-slate-600 mt-1">
+            <span>No. Dokumen: <strong className="text-slate-950">{document.nomorDokumen}</strong></span>
+            <span>•</span>
+            <span>Tgl Dikeluarkan: <strong className="text-slate-950">{todayStr}</strong></span>
+          </div>
+        </div>
+
+        <main className="relative z-10 space-y-4 text-xs leading-relaxed text-slate-800">
+          <p className="text-justify">
+            Bagian Sumber Daya Manusia (SDM) <strong>{hospital.name}</strong> menerangkan dengan sebenarnya bahwa data di bawah ini adalah staf / tenaga kesehatan aktif yang terdaftar resmi:
+          </p>
+
+          {/* I. Identitas Pegawai */}
+          <section className="bg-slate-50/90 p-3.5 rounded-lg border border-slate-300">
+            <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-wider mb-2 pb-1 border-b border-slate-200 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-blue-900" />
+              I. IDENTITAS PERSONAL PEGAWAI
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Nama Lengkap</span><span className="mr-2">:</span><span className="font-black text-slate-950 uppercase">{sdm.nama}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Nomor Induk Pegawai</span><span className="mr-2">:</span><span className="font-mono font-bold text-blue-900">{sdm.nip}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">NIK (KTP)</span><span className="mr-2">:</span><span className="font-mono text-slate-900">{subject.nik || '-'}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Tempat, Tgl Lahir</span><span className="mr-2">:</span><span className="text-slate-900">{subject.tempat_lahir ? `${subject.tempat_lahir}, ` : ''}{subject.tgl_lahir || '-'}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Jenis Kelamin / Gol Darah</span><span className="mr-2">:</span><span className="text-slate-900">{formatGender(subject.jenis_kelamin)} / <strong className="text-rose-700">{subject.golongan_darah || '-'}</strong></span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">No. Kontak / Telepon</span><span className="mr-2">:</span><span className="font-mono text-slate-900">{sdm.kontak || '-'}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Email Resmi</span><span className="mr-2">:</span><span className="font-mono text-slate-900">{sdm.email || '-'}</span></div>
+              <div className="flex sm:col-span-2"><span className="w-36 font-bold text-slate-700">Alamat Lengkap</span><span className="mr-2">:</span><span className="text-slate-900">{sdm.alamat || '-'}</span></div>
+            </div>
+          </section>
+
+          {/* II. Posisi & Penempatan Kerja */}
+          <section className="bg-white p-3.5 rounded-lg border border-slate-300 space-y-2">
+            <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-blue-900" />
+              II. POSISI, JABATAN & PENEMPATAN KERJA
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Jabatan / Profesi</span><span className="mr-2">:</span><span className="font-black text-slate-900">{sdm.jabatan}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Divisi / Unit Kerja</span><span className="mr-2">:</span><span className="font-bold text-blue-900">{sdm.divisi}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Status Kepegawaian</span><span className="mr-2">:</span><span className="font-semibold text-emerald-800">{sdm.statusKepegawaian || 'Pegawai Tetap'}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Tanggal Mulai Tugas</span><span className="mr-2">:</span><span className="font-mono text-slate-900">{sdm.tglMasuk || '-'}</span></div>
+              <div className="flex sm:col-span-2"><span className="w-36 font-bold text-slate-700">Kualifikasi Pendidikan</span><span className="mr-2">:</span><span className="text-slate-900">{sdm.pendidikan || 'Pendidikan Terakreditasi'}</span></div>
+            </div>
+          </section>
+
+          {/* III. Legalitas & Kredensial Medis (bila ada) */}
+          {(sdm.str || sdm.sip) && (
+            <section className="bg-slate-50/90 p-3.5 rounded-lg border border-slate-300 space-y-2">
+              <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-900" />
+                III. KREDENSIAL PROFESI KESEHATAN (STR & SIP)
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+                {sdm.str && (
+                  <div className="flex"><span className="w-36 font-bold text-slate-700">Nomor Registrasi (STR)</span><span className="mr-2">:</span><span className="font-mono font-bold text-slate-900">{sdm.str}</span></div>
+                )}
+                {sdm.sip && (
+                  <div className="flex"><span className="w-36 font-bold text-slate-700">Surat Izin Praktik (SIP)</span><span className="mr-2">:</span><span className="font-mono font-bold text-blue-900">{sdm.sip}</span></div>
+                )}
+                <div className="flex sm:col-span-2"><span className="w-36 font-bold text-slate-700">Status Kredensial Medis</span><span className="mr-2">:</span><span className="font-bold text-emerald-800">Tervalidasi Aktif oleh Komite Tenaga Kesehatan</span></div>
+              </div>
+            </section>
+          )}
+
+          <div className="p-3 bg-blue-50/80 rounded border border-blue-200 text-[11px] text-slate-700 leading-relaxed text-justify">
+            Surat data profil kepegawaian ini dicetak dari pangkalan data kepegawaian resmi MYITARU SIMRS dan sah dipergunakan sebagai bukti keaktifan penugasan serta kredensial kerja di lingkungan {hospital.name}.
+          </div>
+        </main>
+
+        <div className="mt-8 pt-4 border-t-2 border-slate-900 grid grid-cols-2 gap-8 text-center text-xs">
+          <div className="flex flex-col items-center">
+            <p className="font-bold text-slate-800 mb-14">Pegawai yang Bersangkutan</p>
+            <p className="font-bold text-slate-950 border-b border-slate-900 pb-0.5 min-w-[180px]">( {sdm.nama} )</p>
+            <p className="text-[10px] text-slate-500 mt-1">NIP: {sdm.nip}</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <p className="font-bold text-slate-800 mb-14">Kepala Bagian SDM & Organisasi</p>
+            <p className="font-black text-slate-950 border-b border-slate-900 pb-0.5 min-w-[180px]">( {hospital.directorName || 'dr. H. Hendra, MARS, Sp.PK'} )</p>
+            <p className="text-[10px] text-slate-500 mt-1">NIP: {hospital.directorNip || '197508122002121001'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 11. DEDICATED TEMPLATE: LAPORAN INVESTIGASI INSIDEN KESELAMATAN PASIEN (IKP)
+  // =========================================================================
+  if (document.type === 'laporan_insiden') {
+    const ikp = document.laporanInsidenData || {
+      noInsiden: document.nomorDokumen,
+      tglWaktuInsiden: `${todayStr}, 09:30 WIB`,
+      lokasiUnit: subject.unit_pelayanan || 'Instalasi Rawat Jalan',
+      tipeInsiden: 'KNC (Kejadian Nyaris Cedera)',
+      kronologis: 'Insiden teridentifikasi saat tahap verifikasi ganda sebelum prosedur dan langsung dikoreksi sesuai SPO.',
+      tindakanLangsung: 'Verifikasi ulang identitas dan penyesuaian rekam instruksi.',
+      gradingRisiko: 'Biru (Risiko Rendah)',
+      dampak: 'Tidak ada dampak cedera pada pasien',
+      pelapor: 'Petugas Mutu & Keselamatan Pasien'
+    };
+
+    return (
+      <div className="printable-hospital-doc bg-white text-slate-900 shadow-2xl mx-auto my-0 p-8 sm:p-12 relative overflow-hidden font-sans border border-slate-300" style={containerStyle}>
+        {renderWatermark()}
+        {renderHeader('LAPORAN INSIDEN KESELAMATAN PASIEN (IKP)', 'KOMITE MUTU & KESELAMATAN PASIEN (KMKP)')}
+
+        <div className="relative z-10 text-center my-4">
+          <h2 className="text-base sm:text-lg font-black text-slate-950 tracking-wide uppercase border-b-2 border-slate-900 inline-block pb-0.5">
+            LEMBAR PELAPORAN INSIDEN KESELAMATAN PASIEN (IKP)
+          </h2>
+          <div className="flex justify-center items-center gap-4 text-xs font-mono text-slate-600 mt-1">
+            <span>No. Insiden: <strong className="text-slate-950">{ikp.noInsiden}</strong></span>
+            <span>•</span>
+            <span>Waktu Kejadian: <strong className="text-slate-950">{ikp.tglWaktuInsiden}</strong></span>
+          </div>
+        </div>
+
+        <main className="relative z-10 space-y-4 text-xs leading-relaxed text-slate-800">
+          {/* I. Rincian Klasifikasi Insiden */}
+          <section className="bg-slate-50/90 p-3.5 rounded-lg border border-slate-300">
+            <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-wider mb-2 pb-1 border-b border-slate-200 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-rose-700" />
+              I. KLASIFIKASI & MATRIKS GRADING RISIKO
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Unit / Lokasi Kejadian</span><span className="mr-2">:</span><span className="font-bold text-slate-900">{ikp.lokasiUnit}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Waktu Insiden Terjadi</span><span className="mr-2">:</span><span className="font-mono text-slate-900">{ikp.tglWaktuInsiden}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Jenis Insiden</span><span className="mr-2">:</span><span className="font-black text-blue-900">{ikp.tipeInsiden}</span></div>
+              <div className="flex"><span className="w-36 font-bold text-slate-700">Grading Matriks Risiko</span><span className="mr-2">:</span><span className="font-black text-amber-700">{ikp.gradingRisiko}</span></div>
+              <div className="flex sm:col-span-2"><span className="w-36 font-bold text-slate-700">Dampak Klinis Terhadap Pasien</span><span className="mr-2">:</span><span className="font-semibold text-slate-900">{ikp.dampak}</span></div>
+            </div>
+          </section>
+
+          {/* II. Identitas Pasien Terkait (bila ada) */}
+          {subject.nama && subject.nama !== 'Entitas Terdaftar' && (
+            <section className="bg-white p-3 rounded-lg border border-slate-300">
+              <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-wider mb-1.5 pb-1 border-b border-slate-200 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-blue-900" />
+                II. IDENTITAS PASIEN TERKAIT INSIDEN
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1 text-slate-800">
+                <div className="flex"><span className="w-32 font-bold text-slate-700">Nama Pasien</span><span className="mr-2">:</span><span className="font-bold uppercase text-slate-900">{subject.nama}</span></div>
+                <div className="flex"><span className="w-32 font-bold text-slate-700">No. Rekam Medis</span><span className="mr-2">:</span><span className="font-mono font-bold text-slate-900">{subject.no_rm || '-'}</span></div>
+                <div className="flex"><span className="w-32 font-bold text-slate-700">Usia / Jenis Kelamin</span><span className="mr-2">:</span><span>{subject.umur || '-'} Thn / {formatGender(subject.jenis_kelamin)}</span></div>
+                <div className="flex"><span className="w-32 font-bold text-slate-700">Penjamin Biaya</span><span className="mr-2">:</span><span>{subject.penjamin || 'Umum'}</span></div>
+              </div>
+            </section>
+          )}
+
+          {/* III. Uraian Kronologis Kejadian */}
+          <section className="bg-white p-3.5 rounded-lg border border-slate-300 space-y-1.5">
+            <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-600" />
+              III. KRONOLOGIS LENGKAP KEJADIAN
+            </h3>
+            <div className="p-3 bg-slate-50 rounded border border-slate-200 text-slate-900 whitespace-pre-line leading-relaxed">
+              {ikp.kronologis}
+            </div>
+          </section>
+
+          {/* IV. Tindakan Langsung Dilakukan */}
+          <section className="bg-slate-50/90 p-3.5 rounded-lg border border-slate-300 space-y-1.5">
+            <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-700" />
+              IV. TINDAKAN LANGSUNG YANG TELAH DILAKUKAN
+            </h3>
+            <div className="p-3 bg-white rounded border border-slate-200 text-slate-900 whitespace-pre-line leading-relaxed">
+              {ikp.tindakanLangsung}
+            </div>
+          </section>
+
+          <p className="text-[10px] text-slate-500 italic">
+            * Laporan insiden ini bersifat konfidensial dan non-punitive (tanpa menyalahkan), bertujuan untuk perbaikan mutu sistemik dan keselamatan pasien sesuai standar KARS & Permenkes RI.
+          </p>
+        </main>
+
+        <div className="mt-8 pt-4 border-t-2 border-slate-900 grid grid-cols-2 gap-8 text-center text-xs">
+          <div className="flex flex-col items-center">
+            <p className="font-bold text-slate-800 mb-14">Petugas Pembuat Laporan</p>
+            <p className="font-bold text-slate-950 border-b border-slate-900 pb-0.5 min-w-[180px]">( {ikp.pelapor} )</p>
+            <p className="text-[10px] text-slate-500 mt-1">Staf Pelapor IKP</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <p className="font-bold text-slate-800 mb-14">Ketua Komite Mutu & Keselamatan Pasien</p>
+            <p className="font-black text-slate-950 border-b border-slate-900 pb-0.5 min-w-[180px]">( dr. Penanggung Jawab Mutu, Sp.PK )</p>
+            <p className="text-[10px] text-slate-500 mt-1">Komite Mutu RS</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 12. DEDICATED TEMPLATE: LAPORAN UMUM OPERASIONAL / GUDANG / REKAPITULASI
+  // =========================================================================
+  if (document.type === 'dokumen_umum') {
+    const umum = document.dokumenUmumData || {
+      kategori: 'Laporan Operasional Klinik',
+      deskripsi: 'Rekapitulasi data resmi tercatat dalam sistem MYITARU SIMRS.',
+      tabelData: []
+    };
+
+    return (
+      <div className="printable-hospital-doc bg-white text-slate-900 shadow-2xl mx-auto my-0 p-8 sm:p-12 relative overflow-hidden font-sans border border-slate-300" style={containerStyle}>
+        {renderWatermark()}
+        {renderHeader(document.judulDokumen, umum.kategori.toUpperCase())}
+
+        <div className="relative z-10 text-center my-4">
+          <h2 className="text-base sm:text-lg font-black text-slate-950 tracking-wide uppercase border-b-2 border-slate-900 inline-block pb-0.5">
+            {document.judulDokumen}
+          </h2>
+          <div className="flex justify-center items-center gap-4 text-xs font-mono text-slate-600 mt-1">
+            <span>No. Laporan: <strong className="text-slate-950">{document.nomorDokumen}</strong></span>
+            <span>•</span>
+            <span>Tgl Cetak: <strong className="text-slate-950">{todayStr}</strong></span>
+          </div>
+        </div>
+
+        <main className="relative z-10 space-y-4 text-xs leading-relaxed text-slate-800">
+          {/* Metadata Laporan */}
+          <div className="bg-slate-50/90 p-3.5 rounded-lg border border-slate-300 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+            <div className="flex"><span className="w-36 font-bold text-slate-700">Kategori Laporan</span><span className="mr-2">:</span><span className="font-bold text-slate-900">{umum.kategori}</span></div>
+            <div className="flex"><span className="w-36 font-bold text-slate-700">Unit / Penanggung Jawab</span><span className="mr-2">:</span><span className="font-bold text-blue-900">{subject.unit_pelayanan || 'Administrasi Operasional'}</span></div>
+            <div className="flex sm:col-span-2"><span className="w-36 font-bold text-slate-700">Deskripsi / Ruang Lingkup</span><span className="mr-2">:</span><span className="text-slate-900">{umum.deskripsi}</span></div>
+          </div>
+
+          {/* Render Sections (Table Report dari ProfessionalTable dsb) */}
+          {document.sections && document.sections.length > 0 ? (
+            <div className="space-y-4">
+              {document.sections.map((sec, secIdx) => (
+                <div key={secIdx} className="bg-white rounded-lg border border-slate-300 overflow-hidden">
+                  {sec.title && (
+                    <div className="bg-slate-100 p-2.5 font-black text-slate-900 uppercase text-[11px] border-b border-slate-300">
+                      {sec.title}
+                    </div>
+                  )}
+                  {sec.tableData && (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-[11px]">
+                        <thead className="bg-slate-50 text-slate-900 font-bold border-b border-slate-300">
+                          <tr>
+                            {sec.tableData.headers.map((h, hIdx) => (
+                              <th key={hIdx} className="p-2 border-r border-slate-300 last:border-r-0">{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200">
+                          {sec.tableData.rows.map((row, rIdx) => (
+                            <tr key={rIdx} className={rIdx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                              {row.map((cell, cIdx) => (
+                                <td key={cIdx} className="p-1.5 border-r border-slate-200 last:border-r-0">{cell}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : umum.tabelData && umum.tabelData.length > 0 ? (
+            /* Render Tabel Grid Data Rekapitulasi */
+            <div className="bg-white rounded-lg border border-slate-300 overflow-hidden">
+              <table className="w-full text-left text-[11px]">
+                <thead className="bg-slate-100 text-slate-900 font-bold border-b border-slate-300">
+                  <tr>
+                    <th className="p-2 w-12 text-center border-r border-slate-300">No</th>
+                    <th className="p-2 w-64 border-r border-slate-300">Parameter / Atribut Data</th>
+                    <th className="p-2 font-black">Nilai / Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {umum.tabelData.map((item, idx) => (
+                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                      <td className="p-1.5 text-center text-slate-500 border-r border-slate-200">{idx + 1}</td>
+                      <td className="p-1.5 font-bold text-slate-800 border-r border-slate-200">{item.label}</td>
+                      <td className="p-1.5 font-mono text-slate-950">{item.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="p-6 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+              Tidak ada rincian data tabular untuk ditampilkan.
+            </div>
+          )}
+        </main>
+
+        <div className="mt-8 pt-4 border-t-2 border-slate-900 grid grid-cols-2 gap-8 text-center text-xs">
+          <div className="flex flex-col items-center">
+            <p className="font-bold text-slate-800 mb-14">Petugas Pengelola Data</p>
+            <p className="font-bold text-slate-950 border-b border-slate-900 pb-0.5 min-w-[180px]">( Petugas Administrasi SIMRS )</p>
+            <p className="text-[10px] text-slate-500 mt-1">Staf Pengolah Data</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <p className="font-bold text-slate-800 mb-14">Penanggung Jawab Unit / Kepala Bagian</p>
+            <p className="font-black text-slate-950 border-b border-slate-900 pb-0.5 min-w-[180px]">( {hospital.directorName || 'dr. H. Hendra, MARS, Sp.PK'} )</p>
+            <p className="text-[10px] text-slate-500 mt-1">Kepala Unit Pelayanan</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // 13. DEFAULT / DOKUMEN REKAM MEDIS BERSIH (TANPA PENCAMPURAN DOKUMEN)
   // Digunakan untuk dokumen EMR klinis umum, asesmen khusus, dll.
   // =========================================================================
   return (

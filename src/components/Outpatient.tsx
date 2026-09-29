@@ -21,6 +21,7 @@ import { Patient360 } from './RME/Patient360';
 import { PoliklinikQueueDisplay } from './PoliklinikQueueDisplay';
 import { RegistrationForm } from './Registration/RegistrationForm';
 import { WilayahSelector } from './WilayahSelector';
+import { integrateOutpatientSOAP, integrateRegistration } from '../utils/interlineIntegration';
 
 export function Outpatient() {
   const { activeTab } = useOutletContext<{ activeTab: string }>() || { activeTab: 'Pemeriksaan' };
@@ -649,6 +650,17 @@ export function Outpatient() {
       console.error('Error syncing clinical data with RME storage:', e);
     }
 
+    // 5. Interline System Integration (Farmasi, Laboratorium, Radiologi, Kasir, Patient Flow)
+    integrateOutpatientSOAP({
+      patient: activePatient,
+      visit: activeVisit,
+      doctor: activeDoctor,
+      poli: currentPoli,
+      soapData: soapData,
+      prescriptions: prescriptions,
+      labRadOrders: soapData.lab_rad
+    });
+
     toast.success(`✅ Pemeriksaan selesai! Data tersinkronisasi ke Rekam Medis (RME) pasien ${activePatient?.nama || ''} & Resep diteruskan ke Farmasi.`);
     
     // Notify next in line
@@ -752,6 +764,16 @@ export function Outpatient() {
     } catch (e) {
       console.warn('AntrianContext sync:', e);
     }
+
+    // Interline integration for billing, EMR and visit
+    integrateRegistration({
+      patient: chosenPatient,
+      visit: newVisit,
+      isBPJS: newQueueForm.penjamin.includes('BPJS'),
+      poliNama: targetPoli.nama,
+      dokterNama: assignedDoc.nama,
+      keluhan: newQueueForm.keluhan
+    });
 
     // 4. Update Filter & Focus
     setSelectedPoliFilter(targetPoli.id);

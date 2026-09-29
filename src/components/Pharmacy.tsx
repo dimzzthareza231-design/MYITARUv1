@@ -3,6 +3,7 @@ import { useLocation, useOutletContext, useParams } from 'react-router-dom';
 import { useHospital } from '../contexts/HospitalContext';
 import { useToast } from '../contexts/ToastContext';
 import { storage } from '../utils/storage';
+import { integratePharmacyDispense } from '../utils/interlineIntegration';
 
 // TYPES & MOCK DATA
 import { 
@@ -160,6 +161,26 @@ export function Pharmacy() {
   useEffect(() => {
     storage.set('hospital_pharmacy_sipnap', sipnapList);
   }, [sipnapList]);
+
+  // Listen to cross-module interline sync events (e.g. from Poliklinik & IGD)
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const savedRx = storage.get<PrescriptionOrder[]>('hospital_pharmacy_prescriptions', null);
+        if (savedRx && Array.isArray(savedRx)) {
+          setPrescriptions(savedRx);
+        }
+        const savedStocks = storage.get<MedicationStock[]>('hospital_pharmacy_stocks', null);
+        if (savedStocks && Array.isArray(savedStocks)) {
+          setStocks(savedStocks);
+        }
+      } catch (e) {
+        console.warn('Pharmacy sync error:', e);
+      }
+    };
+    window.addEventListener('simrs-interline-sync', handleSync);
+    return () => window.removeEventListener('simrs-interline-sync', handleSync);
+  }, []);
 
   // SYNC WITH HOSPITAL CONTEXT KUNJUNGAN (Auto import prescriptions with status 'Farmasi')
   useEffect(() => {
@@ -418,6 +439,13 @@ export function Pharmacy() {
           stocks={stocks}
           onUpdatePrescription={(p) => {
             setPrescriptions(prev => prev.map(item => item.id === p.id ? p : item));
+            if (p.status === 'Selesai Terlayani') {
+              integratePharmacyDispense({
+                prescription: p,
+                petugasPenyerah: 'Apt. Sarah Maulida, S.Farm.'
+              });
+              toast.success(`Resep ${p.no_resep} selesai diserahkan! Data terintegrasi ke Kasir & Rekam Medis.`);
+            }
           }}
           onAddPrescription={(newP) => {
             setPrescriptions(prev => [newP, ...prev]);

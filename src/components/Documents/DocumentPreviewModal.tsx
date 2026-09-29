@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { 
   X, Printer, Download, Eye, FileText, ZoomIn, ZoomOut, 
-  Copy, Check, ShieldCheck, Share2, Sparkles, SlidersHorizontal, RefreshCw 
+  Copy, Check, ShieldCheck, Share2, Sparkles, SlidersHorizontal, RefreshCw,
+  Image as ImageIcon
 } from 'lucide-react';
 import { HospitalDocumentModel } from '../../types/document';
 import { HospitalDocumentSheet } from './HospitalDocumentSheet';
@@ -67,6 +68,11 @@ export function DocumentPreviewModal({
     setIsDownloading(true);
     toast.info('Menyiapkan file PDF resmi beresolusi tinggi...');
     
+    // Temporarily reset CSS scale transform to ensure 100% crisp render
+    const container = printSheetRef.current;
+    const originalTransform = container ? container.style.transform : '';
+    if (container) container.style.transform = 'none';
+
     try {
       const element = document.querySelector('.printable-hospital-doc') as HTMLElement;
       if (!element) {
@@ -75,11 +81,10 @@ export function DocumentPreviewModal({
       }
 
       const canvas = await html2canvas(element, {
-        scale: 2.5, // High-DPI for razor-sharp typography
+        scale: 2.0, // High-DPI for sharp typography
         useCORS: true,
         backgroundColor: '#ffffff',
-        logging: false,
-        windowWidth: 850
+        logging: false
       });
 
       const imgData = canvas.toDataURL('image/png', 1.0);
@@ -103,51 +108,150 @@ export function DocumentPreviewModal({
         heightLeft -= pdfHeight;
       }
 
-      const safeFilename = doc ? `${doc?.judulDokumen.replace(/[^a-zA-Z0-9]/g, '_')}_${doc?.subject.no_rm || doc?.subject.nip || 'DOC'}_${doc?.subject.nama.replace(/[^a-zA-Z0-9]/g, '_')}.pdf` : `${title?.replace(/[^a-zA-Z0-9]/g, '_') || 'Dokumen_RS'}_${new Date().getTime()}.pdf`;
+      const safeFilename = doc 
+        ? `${doc.judulDokumen.replace(/[^a-zA-Z0-9]/g, '_')}_${doc.subject.no_rm || doc.subject.nip || 'DOC'}.pdf` 
+        : `${title?.replace(/[^a-zA-Z0-9]/g, '_') || 'Dokumen_RS'}_${Date.now()}.pdf`;
       pdf.save(safeFilename);
       toast.success('PDF Resmi berhasil diunduh!');
     } catch (err) {
       console.error('Error generating PDF:', err);
       toast.error('Gagal membuat PDF. Gunakan tombol Cetak Langsung (Print).');
     } finally {
+      if (container) container.style.transform = originalTransform;
       setIsDownloading(false);
     }
   };
 
-  // 3. COPY MEDICAL SUMMARY TEXT
+  // 3. HIGH-RES PNG IMAGE DOWNLOAD
+  const handleDownloadPNG = async () => {
+    setIsDownloading(true);
+    toast.info('Menyiapkan gambar PNG dokumen beresolusi tinggi...');
+    
+    const container = printSheetRef.current;
+    const originalTransform = container ? container.style.transform : '';
+    if (container) container.style.transform = 'none';
+
+    try {
+      const element = document.querySelector('.printable-hospital-doc') as HTMLElement;
+      if (!element) {
+        toast.error('Lembar dokumen tidak ditemukan');
+        return;
+      }
+
+      const canvas = await html2canvas(element, {
+        scale: 2.0,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      const safeFilename = doc 
+        ? `${doc.judulDokumen.replace(/[^a-zA-Z0-9]/g, '_')}_${doc.subject.no_rm || doc.subject.nip || 'DOC'}.png` 
+        : `Dokumen_${Date.now()}.png`;
+      link.download = safeFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('Gambar PNG resmi berhasil diunduh!');
+    } catch (err) {
+      console.error('Error generating PNG:', err);
+      toast.error('Gagal mengunduh gambar');
+    } finally {
+      if (container) container.style.transform = originalTransform;
+      setIsDownloading(false);
+    }
+  };
+
+  // 4. INTELLIGENT TEXT SUMMARY GENERATOR
+  const generateTextSummary = (): string => {
+    if (!doc) return '';
+    const h = doc.hospitalInfo || { name: 'KLINIK TARUMANAGARA' };
+
+    let specificSection = '';
+    if (doc.type === 'hasil_laboratorium') {
+      const lMeta = doc.labMetadata;
+      const items = (doc.hasilPemeriksaanLab || []).map(r => `• ${r.nama}: ${r.hasil} ${r.satuan || ''} (Nilai Rujukan: ${r.nilai_rujukan || '-'}) [${r.flag || 'Normal'}]`).join('\n');
+      specificSection = `HASIL PEMERIKSAAN LAB:\nNo. Lab: ${lMeta?.noLab || '-'}\nWaktu Sampling: ${lMeta?.tglSampling || '-'}\n\n${items}\n\nCatatan Klinis: ${lMeta?.catatanKlinis || '-'}`;
+    } else if (doc.type === 'hasil_radiologi') {
+      const rad = doc.hasilRadiologi?.[0];
+      specificSection = `HASIL RADIOLOGI & PENCITRAAN:\nPemeriksaan: ${rad?.jenis || '-'}\nProyeksi: ${doc.radiologiMetadata?.proyeksi || '-'}\n\nEkspertise:\n${rad?.ekspertise || '-'}\n\nKesimpulan Radiologis:\n${rad?.kesimpulan || '-'}`;
+    } else if (doc.type === 'kuitansi_billing') {
+      const b = doc.billingSummary;
+      const items = (doc.itemBilling || []).map(it => `• ${it.nama} (x${it.jumlah || 1}): Rp ${(it.subtotal || it.tarif || 0).toLocaleString('id-ID')}`).join('\n');
+      specificSection = `RINCIAN BIAYA & PEMBAYARAN:\nNo. Kuitansi: ${b?.noKuitansi || '-'}\n\n${items}\n\nTotal Tarif: Rp ${(b?.totalTarif || 0).toLocaleString('id-ID')}\nTotal Dibayar: Rp ${(b?.totalDibayar || 0).toLocaleString('id-ID')}\nTerbilang: ${b?.terbilang || '-'}\nStatus: LUNAS (${b?.tanggalBayar || '-'})`;
+    } else if (doc.type === 'resep_obat') {
+      const meds = (doc.terapiObat || []).map(m => `R/ ${m.nama} — No. ${m.jumlah || 'X'}\n   Signa: ${m.aturan_pakai || m.dosis || '-'} (${m.keterangan || '-'})`).join('\n\n');
+      specificSection = `FORMULA RESEP OBAT:\n${meds}\n\nInstruksi Farmasi: ${doc.resepData?.instruksiKhususApotek || '-'}`;
+    } else if (doc.type === 'profil_sdm') {
+      const s = doc.profilSdmData;
+      specificSection = `PROFIL KEPEGAWAIAN:\nJabatan: ${s?.jabatan || '-'}\nDivisi: ${s?.divisi || '-'}\nStatus: ${s?.statusKepegawaian || '-'}\nPendidikan: ${s?.pendidikan || '-'}\nSTR: ${s?.str || '-'}\nSIP: ${s?.sip || '-'}\nKontak: ${s?.kontak || '-'} | Email: ${s?.email || '-'}`;
+    } else if (doc.type === 'laporan_insiden') {
+      const ikp = doc.laporanInsidenData;
+      specificSection = `LAPORAN INSIDEN:\nNo. Insiden: ${ikp?.noInsiden || '-'}\nUnit: ${ikp?.lokasiUnit || '-'}\nTipe: ${ikp?.tipeInsiden || '-'}\nGrading: ${ikp?.gradingRisiko || '-'}\n\nKronologis:\n${ikp?.kronologis || '-'}\n\nTindakan Langsung:\n${ikp?.tindakanLangsung || '-'}`;
+    } else if (doc.type === 'dokumen_umum') {
+      const rows = doc.sections?.[0]?.tableData?.rows?.map(r => r.join(' | ')).join('\n') || 
+                   doc.dokumenUmumData?.tabelData?.map(t => `${t.label}: ${t.value}`).join('\n') || '-';
+      specificSection = `REKAPITULASI DATA:\n${rows}`;
+    } else {
+      specificSection = `DIAGNOSIS:\n${doc.diagnosisUtama?.nama ? `Diagnosis Utama: ${doc.diagnosisUtama.nama} (${doc.diagnosisUtama.kode || '-'})` : '-'}\n\nANAMNESIS & KELUHAN:\n${doc.keluhanUtama || doc.anamnesis || '-'}\n\nINSTRUKSI & EDUKASI:\n${doc.edukasiInstruksi || '-'}`;
+    }
+
+    return `
+=== ${h.name} ===
+${doc.judulDokumen}
+Nomor Dokumen : ${doc.nomorDokumen}
+Tanggal       : ${doc.signer.tanggal || new Date().toLocaleDateString('id-ID')}
+
+IDENTITAS SUBJEK:
+• Nama Lengkap: ${doc.subject.nama}
+• No. RM / NIP: ${doc.subject.no_rm || doc.subject.nip || '-'}
+• Jenis Kelamin: ${doc.subject.jenis_kelamin || '-'}
+• Unit / Poli : ${doc.subject.unit_pelayanan || doc.subject.poli || '-'}
+• Penjamin    : ${doc.subject.penjamin || '-'}
+
+--------------------------------------------------
+${specificSection}
+--------------------------------------------------
+
+Penanggung Jawab: ${doc.signer.nama} (${doc.signer.jabatan || 'Pejabat Berwenang'})
+Kredensial / SIP: ${doc.signer.sip_nip || '-'}
+Digital Validation: ${doc.signer.digitalValidationCode || '-'}
+    `.trim();
+  };
+
+  // 5. COPY MEDICAL / DOCUMENT SUMMARY TEXT
   const handleCopyText = () => {
     if (!doc) {
-      toast.error('Tidak ada teks medis terstruktur untuk disalin.');
+      toast.error('Tidak ada teks dokumen untuk disalin.');
       return;
     }
-    const textSummary = `
-=== ${doc?.hospitalInfo?.name || 'KLINIK SEHAT SEJAHTERA'} ===
-${doc?.judulDokumen}
-Nomor: ${doc?.nomorDokumen}
-Tanggal: ${doc?.signer.tanggal || new Date().toLocaleDateString('id-ID')}
-
-IDENTITAS:
-- Nama: ${doc?.subject.nama}
-- No. RM/NIP: ${doc?.subject.no_rm || doc?.subject.nip || '-'}
-- Jenis Kelamin: ${doc?.subject.jenis_kelamin || '-'}
-- Unit/Poli: ${doc?.subject.unit_pelayanan || doc?.subject.poli || '-'}
-
-DIAGNOSIS:
-${doc?.diagnosisUtama?.nama ? `Diagnosis Utama: ${doc?.diagnosisUtama.nama} (${doc?.diagnosisUtama.kode || '-'})` : '-'}
-
-ANAMNESIS & PEMERIKSAAN:
-${doc?.anamnesis || '-'}
-
-INSTRUKSI & EDUKASI:
-${doc?.edukasiInstruksi || '-'}
-
-DPJP/Pejabat: ${doc?.signer.nama} (${doc?.signer.sip_nip || '-'})
-    `.trim();
-
+    const textSummary = generateTextSummary();
     navigator.clipboard.writeText(textSummary);
     setIsCopied(true);
     toast.success('Ringkasan teks dokumen berhasil disalin ke clipboard');
     setTimeout(() => setIsCopied(false), 2500);
+  };
+
+  // 6. DOWNLOAD AS STRUCTURED TXT FILE
+  const handleDownloadTXT = () => {
+    if (!doc) {
+      toast.error('Tidak ada data dokumen untuk diunduh.');
+      return;
+    }
+    const textSummary = generateTextSummary();
+    const blob = new Blob([textSummary], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${doc.judulDokumen.replace(/[^a-zA-Z0-9]/g, '_')}_${doc.subject.no_rm || doc.subject.nip || 'DOC'}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success('Berkas teks resmi (.txt) berhasil diunduh!');
   };
 
   const handleApplyNotes = () => {
@@ -184,7 +288,7 @@ DPJP/Pejabat: ${doc?.signer.nama} (${doc?.signer.sip_nip || '-'})
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              {doc?.judulDokumen} • {doc?.subject.nama} ({doc?.subject.no_rm || doc?.subject.nip || 'Pasien'})
+              {doc?.judulDokumen} • {doc?.subject.nama} ({doc?.subject.no_rm || doc?.subject.nip || 'Entitas'})
             </p>
           </div>
         </div>
@@ -228,10 +332,31 @@ DPJP/Pejabat: ${doc?.signer.nama} (${doc?.signer.sip_nip || '-'})
           <button
             onClick={handleCopyText}
             className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5"
-            title="Salin Teks Ringkasan"
+            title="Salin Teks Dokumen"
           >
             {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
             <span className="hidden md:inline">{isCopied ? 'Tersalin' : 'Salin Teks'}</span>
+          </button>
+
+          {/* DOWNLOAD TXT */}
+          <button
+            onClick={handleDownloadTXT}
+            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5"
+            title="Download Berkas Teks (.txt)"
+          >
+            <FileText className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="hidden lg:inline">Unduh TXT</span>
+          </button>
+
+          {/* DOWNLOAD PNG IMAGE */}
+          <button
+            onClick={handleDownloadPNG}
+            disabled={isDownloading}
+            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            title="Download Gambar Dokumen (PNG High-Res)"
+          >
+            <ImageIcon className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden lg:inline">Unduh Gambar</span>
           </button>
 
           {/* DOWNLOAD PDF */}

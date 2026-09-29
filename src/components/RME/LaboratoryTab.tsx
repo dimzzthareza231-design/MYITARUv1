@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FlaskConical, Plus, CheckCircle2, AlertTriangle, Printer, Search, FileText, Check, Clock, Filter, Eye } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import PrintPDFButton from '../PrintPDFButton';
@@ -80,6 +80,68 @@ export function LaboratoryTab({ patientData }: { patientData: any }) {
   // Modal order state
   const [selectedTests, setSelectedTests] = useState<string[]>([]);
   const [orderClinicalNotes, setOrderClinicalNotes] = useState('');
+
+  // Dynamically load integrated Lab orders from SIMRS Interline storage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('simrs_lab_orders');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const patientOrders = parsed.filter((l: any) => 
+            l.no_rm === patientData?.no_rm || l.pasien_id === String(patientData?.id)
+          );
+
+          if (patientOrders.length > 0) {
+            const mappedOrders: LabOrder[] = patientOrders.map((l: any) => ({
+              id: l.id,
+              orderNumber: l.no_permintaan || l.id,
+              orderDate: l.waktu_order || 'Hari ini',
+              doctor: l.dokter_pengirim || 'dr. DPJP',
+              diagnosaKlinis: l.diagnosa_klinis || 'Pemeriksaan Rutin',
+              status: l.status === 'Selesai & Tervalidasi' ? 'Selesai' : (l.status === 'Menunggu Validasi' ? 'Pending Verifikasi' : 'Dalam Proses'),
+              verifiedBy: l.dokter_sp_pk,
+              verifiedAt: l.waktu_validasi,
+              items: (l.parameter_results && l.parameter_results.length > 0) ? l.parameter_results.map((p: any, idx: number) => ({
+                id: String(idx + 1),
+                name: p.parameter_name,
+                loinc: p.test_code || '718-7',
+                category: 'Hematologi / Kimia',
+                result: String(p.hasil),
+                unit: p.satuan || '',
+                refRange: p.nilai_rujukan || '',
+                status: p.is_critical ? 'Critical' : (p.flag === 'H' ? 'High' : (p.flag === 'L' ? 'Low' : 'Normal')),
+                flagText: p.is_critical ? 'Nilai Kritis' : undefined
+              })) : [
+                {
+                  id: '1',
+                  name: l.items?.[0]?.nama_pemeriksaan || 'Panel Laboratorium',
+                  loinc: l.items?.[0]?.loinc_code || '57021-8',
+                  category: 'Hematologi',
+                  result: l.status === 'Selesai & Tervalidasi' ? 'Tervalidasi Sp.PK' : 'Sedang Dianalisis',
+                  unit: '-',
+                  refRange: 'Normal',
+                  status: 'Normal'
+                }
+              ]
+            }));
+
+            setOrders(prev => {
+              const existingIds = new Set(prev.map(p => p.id));
+              const newUniq = mappedOrders.filter(m => !existingIds.has(m.id));
+              return [...newUniq, ...prev];
+            });
+
+            if (mappedOrders.length > 0 && !selectedOrder) {
+              setSelectedOrder(mappedOrders[0].id);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Error reading integrated lab orders:', e);
+    }
+  }, [patientData?.no_rm, patientData?.id]);
 
   const activeOrder = orders.find(o => o.id === selectedOrder) || orders[0];
 

@@ -17,9 +17,11 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
   const [activeTab, setActiveTab] = useState('subjective');
   const [isSaving, setIsSaving] = useState(false);
   const [showCDSModal, setShowCDSModal] = useState(false);
+  const [aiStatus, setAiStatus] = useState<'AI_GENERATED' | 'PENDING_REVIEW' | 'HUMAN_VERIFIED' | 'FINAL'>('PENDING_REVIEW');
   
   const handleTranscriptReady = (newSoap: any) => {
     setSoap(newSoap);
+    setAiStatus('AI_GENERATED');
     if (newSoap.subjective?.keluhan_utama) setActiveTab('subjective');
   };
   
@@ -38,7 +40,12 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
     const saved: any[] = raw ? JSON.parse(raw) : [];
     const existingIndex = saved.findIndex((r: any) => r.kunjungan_id === kunjunganId);
     
-    const data = { kunjungan_id: kunjunganId, ...soap, updated_at: new Date().toISOString() };
+    const data = { 
+      kunjungan_id: kunjunganId, 
+      ...soap, 
+      ai_governance_status: aiStatus,
+      updated_at: new Date().toISOString() 
+    };
     
     if (existingIndex >= 0) saved[existingIndex] = data;
     else saved.push(data);
@@ -110,6 +117,54 @@ export default function FormSOAP({ kunjunganId, pasien, onClose }: { kunjunganId
         setCurrentSOAP={setSoap}
       />
       
+      {/* BLUEPRINT SECTION 10: AI GOVERNANCE PIPELINE BAR */}
+      <div className="mb-4 bg-slate-50 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+            <Brain className="w-4 h-4 text-purple-500" />
+            <span>AI Governance:</span>
+          </span>
+          <div className="flex items-center gap-1 flex-wrap">
+            {[
+              { id: 'AI_GENERATED', label: 'AI GENERATED', color: 'bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300' },
+              { id: 'PENDING_REVIEW', label: 'PENDING REVIEW', color: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300' },
+              { id: 'HUMAN_VERIFIED', label: 'HUMAN VERIFIED', color: 'bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300' },
+              { id: 'FINAL', label: 'FINAL', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300' }
+            ].map((p, idx) => (
+              <React.Fragment key={p.id}>
+                <span className={`px-2 py-0.5 rounded-md font-mono text-[10px] font-bold ${aiStatus === p.id ? `${p.color} ring-1 ring-current shadow-xs` : 'text-slate-400 opacity-60'}`}>
+                  {p.label}
+                </span>
+                {idx < 3 && <span className="text-slate-400 text-[10px]">→</span>}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => {
+              setAiStatus('HUMAN_VERIFIED');
+              toast.success('Diverifikasi oleh dokter (Human-Verified)');
+            }}
+            className="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-600 hover:text-white text-blue-600 dark:text-cyan-300 text-[11px] font-bold border border-blue-500/20 transition-all cursor-pointer"
+          >
+            ✓ Verifikasi Medis
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setAiStatus('FINAL');
+              toast.success('Status rekam medis dikunci ke FINAL');
+            }}
+            className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-600 hover:text-white text-emerald-600 dark:text-emerald-300 text-[11px] font-bold border border-emerald-500/20 transition-all cursor-pointer"
+          >
+            🔒 Finalisasi RME
+          </button>
+        </div>
+      </div>
+
       {/* SOAP Form */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow border border-slate-200 dark:border-slate-700">
         <div className="flex border-b dark:border-gray-700 overflow-x-auto">

@@ -15,6 +15,7 @@ import { generate50IGDPatients } from '../data/patientPelayananData';
 import { DATA_DOKTER_JAGA_LENGKAP } from '../data/dataDokterJagaLengkap';
 import PrintPDFButton from './PrintPDFButton';
 import { GoogleMapsHealthLocator } from './Common/GoogleMapsHealthLocator';
+import { allocatePatientToBed, integrateRegistration } from '../utils/interlineIntegration';
 
 export function Emergency() {
   const { activeTab } = useOutletContext<{ activeTab: string }>() || { activeTab: 'Triase' };
@@ -182,7 +183,36 @@ export function Emergency() {
     };
 
     setTriagePatients([newPatient, ...triagePatients]);
-    toast.success(`Pasien ${newPatient.name} berhasil ditriase [Kategori: ${newPatient.triage}]`);
+
+    // Integrate with Billing & Patient Flow
+    const newIgdVisit: any = {
+      id: `K-IGD-${Date.now().toString().slice(-4)}`,
+      pasien_id: newPatient.no_rm,
+      tanggal: newPatient.tanggal,
+      poli_id: 'POL-IGD',
+      dokter_id: 'D-IGD-01',
+      penjamin_id: newPatient.penjamin.includes('BPJS') ? 'PJ-02' : 'PJ-01',
+      status: 'Menunggu',
+      tipe: 'IGD',
+      nomor_antrian: newPatient.nomor,
+      keluhan_utama: newPatient.condition
+    };
+    integrateRegistration({
+      patient: {
+        id: String(newPatient.id),
+        nama: newPatient.name,
+        no_rm: newPatient.no_rm,
+        nik: formData.nik,
+        penjamin: newPatient.penjamin
+      },
+      visit: newIgdVisit,
+      isBPJS: newPatient.penjamin.includes('BPJS'),
+      poliNama: 'Instalasi Gawat Darurat (IGD)',
+      dokterNama: newPatient.dokter_jaga,
+      keluhan: newPatient.condition
+    });
+
+    toast.success(`Pasien ${newPatient.name} berhasil ditriase [Kategori: ${newPatient.triage}] & masuk ke Alur Pelayanan!`);
     setIsSubmitting(false);
     setIsTriageModalOpen(false);
     setFormData({
@@ -264,52 +294,49 @@ export function Emergency() {
   
   // Action: Convert / Transfer patient to Inpatient (Rawat Inap)
   const convertToInpatient = (patient: any) => {
-    // 1. Save to Rawat Inap beds storage
-    try {
-      const savedBeds = localStorage.getItem('simrs_bed_management');
-      let bedsList = savedBeds ? JSON.parse(savedBeds) : [];
-      if (!Array.isArray(bedsList) || bedsList.length === 0) {
-        bedsList = generate50IGDPatients();
-      }
+    // 1. Allocate to Inpatient Bed via Interline Service
+    allocatePatientToBed({
+      no_rm: patient.no_rm,
+      nama_pasien: patient.name || patient.nama_pasien,
+      diagnosa: patient.diagnosa || patient.condition || 'Rawat Inap rujukan IGD',
+      dpjp: patient.dokter_jaga || 'dr. Hendra Pratama, Sp.PD',
+      penjamin: patient.penjamin || 'BPJS Kesehatan'
+    });
 
-      // Find first available bed
-      const emptyBedIndex = bedsList.findIndex((b: any) => b.status === 'Kosong');
-      if (emptyBedIndex !== -1) {
-        bedsList[emptyBedIndex] = {
-          ...bedsList[emptyBedIndex],
-          status: 'Terisi',
-          patient: patient.name || patient.nama_pasien,
-          nama_pasien: patient.name || patient.nama_pasien,
-          no_rm: patient.no_rm,
-          diagnosa: patient.diagnosa || patient.condition || 'Rawat Inap rujukan IGD',
-          dpjp: patient.dokter_jaga || 'dr. Hendra Pratama, Sp.PD',
-          penjamin: patient.penjamin || 'BPJS Kesehatan'
-        };
-        localStorage.setItem('simrs_bed_management', JSON.stringify(bedsList));
-        toast.success(`✅ Pasien ${patient.name} berhasil dialokasikan ke Bed ${bedsList[emptyBedIndex].id} (${bedsList[emptyBedIndex].room})`);
-      } else {
-        toast.success(`Pasien ${patient.name} telah dikonfirmasi masuk ke antrian Rawat Inap.`);
-      }
-    } catch (e) {
-      console.error('Error allocating bed:', e);
-    }
+    // 2. Register Inpatient Visit & Billing in Interline Pipeline
+    const newRanapVisit: any = {
+      id: `K-RANAP-${Date.now().toString().slice(-4)}`,
+      pasien_id: patient.no_rm,
+      tanggal: new Date().toISOString().split('T')[0],
+      poli_id: 'BANGSAL-MAWAR',
+      dokter_id: 'D-RANAP-01',
+      penjamin_id: (patient.penjamin || '').includes('BPJS') ? 'PJ-02' : 'PJ-01',
+      status: 'Menunggu',
+      tipe: 'Rawat Inap',
+      nomor_antrian: `RI-${Math.floor(100 + Math.random() * 900)}`,
+      keluhan_utama: patient.condition || 'Alih Rawat Inap dari IGD'
+    };
 
-    // 2. Update status in IGD triage list
+    integrateRegistration({
+      patient: {
+        id: String(patient.id),
+        nama: patient.name || patient.nama_pasien,
+        no_rm: patient.no_rm,
+        penjamin: patient.penjamin
+      },
+      visit: newRanapVisit,
+      isBPJS: (patient.penjamin || '').includes('BPJS'),
+      poliNama: 'Bangsal Rawat Inap Terpadu',
+      dokterNama: patient.dokter_jaga || 'dr. Hendra Pratama, Sp.PD',
+      keluhan: patient.condition || 'Alih Rawat Inap dari IGD'
+    });
+
+    // 3. Update status in IGD triage list
     setTriagePatients(triagePatients.map((p: any) => 
       p.id === patient.id ? { ...p, status: 'Rawat Inap' } : p
     ));
 
-    // 3. Update Patient Flow if available
-    if (patientFlow && patientFlow.addKunjungan) {
-      patientFlow.addKunjungan({
-        no_rm: patient.no_rm,
-        nama_pasien: patient.name || patient.nama_pasien,
-        jenis_kunjungan: 'Rawat Inap',
-        poli: 'Rawat Inap Bangsal',
-        dokter: patient.dokter_jaga || 'dr. Hendra Pratama, Sp.PD',
-        penjamin: patient.penjamin || 'BPJS Kesehatan'
-      });
-    }
+    toast.success(`✅ Pasien ${patient.name || patient.nama_pasien} berhasil dialih rawatkan ke Rawat Inap (Bed Management & Billing Ranap terupdate)!`);
   };
 
   const getCount = (triageType: string) => triagePatients.filter((p: any) => p.triage === triageType).length;

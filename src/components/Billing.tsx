@@ -72,6 +72,22 @@ export function Billing() {
     storage.setItem('hospital_finance_shifts', shifts);
   }, [shifts]);
 
+  // Real-time interline listener for bills from Registration, Outpatient, Lab, Farmasi, and Bed
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const saved = storage.getItem<BillingRecord[]>('hospital_finance_billings', null);
+        if (saved && Array.isArray(saved) && saved.length > 0) {
+          setBillings(saved);
+        }
+      } catch (e) {
+        console.warn('Billing sync error:', e);
+      }
+    };
+    window.addEventListener('simrs-interline-sync', handleSync);
+    return () => window.removeEventListener('simrs-interline-sync', handleSync);
+  }, []);
+
   // Sync new visits from HospitalContext into billings if not already present
   const handleSyncFromKunjungan = () => {
     let addedCount = 0;

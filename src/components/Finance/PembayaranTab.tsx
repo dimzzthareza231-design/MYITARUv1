@@ -7,6 +7,7 @@ import { BillingRecord, PaymentMethod } from './types';
 import { useHospital } from '../../contexts/HospitalContext';
 import { useToast } from '../../contexts/ToastContext';
 import { logAIAttempt } from '../../lib/activityLogger';
+import { integrateBillingPayment } from '../../utils/interlineIntegration';
 
 interface PembayaranTabProps {
   billings: BillingRecord[];
@@ -116,6 +117,14 @@ export function PembayaranTab({
     if (activeBill.kunjunganId) {
       updateKunjunganStatus(activeBill.kunjunganId, 'Selesai');
     }
+
+    // Interline Integration (Patient Flow ke PULANG & Master Visit LUNAS)
+    integrateBillingPayment({
+      billing: updatedBilling,
+      metodePembayaran: method,
+      jumlahDibayar: amountToPay,
+      kasirNama: updatedBilling.kasirNama || 'Siti Rahmawati, S.E.'
+    });
 
     toast.success(`Pembayaran sebesar Rp ${amountToPay.toLocaleString('id-ID')} BERHASIL! No Kwitansi: ${noKwitansiGenerated}`);
   };

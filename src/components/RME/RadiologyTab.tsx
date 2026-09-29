@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScanLine, Plus, CheckCircle2, Eye, ZoomIn, ZoomOut, RotateCw, Contrast, Sun, Sliders, Printer, Image as ImageIcon, ShieldCheck, Maximize2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import PrintPDFButton from '../PrintPDFButton';
@@ -56,6 +56,51 @@ export function RadiologyTab({ patientData }: { patientData: any }) {
 
   const [selectedOrderId, setSelectedOrderId] = useState<string>('RAD-001');
   const [showOrderModal, setShowOrderModal] = useState(false);
+
+  // Dynamically load integrated Radiology orders from SIMRS Interline storage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('simrs_rad_orders');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const patientOrders = parsed.filter((r: any) =>
+            r.patientRm === patientData?.no_rm || r.no_rm === patientData?.no_rm
+          );
+
+          if (patientOrders.length > 0) {
+            const mappedOrders: RadOrder[] = patientOrders.map((r: any) => ({
+              id: r.id,
+              orderNumber: r.orderNumber || r.id,
+              modality: r.modality || 'X-Ray',
+              examName: r.examName || 'Pemeriksaan Radiologi',
+              orderDate: r.orderDate || 'Hari ini',
+              doctor: r.doctor || 'dr. DPJP',
+              clinicalIndication: r.clinicalIndication || 'Evaluasi Radiologis',
+              status: r.status === 'Tervalidasi' ? 'Selesai' : (r.status === 'Selesai' ? 'Selesai' : 'Dalam Proses'),
+              radiologist: r.radiologist || 'dr. Hendra Wijaya, Sp.Rad',
+              verifiedAt: r.verifiedAt || 'Baru Saja',
+              findings: r.findings || 'Pemeriksaan foto rontgen telah diproses PACS.',
+              impression: r.impression || 'Ekspertise normal atau dalam batas klinis.',
+              recommendation: r.recommendation || 'Korelasi dengan gejala klinis.'
+            }));
+
+            setOrders(prev => {
+              const existingIds = new Set(prev.map(p => p.id));
+              const newUniq = mappedOrders.filter(m => !existingIds.has(m.id));
+              return [...newUniq, ...prev];
+            });
+
+            if (mappedOrders.length > 0 && !selectedOrderId) {
+              setSelectedOrderId(mappedOrders[0].id);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Error reading integrated rad orders:', e);
+    }
+  }, [patientData?.no_rm]);
 
   // PACS / DICOM Viewer Controls
   const [zoom, setZoom] = useState(100);

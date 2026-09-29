@@ -6,6 +6,7 @@ import {
   QrCode, Edit3, ArrowRight, Printer, AlertOctagon
 } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
+import { integrateLabValidation } from '../../utils/interlineIntegration';
 
 interface ValidasiSpPKTabProps {
   orders: LabOrder[];
@@ -115,7 +116,16 @@ export function ValidasiSpPKTab({
 
       onUpdateOrders(updated);
       setIsDigitalSigning(false);
-      toast.success(`Hasil Laboratorium ${activeOrder.id} resmi Tervalidasi & Ditandatangani Elektronik!`);
+
+      // Interline System Integration (RME, Kasir, Patient Flow)
+      integrateLabValidation({
+        labOrder: activeOrder,
+        dokterSpPK: spPkName,
+        interpretasi: interpretasi,
+        saranKlinis: saranKlinis
+      });
+
+      toast.success(`Hasil Laboratorium ${activeOrder.id} resmi Tervalidasi & Ditandatangani Elektronik! Terhubung ke Rekam Medis & Billing.`);
     }, 1200);
   };
 

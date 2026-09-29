@@ -194,14 +194,32 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {rows.length === 0 ? (
-              <tr><td colSpan={columns.length + 1} className="p-12 text-center text-slate-500 dark:text-slate-400 font-medium">📭 Belum ada data pada modul ini</td></tr>
+              <tr>
+                <td colSpan={columns.length + 1} className="p-12 text-center text-slate-500 dark:text-slate-400 font-medium">
+                  <div className="text-3xl mb-2">📭</div>
+                  <p>Belum ada data pada modul ini</p>
+                  {!isReadOnly && (
+                    <button
+                      onClick={() => { setForm({}); setModal('add'); }}
+                      className="mt-3 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Tambah Data Baru</span>
+                    </button>
+                  )}
+                </td>
+              </tr>
             ) : rows.map((r, rIdx) => (
               <tr key={r.id !== undefined && r.id !== null ? String(r.id) : `smart-row-${rIdx}-${r.no_rm || r.nama || r.nomor || ''}`} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group">
-                {columns.map((c, cIdx) => (
-                  <td key={c.key || `col-${cIdx}`} className="p-3.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
-                    {c.badge ? <Badge v={r[c.key]} /> : String(r[c.key] ?? '-')}
-                  </td>
-                ))}
+                {columns.map((c, cIdx) => {
+                  const keyLower = c.key.toLowerCase();
+                  const isMono = /no_|kode|nik|rm|id|tarif|harga|biaya|tgl|tanggal|jam|waktu|qty|stok/.test(keyLower);
+                  return (
+                    <td key={c.key || `col-${cIdx}`} className={`p-3.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 ${isMono ? 'font-mono tabular-nums' : ''}`}>
+                      {c.badge ? <Badge v={r[c.key]} /> : String(r[c.key] ?? '-')}
+                    </td>
+                  );
+                })}
                 <td className="p-3.5">
                   <div className="flex gap-1.5 justify-center items-center opacity-85 group-hover:opacity-100 transition-opacity">
                     {customActions && customActions(r, { setData, data, toast })}
@@ -209,7 +227,7 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
                     {/* LIHAT DETAIL DOKUMEN & FORM LENGKAP */}
                     <button 
                       onClick={() => { setSelected(r); setModal('detail'); }} 
-                      className="px-2.5 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg transition-colors border border-blue-500/20 flex items-center gap-1 text-xs font-bold" 
+                      className="px-2.5 py-1.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg transition-colors border border-blue-500/20 flex items-center gap-1 text-xs font-bold cursor-pointer" 
                       title="Lihat Detail & Dokumen Lengkap"
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -219,7 +237,7 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
                     {/* CETAK / OVERVIEW DOKUMEN LANGSUNG */}
                     <button 
                       onClick={() => setPrintPreviewRow(r)} 
-                      className="px-2.5 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-lg transition-colors border border-emerald-500/20 flex items-center gap-1 text-xs font-bold" 
+                      className="px-2.5 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-lg transition-colors border border-emerald-500/20 flex items-center gap-1 text-xs font-bold cursor-pointer" 
                       title="Overview & Cetak PDF Resmi"
                     >
                       <Printer className="w-3.5 h-3.5" />
@@ -228,10 +246,10 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
 
                     {!isReadOnly && (
                       <>
-                        {/* EDIT DATA DENGAN STYLE ELEGAN */}
+                        {/* EDIT DATA */}
                         <button 
                           onClick={() => { setSelected(r); setForm({ ...r }); setModal('edit'); }} 
-                          className="px-2.5 py-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-600 hover:text-white rounded-lg transition-colors border border-amber-500/20 flex items-center gap-1 text-xs font-bold" 
+                          className="px-2.5 py-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-600 hover:text-white rounded-lg transition-colors border border-amber-500/20 flex items-center gap-1 text-xs font-bold cursor-pointer" 
                           title="Edit & Perbarui Data"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
@@ -241,7 +259,7 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
                         {/* HAPUS DATA */}
                         <button 
                           onClick={() => del(r.id !== undefined && r.id !== null ? r.id : rIdx)} 
-                          className="p-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-600 hover:text-white rounded-lg transition-colors border border-rose-500/20" 
+                          className="p-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white rounded-lg transition-colors border border-rose-500/20 cursor-pointer" 
                           title="Hapus Data"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -457,7 +475,7 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
         <DocumentPreviewModal
           isOpen={printPreviewRow !== null}
           onClose={() => setPrintPreviewRow(null)}
-          document={generateHospitalDocument(printPreviewRow, 'resume_medis', `DOKUMEN RESMI: ${title.toUpperCase()}`)}
+          document={generateHospitalDocument(printPreviewRow, undefined, `DOKUMEN RESMI: ${title.toUpperCase()}`)}
         />
       )}
 
@@ -477,10 +495,10 @@ export default function SmartTable({ storageKey, columns, title, extraActions, c
 function Badge({ v }: { v: any }) {
   const val = String(v ?? '');
   return (
-    <span className={`px-2.5 py-1 rounded-full text-xs font-bold inline-block whitespace-nowrap ${
-      /Aktif|Selesai|Valid|Lunas|Steril|Tervalidasi|Dipanggil/.test(val) ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-      /Proses|Pending|Antri|Diperiksa|Kuning/.test(val) ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 
-      'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold inline-block whitespace-nowrap ${
+      /Aktif|Selesai|Valid|Lunas|Steril|Tervalidasi|Dipanggil/.test(val) ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
+      /Proses|Pending|Antri|Diperiksa|Kuning/.test(val) ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800' : 
+      'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300 dark:border-rose-800'
     }`}>{val}</span>
   );
 }

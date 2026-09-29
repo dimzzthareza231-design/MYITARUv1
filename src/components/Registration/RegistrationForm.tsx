@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 import { useHospital } from '../../contexts/HospitalContext';
 import { usePatientFlow } from '../../contexts/PatientFlowContext';
 import { useAntrian, DAFTAR_POLI } from "../../contexts/AntrianContext";
+import { integrateRegistration } from '../../utils/interlineIntegration';
 
 export function RegistrationForm({ initialData, onClose }: { initialData?: any, onClose?: () => void }) {
   const { addPasien, addKunjungan: addKunjunganMaster } = useHospital();
@@ -489,6 +490,22 @@ export function RegistrationForm({ initialData, onClose }: { initialData?: any, 
       poli: formData.poliTujuan || 'Poli Umum',
       dokter: formData.dokterPilihan || 'dr. Jaga Poliklinik',
       penjamin: formData.jenisPenjamin
+    });
+
+    // Integrated Hospital Pipeline (Billing, Bed, EMR, BPJS)
+    const masterVisitObj: any = {
+      id: `K-${Math.floor(Math.random() * 10000)}`,
+      pasien_id: newPatient.id,
+      status: 'Menunggu',
+      ...commonKunjunganData
+    };
+    integrateRegistration({
+      patient: newPatient,
+      visit: masterVisitObj,
+      isBPJS: formData.jenisPenjamin.toLowerCase().includes('bpjs'),
+      poliNama: formData.poliTujuan,
+      dokterNama: formData.dokterPilihan,
+      keluhan: formData.keluhanUtama
     });
     
     // Clean up draft

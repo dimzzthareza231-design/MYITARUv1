@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --color-primary-blue: #0066CC;
   --color-primary-blue-hover: #0052a3;
   --color-secondary-gray: #f3f4f6;
@@ -9,38 +11,50 @@
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 font-sans;
+  font-family: var(--font-sans);
+  @apply bg-slate-50 text-slate-900 antialiased;
 }
+
 .dark body {
-  @apply bg-slate-900 text-slate-50;
+  @apply bg-slate-950 text-slate-100;
 }
+
+.font-mono,
+.tabular-nums {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
 .btn-primary {
-  @apply px-4 py-2 bg-[var(--color-primary-blue)] text-white rounded-lg font-medium hover:bg-[var(--color-primary-blue-hover)] transition-colors flex items-center justify-center gap-2;
+  @apply px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer;
 }
+
 .btn-secondary {
-  @apply px-4 py-2 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-lg font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2;
+  @apply px-4 py-2 bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-xl font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer;
 }
+
 .card {
-  @apply bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700;
+  @apply bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 transition-all;
 }
+
 .input-field {
-  @apply w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-blue)] focus:border-transparent transition-all;
+  @apply w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/90 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 transition-all;
 }
 
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.5);
+  background: rgba(148, 163, 184, 0.4);
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.8);
+  background: rgba(148, 163, 184, 0.7);
 }
 
 /* Watermark styles for minimalist dashboard */
@@ -64,52 +78,101 @@ body {
 
 /* Print styles */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  /* Reset all dark backgrounds and force clean black text on white paper */
+  html,
+  body,
+  #root,
+  .dark,
+  .dark body,
+  .dark #root,
+  .dark .bg-slate-900,
+  .dark .bg-slate-800,
+  .dark .bg-white {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    color-scheme: light !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide app navigation chrome, buttons, sidebars, alerts */
   .no-print,
   nav,
   aside,
   .sidebar,
+  header.no-print,
+  footer.no-print,
   button:not(.print-keep),
   .action-buttons,
-  footer {
+  [data-sonner-toaster],
+  .fixed.inset-0:not(:has(.printable-hospital-doc)) {
     display: none !important;
   }
-  
-  body {
-    background: white !important;
-    color: black !important;
+
+  /* Allow modal container to flow naturally across printable pages */
+  [role="dialog"],
+  .fixed.inset-0:has(.printable-hospital-doc) {
+    position: static !important;
+    overflow: visible !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-height: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: auto !important;
+    box-shadow: none !important;
   }
-  
+
+  /* Document sheet formatting */
+  .printable-hospital-doc {
+    transform: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Ensure footer and signatures inside printable hospital document are VISIBLE */
+  .printable-hospital-doc footer {
+    display: block !important;
+  }
+
+  /* Avoid awkward page breaks */
+  section,
+  tr,
+  img,
+  h1,
+  h2,
+  h3,
+  .printable-hospital-doc footer {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Links without underlines */
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
   * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
     box-shadow: none !important;
     text-shadow: none !important;
-  }
-  
-  @page {
-    size: A4;
-    margin: 2cm;
-  }
-  
-  a {
-    color: black !important;
-    text-decoration: underline;
-  }
-  
-  tr, img, h1, h2, h3 {
-    page-break-inside: avoid;
-  }
-  
-  table {
-    border-collapse: collapse;
-  }
-  
-  th, td {
-    border: 1px solid #ddd !important;
-    padding: 8px !important;
-  }
-  
-  th {
-    background: #f0f0f0 !important;
-    font-weight: bold;
   }
 }
 
@@ -255,7 +318,9 @@ body.printing {
 .dark ::-webkit-scrollbar-track { background: #1e293b; }
 .dark ::-webkit-scrollbar-thumb { background: #475569; }
 
-/* Smooth transitions */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+/* Targeted smooth transitions for interactive elements without layout lag */
+a, button, input, select, textarea, .card, .btn-primary, .btn-secondary {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-duration: 150ms;
 }

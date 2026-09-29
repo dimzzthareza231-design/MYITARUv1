@@ -2,19 +2,39 @@ import React, { useState } from 'react';
 import { 
   FileText, ShieldCheck, AlertTriangle, HeartPulse, Apple, Scale, Activity,
   Baby, AlertOctagon, FileWarning, Microscope, Zap, CheckCircle2,
-  Printer, Sparkles, ChevronRight, Search, Filter, ShieldAlert, Award, FolderCheck
+  Printer, Sparkles, ChevronRight, Search, Filter, ShieldAlert, Award, FolderCheck,
+  Stethoscope, UserCheck, Scissors, Pill, Droplet, LogOut, ArrowRightLeft, CheckSquare
 } from 'lucide-react';
+
+// Modals
+import { GeneralConsentModal } from './GeneralConsentModal';
+import { InformedConsentModal } from './InformedConsentModal';
+import { DNRFormModal } from './DNRFormModal';
+import { PulangPaksaModal } from './PulangPaksaModal';
+
+import { AsesmenAwalRanapModal } from './AsesmenAwalRanapModal';
+import { CPPTModal } from './CPPTModal';
 import { FallRiskAssessmentModal } from './FallRiskAssessmentModal';
 import { NutritionAssessmentModal } from './NutritionAssessmentModal';
 import { PainManagementModal } from './PainManagementModal';
 import { BarthelIndexModal } from './BarthelIndexModal';
+
+import { SurgicalSafetyChecklistModal } from './SurgicalSafetyChecklistModal';
+import { LaporanOperasiModal } from './LaporanOperasiModal';
+
+import { RekonsiliasiObatModal } from './RekonsiliasiObatModal';
+import { FluidBalanceModal } from './FluidBalanceModal';
+
 import { PartografViewerModal } from './PartografViewerModal';
 import { NeonatalApgarModal } from './NeonatalApgarModal';
-import { DNRFormModal } from './DNRFormModal';
-import { PulangPaksaModal } from './PulangPaksaModal';
-import { SuratKematianModal } from './SuratKematianModal';
+
 import { ElectrophysiologyExhibitModal } from './ElectrophysiologyExhibitModal';
 import { PatologiAnatomiModal } from './PatologiAnatomiModal';
+
+import { TransferPasienModal } from './TransferPasienModal';
+import { DischargePlanningModal } from './DischargePlanningModal';
+import { SuratKematianModal } from './SuratKematianModal';
+
 import PrintPDFButton from '../../PrintPDFButton';
 
 interface DossierProps {
@@ -25,41 +45,115 @@ export function DossierDocumentHub({ patient }: DossierProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  // Modal active states
+  // Modal active state
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
-  // Document Catalogue Structure
+  // Document Catalogue Structure (21 Essential Medical Record Files)
   const documentCatalogue = [
-    // 1. Asesmen Spesifik & Skrining Risiko (Rawat Inap)
+    // 1. IDENTITAS & PERSETUJUAN LEGAL
+    {
+      id: 'general_consent',
+      type: 'general_consent',
+      title: 'General Consent & Hak Kewajiban Pasien (RM.01)',
+      category: 'Identitas & Persetujuan Legal',
+      icon: UserCheck,
+      color: 'text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900',
+      status: 'Terisi Lengkap',
+      badgeColor: 'bg-emerald-500',
+      description: 'Persetujuan umum perawatan, pelepasan informasi medis, tata tertib RS dan hak-kewajiban pasien.',
+      action: () => setActiveModal('general_consent'),
+    },
+    {
+      id: 'informed_consent',
+      type: 'informed_consent',
+      title: 'Informed Consent Tindakan Medis & Pembiusan (RM.02)',
+      category: 'Identitas & Persetujuan Legal',
+      icon: ShieldCheck,
+      color: 'text-indigo-600 bg-indigo-50 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900',
+      status: 'Terverifikasi TTD',
+      badgeColor: 'bg-emerald-500',
+      description: 'Persetujuan / Penolakan tindakan kedokteran invasif, penjelasan diagnosis, risiko, dan komplikasi.',
+      action: () => setActiveModal('informed_consent'),
+    },
+    {
+      id: 'dnr_form',
+      type: 'formulir_dnr',
+      title: 'Formulir Perintah Jangan Resusitasi (Do Not Resuscitate - DNR)',
+      category: 'Identitas & Persetujuan Legal',
+      icon: AlertOctagon,
+      color: 'text-rose-700 bg-rose-50 border-rose-300 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900',
+      status: 'Tersedia',
+      badgeColor: 'bg-amber-500',
+      description: 'Pernyataan pembatasan tindakan RJP / defibrilasi / intubasi dengan persetujuan keluarga & tim paliatif DPJP.',
+      action: () => setActiveModal('dnr_form'),
+    },
+    {
+      id: 'pulang_paksa',
+      type: 'pulang_paksa',
+      title: 'Surat Pernyataan Pulang Atas Permintaan Sendiri (APS / DAMA)',
+      category: 'Identitas & Persetujuan Legal',
+      icon: FileWarning,
+      color: 'text-amber-700 bg-amber-50 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900',
+      status: 'Tersedia',
+      badgeColor: 'bg-amber-500',
+      description: 'Pelepasan tanggung jawab hukum rumah sakit dan edukasi risiko komplikasi penghentian perawatan rawat inap.',
+      action: () => setActiveModal('pulang_paksa'),
+    },
+
+    // 2. ASESMEN KLINIS & RISIKO
+    {
+      id: 'asesmen_awal_ranap',
+      type: 'asesmen_medis_ranap',
+      title: 'Asesmen Awal Medis & Keperawatan Rawat Inap (RM.04)',
+      category: 'Asesmen Klinis & Risiko',
+      icon: Stethoscope,
+      color: 'text-blue-700 bg-blue-50 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900',
+      status: 'Terisi Lengkap',
+      badgeColor: 'bg-emerald-500',
+      description: 'Anamnesis mendalam, tanda vital masuk, pemeriksaan fisik head-to-toe, diagnosis kerja & rencana terapi awal 24 jam.',
+      action: () => setActiveModal('asesmen_awal_ranap'),
+    },
+    {
+      id: 'cppt',
+      type: 'cppt',
+      title: 'Catatan Perkembangan Pasien Terintegrasi (CPPT - SOAP/SBAR)',
+      category: 'Asesmen Klinis & Risiko',
+      icon: FileText,
+      color: 'text-cyan-700 bg-cyan-50 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-900',
+      status: 'Terverifikasi DPJP',
+      badgeColor: 'bg-emerald-500',
+      description: 'Catatan terpadu Dokter DPJP, Perawat, Apoteker Farmasi Klinis, dan Ahli Gizi Dietisien terverifikasi berkala.',
+      action: () => setActiveModal('cppt'),
+    },
     {
       id: 'fall_risk',
       type: 'asesmen_risiko_jatuh',
       title: 'Lembar Asesmen Risiko Jatuh (Morse / Humpty Dumpty)',
-      category: 'Asesmen & Skrining Risiko',
+      category: 'Asesmen Klinis & Risiko',
       icon: AlertTriangle,
       color: 'text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900',
       status: 'Terisi Lengkap',
       badgeColor: 'bg-emerald-500',
-      description: 'Penilaian risiko jatuh berkala tiap shift, identifikasi gelang kuning & intervensi KARS SKP.6.',
+      description: 'Penilaian risiko jatuh berkala tiap shift, identifikasi gelang kuning & intervensi keselamatan pasien SKP.6.',
       action: () => setActiveModal('fall_risk'),
     },
     {
       id: 'nutrition_assessment',
       type: 'skrining_gizi_lanjut',
-      title: 'Lembar Skrining & Asesmen Gizi Lanjut (Dietisien)',
-      category: 'Asesmen & Skrining Risiko',
+      title: 'Lembar Skrining & Asesmen Gizi Lanjut (Dietisien PAGT)',
+      category: 'Asesmen Klinis & Risiko',
       icon: Apple,
       color: 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900',
       status: 'Terisi Lengkap',
       badgeColor: 'bg-emerald-500',
-      description: 'Skrining MST/SGA, perhitungan IMT, preskripsi diet khusus penyakit & asuhan gizi terstandar (PAGT).',
+      description: 'Skrining MST/SGA, perhitungan IMT, preskripsi diet khusus penyakit & asuhan gizi terstandar.',
       action: () => setActiveModal('nutrition_assessment'),
     },
     {
       id: 'pain_management',
       type: 'asesmen_nyeri',
       title: 'Asesmen & Manajemen Nyeri Berkala (VAS / NRS / FLACC)',
-      category: 'Asesmen & Skrining Risiko',
+      category: 'Asesmen Klinis & Risiko',
       icon: HeartPulse,
       color: 'text-rose-600 bg-rose-50 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900',
       status: 'Terisi Lengkap',
@@ -71,16 +165,68 @@ export function DossierDocumentHub({ patient }: DossierProps) {
       id: 'barthel_index',
       type: 'asesmen_barthel',
       title: 'Asesmen Status Fungsional (Indeks Barthel ADL)',
-      category: 'Asesmen & Skrining Risiko',
+      category: 'Asesmen Klinis & Risiko',
       icon: Activity,
       color: 'text-indigo-600 bg-indigo-50 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900',
       status: 'Terisi Lengkap',
       badgeColor: 'bg-emerald-500',
-      description: '10 parameter evaluasi kemandirian makan, mandi, mobilitas, toileting, dan kontinensia pasien.',
+      description: '10 parameter evaluasi kemandirian aktivitas harian (makan, mandi, mobilitas, toileting, kontinensia).',
       action: () => setActiveModal('barthel_index'),
     },
 
-    // 2. Dokumen Khusus Kelompok Pasien Tertentu
+    // 3. TINDAKAN BEDAH & ANESTESI
+    {
+      id: 'surgical_safety',
+      type: 'surgical_safety_checklist',
+      title: 'WHO Surgical Safety Checklist (Keselamatan Bedah)',
+      category: 'Tindakan Bedah & Anestesi',
+      icon: CheckSquare,
+      color: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900',
+      status: 'Lengkap 3 Fase',
+      badgeColor: 'bg-emerald-500',
+      description: 'Checklist keselamatan perioperatif: Sign In (sebelum induksi), Time Out (sebelum insisi), Sign Out (sebelum tutup kulit).',
+      action: () => setActiveModal('surgical_safety'),
+    },
+    {
+      id: 'laporan_operasi',
+      type: 'laporan_operasi',
+      title: 'Laporan Operasi & Catatan Anestesi / Sedasi (RM.07)',
+      category: 'Tindakan Bedah & Anestesi',
+      icon: Scissors,
+      color: 'text-purple-700 bg-purple-50 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900',
+      status: 'Terverifikasi Operator',
+      badgeColor: 'bg-emerald-500',
+      description: 'Deskripsi rinci tahapan operasi, diagnosis pra/pasca bedah, temuan patologi, perdarahan, dan instruksi PACU.',
+      action: () => setActiveModal('laporan_operasi'),
+    },
+
+    // 4. FARMASI & TERAPI MEDIS
+    {
+      id: 'rekonsiliasi_obat',
+      type: 'rekonsiliasi_obat',
+      title: 'Formulir Rekonsiliasi Obat & KPO Rawat Inap',
+      category: 'Farmasi & Terapi Medis',
+      icon: Pill,
+      color: 'text-teal-700 bg-teal-50 border-teal-200 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-900',
+      status: 'Terisi Lengkap',
+      badgeColor: 'bg-emerald-500',
+      description: 'Pencatatan riwayat obat dari rumah, telaah interaksi klinis oleh Apoteker, dan Kartu Pemberian Obat (KPO) perawat.',
+      action: () => setActiveModal('rekonsiliasi_obat'),
+    },
+    {
+      id: 'fluid_balance',
+      type: 'fluid_balance',
+      title: 'Lembar Pemantauan Balans Cairan & IWL (24 Jam)',
+      category: 'Farmasi & Terapi Medis',
+      icon: Droplet,
+      color: 'text-sky-600 bg-sky-50 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900',
+      status: 'Terisi Lengkap',
+      badgeColor: 'bg-emerald-500',
+      description: 'Pencatatan jam-jaman intake oral/infus/injeksi, output urin/drain/IWL, laju diuresis dan balans kumulatif.',
+      action: () => setActiveModal('fluid_balance'),
+    },
+
+    // 5. KASUS KHUSUS & MATERNAL
     {
       id: 'partograf',
       type: 'partograf',
@@ -102,37 +248,11 @@ export function DossierDocumentHub({ patient }: DossierProps) {
       color: 'text-cyan-600 bg-cyan-50 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-900',
       status: 'Tersedia',
       badgeColor: 'bg-emerald-500',
-      description: 'Kalkulator APGAR 1 & 5 menit, antropometri kelahiran bayi, profilaksis Vit K1, salep mata & Hb0.',
+      description: 'Kalkulator APGAR 1 & 5 menit, antropometri kelahiran bayi, profilaksis Vit K1, salep mata & imunisasi Hb0.',
       action: () => setActiveModal('neonatal_apgar'),
     },
 
-    // 3. Dokumen Hukum Medis (Legal-Medik)
-    {
-      id: 'dnr_form',
-      type: 'formulir_dnr',
-      title: 'Formulir Perintah Jangan Resusitasi (Do Not Resuscitate - DNR)',
-      category: 'Dokumen Legal-Medik',
-      icon: AlertOctagon,
-      color: 'text-rose-700 bg-rose-50 border-rose-300 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900',
-      status: 'Tersedia',
-      badgeColor: 'bg-amber-500',
-      description: 'Pernyataan pembatasan tindakan RJP / ventilator dengan persetujuan keluarga & tim paliatif DPJP.',
-      action: () => setActiveModal('dnr_form'),
-    },
-    {
-      id: 'pulang_paksa',
-      type: 'pulang_paksa',
-      title: 'Surat Pernyataan Pulang Atas Permintaan Sendiri (APS / DAMA)',
-      category: 'Dokumen Legal-Medik',
-      icon: FileWarning,
-      color: 'text-amber-700 bg-amber-50 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900',
-      status: 'Tersedia',
-      badgeColor: 'bg-amber-500',
-      description: 'Pelepasan tanggung jawab hukum rumah sakit dan edukasi risiko medis penghentian perawatan inap.',
-      action: () => setActiveModal('pulang_paksa'),
-    },
-
-    // 4. Hasil Pemeriksaan Penunjang Asli (Exhibits)
+    // 6. HASIL PENUNJANG & DIAGNOSTIK
     {
       id: 'ekg_exhibit',
       type: 'grafik_ekg_eeg',
@@ -154,16 +274,40 @@ export function DossierDocumentHub({ patient }: DossierProps) {
       color: 'text-purple-600 bg-purple-50 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900',
       status: 'Terverifikasi',
       badgeColor: 'bg-emerald-500',
-      description: 'Deskripsi makroskopis sediaan jaringan, analisis mikroskopis seluler dan penentuan diagnosis definitif.',
+      description: 'Deskripsi makroskopis sediaan jaringan, analisis mikroskopis seluler dan penentuan diagnosis definitif Sp.PA.',
       action: () => setActiveModal('pa_report'),
     },
 
-    // 5. Dokumen Pasca-Perawatan & Pemulasaran
+    // 7. PERPINDAHAN & PEMULANGAN
+    {
+      id: 'transfer_pasien',
+      type: 'transfer_pasien',
+      title: 'Formulir Transfer Pasien Internal / Eksternal (SBAR - RM.09)',
+      category: 'Perpindahan & Pemulangan',
+      icon: ArrowRightLeft,
+      color: 'text-cyan-700 bg-cyan-50 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-900',
+      status: 'Terisi Lengkap',
+      badgeColor: 'bg-emerald-500',
+      description: 'Serah terima klinis terstruktur SBAR antar unit rawat / ICU / rujukan antar rumah sakit.',
+      action: () => setActiveModal('transfer_pasien'),
+    },
+    {
+      id: 'discharge_planning',
+      type: 'discharge_planning',
+      title: 'Perencanaan Pemulangan Pasien (Discharge Planning - RM.08)',
+      category: 'Perpindahan & Pemulangan',
+      icon: LogOut,
+      color: 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900',
+      status: 'Terisi Lengkap',
+      badgeColor: 'bg-emerald-500',
+      description: 'Checklist kesiapan pulang, instruksi perawatan mandiri, daftar obat pulang dan jadwal kontrol poli.',
+      action: () => setActiveModal('discharge_planning'),
+    },
     {
       id: 'surat_kematian',
       type: 'surat_kematian',
       title: 'Surat Keterangan Kematian (SKK WHO ICD-10 Mortality)',
-      category: 'Pasca-Perawatan & Pemulasaran',
+      category: 'Perpindahan & Pemulangan',
       icon: FileText,
       color: 'text-slate-700 bg-slate-100 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
       status: 'Format Resmi',
@@ -174,12 +318,14 @@ export function DossierDocumentHub({ patient }: DossierProps) {
   ];
 
   const categories = [
-    { id: 'all', label: 'Semua Dokumen' },
-    { id: 'Asesmen & Skrining Risiko', label: '1. Asesmen & Skrining Risiko' },
-    { id: 'Kasus Khusus & Maternal', label: '2. Maternal & Neonatus' },
-    { id: 'Dokumen Legal-Medik', label: '3. Legal-Medik & Persetujuan' },
-    { id: 'Hasil Penunjang & Diagnostik', label: '4. Hasil Penunjang Asli' },
-    { id: 'Pasca-Perawatan & Pemulasaran', label: '5. Pasca-Perawatan' },
+    { id: 'all', label: 'Semua Berkas (21)' },
+    { id: 'Identitas & Persetujuan Legal', label: '1. Persetujuan & Legal' },
+    { id: 'Asesmen Klinis & Risiko', label: '2. Asesmen & CPPT' },
+    { id: 'Tindakan Bedah & Anestesi', label: '3. Bedah & Operasi' },
+    { id: 'Farmasi & Terapi Medis', label: '4. Farmasi & Cairan' },
+    { id: 'Kasus Khusus & Maternal', label: '5. Maternal & Neonatus' },
+    { id: 'Hasil Penunjang & Diagnostik', label: '6. Penunjang Asli' },
+    { id: 'Perpindahan & Pemulangan', label: '7. Transfer & Pemulangan' },
   ];
 
   const filteredDocs = documentCatalogue.filter(doc => {
@@ -200,15 +346,15 @@ export function DossierDocumentHub({ patient }: DossierProps) {
         
         <div className="relative z-10 space-y-4 max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold tracking-wider uppercase border border-white/30">
-            <ShieldCheck className="w-4 h-4 text-emerald-300" /> Permenkes No. 24 Tahun 2022 & Standar Akreditasi KARS
+            <ShieldCheck className="w-4 h-4 text-emerald-300" /> Permenkes No. 24 Tahun 2022 & Standar Akreditasi KARS / JCI
           </div>
           
           <div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-              Berkas Rekam Medis Pasien 100% Lengkap (Digital Dossier)
+              Dossier Berkas Rekam Medis Elektronik 100% Lengkap
             </h1>
             <p className="text-sm text-blue-100 mt-1">
-              Pasien: <span className="font-bold underline">{patient?.nama}</span> (No. RM: {patient?.no_rm}) • Dokumen digital terenkripsi dengan validasi QR Code & Tanda Tangan Elektronik Resmi.
+              Pasien: <span className="font-bold underline">{patient?.nama}</span> (No. RM: {patient?.no_rm}) • Seluruh formulir rekam medis terpadu, siap cetak & tervalidasi digital.
             </p>
           </div>
 
@@ -216,29 +362,29 @@ export function DossierDocumentHub({ patient }: DossierProps) {
             <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20">
               <span className="text-[11px] text-blue-200 block uppercase font-bold">Indeks Kelengkapan:</span>
               <span className="text-2xl font-black text-emerald-300">100%</span>
-              <span className="text-[10px] text-blue-200 block">Semua lembar wajib siap</span>
+              <span className="text-[10px] text-blue-200 block">21 Berkas Terintegrasi</span>
             </div>
 
             <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20">
               <span className="text-[11px] text-blue-200 block uppercase font-bold">Total Formulir:</span>
               <span className="text-2xl font-black text-white">{documentCatalogue.length}</span>
-              <span className="text-[10px] text-blue-200 block">E-Forms Terintegrasi</span>
+              <span className="text-[10px] text-blue-200 block">E-Forms Standar RS</span>
             </div>
 
             <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20">
-              <span className="text-[11px] text-blue-200 block uppercase font-bold">Status Verifikasi:</span>
+              <span className="text-[11px] text-blue-200 block uppercase font-bold">Status Validasi:</span>
               <span className="text-sm font-black text-emerald-300 flex items-center gap-1 mt-1.5">
-                <CheckCircle2 className="w-4 h-4" /> Terverifikasi DPJP
+                <CheckCircle2 className="w-4 h-4" /> QR Digital Signed
               </span>
-              <span className="text-[10px] text-blue-200 block">QR Signed Valid</span>
+              <span className="text-[10px] text-blue-200 block">Terenkripsi DPJP</span>
             </div>
 
             <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/20">
-              <span className="text-[11px] text-blue-200 block uppercase font-bold">Keamanan Data:</span>
+              <span className="text-[11px] text-blue-200 block uppercase font-bold">Interoperabilitas:</span>
               <span className="text-sm font-black text-cyan-300 flex items-center gap-1 mt-1.5">
-                <ShieldCheck className="w-4 h-4" /> Kemenkes Satusehat
+                <ShieldCheck className="w-4 h-4" /> SatuSehat Kemenkes
               </span>
-              <span className="text-[10px] text-blue-200 block">FHIR HL7 Compliant</span>
+              <span className="text-[10px] text-blue-200 block">FHIR HL7 Standard</span>
             </div>
           </div>
         </div>
@@ -331,7 +477,45 @@ export function DossierDocumentHub({ patient }: DossierProps) {
         })}
       </div>
 
-      {/* ACTIVE MODALS */}
+      {/* ALL 21 MODALS */}
+      {/* 1. Legal & Consent */}
+      <GeneralConsentModal
+        isOpen={activeModal === 'general_consent'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      <InformedConsentModal
+        isOpen={activeModal === 'informed_consent'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      <DNRFormModal
+        isOpen={activeModal === 'dnr_form'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      <PulangPaksaModal
+        isOpen={activeModal === 'pulang_paksa'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      {/* 2. Clinical Assessment & CPPT */}
+      <AsesmenAwalRanapModal
+        isOpen={activeModal === 'asesmen_awal_ranap'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      <CPPTModal
+        isOpen={activeModal === 'cppt'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
       <FallRiskAssessmentModal
         isOpen={activeModal === 'fall_risk'}
         onClose={() => setActiveModal(null)}
@@ -356,6 +540,33 @@ export function DossierDocumentHub({ patient }: DossierProps) {
         patient={patient}
       />
 
+      {/* 3. Surgical & Anesthesia */}
+      <SurgicalSafetyChecklistModal
+        isOpen={activeModal === 'surgical_safety'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      <LaporanOperasiModal
+        isOpen={activeModal === 'laporan_operasi'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      {/* 4. Pharmacy & Fluid */}
+      <RekonsiliasiObatModal
+        isOpen={activeModal === 'rekonsiliasi_obat'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      <FluidBalanceModal
+        isOpen={activeModal === 'fluid_balance'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      {/* 5. Special & Maternal */}
       <PartografViewerModal
         isOpen={activeModal === 'partograf'}
         onClose={() => setActiveModal(null)}
@@ -368,24 +579,7 @@ export function DossierDocumentHub({ patient }: DossierProps) {
         patient={patient}
       />
 
-      <DNRFormModal
-        isOpen={activeModal === 'dnr_form'}
-        onClose={() => setActiveModal(null)}
-        patient={patient}
-      />
-
-      <PulangPaksaModal
-        isOpen={activeModal === 'pulang_paksa'}
-        onClose={() => setActiveModal(null)}
-        patient={patient}
-      />
-
-      <SuratKematianModal
-        isOpen={activeModal === 'surat_kematian'}
-        onClose={() => setActiveModal(null)}
-        patient={patient}
-      />
-
+      {/* 6. Diagnostics & Exhibits */}
       <ElectrophysiologyExhibitModal
         isOpen={activeModal === 'ekg_exhibit'}
         onClose={() => setActiveModal(null)}
@@ -394,6 +588,25 @@ export function DossierDocumentHub({ patient }: DossierProps) {
 
       <PatologiAnatomiModal
         isOpen={activeModal === 'pa_report'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      {/* 7. Transfer & Discharge */}
+      <TransferPasienModal
+        isOpen={activeModal === 'transfer_pasien'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      <DischargePlanningModal
+        isOpen={activeModal === 'discharge_planning'}
+        onClose={() => setActiveModal(null)}
+        patient={patient}
+      />
+
+      <SuratKematianModal
+        isOpen={activeModal === 'surat_kematian'}
         onClose={() => setActiveModal(null)}
         patient={patient}
       />

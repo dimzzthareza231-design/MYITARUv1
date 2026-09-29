@@ -16,6 +16,7 @@ import { ProfessionalTable } from './ProfessionalTable';
 import PrintPDFButton from './PrintPDFButton';
 import { Pasien, Kunjungan } from '../types';
 import { GoogleMapsHealthLocator } from './Common/GoogleMapsHealthLocator';
+import { integrateRegistration } from '../utils/interlineIntegration';
 
 type MainSection = '1. Master Pasien' | '2. Registrasi Kunjungan' | '3. Antrian' | '4. Riwayat Pendaftaran';
 
@@ -211,6 +212,16 @@ export function Registration() {
       poliId: targetPoli.id,
       keluhan: quickRegForm.keluhanUtama,
       penjamin: targetPatient.penjamin
+    });
+
+    // Comprehensive Interline Synchronization (Kasir, Bed, RME, SatuSehat)
+    integrateRegistration({
+      patient: targetPatient,
+      visit: newKunjunganData,
+      isBPJS: (targetPatient.penjamin || '').includes('BPJS'),
+      poliNama: targetPoli.nama,
+      dokterNama: targetDoc.nama,
+      keluhan: quickRegForm.keluhanUtama
     });
 
     setSelectedVisit(newKunjunganData);

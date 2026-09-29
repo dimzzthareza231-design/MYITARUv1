@@ -419,6 +419,16 @@ export default function ModuleLayout() {
               </button>
             )}
 
+            {/* Quick Blueprint Button */}
+            <button
+              onClick={() => navigate('/modul/blueprint')}
+              className="flex items-center gap-1.5 bg-cyan-50 dark:bg-cyan-950/60 hover:bg-cyan-100 dark:hover:bg-cyan-900 border border-cyan-200 dark:border-cyan-800 text-cyan-700 dark:text-cyan-300 px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              title="Buka Blueprint Evaluasi & Pengembangan Aplikasi"
+            >
+              <span>🗺️</span>
+              <span className="hidden sm:inline">Blueprint</span>
+            </button>
+
             <button
               onClick={() => navigate('/dashboard')}
               className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-all hover:scale-105 active:scale-95"

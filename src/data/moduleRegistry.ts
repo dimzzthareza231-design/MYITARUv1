@@ -144,6 +144,22 @@ export const MODULE_REGISTRY = [
       submenus: [{ label: 'Overview', cols: 'dokumen' }, { label: 'Turnstile', cols: 'dokumen' }, { label: 'DNS', cols: 'dokumen' }, { label: 'WAF', cols: 'dokumen' }, { label: 'R2 Storage', cols: 'dokumen' }, { label: 'Tunnel', cols: 'dokumen' }] }
   ]},
   { id: 'sistem', label: 'Sistem', icon: '⚙️', navColor: 'hover:bg-gray-600', modules: [
+    { 
+      id: 'blueprint', 
+      label: 'Blueprint Evaluasi & Pengembangan', 
+      icon: '🗺️', 
+      color: 'from-cyan-600 via-blue-600 to-teal-700', 
+      SPECIAL: true,
+      submenus: [
+        { label: 'Canvas Penuh (Blueprint 1-13)', cols: 'dokumen' },
+        { label: '1 & 2. Visi & 10 Prinsip', cols: 'dokumen' },
+        { label: '4. Alur End-to-End', cols: 'dokumen' },
+        { label: '5. Modul & Arsitektur', cols: 'dokumen' },
+        { label: '6. Database (15 Entitas)', cols: 'dokumen' },
+        { label: '10. AI & Tata Kelola', cols: 'dokumen' },
+        { label: '11 & 13. GAP & Checklist', cols: 'dokumen' }
+      ] 
+    },
     { id: 'pengaturan-klinik', label: 'Pengaturan Klinik', icon: '🏥', color: 'from-blue-600 to-blue-700', submenus: [{ label: 'Kop Surat & Logo', cols: 'dokumen' }] },
     { id: 'panduan', label: 'Panduan', icon: '📖', color: 'from-blue-500 to-blue-600', submenus: [{ label: 'Artikel', cols: 'dokumen' }] },
     { id: 'notifikasi', label: 'Notifikasi', icon: '🔔', color: 'from-red-500 to-red-600', submenus: [{ label: 'Semua', cols: 'dokumen' }] },

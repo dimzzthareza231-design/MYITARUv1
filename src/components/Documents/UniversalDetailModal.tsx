@@ -5,7 +5,7 @@ import {
   Building, CreditCard, Activity, Sparkles, ExternalLink, Copy, Check
 } from 'lucide-react';
 import { HospitalDocumentModel } from '../../types/document';
-import { generateHospitalDocument } from '../../utils/documentGenerator';
+import { generateHospitalDocument, detectDocumentType } from '../../utils/documentGenerator';
 import { HospitalDocumentSheet } from './HospitalDocumentSheet';
 import { DocumentPreviewModal } from './DocumentPreviewModal';
 import { useToast } from '../../contexts/ToastContext';
@@ -48,21 +48,9 @@ export function UniversalDetailModal({
 
   if (!isOpen || !data) return null;
 
-  // Determine appropriate document type based on fields
-  let inferredDocType: any = 'dokumen_umum';
-  if (data.no_rm || data.norm || data.keluhan_utama || data.soap || data.diagnosa || data.no_resume) {
-    inferredDocType = 'resume_medis';
-  } else if (data.nip || data.jabatan || data.str || data.sip || data.divisi) {
-    inferredDocType = 'profil_sdm';
-  } else if (data.hasil_lab || data.parameter || data.no_lab) {
-    inferredDocType = 'hasil_laboratorium';
-  } else if (data.total_tagihan || data.no_kuitansi || data.invoice) {
-    inferredDocType = 'kuitansi_billing';
-  } else if (data.no_sep || data.sep) {
-    inferredDocType = 'sep_bpjs';
-  }
-
-  const documentModel: HospitalDocumentModel = generateHospitalDocument(data, inferredDocType);
+  // Determine appropriate document type based on fields, context, and title
+  const inferredDocType = detectDocumentType(data, title);
+  const documentModel: HospitalDocumentModel = generateHospitalDocument(data, inferredDocType, title);
 
   const handleCopy = (text: string, keyName: string) => {
     navigator.clipboard.writeText(text);

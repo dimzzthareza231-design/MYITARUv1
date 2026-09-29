@@ -14,6 +14,7 @@ import { DATA_DOKTER_JAGA_LENGKAP } from '../data/dataDokterJagaLengkap';
 import PrintPDFButton from './PrintPDFButton';
 import { AdmisiRanapTab } from './Ranap/AdmisiRanapTab';
 import { AsuhanKeperawatanTab } from './Ranap/AsuhanKeperawatanTab';
+import { dischargePatientFromBed } from '../utils/interlineIntegration';
 
 export function BedManagement() {
   const { activeTab } = useOutletContext<{ activeTab: string }>() || { activeTab: 'Ketersediaan Bed' };
@@ -39,6 +40,25 @@ export function BedManagement() {
   useEffect(() => {
     localStorage.setItem('simrs_bed_management', JSON.stringify(beds));
   }, [beds]);
+
+  // Real-time interline listener for admissions from IGD and Registration
+  useEffect(() => {
+    const handleSync = () => {
+      try {
+        const saved = localStorage.getItem('simrs_bed_management');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length >= 10) {
+            setBeds(parsed);
+          }
+        }
+      } catch (e) {
+        console.warn('Bed sync error:', e);
+      }
+    };
+    window.addEventListener('simrs-interline-sync', handleSync);
+    return () => window.removeEventListener('simrs-interline-sync', handleSync);
+  }, []);
 
   // Sync new Rawat Inap visits registered in Master Context if not already assigned a bed
   useEffect(() => {
@@ -192,7 +212,15 @@ export function BedManagement() {
     });
 
     setBeds(updatedBeds);
-    toast.success(`Pasien ${selectedBed.patient} telah disetujui pulang (Discharged). Bed ${selectedBed.id} masuk antrian pembersihan.`);
+
+    // Interline Integration for Discharge (Billing Ranap accommodation & Patient Flow)
+    dischargePatientFromBed({
+      bedId: selectedBed.id,
+      no_rm: selectedBed.no_rm || selectedBed.patient,
+      kondisiPulang: 'Perbaikan'
+    });
+
+    toast.success(`Pasien ${selectedBed.patient} telah disetujui pulang (Discharged). Biaya rawat inap dikirim ke Kasir & Bed masuk antrian pembersihan.`);
     setIsSubmitting(false);
     setIsDischargeModalOpen(false);
   };

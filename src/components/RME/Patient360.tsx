@@ -28,6 +28,7 @@ import { ModalAlergi } from './Modals/ModalAlergi';
 import { ModalVitals } from './Modals/ModalVitals';
 import { InformedConsentModal } from './Modals/InformedConsentModal';
 import { AIDocumentValidatorButton } from './AIDocumentValidatorButton';
+import { getPatient360UnifiedRecord } from '../../utils/interlineIntegration';
 
 // ═══════════════════════════════════════════════════════════
 // MAIN COMPONENT
@@ -43,12 +44,27 @@ export function Patient360({ patient, onBack }: { patient?: any, onBack?: () => 
   const [currentRole, setCurrentRole] = useState<'Dokter DPJP' | 'Perawat (Ns.)' | 'Perekam Medis' | 'Pendaftaran'>('Dokter DPJP');
 
   useEffect(() => {
+    const unified = patient?.no_rm ? getPatient360UnifiedRecord(patient.no_rm) : null;
+    
+    // Extract medications from pharmacy prescriptions if any
+    const rxMeds = (unified?.prescriptions && unified.prescriptions.length > 0)
+      ? unified.prescriptions.flatMap(p => p.items.map((it, idx) => ({
+          id: Date.now() + idx,
+          name: it.nama_obat,
+          dose: it.dosis || it.kekuatan || '1 Tab',
+          frequency: it.frekuensi || it.signa || '3x1 tablet',
+          startDate: p.tanggal_resep,
+          status: 'Active' as const
+        })))
+      : [];
+
     const defaultData = {
       ...(patient || {}),
       allergies: patient?.allergies || [],
       problem_list: patient?.problem_list || [],
-      medications: patient?.medications || [],
-      vitals: patient?.vitals || []
+      medications: (patient?.medications && patient.medications.length > 0) ? patient.medications : rxMeds,
+      vitals: patient?.vitals || [],
+      unifiedInterline: unified
     };
     setPatientData(defaultData);
   }, [patient]);

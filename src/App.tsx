@@ -57,6 +57,7 @@ import { Telemedicine } from './components/Telemed/Telemedicine';
 import { PatientPortal } from './components/Portal/PatientPortal';
 import MultiBranchSystem from './components/MultiBranch/MultiBranchSystem';
 import { CRMManagement } from './components/CRM/CRMManagement';
+import { BlueprintSystemView } from './components/Blueprint/BlueprintSystemView';
 
 // Bridging Modules
 import { BridgingHub } from './components/Bridging/BridgingHub';
@@ -161,6 +162,7 @@ function AppContent() {
               <Route path="bpjs" element={<ErrorBoundary><ProtectedRoute moduleId="vclaim"><BPJSModule /></ProtectedRoute></ErrorBoundary>} />
               <Route path="kemenkes" element={<ErrorBoundary><ProtectedRoute moduleId="satu-sehat"><SatuSehatIntegration /></ProtectedRoute></ErrorBoundary>} />
               <Route path="integrasi" element={<ErrorBoundary><ProtectedRoute moduleId="api"><ApiManagementSystem /></ProtectedRoute></ErrorBoundary>} />
+              <Route path="blueprint" element={<ErrorBoundary><BlueprintSystemView /></ErrorBoundary>} />
               <Route path="panduan" element={<ErrorBoundary><ProtectedRoute moduleId="panduan"><PanduanModule /></ProtectedRoute></ErrorBoundary>} />
               <Route path="pengaturan-klinik" element={<ErrorBoundary><ProtectedRoute moduleId="pengaturan-klinik"><PengaturanRS /></ProtectedRoute></ErrorBoundary>} />
               <Route path="notifikasi" element={<ErrorBoundary><ProtectedRoute moduleId="notifikasi"><NotificationPreferences /></ProtectedRoute></ErrorBoundary>} />

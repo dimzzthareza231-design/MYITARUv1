@@ -223,7 +223,7 @@ export default function TopNavbar({ currentTime }: { currentTime: Date }) {
           onClose={() => setShowQRScanner(false)}
           onPatientSelected={(selected) => {
             setShowQRScanner(false);
-            navigate(`/modul/rekam-medis?rm=${encodeURIComponent(selected.no_rm)}`);
+            navigate(`/modul/rekam-medis?tab=Daftar+Pasien&rm=${encodeURIComponent(selected.no_rm)}`);
           }}
         />
       )}

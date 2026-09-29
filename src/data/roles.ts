@@ -9,7 +9,7 @@ export interface Role {
 }
 
 // Modul yang bisa diakses SEMUA role (Self-service & Bantuan)
-export const COMMON_MODULES = ['profile', 'notifikasi', 'panduan', 'dashboard'];
+export const COMMON_MODULES = ['profile', 'notifikasi', 'panduan', 'dashboard', 'blueprint'];
 
 // Alias mapping agar backward compatibility dengan route lama / nama alternatif tetap bekerja sempurna
 export const MODULE_ALIASES: Record<string, string[]> = {

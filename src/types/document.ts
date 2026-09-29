@@ -77,14 +77,18 @@ export type DocumentType =
   | 'general_consent'
   | 'hak_pasien'
   | 'asesmen_medis'
+  | 'asesmen_medis_ranap'
   | 'asesmen_keperawatan'
   | 'informed_consent'
+  | 'cppt'
   | 'laporan_operasi'
   | 'laporan_anestesi'
   | 'surgical_safety_checklist'
   | 'pemantauan_pacu'
   | 'rekonsiliasi_obat'
   | 'fluid_balance'
+  | 'discharge_planning'
+  | 'transfer_pasien'
   | 'audit_trail_rme';
 
 export interface PatientSubjectData {
@@ -350,6 +354,450 @@ export interface HospitalDocumentModel {
     hakKelas?: string;
     jenisPelayanan?: string;
   };
+
+  profilSdmData?: {
+    nip: string;
+    nama: string;
+    jabatan: string;
+    divisi: string;
+    str?: string;
+    sip?: string;
+    pendidikan?: string;
+    statusKepegawaian?: string;
+    tglMasuk?: string;
+    kontak?: string;
+    email?: string;
+    alamat?: string;
+  };
+
+  laporanInsidenData?: {
+    noInsiden: string;
+    tglWaktuInsiden: string;
+    lokasiUnit: string;
+    tipeInsiden: 'KNC' | 'KTC' | 'KTD' | 'Sentinel' | string;
+    kronologis: string;
+    tindakanLangsung: string;
+    gradingRisiko: 'Biru' | 'Hijau' | 'Kuning' | 'Merah' | string;
+    dampak: string;
+    pelapor: string;
+  };
+
+  // ══════════════════════════════════════════════════════════
+  // STRUKTUR DATA BERKAS DOSSIER REKAM MEDIS LENGKAP (PERMENKES 24/2022 & KARS)
+  // ══════════════════════════════════════════════════════════
+  fallRiskData?: {
+    scaleType: 'morse' | 'humpty';
+    skor: number;
+    kategori: string;
+    shift: string;
+    morseValues?: Record<string, number>;
+    humptyValues?: Record<string, number>;
+    intervensi: Record<string, boolean>;
+    petugas: string;
+  };
+
+  nutritionData?: {
+    bb: number | string;
+    tb: number | string;
+    imt: string;
+    imtKategori: string;
+    mstScore: number;
+    isMalnourished: boolean;
+    dietType: string;
+    bentukMakanan: string;
+    rutePemberian: string;
+    alergiMakanan?: string;
+    diagnosisGizi: string;
+    intervensiGizi: string;
+    targetKalori: string;
+    targetProtein: string;
+    dietisien: string;
+  };
+
+  painData?: {
+    skala: number;
+    metode: 'NRS' | 'VAS' | 'FLACC' | 'CPOT';
+    kategori: string;
+    lokasi: string;
+    onset: string;
+    provokasi: string;
+    kualitas: string;
+    radiasi: string;
+    frekuensi: string;
+    terapiNonFarmakologi: string;
+    terapiFarmakologi: string;
+    responSetelahIntervensi: string;
+    evaluator: string;
+  };
+
+  barthelData?: {
+    skor: number;
+    kategori: string;
+    parameterScores: Record<string, number>;
+    kemandirianMakan: string;
+    kemandirianMandi: string;
+    kemandirianBerpakaian: string;
+    kemandirianTransfer: string;
+    kemandirianMobilitas: string;
+    fisioterapis: string;
+  };
+
+  partografData?: {
+    gravida: string;
+    ketubanPecahSejak: string;
+    mulesSejak: string;
+    dataPoints: Array<{
+      jam: string;
+      waktuJam: number;
+      pembukaan: number;
+      turunKepala: number;
+      djj: number;
+      hisFrekuensi: number;
+      hisDurasi: number;
+      tdSistol: number;
+      tdDiastol: number;
+      nadi: number;
+      ketuban: string;
+      penyusupan: string;
+    }>;
+    bidanDPJP: string;
+  };
+
+  apgarData?: {
+    tglLahir: string;
+    jamLahir: string;
+    jenisPersalinan: string;
+    beratLahir: number | string;
+    panjangBadan: number | string;
+    lingkarKepala: number | string;
+    skorApgar1Min: number;
+    skorApgar5Min: number;
+    detail1Min?: Record<string, number>;
+    detail5Min?: Record<string, number>;
+    kategoriKondisi: string;
+    profilaksisVitK: boolean;
+    salepMata: boolean;
+    imunisasiHb0: boolean;
+    resusitasiDilakukan: string;
+    dokterAnak: string;
+  };
+
+  dnrData?: {
+    penandatangan: string;
+    wali?: { nama: string; hubungan: string; nik: string };
+    alasanMedis: string;
+    tindakanDibatasi: Record<string, boolean>;
+    dokterPenanggungJawab: string;
+    saksi1: string;
+    saksi2: string;
+  };
+
+  pulangPaksaData?: {
+    namaPenandatangan: string;
+    hubungan: string;
+    alasanPulang: string;
+    edukasiDiberikan: string;
+    pelepasanTanggungJawab: boolean;
+    saksiKeluarga: string;
+    saksiPerawat: string;
+    dokterDPJP: string;
+  };
+
+  ekgData?: {
+    jenisPemeriksaan: string;
+    irama: string;
+    heartRate: number | string;
+    axisJantung: string;
+    gelombangP: string;
+    intervalPR: string;
+    kompleksQRS: string;
+    segmenST: string;
+    gelombangT: string;
+    kesimpulan: string;
+    spesialisJantung: string;
+  };
+
+  patologiAnatomiData?: {
+    noPA: string;
+    lokasiJaringan: string;
+    tindakanBiopsi: string;
+    makroskopis: string;
+    mikroskopis: string;
+    kesimpulanPA: string;
+    stagingTnm?: string;
+    dokterSpPA: string;
+  };
+
+  suratKematianData?: {
+    noSurat: string;
+    tglMeninggal: string;
+    jamMeninggal: string;
+    tempatMeninggal: string;
+    whoCauseOfDeath: {
+      part1: {
+        a: { penyakit: string; selangWaktu: string };
+        b?: { penyakit: string; selangWaktu: string };
+        c?: { penyakit: string; selangWaktu: string };
+      };
+      part2?: string;
+    };
+    keteranganOtopsi?: string;
+    dokterPemeriksa: string;
+  };
+
+  generalConsentData?: {
+    namaPemberiPersetujuan: string;
+    hubunganDenganPasien: string;
+    persetujuanPerawatanUmum: boolean;
+    persetujuanPelepasanInformasi: boolean;
+    persetujuanTataTertibHakKewajiban: boolean;
+    penjaminBiaya: string;
+    anggotaKeluargaDiizinkanBesuk?: string;
+    saksiPetugasAdmisi: string;
+  };
+
+  informedConsentData?: {
+    namaTindakanMedis: string;
+    dokterPelaksana: string;
+    pemberiInformasi: string;
+    penerimaInformasi: string;
+    indikasiTindakan: string;
+    tataCaraTindakan: string;
+    tujuanTindakan: string;
+    risikoDanKomplikasi: string;
+    prognosisTindakan: string;
+    alternatifTindakan?: string;
+    statusPernyataan: 'SETUJU' | 'MENOLAK';
+    namaYangMenyatakan: string;
+    hubunganDenganPasien: string;
+    saksiKeluarga: string;
+    saksiPerawat: string;
+  };
+
+  cpptData?: {
+    entries: Array<{
+      id: string | number;
+      tanggal: string;
+      jam: string;
+      profesi: 'Dokter DPJP' | 'Perawat' | 'Apoteker' | 'Dietisien' | string;
+      namaPetugas: string;
+      sbarSoap: {
+        s: string;
+        o: string;
+        a: string;
+        p: string;
+      };
+      instruksiPPA: string;
+      verifikasiDPJP?: {
+        diverifikasi: boolean;
+        namaDPJP: string;
+        jamVerifikasi: string;
+      };
+    }>;
+  };
+
+  asesmenRanapData?: {
+    keluhanUtama: string;
+    riwayatPenyakitSekarang: string;
+    riwayatPenyakitDahulu: string;
+    riwayatAlergi: string;
+    keadaanUmum: string;
+    gcs: string;
+    tandaVital: {
+      td: string;
+      nadi: string;
+      suhu: string;
+      rr: string;
+      spo2: string;
+    };
+    pemeriksaanFisikLengkap: string;
+    diagnosisMasuk: string;
+    diagnosisBanding?: string;
+    rencanaPemeriksaanPenunjang: string;
+    terapiAwal: string;
+    dpjpUtama: string;
+    perawatPenerima: string;
+  };
+
+  surgicalSafetyData?: {
+    namaOperasi: string;
+    operator: string;
+    anestesiolog: string;
+    ruangOperasi: string;
+    signIn: {
+      identitasTerkonfirmasi: boolean;
+      lokasiOperasiDitandai: boolean;
+      mesinAnestesiObatLengkap: boolean;
+      pulseOximeterBerfungsi: boolean;
+      riwayatAlergiDicek: boolean;
+      risikoAspirasiDinilai: boolean;
+      risikoPerdarahan500ml: boolean;
+    };
+    timeOut: {
+      seluruhTimMemperkenalkanDiri: boolean;
+      bacaUlangIdentitasDanTindakan: boolean;
+      antibiotikProfilaksis60Mnt: boolean;
+      antisipasiKondisiKritis: boolean;
+      hasilRadiologiDitampilkan: boolean;
+    };
+    signOut: {
+      namaTindakanTercatat: boolean;
+      penghitunganKasaInstrumenLengkap: boolean;
+      spesimenDiberiLabelBenar: boolean;
+      masalahPeralatanDitangani: boolean;
+      perhatianKhususPemulihanPACU: string;
+    };
+    perawatSirkuler: string;
+  };
+
+  laporanOperasiData?: {
+    namaOperasi: string;
+    dokterOperator: string;
+    asistenOperator: string;
+    dokterAnestesi: string;
+    penataAnestesi: string;
+    jenisAnestesi: string;
+    tglOperasi: string;
+    jamMulai: string;
+    jamSelesai: string;
+    durasiMenit: number | string;
+    diagnosisPraBedah: string;
+    diagnosisPascaBedah: string;
+    indikasiOperasi: string;
+    desinfeksiKulit: string;
+    insisiKulit: string;
+    temuanIntraoperatif: string;
+    tahapanUraianPembedahan: string;
+    jumlahPerdarahan: string;
+    transfusiIntraoperatif: string;
+    jaringanDikirimKePA: boolean;
+    komplikasi: string;
+    instruksiPascaBedah: string;
+  };
+
+  rekonsiliasiObatData?: {
+    riwayatObatSebelumAdmisi: Array<{
+      namaObat: string;
+      dosis: string;
+      rute: string;
+      aturanPakai: string;
+      tindakLanjut: 'Lanjut Sesuai Dosis' | 'Modifikasi Dosis' | 'Stop / Ditunda' | 'Ganti Obat';
+      perubahanInstruksi?: string;
+    }>;
+    catatanPemberianObatKPO: Array<{
+      namaObat: string;
+      dosisRute: string;
+      frekuensi: string;
+      jamPemberian: string;
+      perawatPelaksana: string;
+      status: 'Diberikan' | 'Ditunda' | 'Pasien Menolak';
+    }>;
+    apotekerKlinis: string;
+  };
+
+  fluidBalanceData?: {
+    tanggalObservasi: string;
+    shift: string;
+    bbPasien: number | string;
+    intake: {
+      oralEnteral: number;
+      parenteralInfus: number;
+      injeksiObat: number;
+      transfusi: number;
+      totalIntake: number;
+    };
+    output: {
+      urine: number;
+      drainStoma: number;
+      muntahNGT: number;
+      pendarahan: number;
+      feses: number;
+      iwl: number;
+      totalOutput: number;
+    };
+    balans24Jam: number;
+    diuresis: string; // ml/kgBB/jam
+    evaluasiKlinis: string;
+    perawatPenanggungJawab: string;
+  };
+
+  dischargePlanningData?: {
+    tglMasuk: string;
+    estimasiTglPulang: string;
+    kriteriaKesiapanPulang: {
+      tandaVitalStabil: boolean;
+      nyeriTerkendali: boolean;
+      dapatMobilisasiMandiri: boolean;
+      dapatMakanMinumOral: boolean;
+      obatPulangTersediaDanDiedukasi: boolean;
+      lukaOperasiBersih: boolean;
+    };
+    instruksiPerawatanRumah: string;
+    obatPulang: Array<{
+      nama: string;
+      aturan: string;
+      keterangan: string;
+    }>;
+    tandaBahayaEmergency: string;
+    jadwalKontrolPoli: string;
+    dokterDPJP: string;
+    edukatorNurse: string;
+  };
+
+  transferPasienData?: {
+    jenisTransfer: 'Internal Antar Unit / ICU' | 'Eksternal Antar Rumah Sakit';
+    unitAsal: string;
+    unitTujuan: string;
+    waktuTransfer: string;
+    sbar: {
+      situation: string;
+      background: string;
+      assessment: string;
+      recommendation: string;
+    };
+    tandaVitalSaatPindah: {
+      kesadaran: string;
+      td: string;
+      nadi: string;
+      rr: string;
+      suhu: string;
+      spo2: string;
+    };
+    alatMedisTerpasang: string[];
+    petugasPengantar: string;
+    petugasPenerima: string;
+  };
+
+  dokumenUmumData?: {
+    kategori: string;
+    deskripsi?: string;
+    tabelData?: Array<{
+      label: string;
+      value: string | number;
+    }>;
+    daftarBarang?: Array<{
+      no?: number | string;
+      kode?: string;
+      nama: string;
+      kategori?: string;
+      jumlah?: string | number;
+      satuan?: string;
+      harga?: number;
+      lokasi?: string;
+      status?: string;
+      keterangan?: string;
+    }>;
+  };
+
+  sections?: Array<{
+    title: string;
+    type?: string;
+    content?: string;
+    tableData?: {
+      headers: string[];
+      rows: (string | number)[][];
+    };
+  }>;
 
   keteranganTambahan?: Record<string, any>;
   signer: SignerInfo;
