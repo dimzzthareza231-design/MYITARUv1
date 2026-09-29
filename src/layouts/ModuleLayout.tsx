@@ -186,7 +186,6 @@ export default function ModuleLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
   
@@ -205,11 +204,6 @@ export default function ModuleLayout() {
   useEffect(() => {
     localStorage.setItem('myitaru_sidebar_focus_mode', JSON.stringify(focusMode));
   }, [focusMode]);
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Extract module ID from URL (e.g. /modul/pendaftaran -> pendaftaran)
   const pathParts = location.pathname.split('/');
@@ -357,7 +351,7 @@ export default function ModuleLayout() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col w-full text-slate-900 dark:text-slate-200 transition-colors">
       
       {/* 1. NAVBAR (TOP) */}
-      <TopNavbar currentTime={currentTime} />
+      <TopNavbar />
 
       {/* Konten Utama */}
       <main className="flex-1 w-full relative pb-10 flex flex-col max-w-[1700px] mx-auto px-3 sm:px-5 lg:px-6 pt-4">

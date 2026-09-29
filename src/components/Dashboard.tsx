@@ -86,7 +86,7 @@ export default function Dashboard() {
       </div>
       
       {/* NAVBAR */}
-      <TopNavbar currentTime={currentTime} />
+      <TopNavbar />
       
       <main className="relative z-10 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto flex-1">
         
@@ -162,76 +162,6 @@ export default function Dashboard() {
           {/* WIDGET ANTRIAN LIVE */}
           <div className="col-span-1 h-full animate-fade-in-up animation-delay-300 opacity-90 hover:opacity-100 transition-opacity">
             <DashboardWidgetAntrian />
-          </div>
-        </div>
-        
-        {/* AI CLINICAL INSIGHTS MODULAR DRAG-AND-DROP GRID */}
-        <AIClinicalInsightsGrid />
-
-        {/* BLUEPRINT SISTEM EVALUASI & PENGEMBANGAN HERO CARD */}
-        <div className="mb-10 bg-gradient-to-r from-[#072448]/95 via-[#0D3B66]/90 to-[#0B525B]/90 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.35)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-400/10 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xl">🗺️</span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 tracking-wider uppercase">
-                  Arsitektur Resmi MYITARU
-                </span>
-                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" /> 10 Prinsip Dasar &amp; 14 Kriteria DoD Terpenuhi
-                </span>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                BLUEPRINT EVALUASI &amp; PENGEMBANGAN APLIKASI
-              </h3>
-              <p className="text-xs sm:text-sm text-cyan-100/90 max-w-3xl leading-relaxed">
-                Sistem Informasi Manajemen Klinik / Hospital Information System + RME + AI • 
-                <span className="italic ml-1 text-cyan-200">"Satu Sistem, Satu Data, Untuk Pelayanan Kesehatan yang Lebih Baik"</span>
-              </p>
-
-              {/* 8-Step mini pipeline */}
-              <div className="pt-2 flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 text-[11px] font-bold">
-                {[
-                  { n: '1', l: 'Pendaftaran', r: '/modul/pendaftaran' },
-                  { n: '2', l: 'Encounter', r: '/modul/pendaftaran?tab=2.+Registrasi+Kunjungan' },
-                  { n: '3', l: 'Klinis (SOAP)', r: '/modul/rawat-jalan' },
-                  { n: '4', l: 'Penunjang', r: '/modul/laboratorium' },
-                  { n: '5', l: 'Farmasi', r: '/modul/apotek-ralan' },
-                  { n: '6', l: 'Billing', r: '/modul/kasir' },
-                  { n: '7', l: 'Disposisi', r: '/modul/rawat-inap' },
-                  { n: '8', l: 'RME Final', r: '/modul/rekam-medis' }
-                ].map((s, idx) => (
-                  <React.Fragment key={s.n}>
-                    <button
-                      onClick={() => navigate(s.r)}
-                      className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-cyan-500 hover:text-slate-950 text-white border border-white/15 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1"
-                    >
-                      <span className="w-4 h-4 rounded-full bg-cyan-400/30 text-cyan-200 text-[9px] flex items-center justify-center font-mono">{s.n}</span>
-                      <span>{s.l}</span>
-                    </button>
-                    {idx < 7 && <span className="text-cyan-400/60 font-bold">→</span>}
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex sm:flex-row flex-col items-stretch sm:items-center gap-3 shrink-0">
-              <button
-                onClick={() => setShowBlueprintModal(true)}
-                className="px-5 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-cyan-900/40 transition-all hover:scale-105 active:scale-95 cursor-pointer"
-              >
-                <span>Buka Blueprint Lengkap</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => navigate('/modul/blueprint')}
-                className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-              >
-                <span>Halaman Modul</span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -314,6 +244,82 @@ export default function Dashboard() {
               </div>
             );
           })}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* BAGIAN PALING BAWAH: AI CLINICAL INSIGHTS & BLUEPRINT PENGEMBANGAN         */}
+        {/* ========================================================================= */}
+
+        {/* AI CLINICAL INSIGHTS MODULAR DRAG-AND-DROP GRID */}
+        <div className="mb-10">
+          <AIClinicalInsightsGrid />
+        </div>
+
+        {/* BLUEPRINT SISTEM EVALUASI & PENGEMBANGAN HERO CARD */}
+        <div className="mb-12 bg-gradient-to-r from-[#072448]/95 via-[#0D3B66]/90 to-[#0B525B]/90 backdrop-blur-2xl rounded-3xl p-6 sm:p-7 border border-cyan-500/30 shadow-[0_8px_32px_rgba(0,0,0,0.35)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-400/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xl">🗺️</span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 tracking-wider uppercase">
+                  Arsitektur Resmi MYITARU
+                </span>
+                <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" /> 10 Prinsip Dasar &amp; 14 Kriteria DoD Terpenuhi
+                </span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                BLUEPRINT EVALUASI &amp; PENGEMBANGAN APLIKASI
+              </h3>
+              <p className="text-xs sm:text-sm text-cyan-100/90 max-w-3xl leading-relaxed">
+                Sistem Informasi Manajemen Klinik / Hospital Information System + RME + AI • 
+                <span className="italic ml-1 text-cyan-200">"Satu Sistem, Satu Data, Untuk Pelayanan Kesehatan yang Lebih Baik"</span>
+              </p>
+
+              {/* 8-Step mini pipeline */}
+              <div className="pt-2 flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 text-[11px] font-bold">
+                {[
+                  { n: '1', l: 'Pendaftaran', r: '/modul/pendaftaran' },
+                  { n: '2', l: 'Encounter', r: '/modul/pendaftaran?tab=2.+Registrasi+Kunjungan' },
+                  { n: '3', l: 'Klinis (SOAP)', r: '/modul/rawat-jalan' },
+                  { n: '4', l: 'Penunjang', r: '/modul/laboratorium' },
+                  { n: '5', l: 'Farmasi', r: '/modul/apotek-ralan' },
+                  { n: '6', l: 'Billing', r: '/modul/kasir' },
+                  { n: '7', l: 'Disposisi', r: '/modul/rawat-inap' },
+                  { n: '8', l: 'RME Final', r: '/modul/rekam-medis' }
+                ].map((s, idx) => (
+                  <React.Fragment key={s.n}>
+                    <button
+                      onClick={() => navigate(s.r)}
+                      className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-cyan-500 hover:text-slate-950 text-white border border-white/15 transition-all whitespace-nowrap cursor-pointer flex items-center gap-1"
+                    >
+                      <span className="w-4 h-4 rounded-full bg-cyan-400/30 text-cyan-200 text-[9px] flex items-center justify-center font-mono">{s.n}</span>
+                      <span>{s.l}</span>
+                    </button>
+                    {idx < 7 && <span className="text-cyan-400/60 font-bold">→</span>}
+                  </React.Fragment>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex sm:flex-row flex-col items-stretch sm:items-center gap-3 shrink-0">
+              <button
+                onClick={() => setShowBlueprintModal(true)}
+                className="px-5 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-cyan-900/40 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <span>Buka Blueprint Lengkap</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => navigate('/modul/blueprint')}
+                className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              >
+                <span>Halaman Modul</span>
+              </button>
+            </div>
+          </div>
         </div>
         
       </main>

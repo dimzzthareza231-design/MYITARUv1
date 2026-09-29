@@ -28,70 +28,74 @@ function NotificationBell() {
   
   const getTypeIcon = (type: Notification['type']) => {
     switch (type) {
-        case 'info': return <Info className="w-4 h-4 text-blue-500" />;
-        case 'success': return <CheckCircle2 className="w-4 h-4 text-emerald-500" />;
-        case 'warning': return <AlertTriangle className="w-4 h-4 text-orange-500" />;
-        case 'error': return <XCircle className="w-4 h-4 text-rose-500" />;
-        default: return <Info className="w-4 h-4 text-blue-500" />;
+        case 'info': return <Info className="w-3.5 h-3.5 text-cyan-400" />;
+        case 'success': return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />;
+        case 'warning': return <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />;
+        case 'error': return <XCircle className="w-3.5 h-3.5 text-rose-400" />;
+        default: return <Info className="w-3.5 h-3.5 text-cyan-400" />;
     }
   };
   
   const getTypeColor = (type: Notification['type']) => {
     const colors: Record<string, string> = {
-      info: 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/10',
-      success: 'border-l-emerald-500 bg-emerald-50 dark:bg-emerald-900/10',
-      warning: 'border-l-orange-500 bg-orange-50 dark:bg-orange-900/10',
-      error: 'border-l-rose-500 bg-rose-50 dark:bg-rose-900/10'
+      info: 'border-l-cyan-500 bg-cyan-950/20',
+      success: 'border-l-emerald-500 bg-emerald-950/20',
+      warning: 'border-l-amber-500 bg-amber-950/20',
+      error: 'border-l-rose-500 bg-rose-950/20'
     };
-    return colors[type] || 'border-l-slate-500 bg-slate-50 dark:bg-slate-800';
+    return colors[type] || 'border-l-slate-600 bg-white/[0.02]';
   };
   
   const timeAgo = (timestamp: string) => {
     const seconds = Math.floor((new Date().getTime() - new Date(timestamp).getTime()) / 1000);
     if (seconds < 60) return 'Baru saja';
-    if (seconds < 3600) return `${Math.floor(seconds / 60)} menit lalu`;
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)} jam lalu`;
-    return `${Math.floor(seconds / 86400)} hari lalu`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} m lalu`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} j lalu`;
+    return `${Math.floor(seconds / 86400)} h lalu`;
   };
   
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+        className="relative p-2 text-slate-300 hover:text-white hover:bg-white/[0.08] rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-[#C9A94E]/40"
+        title="Pemberitahuan & Aktivitas"
       >
-        <Bell className="w-5 h-5" />
+        <Bell className="w-4 h-4 text-slate-300 hover:text-[#E8D49E] transition-colors" />
         {unreadCount > 0 && (
-          <span className="absolute 1 top-1 right-1 bg-rose-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold shadow-sm ring-2 ring-white dark:ring-slate-900">
+          <span className="absolute top-1 right-1 bg-gradient-to-r from-rose-500 to-amber-500 text-white text-[9px] rounded-full min-w-[15px] h-[15px] px-0.5 flex items-center justify-center font-bold shadow-md ring-2 ring-[#08121E]">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
       </button>
       
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right">
-          <div className="bg-slate-50 dark:bg-slate-900/50 p-4 border-b border-slate-200 dark:border-slate-700">
+        <div className="absolute right-0 mt-3 w-96 bg-[#0A1627]/98 border border-[#C9A94E]/30 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] overflow-hidden z-50 backdrop-blur-2xl animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right">
+          {/* Top subtle gold hairline */}
+          <div className="h-[1.5px] w-full bg-gradient-to-r from-transparent via-[#E8D49E]/70 to-transparent"></div>
+
+          <div className="bg-white/[0.02] p-4 border-b border-white/10">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Bell className="w-4 h-4 text-blue-500" />
-                Notifikasi
+              <h3 className="font-bold text-xs text-white uppercase tracking-wider flex items-center gap-2">
+                <Bell className="w-3.5 h-3.5 text-[#E8D49E]" />
+                Notifikasi Rumah Sakit
               </h3>
               {unreadCount > 0 && (
-                  <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full font-bold">
-                    {unreadCount} baru
-                  </span>
+                <span className="text-[10px] bg-[#C9A94E]/20 text-[#E8D49E] border border-[#C9A94E]/40 px-2 py-0.5 rounded-full font-bold font-mono">
+                  {unreadCount} baru
+                </span>
               )}
             </div>
             <div className="flex gap-2">
               <button
                 onClick={markAllAsRead}
-                className="text-xs flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors bg-white dark:bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm"
+                className="text-[11px] flex items-center gap-1.5 text-slate-300 hover:text-white font-medium transition-colors bg-white/[0.04] hover:bg-white/[0.08] px-2.5 py-1 rounded-lg border border-white/10 shadow-xs"
               >
-                <Check className="w-3 h-3" /> Tandai dibaca
+                <Check className="w-3 h-3 text-[#E8D49E]" /> Tandai Dibaca
               </button>
               <button
                 onClick={clearAll}
-                className="text-xs flex items-center gap-1 text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 font-medium transition-colors bg-white dark:bg-slate-800 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm"
+                className="text-[11px] flex items-center gap-1.5 text-slate-400 hover:text-rose-400 font-medium transition-colors bg-white/[0.04] hover:bg-rose-500/10 px-2.5 py-1 rounded-lg border border-white/10 shadow-xs"
               >
                 <Trash2 className="w-3 h-3" /> Bersihkan
               </button>
@@ -99,15 +103,15 @@ function NotificationBell() {
           </div>
           
           {/* Filter */}
-          <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-x-auto custom-scrollbar">
+          <div className="flex border-b border-white/10 bg-black/20 overflow-x-auto custom-scrollbar p-1 gap-1">
             {['all', 'unread', 'info', 'success', 'warning', 'error'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-2.5 text-xs font-bold whitespace-nowrap transition-colors ${
+                className={`px-3 py-1 text-[11px] font-semibold rounded-lg transition-all ${
                   filter === f 
-                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10' 
-                    : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                    ? 'bg-[#183F6D] text-white border border-[#C9A94E]/40 shadow-xs' 
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.03]'
                 }`}
               >
                 {f === 'all' ? 'Semua' : f === 'unread' ? 'Belum Dibaca' : f.charAt(0).toUpperCase() + f.slice(1)}
@@ -116,17 +120,17 @@ function NotificationBell() {
           </div>
           
           {/* Notification List */}
-          <div className="max-h-96 overflow-y-auto custom-scrollbar">
+          <div className="max-h-80 overflow-y-auto custom-scrollbar divide-y divide-white/5">
             {filteredNotifs.length === 0 ? (
-              <div className="p-10 text-center flex flex-col items-center justify-center">
-                <Bell className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Tidak ada notifikasi</p>
+              <div className="p-8 text-center flex flex-col items-center justify-center">
+                <Bell className="w-8 h-8 text-slate-600 mb-2 opacity-60" />
+                <p className="text-xs font-medium text-slate-400">Tidak ada notifikasi saat ini</p>
               </div>
             ) : (
               filteredNotifs.map(notif => (
                 <div
                   key={notif.id}
-                  className={`border-l-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer border-b border-slate-100 dark:border-slate-800 ${getTypeColor(notif.type)} ${!notif.read ? 'bg-opacity-100 dark:bg-opacity-100' : 'bg-transparent dark:bg-transparent opacity-75 grayscale-[0.2]'}`}
+                  className={`border-l-3 p-3.5 hover:bg-white/[0.04] transition-colors cursor-pointer ${getTypeColor(notif.type)} ${!notif.read ? 'opacity-100' : 'opacity-65'}`}
                   onClick={() => {
                     markAsRead(notif.id);
                     if (notif.link) {
@@ -136,17 +140,21 @@ function NotificationBell() {
                   }}
                 >
                   <div className="flex justify-between items-start gap-3">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1.5">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 mb-1">
                         {getTypeIcon(notif.type)}
-                        <span className={`text-sm font-bold ${!notif.read ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>{notif.title}</span>
+                        <span className={`text-xs font-bold truncate ${!notif.read ? 'text-white' : 'text-slate-300'}`}>
+                          {notif.title}
+                        </span>
                         {!notif.read && (
-                          <span className="w-2 h-2 bg-blue-500 rounded-full shrink-0"></span>
+                          <span className="w-1.5 h-1.5 bg-[#E8D49E] rounded-full shrink-0"></span>
                         )}
                       </div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">{notif.message}</p>
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-wider">
-                        <span>{notif.module}</span>
+                      <p className="text-[11px] text-slate-300 mb-1.5 line-clamp-2 leading-relaxed">
+                        {notif.message}
+                      </p>
+                      <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                        <span className="text-[#E8D49E]">{notif.module}</span>
                         <span>•</span>
                         <span>{timeAgo(notif.timestamp)}</span>
                       </div>
@@ -156,9 +164,9 @@ function NotificationBell() {
                         e.stopPropagation();
                         deleteNotification(notif.id);
                       }}
-                      className="text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 p-1 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded transition-colors shrink-0"
+                      className="text-slate-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg transition-colors shrink-0"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -166,16 +174,15 @@ function NotificationBell() {
             )}
           </div>
           
-          <div className="border-t border-slate-200 dark:border-slate-700 p-3 bg-slate-50 dark:bg-slate-900/50 text-center">
+          <div className="border-t border-white/10 p-2.5 bg-black/40 text-center">
             <button
               onClick={() => {
                 setIsOpen(false);
-                // Dispatch event or navigate to preferences
-                window.dispatchEvent(new CustomEvent('navigate-notifications'));
+                navigate('/modul/notifikasi');
               }}
-              className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-bold"
+              className="text-[#E8D49E] hover:underline text-xs font-bold tracking-wide"
             >
-              Pengaturan Notifikasi →
+              Lihat Riwayat Lengkap →
             </button>
           </div>
         </div>
