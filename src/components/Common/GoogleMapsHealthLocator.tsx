@@ -85,7 +85,7 @@ export function GoogleMapsHealthLocator({
           // Default to Central Jakarta RSCM coordinates if denied/unavailable
           const defaultLoc = { lat: -6.2088, lng: 106.8456 };
           setUserLocation(defaultLoc);
-          setLocationName('DKI Jakarta (Default Hospital Hub)');
+          setLocationName('DKI Jakarta (Default Klinik Hub)');
         },
         { enableHighAccuracy: true, timeout: 5000 }
       );

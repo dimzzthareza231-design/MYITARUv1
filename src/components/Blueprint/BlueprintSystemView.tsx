@@ -143,7 +143,7 @@ export function BlueprintSystemView() {
             </div>
 
             <p className="text-xs sm:text-sm text-slate-200 max-w-3xl leading-relaxed">
-              Sistem Informasi Manajemen Klinik / Hospital Information System + RME + AI. 
+              Sistem Informasi Manajemen Klinik (SIMK) + RME + AI. 
               <span className="text-cyan-200 font-semibold italic ml-1">"Satu Sistem, Satu Data, Untuk Pelayanan Kesehatan yang Lebih Baik"</span>
             </p>
           </div>
@@ -620,7 +620,7 @@ export function BlueprintSystemView() {
               </div>
               <div>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white">6. DATABASE (KONSEPTUAL)</h2>
-                <p className="text-xs text-slate-500">15 Entitas inti relasional Firestore untuk SIMRS &amp; RME</p>
+                <p className="text-xs text-slate-500">15 Entitas inti relasional Firestore untuk SIMK &amp; RME</p>
               </div>
             </div>
 

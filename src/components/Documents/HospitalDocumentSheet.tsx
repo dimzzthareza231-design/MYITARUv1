@@ -42,7 +42,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
   };
 
   const validationCode = signer.digitalValidationCode || `VERIF-${document.nomorDokumen || '2026-MED'}-${Math.floor(1000 + Math.random() * 9000)}`;
-  const qrValue = signer.qrData || `https://myitaru-simrs.id/verify-document?doc=${encodeURIComponent(document.nomorDokumen)}&signer=${encodeURIComponent(signer.nama)}&val=${validationCode}`;
+  const qrValue = signer.qrData || `https://myitaru-simk.id/verify-document?doc=${encodeURIComponent(document.nomorDokumen)}&signer=${encodeURIComponent(signer.nama)}&val=${validationCode}`;
 
   // Process Allergy list
   const allergies: AllergyItem[] = Array.isArray(document.riwayatAlergi) 
@@ -61,7 +61,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
           ) : (
             <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-900 to-indigo-950 flex flex-col items-center justify-center text-white font-black text-xl tracking-tighter shadow-md border border-blue-800 shrink-0">
               <span className="text-cyan-400 text-lg leading-none">{hospitalInitials}</span>
-              <span className="text-[8px] font-mono tracking-widest text-slate-300 uppercase mt-0.5">HOSPITAL</span>
+              <span className="text-[8px] font-mono tracking-widest text-slate-300 uppercase mt-0.5">KLINIK</span>
             </div>
           )}
           <div>
@@ -112,7 +112,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
               DOKUMEN RESMI TERSERTIFIKASI KEMENKES RI
             </div>
             <p className="text-[10px] text-slate-600 mt-0.5">
-              Dokumen elektronik sah & tersimpan permanen di cloud SIMRS MYITARU & SatuSehat.
+              Dokumen elektronik sah & tersimpan permanen di cloud SIMK MYITARU & SatuSehat.
             </p>
             <p className="text-[9px] font-mono text-slate-500 mt-0.5">
               ID Validasi: <span className="font-bold text-slate-800">{validationCode}</span>
@@ -151,7 +151,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
 
       <div className="mt-6 pt-2 border-t border-slate-200 text-center text-[9px] text-slate-400 leading-snug">
         <p>
-          Dokumen ini merupakan Rekam Medis Elektronik (RME) resmi yang diterbitkan oleh Sistem Informasi Manajemen Rumah Sakit (MYITARU SIMRS).
+          Dokumen ini merupakan Rekam Medis Elektronik (RME) resmi yang diterbitkan oleh Sistem Informasi Manajemen Klinik (MYITARU SIMK).
         </p>
         <p>
           Sah dan berkekuatan hukum penuh tanpa tanda tangan basah sesuai UU ITE No. 11/2008 & Permenkes RI No. 24/2022 tentang Rekam Medis Elektronik.
@@ -1233,7 +1233,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
           )}
 
           <div className="p-3 bg-blue-50/80 rounded border border-blue-200 text-[11px] text-slate-700 leading-relaxed text-justify">
-            Surat data profil kepegawaian ini dicetak dari pangkalan data kepegawaian resmi MYITARU SIMRS dan sah dipergunakan sebagai bukti keaktifan penugasan serta kredensial kerja di lingkungan {hospital.name}.
+            Surat data profil kepegawaian ini dicetak dari pangkalan data kepegawaian resmi MYITARU SIMK dan sah dipergunakan sebagai bukti keaktifan penugasan serta kredensial kerja di lingkungan {hospital.name}.
           </div>
         </main>
 
@@ -1366,7 +1366,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
   if (document.type === 'dokumen_umum') {
     const umum = document.dokumenUmumData || {
       kategori: 'Laporan Operasional Klinik',
-      deskripsi: 'Rekapitulasi data resmi tercatat dalam sistem MYITARU SIMRS.',
+      deskripsi: 'Rekapitulasi data resmi tercatat dalam sistem MYITARU SIMK.',
       tabelData: []
     };
 
@@ -1461,7 +1461,7 @@ export function HospitalDocumentSheet({ document, watermark = true }: HospitalDo
         <div className="mt-8 pt-4 border-t-2 border-slate-900 grid grid-cols-2 gap-8 text-center text-xs">
           <div className="flex flex-col items-center">
             <p className="font-bold text-slate-800 mb-14">Petugas Pengelola Data</p>
-            <p className="font-bold text-slate-950 border-b border-slate-900 pb-0.5 min-w-[180px]">( Petugas Administrasi SIMRS )</p>
+            <p className="font-bold text-slate-950 border-b border-slate-900 pb-0.5 min-w-[180px]">( Petugas Administrasi SIMK )</p>
             <p className="text-[10px] text-slate-500 mt-1">Staf Pengolah Data</p>
           </div>
           <div className="flex flex-col items-center">

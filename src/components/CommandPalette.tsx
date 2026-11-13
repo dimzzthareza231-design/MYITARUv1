@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
 import { Search, ChevronRight, CornerDownLeft, X } from 'lucide-react';
@@ -20,6 +20,70 @@ export function CommandPalette() {
   const navigate = useNavigate();
   const toast = useToast();
 
+  const allCommands: CommandItem[] = useMemo(() => [
+    // Navigation Core
+    { id: 1, category: 'Navigasi', icon: '🏠', label: 'Dashboard Utama', description: 'Kembali ke halaman utama SIMK', action: () => navigate('/dashboard') },
+    { id: 2, category: 'Navigasi', icon: '📝', label: 'Pendaftaran Pasien', description: 'Registrasi & admisi pasien baru/lama', action: () => navigate('/modul/pendaftaran') },
+    { id: 3, category: 'Navigasi', icon: '🏥', label: 'Rawat Jalan (Poliklinik)', description: 'Pelayanan poli dan pemeriksaan dokter', action: () => navigate('/modul/rawat-jalan') },
+    { id: 4, category: 'Navigasi', icon: '🚨', label: 'Instalasi Gawat Darurat (IGD)', description: 'Triase darurat dan pasien IGD', action: () => navigate('/modul/igd') },
+    { id: 5, category: 'Navigasi', icon: '🛌', label: 'Rawat Inap & Bangsal', description: 'Manajemen tempat tidur (Bed Management)', action: () => navigate('/modul/rawat-inap') },
+    { id: 6, category: 'Navigasi', icon: '🔪', label: 'Kamar Operasi (OK)', description: 'Jadwal dan checklist bedah operasi', action: () => navigate('/modul/operasi') },
+    { id: 7, category: 'Navigasi', icon: '🔬', label: 'Laboratorium Klinis', description: 'Order & hasil lab darah, urin, mikrobiologi', action: () => navigate('/modul/laboratorium') },
+    { id: 8, category: 'Navigasi', icon: '🩻', label: 'Radiologi & PACS', description: 'Pemeriksaan X-Ray, CT-Scan, USG, MRI', action: () => navigate('/modul/radiologi') },
+    { id: 9, category: 'Navigasi', icon: '💊', label: 'Apotek & Farmasi Rawat Jalan', description: 'Antrian resep, dispensing & stok obat', action: () => navigate('/modul/apotek-ralan') },
+    { id: 10, category: 'Navigasi', icon: '💰', label: 'Kasir & Pembayaran (Billing)', description: 'Kwitansi, invoice & transaksi pembayaran', action: () => navigate('/modul/kasir') },
+    { id: 11, category: 'Navigasi', icon: '📁', label: 'Rekam Medis Elektronik (RME)', description: 'Patient 360, riwayat penyakit & SOAP', action: () => navigate('/modul/rekam-medis') },
+    { id: 12, category: 'Navigasi', icon: '🛡️', label: 'Integrasi BPJS V-Claim', description: 'Generate SEP, rujukan & status kepesertaan', action: () => navigate('/modul/bpjs-klaim') },
+    { id: 13, category: 'Navigasi', icon: '🌐', label: 'Integrasi Kemenkes SatuSehat', description: 'Interoperabilitas FHIR SatuSehat Kemenkes', action: () => navigate('/modul/satu-sehat') },
+    { id: 14, category: 'Navigasi', icon: '📊', label: 'Laporan & Indikator Mutu', description: 'Eksekutif analitik & performa rumah sakit', action: () => navigate('/modul/laporan') },
+    { id: 15, category: 'Navigasi', icon: '👥', label: 'SDM & Kepegawaian', description: 'Jadwal shift dokter, perawat, absensi & cuti', action: () => navigate('/modul/sdm') },
+    { id: 16, category: 'Navigasi', icon: '📦', label: 'Gudang & Logistik Farmasi', description: 'Stock opname, mutasi barang & vendor PO', action: () => navigate('/modul/inventory') },
+    { id: 17, category: 'Navigasi', icon: '📋', label: 'Audit Trail & Log Akses', description: 'Riwayat aktivitas user & keamanan sistem', action: () => navigate('/modul/audit') },
+    { id: 18, category: 'Navigasi', icon: '⚙️', label: 'Pengaturan Fasilitas / SIMK', description: 'Konfigurasi klinik, tarif & profil Klinik', action: () => navigate('/modul/pengaturan-klinik') },
+    { id: 19, category: 'Navigasi', icon: '📚', label: 'Panduan & SOP Penggunaan', description: 'Dokumentasi pedoman dan manual sistem', action: () => navigate('/modul/panduan') },
+    { id: 25, category: 'Navigasi', icon: '🫀', label: 'ICU & Critical Care', description: 'Bed monitoring, ventilator, SOFA score & fluid balance', action: () => navigate('/modul/icu') },
+    { id: 26, category: 'Navigasi', icon: '🏃', label: 'Rehabilitasi Medik (Fisioterapi)', description: 'Asesmen Barthel, catatan sesi terapi SOAP & home program', action: () => navigate('/modul/rehab') },
+    { id: 27, category: 'Navigasi', icon: '🥗', label: 'Gizi & Diet Pasien', description: 'Screening gizi MST, preskripsi diet & monitoring asupan', action: () => navigate('/modul/gizi') },
+    { id: 28, category: 'Navigasi', icon: '📹', label: 'Telemedicine & Virtual Care', description: 'Konsultasi video call, e-resep & pemantauan jarak jauh', action: () => navigate('/modul/telemedicine') },
+    { id: 29, category: 'Navigasi', icon: '👤', label: 'Portal Mandiri Pasien', description: 'Self-service booking, rekam medis & pembayaran', action: () => navigate('/modul/patient-portal') },
+    { id: 30, category: 'Navigasi', icon: '🏢', label: 'Multi-Branch RS', description: 'Operasional terpusat, transfer pasien & konsolidasi cabang', action: () => navigate('/modul/multi-branch') },
+    { id: 31, category: 'Navigasi', icon: '🤝', label: 'CRM & Patient Engagement', description: 'Kampanye pesan, survey kepuasan & penanganan keluhan', action: () => navigate('/modul/crm') },
+
+    // Aksi Cepat
+    { id: 20, category: 'Aksi Cepat', icon: '➕', label: 'Tambah Pasien Baru', description: 'Buka formulir registrasi pasien baru', action: () => navigate('/modul/pendaftaran') },
+    { id: 21, category: 'Aksi Cepat', icon: '🌙', label: 'Ganti Tema Gelap / Terang', description: 'Beralih antara mode gelap dan terang', action: () => {
+      window.dispatchEvent(new CustomEvent('toggle-theme'));
+      toast.info('Tema tampilan diperbarui');
+    }},
+    { id: 22, category: 'Aksi Cepat', icon: '🔔', label: 'Pusat Notifikasi', description: 'Buka daftar pemberitahuan sistem', action: () => navigate('/modul/notifikasi') },
+    { id: 23, category: 'Aksi Cepat', icon: '🔒', label: 'Manajemen Keamanan & Pengguna', description: 'Kelola hak akses dan akun pengguna', action: () => navigate('/modul/security') },
+    { id: 24, category: 'Aksi Cepat', icon: '💾', label: 'Backup & Pemulihan Sistem', description: 'Cadangkan database dan konfigurasi', action: () => navigate('/modul/backup') },
+  ], [navigate, toast]);
+
+  const filteredCommands = useMemo(() => {
+    if (searchQuery.trim() === '') return allCommands;
+    const query = searchQuery.toLowerCase();
+    return allCommands.filter(cmd =>
+      cmd.label.toLowerCase().includes(query) ||
+      cmd.description.toLowerCase().includes(query) ||
+      cmd.category.toLowerCase().includes(query)
+    );
+  }, [allCommands, searchQuery]);
+
+  const groupedCommands = useMemo(() => {
+    return filteredCommands.reduce((acc, cmd) => {
+      if (!acc[cmd.category]) acc[cmd.category] = [];
+      acc[cmd.category].push(cmd);
+      return acc;
+    }, {} as Record<string, CommandItem[]>);
+  }, [filteredCommands]);
+
+  const executeCommand = useCallback((cmd: CommandItem) => {
+    cmd.action();
+    setIsOpen(false);
+    setSearchQuery('');
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -28,22 +92,22 @@ export function CommandPalette() {
         setSearchQuery('');
         setSelectedIndex(0);
         setTimeout(() => inputRef.current?.focus(), 100);
+        return;
       }
 
       if (e.key === 'Escape' && isOpen) {
         setIsOpen(false);
+        return;
       }
 
       if (isOpen) {
         if (e.key === 'ArrowDown') {
           e.preventDefault();
-          setSelectedIndex(prev => Math.min(prev + 1, filteredCommands.length - 1));
-        }
-        if (e.key === 'ArrowUp') {
+          setSelectedIndex(prev => Math.min(prev + 1, Math.max(0, filteredCommands.length - 1)));
+        } else if (e.key === 'ArrowUp') {
           e.preventDefault();
           setSelectedIndex(prev => Math.max(prev - 1, 0));
-        }
-        if (e.key === 'Enter') {
+        } else if (e.key === 'Enter') {
           e.preventDefault();
           const selected = filteredCommands[selectedIndex];
           if (selected) executeCommand(selected);
@@ -64,68 +128,7 @@ export function CommandPalette() {
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('open-command-palette', handleOpen);
     };
-  }, [isOpen, selectedIndex]);
-
-  const allCommands: CommandItem[] = [
-    // Navigation Core
-    { id: 1, category: 'Navigasi', icon: '🏠', label: 'Dashboard Utama', description: 'Kembali ke halaman utama SIMRS', action: () => navigate('/dashboard') },
-    { id: 2, category: 'Navigasi', icon: '📝', label: 'Pendaftaran Pasien', description: 'Registrasi & admisi pasien baru/lama', action: () => navigate('/modul/pendaftaran') },
-    { id: 3, category: 'Navigasi', icon: '🏥', label: 'Rawat Jalan (Poliklinik)', description: 'Pelayanan poli dan pemeriksaan dokter', action: () => navigate('/modul/rawat-jalan') },
-    { id: 4, category: 'Navigasi', icon: '🚨', label: 'Instalasi Gawat Darurat (IGD)', description: 'Triase darurat dan pasien IGD', action: () => navigate('/modul/igd') },
-    { id: 5, category: 'Navigasi', icon: '🛌', label: 'Rawat Inap & Bangsal', description: 'Manajemen tempat tidur (Bed Management)', action: () => navigate('/modul/rawat-inap') },
-    { id: 6, category: 'Navigasi', icon: '🔪', label: 'Kamar Operasi (OK)', description: 'Jadwal dan checklist bedah operasi', action: () => navigate('/modul/operasi') },
-    { id: 7, category: 'Navigasi', icon: '🔬', label: 'Laboratorium Klinis', description: 'Order & hasil lab darah, urin, mikrobiologi', action: () => navigate('/modul/laboratorium') },
-    { id: 8, category: 'Navigasi', icon: '🩻', label: 'Radiologi & PACS', description: 'Pemeriksaan X-Ray, CT-Scan, USG, MRI', action: () => navigate('/modul/radiologi') },
-    { id: 9, category: 'Navigasi', icon: '💊', label: 'Apotek & Farmasi Rawat Jalan', description: 'Antrian resep, dispensing & stok obat', action: () => navigate('/modul/apotek-ralan') },
-    { id: 10, category: 'Navigasi', icon: '💰', label: 'Kasir & Pembayaran (Billing)', description: 'Kwitansi, invoice & transaksi pembayaran', action: () => navigate('/modul/kasir') },
-    { id: 11, category: 'Navigasi', icon: '📁', label: 'Rekam Medis Elektronik (RME)', description: 'Patient 360, riwayat penyakit & SOAP', action: () => navigate('/modul/rekam-medis') },
-    { id: 12, category: 'Navigasi', icon: '🛡️', label: 'Integrasi BPJS V-Claim', description: 'Generate SEP, rujukan & status kepesertaan', action: () => navigate('/modul/bpjs-klaim') },
-    { id: 13, category: 'Navigasi', icon: '🌐', label: 'Integrasi Kemenkes SatuSehat', description: 'Interoperabilitas FHIR SatuSehat Kemenkes', action: () => navigate('/modul/satu-sehat') },
-    { id: 14, category: 'Navigasi', icon: '📊', label: 'Laporan & Indikator Mutu', description: 'Eksekutif analitik & performa rumah sakit', action: () => navigate('/modul/laporan') },
-    { id: 15, category: 'Navigasi', icon: '👥', label: 'SDM & Kepegawaian', description: 'Jadwal shift dokter, perawat, absensi & cuti', action: () => navigate('/modul/sdm') },
-    { id: 16, category: 'Navigasi', icon: '📦', label: 'Gudang & Logistik Farmasi', description: 'Stock opname, mutasi barang & vendor PO', action: () => navigate('/modul/inventory') },
-    { id: 17, category: 'Navigasi', icon: '📋', label: 'Audit Trail & Log Akses', description: 'Riwayat aktivitas user & keamanan sistem', action: () => navigate('/modul/audit') },
-    { id: 18, category: 'Navigasi', icon: '⚙️', label: 'Pengaturan Fasilitas / SIMRS', description: 'Konfigurasi klinik, tarif & profil RS', action: () => navigate('/modul/pengaturan-klinik') },
-    { id: 19, category: 'Navigasi', icon: '📚', label: 'Panduan & SOP Penggunaan', description: 'Dokumentasi pedoman dan manual sistem', action: () => navigate('/modul/panduan') },
-    { id: 25, category: 'Navigasi', icon: '🫀', label: 'ICU & Critical Care', description: 'Bed monitoring, ventilator, SOFA score & fluid balance', action: () => navigate('/modul/icu') },
-    { id: 26, category: 'Navigasi', icon: '🏃', label: 'Rehabilitasi Medik (Fisioterapi)', description: 'Asesmen Barthel, catatan sesi terapi SOAP & home program', action: () => navigate('/modul/rehab') },
-    { id: 27, category: 'Navigasi', icon: '🥗', label: 'Gizi & Diet Pasien', description: 'Screening gizi MST, preskripsi diet & monitoring asupan', action: () => navigate('/modul/gizi') },
-    { id: 28, category: 'Navigasi', icon: '📹', label: 'Telemedicine & Virtual Care', description: 'Konsultasi video call, e-resep & pemantauan jarak jauh', action: () => navigate('/modul/telemedicine') },
-    { id: 29, category: 'Navigasi', icon: '👤', label: 'Portal Mandiri Pasien', description: 'Self-service booking, rekam medis & pembayaran', action: () => navigate('/modul/patient-portal') },
-    { id: 30, category: 'Navigasi', icon: '🏢', label: 'Multi-Branch RS', description: 'Operasional terpusat, transfer pasien & konsolidasi cabang', action: () => navigate('/modul/multi-branch') },
-    { id: 31, category: 'Navigasi', icon: '🤝', label: 'CRM & Patient Engagement', description: 'Kampanye pesan, survey kepuasan & penanganan keluhan', action: () => navigate('/modul/crm') },
-
-    // Aksi Cepat
-    { id: 20, category: 'Aksi Cepat', icon: '➕', label: 'Tambah Pasien Baru', description: 'Buka formulir registrasi pasien baru', action: () => navigate('/modul/pendaftaran') },
-    { id: 21, category: 'Aksi Cepat', icon: '🌙', label: 'Ganti Tema Gelap / Terang', description: 'Beralih antara mode gelap dan terang', action: () => {
-      window.dispatchEvent(new CustomEvent('toggle-theme'));
-      toast.info('Tema tampilan diperbarui');
-    }},
-    { id: 22, category: 'Aksi Cepat', icon: '🔔', label: 'Pusat Notifikasi', description: 'Buka daftar pemberitahuan sistem', action: () => navigate('/modul/notifikasi') },
-    { id: 23, category: 'Aksi Cepat', icon: '🔒', label: 'Manajemen Keamanan & Pengguna', description: 'Kelola hak akses dan akun pengguna', action: () => navigate('/modul/security') },
-    { id: 24, category: 'Aksi Cepat', icon: '💾', label: 'Backup & Pemulihan Sistem', description: 'Cadangkan database dan konfigurasi', action: () => navigate('/modul/backup') },
-  ];
-
-  const filteredCommands = searchQuery.trim() === ''
-    ? allCommands
-    : allCommands.filter(cmd => {
-        const query = searchQuery.toLowerCase();
-        return cmd.label.toLowerCase().includes(query) ||
-               cmd.description.toLowerCase().includes(query) ||
-               cmd.category.toLowerCase().includes(query);
-      });
-
-  const groupedCommands = filteredCommands.reduce((acc, cmd) => {
-    if (!acc[cmd.category]) acc[cmd.category] = [];
-    acc[cmd.category].push(cmd);
-    return acc;
-  }, {} as Record<string, CommandItem[]>);
-
-  const executeCommand = (cmd: CommandItem) => {
-    cmd.action();
-    setIsOpen(false);
-    setSearchQuery('');
-  };
+  }, [isOpen, selectedIndex, filteredCommands, executeCommand]);
 
   if (!isOpen) return null;
 

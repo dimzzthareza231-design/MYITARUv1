@@ -574,7 +574,7 @@ export default function ModuleLayout() {
                           className="w-full flex items-center justify-between text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2.5 pt-2 pb-0.5 hover:text-slate-700 dark:hover:text-slate-300 transition-colors group cursor-pointer"
                         >
                           <span className="truncate flex items-center gap-1.5">
-                            {containsActiveTab && <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />}
+                            {containsActiveTab && <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
                             {group.title}
                           </span>
                           <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : 'rotate-0'}`} />
@@ -659,8 +659,8 @@ export default function ModuleLayout() {
               {!isSidebarCollapsed && (
                 <div className="p-3 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#0B132B]/50 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span>MYITARU SIMRS</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span>MYITARU SIMK</span>
                   </span>
                   <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500">v1.0.0</span>
                 </div>

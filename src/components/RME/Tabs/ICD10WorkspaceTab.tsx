@@ -138,7 +138,7 @@ export function ICD10WorkspaceTab() {
         primary: primaryDiagnosis,
         secondaries: secondaryDiagnoses,
         inacbg_code: primaryDiagnosis.inacbg_hint || 'A-4-10-I',
-        coder_name: 'Perekam Medis Koder SIMRS'
+        coder_name: 'Perekam Medis Koder SIMK'
       };
 
       const existingCodings = JSON.parse(localStorage.getItem('hospital_clinical_codings') || '[]');

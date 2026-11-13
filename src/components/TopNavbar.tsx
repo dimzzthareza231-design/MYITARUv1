@@ -117,7 +117,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
   const quickDirectLinks = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutGrid },
     { label: 'Rawat Jalan', path: '/modul/rawat-jalan', icon: Stethoscope },
-    { label: 'IGD', path: '/modul/igd', icon: Flame, badge: 'Triase' },
+    { label: 'IGD', path: '/modul/igd', icon: Flame },
     { label: 'Rawat Inap', path: '/modul/rawat-inap', icon: HeartPulse },
     { label: 'RME Pasien', path: '/modul/rekam-medis', icon: Activity }
   ];
@@ -129,7 +129,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
       title: 'AI CDSS & ICD-10 Assistant',
       category: 'klinis' as const,
       categoryLabel: 'Diagnostik Klinis',
-      badge: 'Gemini Pro',
+      badge: 'CDSS AI',
       badgeColor: 'bg-cyan-900/50 text-cyan-300 border-cyan-700/60',
       icon: Brain,
       iconBg: 'bg-indigo-950/80 border-indigo-500/40 text-cyan-300',
@@ -180,7 +180,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
       iconBg: 'bg-purple-950/80 border-purple-500/40 text-purple-300',
       description: 'Deteksi otomatis interaksi obat berisiko, polifarmasi, & penyesuaian dosis',
       action: () => {
-        navigate('/modul/apotek-ralan?tab=Antrean+Resep');
+        navigate('/modul/apotek-ralan?tab=Resep+%26+Antrian+Ralan');
         setShowAISuiteMenu(false);
       }
     },
@@ -195,7 +195,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
       iconBg: 'bg-blue-950/80 border-blue-500/40 text-blue-300',
       description: 'Validasi kelayakan klaim, kesesuaian diagnosis, & pencegahan dispute BPJS',
       action: () => {
-        navigate('/modul/vclaim?tab=Manajemen+Klaim');
+        navigate('/modul/bpjs-klaim?tab=AI+Validator');
         setShowAISuiteMenu(false);
       }
     },
@@ -225,7 +225,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
       iconBg: 'bg-indigo-950/80 border-indigo-500/40 text-indigo-300',
       description: 'Deteksi kelainan citra rontgen/CT & asistensi pembacaan radiolog cepat',
       action: () => {
-        navigate('/modul/radiologi?tab=Worklist+Radiologi');
+        navigate('/modul/radiologi?tab=Worklist+%26+Permintaan');
         setShowAISuiteMenu(false);
       }
     },
@@ -240,7 +240,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
       iconBg: 'bg-red-950/80 border-red-500/40 text-red-300',
       description: 'Skrining prioritas gawat darurat & peringatan dini perburukan tanda vital',
       action: () => {
-        navigate('/modul/triase');
+        navigate('/modul/igd');
         setShowAISuiteMenu(false);
       }
     },
@@ -255,7 +255,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
       iconBg: 'bg-teal-950/80 border-teal-500/40 text-teal-300',
       description: 'Kodifikasi diagnosis dan prosedur medis cepat berbasis kecerdasan semantik',
       action: () => {
-        navigate('/modul/rekam-medis?tab=Workspace+ICD-10');
+        navigate('/modul/rekam-medis?tab=ICD-10+Diagnosis');
         setShowAISuiteMenu(false);
       }
     },
@@ -285,7 +285,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
       iconBg: 'bg-amber-950/80 border-amber-500/40 text-amber-300',
       description: 'Investigasi insiden keselamatan pasien dengan otomatisasi diagram Ishikawa',
       action: () => {
-        navigate('/modul/mutu?tab=Investigation+%26+RCA');
+        navigate('/modul/mutu?tab=Patient+Safety&subtab=investigation');
         setShowAISuiteMenu(false);
       }
     },
@@ -300,7 +300,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
       iconBg: 'bg-blue-950/80 border-blue-500/40 text-blue-300',
       description: 'Evaluasi kepatuhan alur klinis dan deteksi deviasi lama rawat inap (LOS)',
       action: () => {
-        navigate('/modul/pathway?tab=Variance+Report');
+        navigate('/modul/mutu?tab=Clinical+Pathway&subtab=variance');
         setShowAISuiteMenu(false);
       }
     },
@@ -315,7 +315,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
       iconBg: 'bg-violet-950/80 border-violet-500/40 text-violet-300',
       description: 'Prediksi keterisian tempat tidur, lonjakan poliklinik, dan discharge planner',
       action: () => {
-        navigate('/dashboard');
+        navigate('/modul/rawat-inap');
         setShowAISuiteMenu(false);
       }
     },
@@ -405,35 +405,30 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
               </div>
             </div>
 
-            {/* Hospital Name & Badge */}
+            {/* Klinik Name */}
             <div className="hidden sm:block">
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-[#E8D49E] leading-tight">
-                  {hospitalSettings?.name || 'MYITARU SIMRS'}
-                </h1>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#C9A94E]/25 to-amber-500/15 text-[#E8D49E] border border-[#C9A94E]/40 uppercase tracking-wider shadow-xs">
-                  PRO 2026
-                </span>
-              </div>
+              <h1 className="text-base font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-[#E8D49E] leading-tight whitespace-nowrap">
+                {hospitalSettings?.name || 'MYITARU SIMK'}
+              </h1>
               <p className="text-[10px] text-slate-400 uppercase tracking-widest font-medium truncate max-w-[200px]">
-                {hospitalSettings?.subname || 'Smart Hospital Suite'}
+                {hospitalSettings?.subname || 'Smart Klinik Suite'}
               </p>
             </div>
           </button>
 
           {/* Mega Menu Launcher Button */}
-          <div className="relative hidden md:block" ref={megaMenuRef}>
+          <div className="relative hidden md:block shrink-0" ref={megaMenuRef}>
             <button
               onClick={() => setShowMegaMenu(!showMegaMenu)}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-sm ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-sm whitespace-nowrap shrink-0 ${
                 showMegaMenu
                   ? 'bg-gradient-to-r from-[#173A63] to-[#1B4677] text-white border-[#E8D49E] shadow-[0_0_15px_rgba(201,169,78,0.25)]'
                   : 'bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 hover:text-white border-white/10 hover:border-[#C9A94E]/40'
               }`}
             >
-              <Layers className="w-3.5 h-3.5 text-[#E8D49E]" />
+              <Layers className="w-3.5 h-3.5 text-[#E8D49E] shrink-0" />
               <span>Direktori Modul</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${showMegaMenu ? 'rotate-180 text-[#E8D49E]' : ''}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${showMegaMenu ? 'rotate-180 text-[#E8D49E]' : ''}`} />
             </button>
 
             {/* ========================================================================= */}
@@ -641,7 +636,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
         {/* ========================================================================= */}
         <div className="hidden lg:flex items-center gap-2 flex-1 justify-center max-w-2xl mx-auto">
           {/* Quick Direct Links (Paling Sering Digunakan) */}
-          <nav className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/[0.07] backdrop-blur-md">
+          <nav className="flex items-center gap-1 bg-white/[0.03] p-1 rounded-2xl border border-white/[0.07] backdrop-blur-md shrink-0">
             {quickDirectLinks.map(link => {
               const Icon = link.icon;
               const isActive = location.pathname === link.path;
@@ -649,19 +644,14 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
                 <button
                   key={link.path}
                   onClick={() => navigate(link.path)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all relative ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all relative whitespace-nowrap shrink-0 ${
                     isActive
                       ? 'bg-gradient-to-r from-[#183F6D] to-[#123157] text-white shadow-sm border border-[#C9A94E]/40'
                       : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#E8D49E]' : 'text-slate-400'}`} />
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-[#E8D49E]' : 'text-slate-400'}`} />
                   <span>{link.label}</span>
-                  {link.badge && (
-                    <span className="text-[9px] px-1 py-0.2 rounded-full bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold">
-                      {link.badge}
-                    </span>
-                  )}
                 </button>
               );
             })}
@@ -670,10 +660,10 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
           {/* Unified Smart Omnisearch Trigger (Command Bar Style) */}
           <button
             onClick={openCommandPalette}
-            className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/10 hover:border-[#C9A94E]/40 text-xs font-medium transition-all shadow-inner group"
+            className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/10 hover:border-[#C9A94E]/40 text-xs font-medium transition-all shadow-inner group whitespace-nowrap shrink-0"
             title="Buka Command Palette (Ctrl+K)"
           >
-            <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#E8D49E] transition-colors" />
+            <Search className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#E8D49E] transition-colors shrink-0" />
             <span className="hidden xl:inline text-slate-400 group-hover:text-slate-200">Cari pasien / aksi...</span>
             <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-mono bg-black/40 text-[#E8D49E] border border-white/10">
               <Command className="w-2.5 h-2.5" /> K
@@ -682,7 +672,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
         </div>
 
         {/* ========================================================================= */}
-        {/* 3. KANAN: AI CLINICAL SUITE HUB + CLOCK + NOTIF + USER PROFILE             */}
+        {/* 3. KANAN: AI CLINICAL SUITE HUB + NOTIF + USER PROFILE                    */}
         {/* ========================================================================= */}
         <div className="flex items-center gap-2.5 shrink-0">
           
@@ -690,45 +680,41 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
           <div className="relative" ref={aiSuiteRef}>
             <button
               onClick={() => setShowAISuiteMenu(!showAISuiteMenu)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-sm ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shadow-sm whitespace-nowrap shrink-0 ${
                 showAISuiteMenu
-                  ? 'bg-gradient-to-r from-purple-950/80 via-indigo-900/80 to-[#102A4A] text-white border-purple-400/60 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
-                  : 'bg-gradient-to-r from-white/[0.05] to-white/[0.02] hover:bg-white/[0.08] text-white border-white/10 hover:border-purple-400/40'
+                  ? 'bg-gradient-to-r from-[#16365D] via-[#1C4373] to-[#102A4A] text-white border-[#C9A94E]/60 shadow-[0_0_15px_rgba(201,169,78,0.25)]'
+                  : 'bg-gradient-to-r from-white/[0.05] to-white/[0.02] hover:bg-white/[0.08] text-white border-white/10 hover:border-[#C9A94E]/45'
               }`}
               title="Akses Alat Kecerdasan Klinis AI & Diagnostik Cepat"
             >
-              <div className="relative">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-                <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
-              </div>
-              <span className="hidden sm:inline bg-gradient-to-r from-amber-200 via-white to-cyan-200 bg-clip-text text-transparent">
+              <Sparkles className="w-3.5 h-3.5 text-[#E8D49E] shrink-0" />
+              <span className="hidden sm:inline bg-gradient-to-r from-[#E8D49E] via-white to-cyan-200 bg-clip-text text-transparent">
                 AI & Tools
               </span>
-              <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform ${showAISuiteMenu ? 'rotate-180 text-amber-300' : ''}`} />
+              <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform shrink-0 ${showAISuiteMenu ? 'rotate-180 text-[#E8D49E]' : ''}`} />
             </button>
 
             {/* AI Tools Luxury Dropdown Palette */}
             {showAISuiteMenu && (
-              <div className="absolute right-0 mt-3 w-[360px] sm:w-[480px] bg-[#0B1728]/98 border border-purple-500/30 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] z-50 backdrop-blur-2xl p-3 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 mt-3 w-[360px] sm:w-[480px] bg-[#0B1728]/98 border border-[#C9A94E]/30 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] z-50 backdrop-blur-2xl p-3 animate-in fade-in slide-in-from-top-2 duration-200">
                 {/* AI Suite Header */}
                 <div className="px-2 py-2 border-b border-white/10 mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center shadow-sm">
+                    <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#183F6D] to-[#C9A94E] flex items-center justify-center shadow-sm">
                       <Sparkles className="w-3.5 h-3.5 text-white" />
                     </div>
                     <div>
                       <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <span className="bg-gradient-to-r from-amber-300 via-purple-200 to-cyan-300 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-[#E8D49E] via-white to-cyan-200 bg-clip-text text-transparent">
                           MYITARU AI Suite
                         </span>
                         <span className="text-[10px] text-slate-400 font-normal">({ALL_AI_TOOLS.length} Kecerdasan)</span>
                       </h3>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-[10px] font-mono text-emerald-300">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>ONLINE</span>
-                  </div>
+                  <span className="text-[10px] font-semibold text-cyan-300 bg-cyan-950/50 border border-cyan-500/30 px-2 py-0.5 rounded-md">
+                    Siap Pakai
+                  </span>
                 </div>
 
                 {/* Search Bar for AI Tools */}
@@ -817,7 +803,7 @@ export default function TopNavbar({ currentTime }: TopNavbarProps) {
 
                 {/* AI Suite Footer */}
                 <div className="mt-2 pt-2 border-t border-white/10 px-2 flex items-center justify-between text-[10px] text-slate-400">
-                  <span>Tenaga Penggerak: Gemini 2.5 Pro & Deep Neural Mesh</span>
+                  <span>MYITARU Clinical AI Suite</span>
                   <button
                     onClick={() => {
                       setShowAISuiteMenu(false);

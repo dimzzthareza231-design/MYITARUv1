@@ -137,7 +137,7 @@ export function PoliklinikQueueDisplay({
               </span>
             </div>
             <p className="text-[11px] text-slate-400">
-              RSUD Smart Hospital • Gedung Pelayanan Rawat Jalan Terpadu (Lantai 1 & 2)
+              Klinik Smart Medika • Gedung Pelayanan Rawat Jalan Terpadu (Lantai 1 & 2)
             </p>
           </div>
         </div>

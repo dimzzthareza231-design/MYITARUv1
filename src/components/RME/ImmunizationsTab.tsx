@@ -41,7 +41,7 @@ export function ImmunizationsTab({ patientData }: { patientData: any }) {
     dateGiven: new Date().toISOString().split('T')[0],
     batchNumber: '',
     administeredBy: 'dr. Budi Santoso',
-    facility: 'RS MYITARU SIMRS',
+    facility: 'MYITARU Klinik SIMK',
     notes: ''
   });
 
@@ -73,7 +73,7 @@ export function ImmunizationsTab({ patientData }: { patientData: any }) {
       dateGiven: new Date().toISOString().split('T')[0],
       batchNumber: '',
       administeredBy: 'dr. Budi Santoso',
-      facility: 'RS MYITARU SIMRS',
+      facility: 'MYITARU Klinik SIMK',
       notes: ''
     });
     toast.success('Catatan imunisasi berhasil ditambahkan');

@@ -81,12 +81,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Sync users list from Cloud Firestore in real time (Zero localStorage consumption)
+  // Sync users list from Cloud Firestore only when authenticated as Super Admin / Admin
   useEffect(() => {
-    if (!isFirebaseConfigured) {
-      setUsers(DEFAULT_USERS);
+    const isAdminSession =
+      firebaseUser?.email?.toLowerCase().trim() === 'dimzzthareza231@gmail.com' ||
+      currentUser?.roleId === 'super_admin' ||
+      currentUser?.roleId === 'admin';
+
+    if (!isFirebaseConfigured || !db || !firebaseUser || !isAdminSession) {
       return;
     }
+
     const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
       if (!snapshot.empty) {
         const loadedUsers: User[] = [];
@@ -98,7 +103,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             nama: d.nama || 'Staff Klinik',
             roleId: d.roleId || 'dokter',
             email: d.email || '',
-            password: d.password,
             photoURL: d.photoURL,
             aktif: d.aktif ?? true,
             dibuatPada: d.dibuatPada || '2026-01-01',
@@ -106,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
         });
 
-        // Ensure default accounts are present
+        // Ensure default local staff directory accounts remain available alongside cloud accounts
         const mergedUsers = [...loadedUsers];
         DEFAULT_USERS.forEach((defUser) => {
           if (!mergedUsers.some(u => u.username === defUser.username)) {
@@ -115,23 +119,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         setUsers(mergedUsers);
       } else {
-        // Initial setup: bootstrap default accounts into Firestore
         setUsers(DEFAULT_USERS);
-        DEFAULT_USERS.forEach(async (u) => {
-          try {
-            await setDoc(doc(db, 'users', u.id), {
-              ...u,
-              updatedAt: new Date().toISOString()
-            });
-          } catch (_) {}
-        });
       }
     }, (error) => {
-      console.warn('Firestore users collection snapshot notice:', error);
+      console.warn('Firestore users collection snapshot notice:', error.message);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [firebaseUser, currentUser?.roleId]);
 
   // Listen to Firebase Auth & IndexedDB session vault
   useEffect(() => {
@@ -464,10 +459,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUsers(prev => [...prev, newUser]);
 
     try {
-      if (isFirebaseConfigured) await setDoc(doc(db, 'users', newId), {
-        ...newUser,
-        updatedAt: new Date().toISOString()
-      });
+      if (isFirebaseConfigured && db && auth?.currentUser) {
+        const { password: _pw, ...safeUser } = newUser;
+        await setDoc(doc(db, 'users', newId), {
+          ...safeUser,
+          uid: newId,
+          updatedAt: new Date().toISOString()
+        });
+      }
     } catch (err) {
       console.warn('Could not sync user to Firestore:', err);
     }
@@ -482,10 +481,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      if (isFirebaseConfigured) await setDoc(doc(db, 'users', id), {
-        ...data,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
+      if (isFirebaseConfigured && db && auth?.currentUser) {
+        const { password: _pw, ...safeUpdates } = data;
+        await setDoc(doc(db, 'users', id), {
+          ...safeUpdates,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      }
     } catch (err) {
       console.warn('Could not sync user update to Firestore:', err);
     }
@@ -494,7 +496,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const deleteUser = async (id: string) => {
     setUsers(prev => prev.filter(u => u.id !== id));
     try {
-      if (isFirebaseConfigured) await deleteDoc(doc(db, 'users', id));
+      if (isFirebaseConfigured && db && auth?.currentUser) {
+        await deleteDoc(doc(db, 'users', id));
+      }
     } catch (err) {
       console.warn('Could not delete user from Firestore:', err);
     }

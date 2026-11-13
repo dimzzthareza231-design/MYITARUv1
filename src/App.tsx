@@ -16,6 +16,12 @@ import Dashboard from './components/Dashboard';
 import ModuleLayout from './layouts/ModuleLayout';
 import { GenericModuleContent } from './components/GenericModuleContent';
 import ErrorBoundary from './components/ErrorBoundary';
+import { PublicHospitalPortal } from './components/Portal/PublicHospitalPortal';
+import { PatientMobileApp } from './components/Mobile/PatientMobileApp';
+import { EmployeeAppLanding } from './components/Employee/EmployeeAppLanding';
+import { EmployeePortal } from './components/Employee/EmployeePortal';
+import { EmployeeMobileApp } from './components/Employee/EmployeeMobileApp';
+import { OfflineIndicator } from './components/PWA/OfflineIndicator';
 
 // Existing Modules
 import { Registration } from './components/Registration';
@@ -96,36 +102,58 @@ function AppContent() {
     return () => window.removeEventListener('viewer-mode-block', handleViewerBlock);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
-        <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-white font-semibold text-sm">Memverifikasi Sesi Keamanan Firebase...</p>
-        <p className="text-slate-400 text-xs mt-1">Menggunakan persistensi sesi cloud aman</p>
-      </div>
-    );
-  }
-
-  if (!currentUser) {
-    return (
-      <>
-        <Toaster position="top-right" />
-        <Login />
-      </>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 font-sans transition-colors duration-300 flex flex-col">
       <Toaster position="top-right" />
-      <CommandPalette />
+      <OfflineIndicator />
+      {currentUser && <CommandPalette />}
 
       <main className="flex-1 flex flex-col min-w-0 relative w-full scroll-smooth">
         <ErrorBoundary>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/modul" element={<ModuleLayout />}>
+            {/* Public Siloam-Style Hospital Portal & Mobile Patient App (PWA) */}
+            <Route path="/" element={<ErrorBoundary><PublicHospitalPortal /></ErrorBoundary>} />
+            <Route path="/portal" element={<ErrorBoundary><PublicHospitalPortal /></ErrorBoundary>} />
+            <Route path="/mobile/*" element={<ErrorBoundary><PatientMobileApp /></ErrorBoundary>} />
+
+            {/* Employee Ecosystem: Landing Page App Download, Unified Portal (Staff+Admin) & Mobile Employee App */}
+            <Route path="/app-karyawan" element={<ErrorBoundary><EmployeeAppLanding /></ErrorBoundary>} />
+            <Route path="/app" element={<ErrorBoundary><EmployeeAppLanding /></ErrorBoundary>} />
+            <Route path="/portal-karyawan/*" element={<ErrorBoundary><EmployeePortal /></ErrorBoundary>} />
+            <Route path="/karyawan/mobile/*" element={<ErrorBoundary><EmployeeMobileApp /></ErrorBoundary>} />
+
+            {/* Staff Login Gate & Protected SIMK Workspace */}
+            <Route
+              path="/staff/login"
+              element={
+                loading ? (
+                  <div className="min-h-screen bg-[#07265C] flex flex-col items-center justify-center p-4">
+                    <div className="w-12 h-12 border-4 border-sky-400 border-t-transparent rounded-full animate-spin mb-4" />
+                    <p className="text-white font-semibold text-sm">Memverifikasi Sesi Keamanan Firebase...</p>
+                  </div>
+                ) : currentUser ? (
+                  <Navigate to="/dashboard" replace />
+                ) : (
+                  <Login />
+                )
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                loading ? (
+                  <div className="min-h-screen bg-[#07265C] flex flex-col items-center justify-center p-4">
+                    <div className="w-12 h-12 border-4 border-sky-400 border-t-transparent rounded-full animate-spin mb-4" />
+                    <p className="text-white font-semibold text-sm">Memuat Dasbor SIMK...</p>
+                  </div>
+                ) : currentUser ? (
+                  <Dashboard />
+                ) : (
+                  <Navigate to="/staff/login" replace />
+                )
+              }
+            />
+            <Route path="/modul" element={currentUser ? <ModuleLayout /> : <Navigate to="/staff/login" replace />}>
               <Route path="pendaftaran" element={<ErrorBoundary><ProtectedRoute moduleId="pendaftaran"><Registration /></ProtectedRoute></ErrorBoundary>} />
               <Route path="rekam-medis" element={<ErrorBoundary><ProtectedRoute moduleId="rekam-medis"><MedicalRecords /></ProtectedRoute></ErrorBoundary>} />
               <Route path="igd" element={<ErrorBoundary><ProtectedRoute moduleId="igd"><Emergency /></ProtectedRoute></ErrorBoundary>} />

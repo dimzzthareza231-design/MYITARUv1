@@ -132,7 +132,7 @@ const DEFAULT_INSIGHT_CARDS: AIInsightCardItem[] = [
       { text: 'Ruang Isolasi Tekanan Negatif terisi 100%. Rencanakan eskalasi bed cadangan di Gedung B.', type: 'warning' }
     ],
     actionLabel: 'Kelola Bed Management',
-    actionRoute: '/modul/bed-management',
+    actionRoute: '/modul/rawat-inap',
     lastUpdated: '4 menit lalu'
   },
   {
@@ -329,24 +329,24 @@ export function AIClinicalInsightsGrid() {
   return (
     <section className="mb-12 relative z-10">
       {/* SECTION HEADER & CONTROLS */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/[0.08]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200 dark:border-white/[0.08]">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0F3B5E] via-[#1A4F7A] to-[#C9A94E] flex items-center justify-center text-[#E5CA78] shadow-[0_0_15px_rgba(201,169,78,0.25)] border border-[#C9A94E]/30">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0F3B5E] via-[#1A4F7A] to-[#C9A94E] flex items-center justify-center text-[#E5CA78] shadow-sm border border-[#C9A94E]/30">
               <BrainCircuit className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl md:text-2xl font-black text-white tracking-tight flex items-center gap-2">
-                  AI Clinical Insights & Neural Copilot
+                <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+                  AI Clinical Insights &amp; Neural Copilot
                 </h2>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-[#C9A94E]/20 text-[#E5CA78] border border-[#C9A94E]/30 animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-amber-50 dark:bg-[#C9A94E]/20 text-amber-800 dark:text-[#E5CA78] border border-amber-200 dark:border-[#C9A94E]/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                   Live Grid
                 </span>
               </div>
-              <p className="text-xs text-slate-300 mt-0.5 font-medium">
-                Panel analitik klinis modular berbasis AI. Tarik handle <span className="font-mono text-[#E5CA78]">⠿</span> untuk mengatur ulang posisi modul.
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium">
+                Panel analitik klinis modular berbasis AI. Tarik handle <span className="font-mono text-amber-700 dark:text-[#E5CA78]">⠿</span> untuk mengatur ulang posisi modul.
               </p>
             </div>
           </div>
@@ -359,8 +359,8 @@ export function AIClinicalInsightsGrid() {
             onClick={() => setIsRearrangeMode(!isRearrangeMode)}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
               isRearrangeMode
-                ? 'bg-[#C9A94E] text-[#071322] border-[#E5CA78] shadow-[0_0_15px_rgba(201,169,78,0.4)]'
-                : 'bg-white/[0.04] text-slate-200 border-white/[0.1] hover:bg-white/[0.08] hover:border-[#C9A94E]/40'
+                ? 'bg-[#C9A94E] text-[#071322] border-[#E5CA78] shadow-sm'
+                : 'bg-white dark:bg-white/[0.04] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-white/[0.1] hover:bg-slate-100 dark:hover:bg-white/[0.08] hover:border-amber-400 dark:hover:border-[#C9A94E]/40'
             }`}
             title="Aktifkan mode pengaturan posisi"
           >
@@ -369,11 +369,11 @@ export function AIClinicalInsightsGrid() {
           </button>
 
           {/* Grid Columns Switcher */}
-          <div className="hidden sm:flex items-center bg-white/[0.03] border border-white/[0.08] rounded-xl p-0.5">
+          <div className="hidden sm:flex items-center bg-slate-100 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.08] rounded-xl p-0.5">
             <button
               onClick={() => setGridColumns('2')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
-                gridColumns === '2' ? 'bg-white/[0.1] text-[#E5CA78]' : 'text-slate-400 hover:text-white'
+                gridColumns === '2' ? 'bg-white dark:bg-white/[0.1] text-amber-700 dark:text-[#E5CA78] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
               title="Tampilan 2 Kolom"
             >
@@ -382,7 +382,7 @@ export function AIClinicalInsightsGrid() {
             <button
               onClick={() => setGridColumns('3')}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-colors ${
-                gridColumns === '3' ? 'bg-white/[0.1] text-[#E5CA78]' : 'text-slate-400 hover:text-white'
+                gridColumns === '3' ? 'bg-white dark:bg-white/[0.1] text-amber-700 dark:text-[#E5CA78] shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
               title="Tampilan 3 Kolom"
             >
@@ -394,16 +394,16 @@ export function AIClinicalInsightsGrid() {
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.1] text-slate-300 hover:text-white hover:border-[#C9A94E]/40 transition-colors"
+            className="p-2 rounded-xl bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.1] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-amber-400 dark:hover:border-[#C9A94E]/40 transition-colors"
             title="Refresh Analitik AI"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-[#E5CA78]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-amber-600 dark:text-[#E5CA78]' : ''}`} />
           </button>
 
           {/* Reset Layout */}
           <button
             onClick={resetLayout}
-            className="px-2.5 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.1] text-xs font-semibold text-slate-300 hover:text-rose-300 hover:border-rose-400/40 transition-colors flex items-center gap-1"
+            className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.1] text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-rose-600 dark:hover:text-rose-300 hover:border-rose-300 dark:hover:border-rose-400/40 transition-colors flex items-center gap-1"
             title="Kembalikan posisi standar"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -451,42 +451,42 @@ export function AIClinicalInsightsGrid() {
               onDragEnd={handleDragEnd}
               className={`group relative rounded-3xl transition-all duration-300 flex flex-col justify-between overflow-hidden backdrop-blur-2xl border ${
                 isDragging 
-                  ? 'opacity-40 scale-95 border-dashed border-[#C9A94E] shadow-[0_0_30px_rgba(201,169,78,0.3)]' 
+                  ? 'opacity-40 scale-95 border-dashed border-[#C9A94E] shadow-lg' 
                   : isDragOver
-                  ? 'scale-[1.02] border-[#E5CA78] shadow-[0_0_25px_rgba(201,169,78,0.4)] ring-2 ring-[#C9A94E]/50'
-                  : 'bg-white/[0.03] border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.06)] hover:bg-white/[0.05] hover:border-white/[0.18]'
+                  ? 'scale-[1.02] border-[#C9A94E] shadow-lg ring-2 ring-[#C9A94E]/50'
+                  : 'bg-white dark:bg-white/[0.03] border-slate-200/90 dark:border-white/[0.08] shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.06)] hover:bg-slate-50/70 dark:hover:bg-white/[0.05] hover:border-slate-300 dark:hover:border-white/[0.18]'
               }`}
             >
               {/* Top ambient glow */}
               <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-br ${card.bgGlow} to-transparent rounded-bl-full pointer-events-none opacity-40 group-hover:opacity-70 transition-opacity duration-500`}></div>
 
               {/* CARD HEADER */}
-              <div className="p-5 pb-3 relative z-10 border-b border-white/[0.06]">
+              <div className="p-5 pb-3 relative z-10 border-b border-slate-200/80 dark:border-white/[0.06]">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
                     {/* Drag Handle */}
                     <div 
                       className={`p-1.5 rounded-lg cursor-grab active:cursor-grabbing transition-colors ${
                         isRearrangeMode 
-                          ? 'bg-[#C9A94E]/20 text-[#E5CA78] border border-[#C9A94E]/40' 
-                          : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.05]'
+                          ? 'bg-amber-100 dark:bg-[#C9A94E]/20 text-amber-800 dark:text-[#E5CA78] border border-amber-300 dark:border-[#C9A94E]/40' 
+                          : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
                       }`}
                       title="Tahan dan geser untuk memindahkan kartu"
                     >
                       <GripVertical className="w-4 h-4" />
                     </div>
 
-                    <div className="w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.1] flex items-center justify-center shadow-inner">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.1] flex items-center justify-center shadow-inner">
                       {renderIcon(card.iconName)}
                     </div>
 
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-white text-base leading-snug group-hover:text-[#E5CA78] transition-colors">
+                        <h3 className="font-bold text-slate-900 dark:text-white text-base leading-snug group-hover:text-blue-700 dark:group-hover:text-[#E5CA78] transition-colors">
                           {card.title}
                         </h3>
                       </div>
-                      <p className="text-[11px] text-slate-400 font-medium line-clamp-1">
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium line-clamp-1">
                         {card.subtitle}
                       </p>
                     </div>
@@ -495,11 +495,11 @@ export function AIClinicalInsightsGrid() {
                   {/* Actions & Collapse Toggle */}
                   <div className="flex items-center gap-1 shrink-0">
                     {isRearrangeMode && (
-                      <div className="flex items-center gap-0.5 bg-black/20 rounded-lg p-0.5 border border-white/10">
+                      <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-black/20 rounded-lg p-0.5 border border-slate-200 dark:border-white/10">
                         <button
                           onClick={() => moveCard(card.id, 'up')}
                           disabled={index === 0}
-                          className="p-1 text-slate-400 hover:text-white disabled:opacity-30 rounded hover:bg-white/10 text-xs"
+                          className="p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 rounded hover:bg-slate-200 dark:hover:bg-white/10 text-xs"
                           title="Geser ke kiri / atas"
                         >
                           ◀
@@ -507,7 +507,7 @@ export function AIClinicalInsightsGrid() {
                         <button
                           onClick={() => moveCard(card.id, 'down')}
                           disabled={index === cards.length - 1}
-                          className="p-1 text-slate-400 hover:text-white disabled:opacity-30 rounded hover:bg-white/10 text-xs"
+                          className="p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 rounded hover:bg-slate-200 dark:hover:bg-white/10 text-xs"
                           title="Geser ke kanan / bawah"
                         >
                           ▶
@@ -521,7 +521,7 @@ export function AIClinicalInsightsGrid() {
 
                     <button
                       onClick={() => toggleCollapse(card.id)}
-                      className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/[0.05] transition-colors"
+                      className="p-1 text-slate-400 hover:text-slate-800 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors"
                       title={isCollapsed ? 'Perluas Kartu' : 'Ciutkan Kartu'}
                     >
                       {isCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
@@ -538,15 +538,15 @@ export function AIClinicalInsightsGrid() {
                     {card.metrics.map((metric, mIdx) => (
                       <div 
                         key={mIdx}
-                        className="bg-white/[0.03] backdrop-blur-md rounded-xl p-2.5 border border-white/[0.05] text-center"
+                        className="bg-slate-50 dark:bg-white/[0.03] backdrop-blur-md rounded-xl p-2.5 border border-slate-200/80 dark:border-white/[0.05] text-center"
                       >
-                        <p className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold truncate">
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold truncate">
                           {metric.label}
                         </p>
                         <p className={`text-sm font-black mt-0.5 truncate ${
-                          metric.status === 'critical' ? 'text-rose-400' :
-                          metric.status === 'warning' ? 'text-amber-400' :
-                          metric.status === 'info' ? 'text-cyan-400' : 'text-emerald-400'
+                          metric.status === 'critical' ? 'text-rose-600 dark:text-rose-400' :
+                          metric.status === 'warning' ? 'text-amber-600 dark:text-amber-400' :
+                          metric.status === 'info' ? 'text-cyan-700 dark:text-cyan-400' : 'text-emerald-600 dark:text-emerald-400'
                         }`}>
                           {metric.value}
                         </p>
@@ -556,8 +556,8 @@ export function AIClinicalInsightsGrid() {
 
                   {/* Clinical Recommendations & Real-Time Alerts */}
                   <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#E5CA78]/80 flex items-center gap-1.5">
-                      <Sparkles className="w-3 h-3 text-[#E5CA78]" />
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-[#E5CA78]/80 flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 text-amber-600 dark:text-[#E5CA78]" />
                       Rekomendasi Preskriptif AI
                     </p>
 
@@ -567,12 +567,12 @@ export function AIClinicalInsightsGrid() {
                           key={iIdx}
                           className={`p-2.5 rounded-xl text-xs font-medium leading-relaxed border flex items-start gap-2 ${
                             insight.type === 'critical' 
-                              ? 'bg-rose-500/10 border-rose-500/30 text-rose-200' :
+                              ? 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 text-rose-800 dark:text-rose-200' :
                             insight.type === 'warning'
-                              ? 'bg-amber-500/10 border-amber-500/30 text-amber-200' :
+                              ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30 text-amber-900 dark:text-amber-200' :
                             insight.type === 'success'
-                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200' :
-                              'bg-cyan-500/10 border-cyan-500/30 text-cyan-200'
+                              ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-200' :
+                              'bg-cyan-50 dark:bg-cyan-500/10 border-cyan-200 dark:border-cyan-500/30 text-cyan-900 dark:text-cyan-200'
                           }`}
                         >
                           <span className="shrink-0 mt-0.5 text-sm">
@@ -585,14 +585,14 @@ export function AIClinicalInsightsGrid() {
                   </div>
 
                   {/* Card Footer: Timestamp & Direct Navigation */}
-                  <div className="pt-2 flex items-center justify-between text-xs border-t border-white/[0.05]">
-                    <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                  <div className="pt-2 flex items-center justify-between text-xs border-t border-slate-200/80 dark:border-white/[0.05]">
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
                       <Clock className="w-3 h-3" /> {card.lastUpdated}
                     </span>
 
                     <button
                       onClick={() => navigate(card.actionRoute)}
-                      className="inline-flex items-center gap-1.5 font-bold text-[#E5CA78] hover:text-white transition-colors group/btn cursor-pointer py-1 px-2 rounded-lg hover:bg-white/[0.05]"
+                      className="inline-flex items-center gap-1.5 font-bold text-amber-700 dark:text-[#E5CA78] hover:text-blue-700 dark:hover:text-white transition-colors group/btn cursor-pointer py-1 px-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.05]"
                     >
                       <span>{card.actionLabel}</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
@@ -603,13 +603,13 @@ export function AIClinicalInsightsGrid() {
 
               {/* Minimized Quick Preview */}
               {isCollapsed && (
-                <div className="p-3 px-5 flex items-center justify-between text-xs text-slate-400 bg-white/[0.01]">
+                <div className="p-3 px-5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-white/[0.01]">
                   <span className="text-[11px] truncate">
-                    {card.metrics[0]?.label}: <strong className="text-white">{card.metrics[0]?.value}</strong>
+                    {card.metrics[0]?.label}: <strong className="text-slate-900 dark:text-white">{card.metrics[0]?.value}</strong>
                   </span>
                   <button
                     onClick={() => navigate(card.actionRoute)}
-                    className="text-[#E5CA78] font-semibold text-xs flex items-center gap-1"
+                    className="text-amber-700 dark:text-[#E5CA78] font-semibold text-xs flex items-center gap-1"
                   >
                     Buka Modul →
                   </button>

@@ -396,7 +396,7 @@ export function generateHospitalDocument(
     type: docType,
     nomorDokumen: docNumber,
     judulDokumen: title,
-    subJudul: data.subjudul || 'MYITARU INTEGRATED HOSPITAL INFORMATION SYSTEM — OFFICIAL RECORD',
+    subJudul: data.subjudul || 'MYITARU INTEGRATED KLINIK INFORMATION SYSTEM — OFFICIAL RECORD',
     hospitalInfo: DEFAULT_HOSPITAL_INFO,
     subject: {
       nama: subjectName,

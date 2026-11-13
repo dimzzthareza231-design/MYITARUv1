@@ -167,7 +167,7 @@ export function AuditKLPCMTab() {
       return a;
     }));
 
-    toast.success(`Pengingat KLPCM berhasil dikirim ke DPJP (${audit.dpjp}) melalui WhatsApp & Inbox SIMRS.`);
+    toast.success(`Pengingat KLPCM berhasil dikirim ke DPJP (${audit.dpjp}) melalui WhatsApp & Inbox SIMK.`);
   };
 
   const handleCreateAudit = (e: React.FormEvent) => {

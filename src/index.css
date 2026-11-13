@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -12,11 +13,7 @@
 
 body {
   font-family: var(--font-sans);
-  @apply bg-slate-50 text-slate-900 antialiased;
-}
-
-.dark body {
-  @apply bg-slate-950 text-slate-100;
+  @apply bg-slate-50 dark:bg-[#071322] text-slate-900 dark:text-slate-100 antialiased;
 }
 
 .font-mono,
@@ -55,25 +52,6 @@ body {
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.7);
-}
-
-/* Watermark styles for minimalist dashboard */
-.watermark-mytaru {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 15vw;
-  font-weight: 900;
-  color: rgba(0, 0, 0, 0.08);
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 0;
-  user-select: none;
-  letter-spacing: -0.05em;
-}
-.dark .watermark-mytaru {
-  color: rgba(255, 255, 255, 0.05);
 }
 
 /* Print styles */
@@ -221,102 +199,12 @@ body.printing {
   animation-play-state: paused;
 }
 
-/* ========================================
-   DARK MODE - COMPLETE STYLES
-   ======================================== */
-
 .dark {
   color-scheme: dark;
 }
 
-/* Background */
-.dark body {
-  background-color: #0f172a !important;
-  color: #e2e8f0 !important;
-}
-
-.dark .bg-white {
-  background-color: #1e293b !important;
-  color: #e2e8f0 !important;
-}
-
-.dark .bg-gray-50 { background-color: #1e293b !important; }
-.dark .bg-gray-100 { background-color: #334155 !important; }
-.dark .bg-gray-200 { background-color: #475569 !important; }
-
-/* Text colors */
-.dark .text-gray-900,
-.dark .text-gray-800 { color: #f1f5f9 !important; }
-.dark .text-gray-700 { color: #e2e8f0 !important; }
-.dark .text-gray-600 { color: #cbd5e1 !important; }
-.dark .text-gray-500 { color: #94a3b8 !important; }
-.dark .text-gray-400 { color: #64748b !important; }
-
-/* Borders */
-.dark .border,
-.dark .border-t,
-.dark .border-b,
-.dark .border-l,
-.dark .border-r,
-.dark .border-2 {
-  border-color: #334155 !important;
-}
-
-/* Inputs & Forms */
-.dark input,
-.dark textarea,
-.dark select {
-  background-color: #0f172a !important;
-  color: #e2e8f0 !important;
-  border-color: #475569 !important;
-}
-
-.dark input::placeholder,
-.dark textarea::placeholder {
-  color: #64748b !important;
-}
-
-.dark input:focus,
-.dark textarea:focus,
-.dark select:focus {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
-}
-
-/* Tables */
-.dark table thead { background-color: #0f172a !important; }
-.dark table tbody tr { border-color: #334155 !important; }
-.dark table tbody tr:hover { background-color: #1e293b !important; }
-
-/* Hover states */
-.dark .hover\:bg-gray-50:hover,
-.dark .hover\:bg-gray-100:hover {
-  background-color: #334155 !important;
-}
-
-/* Shadows */
-.dark .shadow,
-.dark .shadow-sm,
-.dark .shadow-md,
-.dark .shadow-lg,
-.dark .shadow-xl {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* Badges */
-.dark .bg-blue-100 { background-color: #1e3a8a !important; color: #93c5fd !important; }
-.dark .bg-green-100 { background-color: #14532d !important; color: #86efac !important; }
-.dark .bg-yellow-100 { background-color: #713f12 !important; color: #fde047 !important; }
-.dark .bg-red-100 { background-color: #7f1d1d !important; color: #fca5a5 !important; }
-.dark .bg-orange-100 { background-color: #7c2d12 !important; color: #fdba74 !important; }
-.dark .bg-purple-100 { background-color: #581c87 !important; color: #d8b4fe !important; }
-
-/* Modal overlay */
-.dark .bg-black\/50 { background-color: rgba(0, 0, 0, 0.7) !important; }
-
-/* Scrollbar */
-.dark ::-webkit-scrollbar-track { background: #1e293b; }
-.dark ::-webkit-scrollbar-thumb { background: #475569; }
+.dark ::-webkit-scrollbar-track { background: #0f172a; }
+.dark ::-webkit-scrollbar-thumb { background: #334155; }
 
 /* Targeted smooth transitions for interactive elements without layout lag */
 a, button, input, select, textarea, .card, .btn-primary, .btn-secondary {

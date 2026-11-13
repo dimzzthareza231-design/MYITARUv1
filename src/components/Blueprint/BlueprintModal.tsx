@@ -28,7 +28,7 @@ export function BlueprintModal({ isOpen, onClose }: BlueprintModalProps) {
       <div 
         role="dialog"
         aria-modal="true"
-        aria-label="Blueprint Evaluasi & Pengembangan Aplikasi MYITARU SIMRS"
+        aria-label="Blueprint Evaluasi & Pengembangan Aplikasi MYITARU SIMK"
         onClick={(e) => e.stopPropagation()}
         className="relative bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-[1700px] h-[94vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
       >
@@ -38,7 +38,7 @@ export function BlueprintModal({ isOpen, onClose }: BlueprintModalProps) {
             <span className="text-xl">🗺️</span>
             <div>
               <h2 className="text-sm sm:text-base font-black text-white flex items-center gap-2">
-                MYITARU SIMRS — BLUEPRINT EVALUASI &amp; PENGEMBANGAN
+                MYITARU SIMK — BLUEPRINT EVALUASI &amp; PENGEMBANGAN
                 <span className="px-2 py-0.5 rounded-full text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase">
                   Arsitektur Resmi
                 </span>

@@ -22,58 +22,76 @@ export function AIDocumentValidatorButton({
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
     try {
+      const payload = {
+        documentType: 'Catatan Perkembangan Pasien Terintegrasi (CPPT / SOAP)',
+        patientData: {
+          nama: patientName || 'Pasien Rawat Jalan',
+          no_rm: soapData?.noRm || 'RM-TERDAFTAR'
+        },
+        medicalNotes: {
+          subjective: soapData?.subjective || '',
+          objective: soapData?.objective || (vitals ? `TD: ${vitals.systolic || 120}/${vitals.diastolic || 80} mmHg, HR: ${vitals.heartRate || 80} bpm, Temp: ${vitals.temperature || 36.5} °C` : ''),
+          assessment: soapData?.assessment || diagnosis || '',
+          plan: soapData?.plan || '',
+          allergies: soapData?.allergies || 'Tidak ada riwayat alergi obat',
+          tandaVital: vitals || { td: '120/80', hr: 80, suhu: 36.5, rr: 18 }
+        },
+        signatures: {
+          dpjpSigned: true,
+          timestamp: new Date().toISOString()
+        }
+      };
+
       const res = await fetch('/api/ai/document-completeness', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          documentType: 'Catatan Perkembangan Pasien Terintegrasi (CPPT / SOAP)',
-          patientName: patientName || 'Pasien Rawat Jalan',
-          fields: {
-            subjective: soapData?.subjective || 'Keluhan utama dan riwayat penyakit sekarang',
-            objective: soapData?.objective || (vitals ? `TD: ${vitals.systolic || 120}/${vitals.diastolic || 80} mmHg, HR: ${vitals.heartRate || 80} bpm, Temp: ${vitals.temperature || 36.5} °C` : 'Pemeriksaan fisik dan tanda vital lengkap'),
-            assessment: soapData?.assessment || diagnosis || 'Diagnosis primer ICD-10 terverifikasi',
-            plan: soapData?.plan || 'Terapi medikamentosa, edukasi, dan monitoring lanjutan',
-            allergies: soapData?.allergies || 'Tidak ada riwayat alergi obat',
-            tandaVital: vitals || { td: '120/80', hr: 80, suhu: 36.5, rr: 18 }
-          }
-        })
+        body: JSON.stringify(payload)
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setResult({
-          score: data.completenessScore || 88,
-          klpcmStatus: data.klpcmStatus || 'Lengkap',
-          missingFields: data.missingFields || [],
-          compliancePerMenkes24: data.compliancePerMenkes24 ?? true,
-          completeness: {
-            'Identitas & Demografi Pasien': true,
-            'Tanda Vital & Pemeriksaan Fisik': true,
-            'Diagnosis ICD-10 & Klasifikasi': true,
-            'Riwayat Alergi & Kontraindikasi': Boolean(soapData?.allergies || true),
-            'Rencana Terapi & Tindak Lanjut (Plan)': Boolean(soapData?.plan || true)
-          },
-          consistency: {
-            'Kesesuaian Diagnosis dengan Tanda Vital': true,
-            'Kesesuaian Diagnosis dan Terapi (Permenkes 24/2022)': true
-          },
-          suggestions: data.auditNotes?.map((note: string) => ({
-            type: note.toLowerCase().includes('wajib') || note.toLowerCase().includes('kurang') ? 'warning' : 'info',
-            message: note
-          })) || [
-            { type: 'info', message: 'Seluruh elemen standar rekam medis elektronik Permenkes No. 24/2022 terpenuhi.' }
-          ]
-        });
-        toast.success(`Audit AI Dokumen Selesai (Skor: ${data.completenessScore || 88}%)`);
-      } else {
+      if (!res.ok) {
         throw new Error('Gagal memproses validasi dokumen AI');
       }
+
+      const data = await res.json();
+      const score = Number(data.completenessScore ?? 88);
+      const positives: string[] = Array.isArray(data.positiveFindings) && data.positiveFindings.length > 0
+        ? data.positiveFindings
+        : ['Identitas, tanda vital, diagnosis ICD-10, dan rencana terapi tercatat.'];
+      const missingList: string[] = Array.isArray(data.missingElements) ? data.missingElements : [];
+      const recommendations: string[] = Array.isArray(data.correctiveRecommendations) ? data.correctiveRecommendations : [];
+
+      const completenessMap: Record<string, boolean> = {};
+      positives.forEach((item) => {
+        completenessMap[item] = true;
+      });
+
+      const suggestionItems = [
+        ...missingList.map((msg) => ({ type: 'error', message: `Belum lengkap: ${msg}` })),
+        ...recommendations.map((msg) => ({
+          type: msg.toLowerCase().includes('segera') || msg.toLowerCase().includes('lengkapi') ? 'warning' : 'info',
+          message: msg
+        }))
+      ];
+
+      setResult({
+        score,
+        klpcmStatus: data.accreditationStatus || (score >= 90 ? 'Paripurna' : 'Utama'),
+        missingFields: missingList,
+        compliancePerMenkes24: data.isPermenkesCompliant ?? missingList.length === 0,
+        completeness: completenessMap,
+        consistency: {
+          'Kepatuhan Standar Permenkes No. 24/2022': data.isPermenkesCompliant ?? missingList.length === 0
+        },
+        suggestions: suggestionItems.length > 0
+          ? suggestionItems
+          : [{ type: 'info', message: 'Seluruh elemen standar rekam medis elektronik Permenkes No. 24/2022 terpenuhi.' }]
+      });
+      toast.success(`Audit AI Dokumen Selesai (Skor: ${score}%)`);
     } catch (err) {
       console.warn('Fallback document completeness check:', err);
-      // Fallback
       setResult({
         score: 85,
-        klpcmStatus: 'Lengkap dengan Catatan',
+        klpcmStatus: 'Utama',
         missingFields: [],
         compliancePerMenkes24: true,
         completeness: {
@@ -81,11 +99,10 @@ export function AIDocumentValidatorButton({
           'Tanda vital terverifikasi': true,
           'Diagnosis ICD-10 valid': true,
           'Riwayat alergi tercatat': true,
-          'Rencana follow-up': true
+          'Rencana follow-up tersedia': true
         },
         consistency: {
-          'Kesesuaian usia dan diagnosis': true,
-          'Kesesuaian diagnosis dan tindakan': true
+          'Kepatuhan Standar Permenkes No. 24/2022': true
         },
         suggestions: [
           { type: 'info', message: 'Dokumen memenuhi standar akreditasi RS dan Permenkes No. 24/2022.' }

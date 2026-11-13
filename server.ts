@@ -5,6 +5,7 @@ import { createServer as createViteServer } from 'vite';
 import dotenv from 'dotenv';
 import {
   executeResilientGemini,
+  parseSafeJson,
   analyzeClinicalNoteDeterministic,
   generateClinicalDecisionSupportDeterministic,
   auditBpjsClaimDeterministic,
@@ -17,6 +18,8 @@ import {
   generateClinicalCopilotReplyDeterministic,
   generateHealthUpdates2026
 } from './src/server/aiIntelligenceEngine';
+import { registerPatientPortalRoutes } from './src/server/patientPortalService';
+import { registerEmployeePortalGateway } from './src/server/employeePortalGateway';
 
 dotenv.config();
 
@@ -41,14 +44,14 @@ async function startServer() {
     res.on('finish', () => {
       const duration = Date.now() - startTime;
       if (req.path.startsWith('/api')) {
-        console.log(`[SIMRS-API] ${req.method} ${req.path} -> ${res.statusCode} (${duration}ms)`);
+        console.log(`[SIMK-API] ${req.method} ${req.path} -> ${res.statusCode} (${duration}ms)`);
       }
     });
     next();
   });
 
   // =========================================================================
-  // 🏥 IN-MEMORY HOSPITAL DATA STORE (Simulated Enterprise SIMRS State)
+  // 🏥 IN-MEMORY KLINIK DATA STORE (Simulated Enterprise SIMK State)
   // =========================================================================
   interface PatientRecord {
     id: string;
@@ -329,7 +332,7 @@ async function startServer() {
   let sepCounter = 100245;
 
   // =========================================================================
-  // 🚀 REST API V1 ENDPOINTS (Enterprise Hospital Information System Backend)
+  // 🚀 REST API V1 ENDPOINTS (Enterprise Klinik Information System Backend)
   // =========================================================================
 
   // 1. System Health Check Endpoint
@@ -528,7 +531,7 @@ async function startServer() {
 
     res.status(201).json({
       success: true,
-      message: 'Pasien berhasil didaftarkan ke SIMRS.',
+      message: 'Pasien berhasil didaftarkan ke SIMK.',
       data: newPatient
     });
   });
@@ -882,7 +885,7 @@ async function startServer() {
       },
       serviceProvider: {
         reference: 'Organization/10000004',
-        display: 'RS MYITARU SIMRS'
+        display: 'MYITARU KLINIK SIMK'
       },
       syncMetadata: {
         syncedAt: new Date().toISOString(),
@@ -987,7 +990,7 @@ async function startServer() {
     const entry: AuditLogEntry = {
       id: `log-${Date.now()}`,
       timestamp: new Date().toISOString(),
-      user: req.body.user || 'Staf SIMRS',
+      user: req.body.user || 'Staf SIMK',
       role: req.body.role || 'Tenaga Medis',
       action: action || 'DATA_ACCESS',
       module: module || 'Umum',
@@ -1019,7 +1022,7 @@ async function startServer() {
       size: '2.4 MB',
       checksum: 'sha256-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       summary: payload,
-      message: 'Snapshot backup basis data SIMRS berhasil dibuat dan diarsipkan dengan aman.'
+      message: 'Snapshot backup basis data SIMK berhasil dibuat dan diarsipkan dengan aman.'
     });
   });
 
@@ -1034,7 +1037,7 @@ async function startServer() {
   });
 
   // =========================================================================
-  // 🧠 AI MEDICAL INTELLIGENCE ENDPOINTS (Powered by Google Gemini 3.8)
+  // 🧠 AI MEDICAL INTELLIGENCE ENDPOINTS (Powered by Google Gemini 4)
   // =========================================================================
 
   // AI Medical Assistant Endpoint
@@ -1108,8 +1111,10 @@ IMPORTANT: You are an assistant, NOT a doctor. Ensure you state that this is for
       });
 
       if (aiResult?.text) {
-        const data = JSON.parse(aiResult.text);
-        return res.json(data);
+        const data = parseSafeJson(aiResult.text);
+        if (data) {
+          return res.json(data);
+        }
       }
 
       // High-Detail Deterministic Fallback
@@ -1131,21 +1136,8 @@ IMPORTANT: You are an assistant, NOT a doctor. Ensure you state that this is for
         return res.status(400).json({ error: 'Keluhan utama (chief complaint) atau catatan klinis diperlukan.' });
       }
 
-      if (!process.env.GEMINI_API_KEY) {
-        throw new Error('GEMINI_API_KEY is not configured.');
-      }
-
-      const ai = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          }
-        }
-      });
-
       const prompt = `
-You are MY ITARU Clinical Decision Support System (CDSS), an advanced medical intelligence assistant for hospital doctors in Indonesia.
+You are MY ITARU Clinical Decision Support System (CDSS), an advanced medical intelligence assistant for clinic doctors in Indonesia.
 Analyze the following patient's vital signs and symptoms to provide evidence-based clinical decision support and accurate ICD-10 diagnosis recommendations.
 
 Patient Context:
@@ -1185,12 +1177,9 @@ Task:
 10. Emphasize that this is a Clinical Decision Support tool for licensed medical personnel, not an autonomous final diagnosis.
 `;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: {
+      const aiResult = await executeResilientGemini({
+        prompt,
+        responseSchema: {
             type: Type.OBJECT,
             properties: {
               summary: { type: Type.STRING },
@@ -1296,432 +1285,19 @@ Task:
               'differentialDiagnoses', 'suggestedIcd9', 'redFlags',
               'recommendedWorkup', 'immediateActions', 'clinicalGuidelineRef', 'disclaimer'
             ]
-          }
         }
       });
 
-      if (!response.text) {
-        throw new Error('Failed to generate Clinical Decision Support response from Gemini.');
-      }
-
-      const parsedData = JSON.parse(response.text);
-      res.json(parsedData);
-    } catch (error: any) {
-      console.warn('Clinical Decision Support Fallback triggered:', error?.message || error);
-
-      // Extract context for intelligent clinical fallback
-      const { patient, vitals, symptoms, clinicalNotes } = req.body;
-      const complaintText = `${symptoms?.chiefComplaint || ''} ${symptoms?.additionalSymptoms || ''} ${clinicalNotes || ''}`.toLowerCase();
-
-      // Analyze vitals
-      const systolic = Number(vitals?.systolic) || 120;
-      const diastolic = Number(vitals?.diastolic) || 80;
-      const hr = Number(vitals?.heartRate) || 80;
-      const temp = Number(vitals?.temperature) || 36.5;
-      const rr = Number(vitals?.respiratoryRate) || 18;
-      const spo2 = Number(vitals?.spO2) || 98;
-      const pain = Number(vitals?.painScale) || 0;
-
-      const flags: Array<{ parameter: string; value: string; severity: 'warning' | 'critical' | 'info'; message: string }> = [];
-      let newsScore = 0;
-
-      // Systolic BP
-      if (systolic >= 180 || diastolic >= 120) {
-        flags.push({ parameter: 'Tekanan Darah', value: `${systolic}/${diastolic} mmHg`, severity: 'critical', message: 'Krisis Hipertensi (Emergensi/Urgensi)' });
-        newsScore += 3;
-      } else if (systolic >= 140 || diastolic >= 90) {
-        flags.push({ parameter: 'Tekanan Darah', value: `${systolic}/${diastolic} mmHg`, severity: 'warning', message: 'Hipertensi Derajat 1-2' });
-        newsScore += 1;
-      } else if (systolic <= 90) {
-        flags.push({ parameter: 'Tekanan Darah', value: `${systolic}/${diastolic} mmHg`, severity: 'critical', message: 'Hipotensi / Risiko Syok' });
-        newsScore += 3;
-      }
-
-      // Heart Rate
-      if (hr >= 130) {
-        flags.push({ parameter: 'Denyut Nadi', value: `${hr} bpm`, severity: 'critical', message: 'Takikardia Berat' });
-        newsScore += 3;
-      } else if (hr >= 100) {
-        flags.push({ parameter: 'Denyut Nadi', value: `${hr} bpm`, severity: 'warning', message: 'Takikardia Ringan-Sedang' });
-        newsScore += 1;
-      } else if (hr < 50) {
-        flags.push({ parameter: 'Denyut Nadi', value: `${hr} bpm`, severity: 'critical', message: 'Bradikardia Signifikan' });
-        newsScore += 3;
-      }
-
-      // Respiratory Rate
-      if (rr >= 25) {
-        flags.push({ parameter: 'Pernapasan (RR)', value: `${rr} x/m`, severity: 'critical', message: 'Takipnea Berat' });
-        newsScore += 3;
-      } else if (rr >= 21) {
-        flags.push({ parameter: 'Pernapasan (RR)', value: `${rr} x/m`, severity: 'warning', message: 'Takipnea Ringan' });
-        newsScore += 2;
-      } else if (rr <= 8) {
-        flags.push({ parameter: 'Pernapasan (RR)', value: `${rr} x/m`, severity: 'critical', message: 'Depresi Pernapasan' });
-        newsScore += 3;
-      }
-
-      // SpO2
-      if (spo2 <= 91) {
-        flags.push({ parameter: 'SpO2', value: `${spo2}%`, severity: 'critical', message: 'Hipoksemia Berat — Butuh Oksigen Segera' });
-        newsScore += 3;
-      } else if (spo2 <= 94) {
-        flags.push({ parameter: 'SpO2', value: `${spo2}%`, severity: 'warning', message: 'Hipoksemia Ringan-Sedang' });
-        newsScore += 1;
-      }
-
-      // Temperature
-      if (temp >= 39.0) {
-        flags.push({ parameter: 'Suhu Tubuh', value: `${temp} °C`, severity: 'warning', message: 'Febris Tinggi / Hiperpireksia' });
-        newsScore += 2;
-      } else if (temp >= 37.8) {
-        flags.push({ parameter: 'Suhu Tubuh', value: `${temp} °C`, severity: 'info', message: 'Subfebris / Demam Ringan' });
-        newsScore += 1;
-      } else if (temp < 35.5) {
-        flags.push({ parameter: 'Suhu Tubuh', value: `${temp} °C`, severity: 'critical', message: 'Hipotermia' });
-        newsScore += 3;
-      }
-
-      // Determine Triage & Overall Status
-      let overallStatus: 'NORMAL' | 'ABNORMAL' | 'CRITICAL' = 'NORMAL';
-      if (flags.some(f => f.severity === 'critical') || newsScore >= 5 || pain >= 8) {
-        overallStatus = 'CRITICAL';
-      } else if (flags.length > 0 || newsScore >= 2 || pain >= 4) {
-        overallStatus = 'ABNORMAL';
-      }
-
-      let triageLevel: 'P1' | 'P2' | 'P3' | 'P4' | 'P5' = 'P3';
-      let triageName = 'P3 - Urgensi';
-      let triageColor = '#F59E0B';
-      let triageUrgency = 'Pemeriksaan dalam waktu 30-60 menit.';
-
-      if (overallStatus === 'CRITICAL' || newsScore >= 7) {
-        triageLevel = 'P1';
-        triageName = 'P1 - Resusitasi Akut';
-        triageColor = '#EF4444';
-        triageUrgency = 'Tindakan resusitasi dan stabilisasi segera tanpa penundaan (<5 menit).';
-      } else if (overallStatus === 'ABNORMAL' && (newsScore >= 4 || pain >= 7)) {
-        triageLevel = 'P2';
-        triageName = 'P2 - Emergensi';
-        triageColor = '#F97316';
-        triageUrgency = 'Penanganan segera dalam waktu 10-15 menit.';
-      } else if (overallStatus === 'NORMAL' && pain <= 3) {
-        triageLevel = 'P4';
-        triageName = 'P4 - Semi Urgensi';
-        triageColor = '#10B981';
-        triageUrgency = 'Pelayanan rawat jalan standar (dapat menunggu antrian poliklinik).';
-      }
-
-      // Disease pattern recognition for ICD-10 suggestions
-      let primaryDiagnosis = {
-        code: 'Z00.0',
-        nameId: 'Pemeriksaan Kesehatan Medis Umum',
-        nameEn: 'General medical examination',
-        confidence: 88,
-        reasoning: 'Gejala umum tanpa defisit fokal akut, tanda vital dalam batas terpantau aman.',
-        clinicalCriteria: 'Evaluasi klinis komprehensif, tidak ditemukan kegawatdaruratan organ target.',
-        category: 'Konsultasi & Pemeriksaan Umum'
-      };
-
-      let differentialDiagnoses: any[] = [
-        {
-          code: 'R53',
-          nameId: 'Kelemahan dan Kelelahan Umum',
-          nameEn: 'Malaise and fatigue',
-          confidence: 76,
-          reasoning: 'Keluhan badan lemas sering menyertai kelelahan fisik atau infeksi subklinis.',
-          differentiatingClues: 'Tidak ada penurunan berat badan drastis atau kelainan laboratoris mayor.'
-        },
-        {
-          code: 'R68.89',
-          nameId: 'Gejala dan Tanda Umum Lainnya',
-          nameEn: 'Other general symptoms and signs',
-          confidence: 65,
-          reasoning: 'Pertimbangan diagnosis kerja tambahan bila ada gejala penyerta non-spesifik.',
-          differentiatingClues: 'Responsif terhadap perbaikan hidrasi dan istirahat cukup.'
-        }
-      ];
-
-      let suggestedIcd9 = [
-        { code: '89.07', name: 'General Physical Examination', category: 'Pemeriksaan', indication: 'Pemeriksaan fisik umum rutin' },
-        { code: '90.59', name: 'Microscopic Exam of Blood', category: 'Laboratorium', indication: 'Skrining hematologi dasar' }
-      ];
-
-      let redFlags: string[] = [];
-      let recommendedWorkup: any[] = [
-        { category: 'Laboratorium', testName: 'Darah Lengkap (Hematologi Rutin)', reason: 'Skrining anemia dan respons infeksi/leukosit' },
-        { category: 'Diagnostik Lain', testName: 'Observasi TTV Berkala', reason: 'Pemantauan stabilitas hemodinamik pasien' }
-      ];
-      let immediateActions: string[] = [
-        'Lakukan evaluasi anamnesis terstruktur dan pemeriksaan fisik fokus.',
-        'Pastikan hidrasi cairan adekuat dan edukasi pola istirahat.',
-        'Jadwalkan kontrol ulang bila keluhan menetap lebih dari 3 hari.'
-      ];
-
-      // Syndrome pattern matchers:
-      if (complaintText.includes('dada') || complaintText.includes('jantung') || complaintText.includes('angina') || complaintText.includes('serangan')) {
-        primaryDiagnosis = {
-          code: systolic > 160 ? 'I20.0' : 'I20.9',
-          nameId: 'Angina Pectoris Tidak Stabil / Sindrom Koroner Akut',
-          nameEn: 'Unstable angina pectoris / Acute Coronary Syndrome',
-          confidence: 94,
-          reasoning: `Keluhan nyeri dada khas disertai TD ${systolic}/${diastolic} mmHg dan Nadi ${hr} bpm memerlukan eliminasi iskemia miokard akut segera.`,
-          clinicalCriteria: 'Nyeri dada retrosternal, rasa tertekan/tertimpa beban, durasi >15 menit, penjalaran ke lengan kiri/leher.',
-          category: 'Kardiovaskular'
-        };
-        differentialDiagnoses = [
-          {
-            code: 'I21.9',
-            nameId: 'Infark Miokard Akut, Tidak Spesifik (STEMI/NSTEMI)',
-            nameEn: 'Acute myocardial infarction, unspecified',
-            confidence: 88,
-            reasoning: 'Diferensiasi wajib jika nyeri dada persisten disertai peningkatan enzim Troponin I/T atau elevasi segmen ST.',
-            differentiatingClues: 'Terdapat elevasi segmen ST pada EKG atau peningkatan biomarker nekrosis miokard.'
-          },
-          {
-            code: 'I10',
-            nameId: 'Hipertensi Esensial (Primer)',
-            nameEn: 'Essential (primary) hypertension',
-            confidence: 82,
-            reasoning: `Tekanan darah terukur ${systolic}/${diastolic} mmHg berkontribusi pada peningkatan afterload dan beban miokard.`,
-            differentiatingClues: 'Peningkatan tensi persisten tanpa nekrosis miokard.'
-          },
-          {
-            code: 'K21.9',
-            nameId: 'Penyakit Refluks Gastroesofageal (GERD)',
-            nameEn: 'Gastro-esophageal reflux disease without esophagitis',
-            confidence: 70,
-            reasoning: 'Nyeri ulu hati menjalar ke retrosternal sering menyerupai angina (non-cardiac chest pain).',
-            differentiatingClues: 'Diperberat posisi telentang pasca makan, membaik dengan antasida, EKG normal.'
-          }
-        ];
-        suggestedIcd9 = [
-          { code: '89.52', name: 'Electrocardiogram (12 Lead)', category: 'Kardiologi', indication: 'Evaluasi ST elevasi/depresi dan aritmia' },
-          { code: '87.44', name: 'Routine Chest X-Ray', category: 'Radiologi', indication: 'Menilai kardiomegali dan edema paru' },
-          { code: '90.59', name: 'Cardiac Enzymes (Troponin I/CK-MB)', category: 'Laboratorium', indication: 'Penanda nekrosis miokardial' }
-        ];
-        redFlags = [
-          'Nyeri dada retrosternal persisten > 20 menit disertai keringat dingin profus.',
-          'Hipotensi (TD < 90/60 mmHg) atau tanda syok kardiogenik.',
-          'Aritmia ventrikel atau bradikardia simtomatik.'
-        ];
-        recommendedWorkup = [
-          { category: 'Diagnostik Lain', testName: 'EKG 12 Sandapan Segera (<10 menit)', reason: 'Menyingkirkan STEMI untuk reperfusi dini' },
-          { category: 'Laboratorium', testName: 'Troponin I Kuantitatif / hs-cTnI', reason: 'Deteksi dini cedera sel miokard' },
-          { category: 'Radiologi', testName: 'Foto Thorax AP/PA', reason: 'Menyingkirkan diseksi aorta dan kongesti pulmonal' }
-        ];
-        immediateActions = [
-          'Pasang jalur intravena (IV line) dan monitor EKG kontinu.',
-          'Berikan Oksigen nasal kanul 2-4 Lpm bila SpO2 < 94%.',
-          'Berikan Aspirin 160-320 mg kunyah dan Clopidogrel 300 mg loading bila terindikasi sindrom koroner akut.',
-          'Konsulkan segera ke Dokter Spesialis Jantung (Sp.JP) atau rujuk ruang perawatan intensif ICCU.'
-        ];
-      } else if (complaintText.includes('sesak') || complaintText.includes('batuk') || complaintText.includes('asma') || complaintText.includes('paru') || spo2 < 95) {
-        primaryDiagnosis = {
-          code: spo2 < 92 ? 'J18.9' : 'J45.909',
-          nameId: spo2 < 92 ? 'Pneumonia Komunitas, Tidak Spesifik' : 'Asma Bronkial dalam Eksaserbasi Akut',
-          nameEn: spo2 < 92 ? 'Pneumonia, unspecified' : 'Unspecified asthma, uncomplicated',
-          confidence: 92,
-          reasoning: `Gejala sesak napas dengan frekuensi napas ${rr} x/m dan saturasi oksigen ${spo2}% menunjukkan gangguan ventilasi-perfusi paru aktif.`,
-          clinicalCriteria: 'Takipnea, ronki/wheezing pada auskultasi, penurunan SpO2.',
-          category: 'Respirasi'
-        };
-        differentialDiagnoses = [
-          {
-            code: 'J20.9',
-            nameId: 'Bronkitis Akut, Tidak Spesifik',
-            nameEn: 'Acute bronchitis, unspecified',
-            confidence: 80,
-            reasoning: 'Batuk produktif sering diawali infeksi saluran napas bawah dengan ronki basah kasar.',
-            differentiatingClues: 'Infiltrat pada foto rontgen minimal atau tidak tampak konsolidasi lobaris.'
-          },
-          {
-            code: 'J44.1',
-            nameId: 'Penyakit Paru Obstruktif Kronik (PPOK) dengan Eksaserbasi Akut',
-            nameEn: 'COPD with acute exacerbation',
-            confidence: 78,
-            reasoning: 'Pertimbangkan pada perokok kronis atau usia >40 tahun dengan riwayat sesak menahun.',
-            differentiatingClues: 'Riwayat paparan asap rokok/biomassa jangka panjang, barrel chest.'
-          },
-          {
-            code: 'J06.9',
-            nameId: 'Infeksi Akut Saluran Pernapasan Atas (ISPA)',
-            nameEn: 'Acute upper respiratory infection, unspecified',
-            confidence: 72,
-            reasoning: 'Keluhan batuk pilek ringan tanpa tanda distres pernapasan berat.',
-            differentiatingClues: 'SpO2 normal, tidak ada retraksi dinding dada.'
-          }
-        ];
-        suggestedIcd9 = [
-          { code: '87.44', name: 'Chest X-Ray PA/AP', category: 'Radiologi', indication: 'Mendeteksi infiltrat paru / konsolidasi' },
-          { code: '93.94', name: 'Nebulizer Therapy / Aerosol Inhalation', category: 'Tindakan', indication: 'Bronkodilator inhalasi' },
-          { code: '89.65', name: 'Measurement of Systemic Arterial Blood Gas', category: 'Laboratorium', indication: 'Analisis Gas Darah (AGD)' }
-        ];
-        redFlags = [
-          'SpO2 < 90% dengan udara ruangan (hipoksemia berat).',
-          'Penggunaan otot bantu napas sternokleidomastoideus / retraksi interkostal.',
-          'Sianosis sentral atau penurunan kesadaran akibat retensi CO2.'
-        ];
-        recommendedWorkup = [
-          { category: 'Radiologi', testName: 'Foto Thorax PA', reason: 'Konfirmasi infiltrat pneumonia atau hiperinflasi asma' },
-          { category: 'Laboratorium', testName: 'Darah Lengkap & CRP Kuantitatif', reason: 'Menilai leukositosis dan marker inflamasi bakterial' },
-          { category: 'Laboratorium', testName: 'Analisis Gas Darah (BGA)', reason: 'Evaluasi asidosis respiratorik dan PaO2/FiO2' }
-        ];
-        immediateActions = [
-          'Posisikan pasien Semi-Fowler / duduk nyaman.',
-          'Terapi Oksigen target SpO2 94-98% (atau 88-92% pada risiko hiperkapnia PPOK).',
-          'Nebulisasi Salbutamol 2.5 mg + Ipratropium Bromide 0.5 mg bila wheezing bronkospasme.',
-          'Pemberian antibiotik empiris sesuai PPK jika curiga pneumonia bakterial.'
-        ];
-      } else if (complaintText.includes('demam') || complaintText.includes('panas') || complaintText.includes('dengue') || complaintText.includes('dbd') || temp >= 38.0) {
-        primaryDiagnosis = {
-          code: 'A91',
-          nameId: 'Demam Berdarah Dengue (DBD) / Dengue Hemorrhagic Fever',
-          nameEn: 'Dengue haemorrhagic fever',
-          confidence: 90,
-          reasoning: `Suhu terukur ${temp} °C dengan riwayat demam akut memerlukan kewaspadaan terhadap infeksi virus Dengue fase kritis.`,
-          clinicalCriteria: 'Demam akut 2-7 hari, tanda kebocoran plasma, trombositopenia, hemokonsentrasi.',
-          category: 'Penyakit Tropis & Infeksi'
-        };
-        differentialDiagnoses = [
-          {
-            code: 'A90',
-            nameId: 'Demam Dengue (DD / Klasik)',
-            nameEn: 'Dengue fever [classical dengue]',
-            confidence: 85,
-            reasoning: 'Demam dengue tanpa tanda perembesan plasma (tanpa efusi/asites/hipoalbuminemia).',
-            differentiatingClues: 'Hematokrit stabil dan tidak ada kebocoran plasma.'
-          },
-          {
-            code: 'A01.0',
-            nameId: 'Demam Tifoid (Typhoid Fever)',
-            nameEn: 'Typhoid fever',
-            confidence: 78,
-            reasoning: 'Demam naik bertahap sore/malam hari disertai gangguan saluran cerna (lidah kotor, obstipasi/diare).',
-            differentiatingClues: 'Uji Tubex TF positif atau serologi Widal meningkat titer.'
-          },
-          {
-            code: 'R50.9',
-            nameId: 'Demam, Tidak Spesifik (Fever Unspecified)',
-            nameEn: 'Fever, unspecified',
-            confidence: 70,
-            reasoning: 'Diagnosis kerja awal sebelum hasil serologi dan darah lengkap terbit.',
-            differentiatingClues: 'Menunggu konfirmasi laboratorium spesifik.'
-          }
-        ];
-        suggestedIcd9 = [
-          { code: '90.59', name: 'Complete Blood Count (CBC) with Platelets', category: 'Laboratorium', indication: 'Monitoring trombosit dan hematokrit' },
-          { code: '90.59', name: 'Dengue NS1 Antigen / IgG IgM Serology', category: 'Laboratorium', indication: 'Konfirmasi etiologi dengue' }
-        ];
-        redFlags = [
-          'Warning Signs: Nyeri perut hebat, muntah persisten, perdarahan mukosa/gusi/epistaksis.',
-          'Hematokrit meningkat tajam ≥20% bersamaan dengan penurunan drastis trombosit.',
-          'Letargi, gelisah, ekstremitas dingin lembap (Dengue Shock Syndrome).'
-        ];
-        recommendedWorkup = [
-          { category: 'Laboratorium', testName: 'Darah Lengkap Serial (Hb, Ht, Leukosit, Trombosit)', reason: 'Pemantauan fase kritis dan kebocoran plasma per 6-12 jam' },
-          { category: 'Laboratorium', testName: 'Dengue NS1 Ag (Hari 1-3) atau IgM/IgG Dengue (Hari ≥4)', reason: 'Deteksi antigen/antibodi spesifik virus dengue' }
-        ];
-        immediateActions = [
-          'Resusitasi cairan kristaloid isotonik (Ringer Laktat / NaCl 0.9%) sesuai berat badan.',
-          'Antipiretik Paracetamol 500-1000 mg (HINDARI NSAID/Aspirin karena risiko perdarahan).',
-          'Monitoring balans cairan ketat dan catat produksi urin (minimal 0.5-1 ml/kgBB/jam).'
-        ];
-      } else if (complaintText.includes('lambung') || complaintText.includes('maag') || complaintText.includes('mual') || complaintText.includes('muntah') || complaintText.includes('ulu hati') || complaintText.includes('gerd')) {
-        primaryDiagnosis = {
-          code: 'K21.9',
-          nameId: 'Penyakit Refluks Gastroesofageal (GERD) tanpa Esofagitis',
-          nameEn: 'Gastro-esophageal reflux disease without esophagitis',
-          confidence: 91,
-          reasoning: 'Keluhan rasa panas di dada (heartburn), regurgitasi asam, atau nyeri ulu hati khas dispepsia fungsional / refluks.',
-          clinicalCriteria: 'Gejala refluks asam >2 kali seminggu, sensasi terbakar retrosternal, rasa pahit di mulut.',
-          category: 'Gastroenterologi'
-        };
-        differentialDiagnoses = [
-          {
-            code: 'K29.70',
-            nameId: 'Gastritis, Tidak Spesifik, Tanpa Perdarahan',
-            nameEn: 'Gastritis, unspecified, without bleeding',
-            confidence: 86,
-            reasoning: 'Nyeri perih di epigastrium pasca makan makanan iritan atau penggunaan analgesik.',
-            differentiatingClues: 'Nyeri terutama terlokalisasi di regio epigastrium tanpa regurgitasi.'
-          },
-          {
-            code: 'K25.9',
-            nameId: 'Tukak Lambung (Ulkus Peptikum), Tidak Spesifik',
-            nameEn: 'Gastric ulcer, unspecified as acute or chronic',
-            confidence: 76,
-            reasoning: 'Pertimbangkan jika ada riwayat nyeri nocturnal atau konsumsi NSAID jangka panjang.',
-            differentiatingClues: 'Terdapat riwayat hematemesis/melena atau defek mukosa pada endoskopi.'
-          }
-        ];
-        suggestedIcd9 = [
-          { code: '44.13', name: 'Other Gastroscopy (EGD)', category: 'Gastroenterologi', indication: 'Evaluasi mukosa esofagus dan gaster' },
-          { code: '88.76', name: 'Diagnostic Ultrasound of Abdomen', category: 'Radiologi', indication: 'Menyingkirkan kolesistitis / kolelitiasis' }
-        ];
-        redFlags = [
-          'Muntah darah hitam (hematemesis) atau buang air besar hitam pekat (melena).',
-          'Penurunan berat badan progresif tanpa sebab jelas atau disfagia (sukar menelan).',
-          'Anemia defisiensi besi refrakter.'
-        ];
-        recommendedWorkup = [
-          { category: 'Laboratorium', testName: 'Darah Lengkap & Feses Lengkap (FOBT)', reason: 'Skrining perdarahan saluran cerna tersembunyi' },
-          { category: 'Diagnostik Lain', testName: 'Uji H. pylori (Stool Antigen / Urea Breath Test)', reason: 'Deteksi eradikasi infeksi Helicobacter pylori' }
-        ];
-        immediateActions = [
-          'Pemberian Proton Pump Inhibitor (Omeprazole 20-40 mg atau Pantoprazole IV) 30 menit sebelum makan.',
-          'Antasida sirup kombinasi untuk pereda rasa perih akut.',
-          'Edukasi modifikasi gaya hidup: hindari tidur 2-3 jam pasca makan dan batasi kafein/pedas/lemak.'
-        ];
-      } else if (complaintText.includes('gula') || complaintText.includes('diabetes') || complaintText.includes('dm') || (vitals?.bloodGlucose && Number(vitals.bloodGlucose) > 200)) {
-        primaryDiagnosis = {
-          code: 'E11.9',
-          nameId: 'Diabetes Melitus Tipe 2 Tanpa Komplikasi Akut',
-          nameEn: 'Type 2 diabetes mellitus without complications',
-          confidence: 93,
-          reasoning: `Kadar glukosa darah terukur ${vitals?.bloodGlucose || '>200'} mg/dL memenuhi kriteria evaluasi klinis diabetes melitus.`,
-          clinicalCriteria: 'Gula Darah Sewaktu ≥ 200 mg/dL disertai gejala klasik poliuria, polidipsia, polifagia.',
-          category: 'Endokrin & Metabolik'
-        };
-        differentialDiagnoses = [
-          {
-            code: 'E11.65',
-            nameId: 'Diabetes Melitus Tipe 2 dengan Hiperglikemia',
-            nameEn: 'Type 2 diabetes mellitus with hyperglycemia',
-            confidence: 87,
-            reasoning: 'Eksaserbasi hiperglikemia akibat ketidakpatuhan obat atau stres infeksi akut.',
-            differentiatingClues: 'Kadar glukosa darah sangat tinggi tanpa tanda asidosis metabolik.'
-          },
-          {
-            code: 'E87.2',
-            nameId: 'Asidosis (Suspek Ketoasidosis Diabetik)',
-            nameEn: 'Acidosis (Ketoacidosis risk)',
-            confidence: 72,
-            reasoning: 'Waspadai KAD jika gula darah tinggi disertai pernapasan Kussmaul atau napas aroma aseton.',
-            differentiatingClues: 'Ketonuria positif, pH darah < 7.30, bikarbonat serum rendah.'
-          }
-        ];
-        suggestedIcd9 = [
-          { code: '90.59', name: 'Blood Glucose Testing (GDS/GDP/GD2PP)', category: 'Laboratorium', indication: 'Monitoring kendali glikemik' },
-          { code: '90.59', name: 'Glycosylated Hemoglobin (HbA1c)', category: 'Laboratorium', indication: 'Evaluasi kendali gula darah 3 bulan terakhir' }
-        ];
-        redFlags = [
-          'Gula darah sewaktu > 300 mg/dL dengan tanda dehidrasi berat atau letargi.',
-          'Napas cepat dan dalam (Kussmaul) disertai bau keton khas.',
-          'Gejala syok hiperosmolar hiperglikemik (HHS) pada geriatri.'
-        ];
-        recommendedWorkup = [
-          { category: 'Laboratorium', testName: 'HbA1c & Profil Lipid Lengkap', reason: 'Menentukan target terapi jangka panjang' },
-          { category: 'Laboratorium', testName: 'Urinalisis Lengkap (Proteinuria & Keton Urin)', reason: 'Skrining nefropati diabetik dan ketosis' }
-        ];
-        immediateActions = [
-          'Hidrasi cairan oral atau intravena bila dehidrasi.',
-          'Penyesuaian Obat Anti-Diabetes Oral (Metformin sesuai Fornas) atau terapi insulin bertarget.',
-          'Konseling edukasi gizi diet 3J (Jadwal, Jumlah, Jenis) dan pemantauan gula darah mandiri.'
-        ];
+      const parsedData = parseSafeJson(aiResult?.text);
+      if (parsedData) {
+        return res.json(parsedData);
       }
 
       const fallbackResult = generateClinicalDecisionSupportDeterministic(req.body);
+      return res.json(fallbackResult);
+    } catch (error: any) {
+      console.warn('Clinical Decision Support Fallback triggered:', error?.message || error);
+      const fallbackResult = generateClinicalDecisionSupportDeterministic(req.body || {});
       return res.json(fallbackResult);
     }
   });
@@ -1739,10 +1315,17 @@ Task:
         throw new Error('GEMINI_API_KEY is not configured.');
       }
 
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build'
+          }
+        }
+      });
 
       const prompt = `
-You are MY ITARU Medical Search & Clinical Evidence Assistant, an integrated AI assistant in the SIMRS hospital system.
+You are MY ITARU Medical Search & Clinical Evidence Assistant, an integrated AI assistant in the SIMK clinic system.
 Provide up-to-date, accurate, evidence-based medical information in Bahasa Indonesia using Google Search data.
 
 Clinical / Query Context:
@@ -1758,13 +1341,25 @@ Instructions:
 5. Emphasize that this information is for clinical decision support for healthcare professionals and not an independent medical diagnosis.
 `;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: prompt,
-        config: {
-          tools: [{ googleSearch: {} }]
+      let response: any = null;
+      for (const modelName of ['gemini-4-hydrogen', 'gemini-3.1-flash-lite']) {
+        try {
+          response = await ai.models.generateContent({
+            model: modelName,
+            contents: prompt,
+            config: {
+              tools: [{ googleSearch: {} }]
+            }
+          });
+          if (response?.text) break;
+        } catch (modelErr: any) {
+          console.warn(`[Grounded Search] Model ${modelName} failed:`, modelErr?.message || modelErr);
         }
-      });
+      }
+
+      if (!response?.text) {
+        throw new Error('Grounded search models unavailable, switching to deterministic evidence engine.');
+      }
 
       const responseText = response.text || '';
       const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
@@ -1790,34 +1385,7 @@ Instructions:
       });
     } catch (error: any) {
       console.warn('AI Grounded Search Warning/Fallback triggered:', error?.message || error);
-      
-      const q = String(req.body.query || '');
-      const qLower = q.toLowerCase();
-
-      let topicAnswer = '';
-      let sources = [
-        { title: 'Kementerian Kesehatan RI (Kemenkes) — Panduan Praktik Klinis', url: 'https://kemkes.go.id' },
-        { title: 'Badan Pengawas Obat dan Makanan (BPOM) — Pusat Informasi Obat Nasional', url: 'https://pionas.pom.go.id' },
-        { title: 'Ikatan Dokter Indonesia (IDI) / PAPDI — Pedoman Diagnosis & Terapi', url: 'https://idionline.org' }
-      ];
-
-      if (qLower.includes('dbd') || qLower.includes('dengue') || qLower.includes('demam berdarah')) {
-        topicAnswer = `### 📋 Pedoman Tatalaksana Demam Berdarah Dengue (DBD) — Kemenkes RI & WHO\n\n**1. Kriteria Diagnosis Klinis:**\n- Demam mendadak tinggi 2–7 hari disertai minimal 2 manifestasi: nyeri kepala/retro-orbital, mialgia/artralgia, petekie/uji tourniquet positif, leukopenia (≤5.000/µL), trombositopenia (≤100.000/µL), dan peningkatan hematokrit ≥20%.\n\n**2. Protokol Resusitasi Cairan:**\n- **Fase Kritis (Hari ke 3-6):** Berikan Kristaloid isotonik (Ringer Laktat / NaCl 0.9%) dengan kecepatan 5-7 ml/kgBB/jam selama 1-2 jam, lalu titrasi turun bertahap menjadi 3-5 ml/kgBB/jam bila tanda vital stabil.\n- **Warning Signs:** Nyeri perut hebat, muntah persisten, akumulasi cairan klinis (asites/efusi pleura), perdarahan mukosa, letargi, pembesaran hepar >2 cm.\n\n**3. Kontraindikasi & Peringatan:**\n- **Hindari pemberian NSAID (Asam Mefenamat, Ibuprofen, Aspirin)** karena memperberat risiko perdarahan saluran cerna. Gunakan Paracetamol (maksimal 3-4 g/hari pada dewasa).\n\n*Catatan: Clinical Decision Support — Selalu sesuaikan dengan kondisi klinis dan monitor tanda vital setiap 2-4 jam.*`;
-      } else if (qLower.includes('hipertensi') || qLower.includes('tensi') || qLower.includes('perki')) {
-        topicAnswer = `### 🩺 Pedoman Tatalaksana Hipertensi — Konsensus PERKI & JNC-8\n\n**1. Klasifikasi Tekanan Darah:**\n- Normal: TDS < 120 mmHg dan TDD < 80 mmHg\n- Hipertensi Derajat 1: TDS 140–159 mmHg atau TDD 90–99 mmHg\n- Hipertensi Derajat 2: TDS ≥ 160 mmHg atau TDD ≥ 100 mmHg\n\n**2. Lini Pertama Farmakoterapi (Fornas/BPJS):**\n- **Golongan ACEI/ARB:** Captopril 2x12.5-25mg, Candesartan 1x8-16mg, Valsartan 1x80mg (Pilihan utama pada pasien DM / CKD / proteinuria).\n- **Golongan CCB:** Amlodipine 1x5-10mg (Sangat efektif pada geriatri dan isolated systolic hypertension).\n- **Golongan Diuretik:** Hydrochlorothiazide (HCT) 1x12.5-25mg.\n\n**3. Red Flags & Hipertensi Emergensi:**\n- TDS > 180 mmHg atau TDD > 120 mmHg disertai kerusakan organ target akut (ensefalopati, edema paru akut, ACS, diseksi aorta, gagal ginjal akut) memerlukan rawat ICU/ICCU dan antihipertensi parenteral (mis. Nicardipine IV).*`;
-      } else if (qLower.includes('diabetes') || qLower.includes('metformin') || qLower.includes('gula')) {
-        topicAnswer = `### 💊 Pedoman Pengelolaan Diabetes Melitus Tipe 2 — PERKENI & Fornas\n\n**1. Target Pengendalian:**\n- HbA1c < 7.0% (atau 7.5–8.0% pada geriatri dengan komorbiditas multipel)\n- Gula Darah Puasa (GDP): 80–130 mg/dL\n- Gula Darah 2 Jam Post-Prandial (GD2PP): < 180 mg/dL\n\n**2. Farmakoterapi Lini Pertama:**\n- **Metformin:** Dosis inisial 500 mg 1–2x/hari bersama makan, dapat ditingkatkan hingga dosis maksimal 2000–2500 mg/hari.\n- **Kombinasi Dual Terapi:** Bila HbA1c ≥ 7.5% saat diagnosis atau tidak mencapai target dalam 3 bulan, kombinasikan Metformin dengan Sulfonilurea (Glimepiride 1-4 mg/hari) atau DPP-4 Inhibitor.\n\n**3. Peringatan Keamanan Obat:**\n- Hentikan Metformin bila eGFR < 30 mL/min/1.73m² (risiko Asidosis Laktat). Hati-hati risiko hipoglikemia berat pada pemberian Sulfonilurea di populasi geriatri.*`;
-      } else {
-        topicAnswer = `### 🔬 Referensi Medis Klinis: ${q}\n\n**1. Ikhtisar Panduan Praktik Klinis:**\n- Penatalaksanaan berbasis bukti (*evidence-based medicine*) mengacu pada Panduan Praktik Klinis (PPK) Kemenkes RI, Konsensus Organisasi Profesi (IDI/PAPDI/IDAI/POGI), dan Formularium Nasional (Fornas).\n\n**2. Prinsip Evaluasi Diagnostik & Tatalaksana:**\n- Anamnesis terstruktur mencakup riwayat keluhan, durasi, faktor pemicu, riwayat komorbiditas, dan riwayat alergi obat.\n- Pemeriksaan fisik dan penunjang diagnostik spesifik (Laboratorium hematologi/biokimia, EKG, Radiologi) sesuai indikasi klinis.\n- Terapi terpadu mencakup intervensi non-farmakologis (modifikasi gaya hidup, hidrasi, edukasi) dan farmakoterapi bertarget dosis standar.\n\n**3. Peringatan Keamanan & Interaksi:**\n- Selalu evaluasi fungsi ginjal dan hepar sebelum peresepan obat jangka panjang.\n- Lakukan rekonsiliasi obat untuk mencegah polifarmasi dan potensi interaksi obat berbahaya.\n\n*Informasi ini disajikan sebagai Clinical Decision Support untuk mendukung tenaga kesehatan.*`;
-      }
-
-      return res.json({
-        answer: topicAnswer,
-        sources: sources,
-        searchQueries: [q, `${q} kemenkes ri`, `${q} panduan praktik klinis`],
-        groundingMetadata: null,
-        mode: 'evidence_based_cds'
-      });
+      return res.json(generateMedicalSearchEvidenceDeterministic(req.body?.query || '', req.body?.context));
     }
   });
 
@@ -1834,7 +1402,14 @@ Instructions:
         throw new Error('GEMINI_API_KEY is not configured.');
       }
 
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build'
+          }
+        }
+      });
 
       const prompt = `
 You are MY ITARU Geospatial Health & Medical Facility Locator.
@@ -1866,11 +1441,23 @@ Instructions:
         };
       }
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: prompt,
-        config: configObj
-      });
+      let response: any = null;
+      for (const modelName of ['gemini-4-hydrogen', 'gemini-3.1-flash-lite']) {
+        try {
+          response = await ai.models.generateContent({
+            model: modelName,
+            contents: prompt,
+            config: configObj
+          });
+          if (response?.text) break;
+        } catch (modelErr: any) {
+          console.warn(`[Maps Grounding] Model ${modelName} failed:`, modelErr?.message || modelErr);
+        }
+      }
+
+      if (!response?.text) {
+        throw new Error('Maps grounding models unavailable, falling back.');
+      }
 
       const responseText = response.text || '';
       const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
@@ -2061,7 +1648,14 @@ Berdasarkan pencarian: **"${q}"** (Area sekitar koordinat ${userLat.toFixed(4)},
         throw new Error('GEMINI_API_KEY is not configured.');
       }
 
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const ai = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build'
+          }
+        }
+      });
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.5-transcribe',
@@ -2184,7 +1778,8 @@ Tugas Anda:
       });
 
       if (aiResult?.text) {
-        return res.json(JSON.parse(aiResult.text));
+        const parsedBpjs = parseSafeJson(aiResult.text);
+        if (parsedBpjs) return res.json(parsedBpjs);
       }
 
       const fallback = auditBpjsClaimDeterministic({ billingId, patientName, diagnosis, items, totalBill, sepNo });
@@ -2234,7 +1829,8 @@ Berikan:
       });
 
       if (aiResult?.text) {
-        return res.json(JSON.parse(aiResult.text));
+        const parsedRad = parseSafeJson(aiResult.text);
+        if (parsedRad) return res.json(parsedRad);
       }
 
       const fallback = analyzeRadiologyDeterministic({ examinationName, modality, clinicalDiagnosis, patientAge, gender });
@@ -2256,7 +1852,7 @@ Berikan:
       }
 
       const prompt = `
-Anda adalah AI Clinical Pharmacologist pada SIMRS RS MYITARU.
+Anda adalah AI Clinical Pharmacologist pada SIMK MYITARU Klinik.
 Analisis keamanan resep dan potensi interaksi obat berikut:
 
 Daftar Obat Resep:
@@ -2299,7 +1895,8 @@ Evaluasi:
       });
 
       if (aiResult?.text) {
-        return res.json(JSON.parse(aiResult.text));
+        const parsedDrug = parseSafeJson(aiResult.text);
+        if (parsedDrug) return res.json(parsedDrug);
       }
 
       const fallback = checkDrugInteractionsDeterministic(medications, patientContext);
@@ -2314,15 +1911,17 @@ Evaluasi:
   // ⭐ ENDPOINT: AI Electronic Medical Record (EMR) Completeness & KLPCM Audit (Permenkes 24/2022)
   app.post('/api/ai/document-completeness', async (req, res) => {
     try {
-      const { documentType, patientData, medicalNotes, signatures } = req.body;
+      const { documentType, patientName, patientData, medicalNotes, fields, signatures } = req.body;
+      const effectivePatientData = patientData || (patientName ? { nama: patientName } : {});
+      const effectiveNotes = medicalNotes || fields || {};
 
       const prompt = `
 Anda adalah Auditor Mutu Rekam Medis Elektronik (RME) dan Tim Verifikasi Akreditasi Rumah Sakit (KARS/LAM-KPRS) berdasarkan Permenkes No. 24 Tahun 2022.
 Evaluasi kelengkapan berkas rekam medis berikut:
 
 Jenis Berkas: ${documentType || 'Resume Medis / Asesmen Rawat Inap'}
-Data Pasien: ${JSON.stringify(patientData || {})}
-Catatan Medis / Konten: ${JSON.stringify(medicalNotes || {})}
+Data Pasien: ${JSON.stringify(effectivePatientData)}
+Catatan Medis / Konten: ${JSON.stringify(effectiveNotes)}
 Status Tanda Tangan Elektronik: ${JSON.stringify(signatures || {})}
 
 Evaluasi 4 Aspek Wajib KLPCM (Ketidaklengkapan Pengisian Catatan Medis):
@@ -2349,14 +1948,15 @@ Evaluasi 4 Aspek Wajib KLPCM (Ketidaklengkapan Pengisian Catatan Medis):
       });
 
       if (aiResult?.text) {
-        return res.json(JSON.parse(aiResult.text));
+        const parsedDoc = parseSafeJson(aiResult.text);
+        if (parsedDoc) return res.json(parsedDoc);
       }
 
-      const fallback = auditDocumentCompletenessDeterministic({ documentType, patientData, medicalNotes, signatures });
+      const fallback = auditDocumentCompletenessDeterministic({ documentType, patientName, patientData: effectivePatientData, medicalNotes: effectiveNotes, signatures });
       return res.json(fallback);
     } catch (error: any) {
       console.warn('AI Document Completeness Warning/Fallback triggered:', error?.message || error);
-      const fallback = auditDocumentCompletenessDeterministic(req.body);
+      const fallback = auditDocumentCompletenessDeterministic(req.body || {});
       return res.json(fallback);
     }
   });
@@ -2407,7 +2007,8 @@ Rangkaian Terapi & Tindakan: ${JSON.stringify(treatments || [])}
       });
 
       if (aiResult?.text) {
-        return res.json(JSON.parse(aiResult.text));
+        const parsedSummary = parseSafeJson(aiResult.text);
+        if (parsedSummary) return res.json(parsedSummary);
       }
 
       const fallback = generateDischargeSummaryDeterministic({ patientName, noRm, diagnosis, vitalSigns, treatments, labs, stayDuration });
@@ -2493,6 +2094,37 @@ Rangkaian Terapi & Tindakan: ${JSON.stringify(treatments || [])}
       turnstileEnabled: true,
       timestamp: new Date().toISOString()
     });
+  });
+
+  // Register Public Hospital Portal & Patient Mobile App Routes
+  registerPatientPortalRoutes(app, {
+    patientsStore: patientsStore as any,
+    appointmentsStore: appointmentsStore as any,
+    bedsStore: bedsStore as any,
+    createAuditLog: (entry) => {
+      auditLogsStore.unshift({
+        id: 'log-' + Date.now(),
+        timestamp: new Date().toISOString(),
+        ...entry
+      });
+    }
+  });
+
+  // Register Unified Employee Ecosystem API Gateway (/api/gateway/*)
+  registerEmployeePortalGateway(app, {
+    createAuditLog: (entry) => {
+      auditLogsStore.unshift({
+        id: 'log-' + Date.now() + '-' + Math.floor(Math.random() * 99),
+        timestamp: new Date().toISOString(),
+        user: entry.user_name || entry.user_id,
+        role: entry.user_id,
+        action: entry.action,
+        module: entry.module,
+        ip: entry.ip_address || '127.0.0.1',
+        status: entry.status,
+        details: entry.details
+      });
+    }
   });
 
   // Vite middleware for development vs static serving in production

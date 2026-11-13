@@ -29,7 +29,7 @@ function logError(msg) {
 }
 
 console.log(`\n${COLORS.bold}===========================================${COLORS.reset}`);
-console.log(`${COLORS.bold} MYITARU SIMRS - Pre-Deployment Audit Check${COLORS.reset}`);
+console.log(`${COLORS.bold} MYITARU SIMK - Pre-Deployment Audit Check${COLORS.reset}`);
 console.log(`${COLORS.bold}===========================================${COLORS.reset}\n`);
 
 let hasErrors = false;

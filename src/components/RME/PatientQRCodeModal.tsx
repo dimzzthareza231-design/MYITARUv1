@@ -256,7 +256,7 @@ export function PatientQRCodeModal({
                       <Shield className="w-3.5 h-3.5 text-cyan-700" />
                       <div>
                         <div className="font-extrabold text-[11px] uppercase tracking-wider text-cyan-900 leading-none">
-                          {hospitalSettings?.name || 'MYITARU SIMRS'}
+                          {hospitalSettings?.name || 'MYITARU SIMK'}
                         </div>
                         <div className="text-[9px] text-slate-500 font-semibold leading-none mt-0.5">
                           BERKAS REKAM MEDIS ELEKTRONIK

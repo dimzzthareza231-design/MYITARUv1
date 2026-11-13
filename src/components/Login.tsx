@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Activity, Eye, EyeOff, LogIn, User as UserIcon, Lock, Sparkles, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Activity, Eye, EyeOff, LogIn, User as UserIcon, Lock, Sparkles, ShieldCheck, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext';
 import { useHospital } from '../contexts/HospitalContext';
@@ -63,7 +64,38 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#061A3D] via-[#0B3D91] to-[#1E3163] flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md mb-4 flex items-center justify-between">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-blue-100 hover:text-white transition"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Kembali ke Portal Publik MYITARU</span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/portal-karyawan"
+            className="text-xs font-semibold text-sky-300 hover:text-white transition"
+          >
+            Portal Karyawan
+          </Link>
+          <span className="text-blue-400">·</span>
+          <Link
+            to="/app-karyawan"
+            className="text-xs font-semibold text-sky-300 hover:text-white transition"
+          >
+            App Karyawan
+          </Link>
+          <span className="text-blue-400">·</span>
+          <Link
+            to="/mobile"
+            className="text-xs font-semibold text-sky-300 hover:text-white transition"
+          >
+            App Pasien
+          </Link>
+        </div>
+      </div>
       <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 w-full max-w-md border border-slate-200 dark:border-slate-700 relative overflow-hidden">
         {/* Glow accent */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
@@ -82,7 +114,7 @@ export function Login() {
             {hospitalSettings?.name || 'MYITARU'}
           </h1>
           <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-1 flex items-center justify-center gap-1">
-            <ShieldCheck className="w-4 h-4" /> {hospitalSettings?.subname || 'Cloud Hospital Intelligence Platform'}
+            <ShieldCheck className="w-4 h-4" /> {hospitalSettings?.subname || 'Cloud Klinik Intelligence Platform'}
           </p>
         </div>
 

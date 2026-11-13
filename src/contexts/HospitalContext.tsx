@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { collection, onSnapshot, doc } from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { auth, db, isFirebaseConfigured } from '../lib/firebase';
 import { PASIEN, MASTER_POLIKLINIK, SEMUA_DOKTER, SEMUA_PERAWAT } from "../data/seedData";
 import { Pasien, Kunjungan, MasterDokter, MasterPoli, MasterPenjamin, MasterPerawat, BantuanArtikel, User } from '../types';
 import { HospitalInfo, DEFAULT_HOSPITAL_INFO } from '../types/document';
@@ -228,9 +229,20 @@ export function HospitalProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('toggle-theme', handleToggleTheme);
   }, []);
 
-  // Real-time Firestore listeners for core hospital collections
+  // Track Firebase Auth UID so Firestore listeners only attach when authenticated
+  const [firebaseUid, setFirebaseUid] = useState<string | null>(() => auth?.currentUser?.uid || null);
+
   useEffect(() => {
-    if (!isFirebaseConfigured) return;
+    if (!isFirebaseConfigured || !auth) return;
+    const unsub = onAuthStateChanged(auth, (fUser) => {
+      setFirebaseUid(fUser?.uid || null);
+    });
+    return () => unsub();
+  }, []);
+
+  // Real-time Firestore listeners for core hospital collections (authenticated Firebase sessions only)
+  useEffect(() => {
+    if (!isFirebaseConfigured || !db || !firebaseUid) return;
     let seededPasien = false;
     let seededKunjungan = false;
     let seededDokter = false;
@@ -339,8 +351,11 @@ export function HospitalProvider({ children }: { children: ReactNode }) {
     const unsubSettings = onSnapshot(doc(db, 'hospital_settings', 'main'), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
-        setHospitalSettings(prev => ({ ...prev, ...data }));
-        storage.set('hospital_settings', { ...hospitalSettings, ...data });
+        setHospitalSettings(prev => {
+          const merged = { ...prev, ...data };
+          storage.set('hospital_settings', merged);
+          return merged;
+        });
       }
     }, (error) => {
       console.warn('Firestore Settings sync notice:', error.message);
@@ -353,7 +368,7 @@ export function HospitalProvider({ children }: { children: ReactNode }) {
       unsubPerawat();
       unsubSettings();
     };
-  }, []);
+  }, [firebaseUid]);
 
   const toggleDarkMode = () => setIsDarkMode(prev => !prev);
 

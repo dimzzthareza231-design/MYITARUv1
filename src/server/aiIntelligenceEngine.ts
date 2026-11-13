@@ -2,7 +2,7 @@
 // MYITARU SIMRS — ENTERPRISE CLINICAL AI INTELLIGENCE & RESILIENCE ENGINE
 // ═══════════════════════════════════════════════════════════════════════════
 // Multi-Tier Architecture:
-// Tier 1: Google Gemini 3.8 Flash (Primary Generative Model)
+// Tier 1: Google Gemini 4 Hydrogen (Primary Generative Model)
 // Tier 2: Google Gemini 3.1 Flash Lite (High-Throughput Quota Failover)
 // Tier 3: Deterministic Clinical Decision Support Engine (PPK Kemenkes, WHO, Fornas)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -11,10 +11,46 @@ import { GoogleGenAI, Type } from '@google/genai';
 
 export interface AiExecutionResult<T = any> {
   data: T;
-  source: 'gemini-3.8-flash' | 'gemini-3.1-flash-lite' | 'clinical_intelligence_engine';
+  source: 'gemini-4-hydrogen' | 'gemini-3.1-flash-lite' | 'clinical_intelligence_engine';
   isFallback: boolean;
   status: 'SUCCESS' | 'WARNING';
   latencyMs: number;
+}
+
+/**
+ * Safely parse JSON responses from LLMs (strips markdown code fences if present)
+ */
+export function parseSafeJson<T = any>(rawText: string | undefined | null): T | null {
+  if (!rawText) return null;
+  const cleaned = rawText
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+
+  try {
+    return JSON.parse(cleaned) as T;
+  } catch {
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      try {
+        return JSON.parse(cleaned.slice(firstBrace, lastBrace + 1)) as T;
+      } catch {
+        return null;
+      }
+    }
+    const firstBracket = cleaned.indexOf('[');
+    const lastBracket = cleaned.lastIndexOf(']');
+    if (firstBracket !== -1 && lastBracket > firstBracket) {
+      try {
+        return JSON.parse(cleaned.slice(firstBracket, lastBracket + 1)) as T;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
 }
 
 /**
@@ -41,7 +77,7 @@ export async function executeResilientGemini(params: {
   });
 
   const modelsToTry = [
-    params.preferredModel || 'gemini-3.8-flash',
+    params.preferredModel || 'gemini-4-hydrogen',
     'gemini-3.1-flash-lite'
   ];
 
@@ -71,7 +107,6 @@ export async function executeResilientGemini(params: {
     } catch (err: any) {
       const errMsg = String(err?.message || err);
       console.warn(`[AI Engine] Model ${model} failed: ${errMsg.slice(0, 140)}... Trying next tier.`);
-      // If it's resource_exhausted or rate limit, loop will try gemini-3.1-flash-lite
     }
   }
 
@@ -279,42 +314,114 @@ export function generateClinicalDecisionSupportDeterministic(input: {
     triageUrgency = 'Pemeriksaan dalam 30 menit';
   }
 
-  // Primary Diagnosis identification
+  // Context-aware Primary Diagnosis, Procedures, Workup & Management
   let primaryDiag = {
-    code: 'I10',
-    nameId: 'Hipertensi Primer (Esensial)',
-    nameEn: 'Essential (primary) hypertension',
-    confidence: 94,
-    reasoning: `Berdasarkan tekanan darah ${systolic}/${diastolic} mmHg serta keluhan yang konsisten dengan hipertensi simtomatik.`,
-    clinicalCriteria: 'TDS ≥ 140 mmHg dan/atau TDD ≥ 90 mmHg pada pengukuran berulang (JNC-8/PERKI).',
-    category: 'Kardiovaskular'
+    code: 'R69',
+    nameId: 'Evaluasi Klinis Umum (Observasi Gejala)',
+    nameEn: 'Illness, unspecified',
+    confidence: 82,
+    reasoning: `Berdasarkan tanda vital TD ${systolic}/${diastolic} mmHg, HR ${hr} bpm, Temp ${temp}°C, SpO2 ${spo2}% serta keluhan klinis pasien.`,
+    clinicalCriteria: 'Anamnesis dan pemeriksaan fisik terstruktur sesuai Panduan Praktik Klinis (PPK) Kemenkes RI.',
+    category: 'Umum & Penyakit Dalam'
   };
 
   let diffDiagnoses = [
     {
-      code: 'I11.9',
-      nameId: 'Penyakit Jantung Hipertensi Tanpa Gagal Jantung',
-      confidence: 76,
-      reasoning: 'Adanya riwayat hipertensi kronis dengan kemungkinan hipertrofi ventrikel kiri.',
-      differentiatingFeatures: 'Perlu pemeriksaan EKG (LVH criteria Sokolow-Lyon) dan rontgen thorax (CTR).'
-    },
-    {
-      code: 'R51',
-      nameId: 'Sakit Kepala (Cephalgia)',
-      confidence: 68,
-      reasoning: 'Gejala sakit kepala sekunder akibat peningkatan resistensi vaskular sistemik.',
-      differentiatingFeatures: 'Nyeri berdenyut regio oksipital memberat pada pagi hari.'
+      code: 'R53',
+      nameId: 'Malaise dan Kelelahan Akut',
+      confidence: 65,
+      reasoning: 'Gejala sistemik non-spesifik yang membutuhkan konfirmasi penunjang dasar.',
+      differentiatingFeatures: 'Evaluasi darah lengkap dan metabolik dasar.'
     }
   ];
 
-  if (complaint.includes('batuk') || complaint.includes('sesak') || complaint.includes('ispa')) {
+  let suggestedProcedures = [
+    { code: '89.07', name: 'Pemeriksaan Fisik Terpadu', indication: 'Asesmen klinis komprehensif' },
+    { code: '90.59', name: 'Pemeriksaan Darah Rutin', indication: 'Evaluasi marker hematologi & inflamasi' }
+  ];
+
+  let redFlags = newsScore >= 5 ? [
+    'Nilai Early Warning Score meningkat — pantau ketat tanda syok, hipoksia, atau penurunan kesadaran.',
+    'Segera lakukan stabilisasi jalan napas, oksigenasi, dan akses intravena.'
+  ] : [
+    'Waspadai perubahan status mental mendadak, sesak napas progresif, atau ketidakstabilan hemodinamik.'
+  ];
+
+  let recommendedWorkup = {
+    laboratory: ['Darah Lengkap (CBC)', 'Kimia Darah Dasar (GDS, Ureum, Kreatinin)'],
+    radiology: ['Sesuai indikasi klinis lokal'],
+    other: ['Pemantauan tanda vital serial']
+  };
+
+  let managementPlan = {
+    immediate: ['Observasi tanda vital dan hidrasi adekuat', 'Posisikan pasien nyaman sesuai toleransi'],
+    pharmacological: ['Terapi simptomatik rasional sesuai Fornas dan PPK Kemenkes RI'],
+    nonPharmacological: ['Istirahat cukup, asupan cairan dan nutrisi seimbang'],
+    monitoring: ['Evaluasi ulang tanda vital dan respons terapi dalam 30-60 menit']
+  };
+
+  // 1. Fever / Dengue / Typhoid / Acute Infection
+  if (
+    complaint.includes('demam') || complaint.includes('panas') || complaint.includes('menggigil') ||
+    complaint.includes('dbd') || complaint.includes('dengue') || complaint.includes('tifoid') ||
+    complaint.includes('retroorbital') || temp >= 38.0
+  ) {
+    const isDengueLike = complaint.includes('retroorbital') || complaint.includes('dbd') || complaint.includes('dengue') || complaint.includes('bintik') || complaint.includes('trombosit');
     primaryDiag = {
-      code: 'J06.9',
-      nameId: 'Infeksi Saluran Pernapasan Akut (ISPA)',
-      nameEn: 'Acute upper respiratory infection, unspecified',
+      code: isDengueLike ? 'A91' : 'A90',
+      nameId: isDengueLike ? 'Demam Berdarah Dengue (Suspek DBD)' : 'Demam Akut / Observasi Febris (dd/ Infeksi Virus / Dengue)',
+      nameEn: isDengueLike ? 'Dengue hemorrhagic fever' : 'Dengue fever [classical dengue]',
+      confidence: isDengueLike ? 91 : 88,
+      reasoning: `Keluhan febris akut (Suhu ${temp}°C) dengan gejala sistemik penyerta dan TD ${systolic}/${diastolic} mmHg, HR ${hr} bpm.`,
+      clinicalCriteria: 'Demam tinggi mendadak 2-7 hari disertai nyeri kepala/retroorbital, mialgia, atau mual tanpa fokus infeksi lokal yang jelas (PPK IDI / Kemenkes).',
+      category: 'Infeksi & Tropis'
+    };
+    diffDiagnoses = [
+      {
+        code: 'A01.0',
+        nameId: 'Demam Tifoid',
+        confidence: 74,
+        reasoning: 'Demam persisten dengan gejala gastrointestinal (mual/anoreksia/lidah kotor).',
+        differentiatingFeatures: 'Demam step-ladder terutama sore-malam hari; konfirmasi Tubex TF / IgM Salmonella.'
+      },
+      {
+        code: 'J06.9',
+        nameId: 'Infeksi Saluran Pernapasan Akut (ISPA)',
+        confidence: 62,
+        reasoning: 'Etiologi viral akut apabila muncul gejala kataral saluran napas.',
+        differentiatingFeatures: 'Disertai batuk, pilek, atau faring hiperemis.'
+      }
+    ];
+    suggestedProcedures = [
+      { code: '90.59', name: 'Darah Lengkap & Trombosit Serial', indication: 'Deteksi trombositopenia dan hemokonsentrasi (Hematokrit)' },
+      { code: '91.99', name: 'Tes Cepat Antigen NS1 / IgM-IgG Dengue', indication: 'Konfirmasi etiologi infeksi dengue hari ke 1-5' },
+      { code: '99.18', name: 'Pemasangan Akses & Hidrasi Cairan', indication: 'Pencegahan dehidrasi pada febris dan mual' }
+    ];
+    redFlags = [
+      'Waspadai Dengue Warning Signs: nyeri perut hebat, muntah persisten, perdarahan mukosa (mimisan/gusi), letargi, atau akral dingin.',
+      'Segera ke IGD bila trombosit <100.000/µL, hematokrit meningkat ≥20%, atau tekanan nadi menyempit ≤20 mmHg.'
+    ];
+    recommendedWorkup = {
+      laboratory: ['Darah Lengkap (Hb, Leukosit, Hematokrit, Trombosit)', 'Antigen NS1 Dengue (hari 1-3) / IgM-IgG Dengue', 'Tubex TF / Widal (bila demam >4 hari)', 'SGOT/SGPT & Elektrolit'],
+      radiology: ['Foto Thorax RLD / USG Abdomen bila curiga kebocoran plasma (efusi pleura/asites)'],
+      other: ['Uji Bendung (Rumple Leede Test)', 'Pemantauan balans cairan & diuresis']
+    };
+    managementPlan = {
+      immediate: ['Rehidrasi oral adekuat (oralit/cairan isotonik); pertimbangkan infus Ringer Laktat bila asupan oral buruk', 'Kompres hangat pada lipatan tubuh'],
+      pharmacological: ['Paracetamol 500 mg tiap 6-8 jam (maks 3-4 g/hari) untuk antipiretik & analgesik; HINDARI NSAID/Aspirin karena risiko perdarahan', 'Ondansetron 4 mg / Domperidone bila mual muntah'],
+      nonPharmacological: ['Tirah baring total, monitor suhu & frekuensi BAK setiap 4-6 jam'],
+      monitoring: ['Kontrol Darah Lengkap (Hematokrit & Trombosit) tiap 24 jam selama fase kritis (hari ke 3-6)']
+    };
+  }
+  // 2. Respiratory / Cough / Dyspnea
+  else if (complaint.includes('batuk') || complaint.includes('sesak') || complaint.includes('ispa') || complaint.includes('asma') || complaint.includes('pilek') || spo2 <= 94) {
+    primaryDiag = {
+      code: spo2 <= 94 || complaint.includes('sesak') ? 'J45.909' : 'J06.9',
+      nameId: spo2 <= 94 || complaint.includes('sesak') ? 'Asma Bronkial / Distres Pernapasan Akut' : 'Infeksi Saluran Pernapasan Akut (ISPA)',
+      nameEn: spo2 <= 94 || complaint.includes('sesak') ? 'Unspecified asthma, uncomplicated' : 'Acute upper respiratory infection, unspecified',
       confidence: 92,
-      reasoning: `Gejala batuk dan keluhan respirasi dengan RR ${rr} x/m dan SpO2 ${spo2}%.`,
-      clinicalCriteria: 'Batuk akut, rinore, malaise tanpa tanda pneumonia berat pada auskultasi paru.',
+      reasoning: `Keluhan respirasi dengan RR ${rr} x/m dan SpO2 ${spo2}%.`,
+      clinicalCriteria: 'Gejala traktus respiratorius akut dengan evaluasi oksigenasi dan auskultasi paru.',
       category: 'Respirasi'
     };
     diffDiagnoses = [
@@ -326,20 +433,82 @@ export function generateClinicalDecisionSupportDeterministic(input: {
         differentiatingFeatures: 'Rontgen thorax tidak menunjukkan infiltrat fokal lobar.'
       },
       {
-        code: 'J45.909',
-        nameId: 'Asma Bronkial',
-        confidence: 60,
-        reasoning: 'Sesak napas ekspiratoir dengan riwayat atopi atau paparan alergen.',
-        differentiatingFeatures: 'Wheezing ekspiratoir reversibel dengan bronkodilator.'
+        code: 'J18.9',
+        nameId: 'Pneumonia Komunitas',
+        confidence: 64,
+        reasoning: 'Bila disertai demam tinggi, takipnea, dan ronki basah halus terlokalisir.',
+        differentiatingFeatures: 'Infiltrat paru pada Foto Thorax PA.'
       }
     ];
-  } else if (complaint.includes('diabetes') || complaint.includes('gula')) {
+    suggestedProcedures = [
+      { code: '87.44', name: 'Foto Thorax PA', indication: 'Evaluasi parenkim paru dan singkirkan pneumonia' },
+      { code: '93.94', name: 'Terapi Nebulisasi Bronkodilator', indication: 'Dilatasi saluran napas bila terdapat bronkospasme' },
+      { code: '90.59', name: 'Pemeriksaan Darah Rutin', indication: 'Evaluasi leukositosis / penanda infeksi' }
+    ];
+    recommendedWorkup = {
+      laboratory: ['Darah Lengkap (CBC)', 'CRP / D-Dimer bila sesak berat', 'Pemeriksaan Sputum BTA/TCM bila batuk >2 minggu'],
+      radiology: ['Foto Thorax PA'],
+      other: ['Pulse Oximetry kontinu & Peak Expiratory Flow (PEFR)']
+    };
+    managementPlan = {
+      immediate: ['Berikan oksigen kanul nasal/NRM bila SpO2 < 95% (target ≥ 95%)', 'Posisikan pasien semi-Fowler / duduk tegak'],
+      pharmacological: ['Nebulisasi Salbutamol + Ipratropium bila wheezing/sesak', 'Mukolitik/ekspektoran (Ambroxol/NAC) dan antipiretik bila demam'],
+      nonPharmacological: ['Hidrasi air hangat, hindari paparan asap rokok dan alergen'],
+      monitoring: ['Evaluasi ulang frekuensi napas (RR), usaha napas, dan SpO2 tiap 15-30 menit']
+    };
+  }
+  // 3. Gastrointestinal / Dyspepsia / GERD / Diarrhea
+  else if (complaint.includes('mual') || complaint.includes('muntah') || complaint.includes('lambung') || complaint.includes('perut') || complaint.includes('maag') || complaint.includes('diare') || complaint.includes('gerd')) {
+    const isDiarrhea = complaint.includes('diare') || complaint.includes('mencret');
+    primaryDiag = {
+      code: isDiarrhea ? 'A09' : 'K21.9',
+      nameId: isDiarrhea ? 'Gastroenteritis Akut / Diare Infeksius' : 'Dispepsia Fungsional / GERD',
+      nameEn: isDiarrhea ? 'Infectious gastroenteritis and colitis, unspecified' : 'Gastro-esophageal reflux disease without esophagitis',
+      confidence: 90,
+      reasoning: `Keluhan gastrointestinal dominan (${isDiarrhea ? 'diare akut' : 'nyeri epigastrium / mual'}) dengan status hemodinamik TD ${systolic}/${diastolic} mmHg.`,
+      clinicalCriteria: 'Evaluasi tanda dehidrasi, nyeri tekan epigastrium/abdomen, dan bising usus.',
+      category: 'Gastroenterologi'
+    };
+    diffDiagnoses = [
+      {
+        code: 'K29.7',
+        nameId: 'Gastritis Akut',
+        confidence: 78,
+        reasoning: 'Iritasi mukosa gaster akibat pola makan tidak teratur atau NSAID.',
+        differentiatingFeatures: 'Nyeri ulu hati dominan berkurang dengan antasida/PPI.'
+      },
+      {
+        code: 'K35.8',
+        nameId: 'Apendisitis Akut (Singkirkan)',
+        confidence: 52,
+        reasoning: 'Waspadai bila nyeri berpindah ke kuadran kanan bawah (McBurney).',
+        differentiatingFeatures: 'Nyeri tekan lepas kanan bawah dan leukositosis.'
+      }
+    ];
+    suggestedProcedures = [
+      { code: '89.07', name: 'Pemeriksaan Fisik Abdomen', indication: 'Evaluasi bising usus, nyeri tekan lokal, dan tanda peritonitis' },
+      { code: '88.76', name: 'USG Abdomen', indication: 'Singkirkan kelainan hepatobilier atau apendisitis bila nyeri menetap' }
+    ];
+    recommendedWorkup = {
+      laboratory: ['Darah Lengkap', 'Elektrolit Serum (Na, K, Cl) bila muntah/diare berulang', 'Feses Lengkap (bila diare)'],
+      radiology: ['USG Abdomen (bila indikasi nyeri kuadran kanan atas/bawah)'],
+      other: ['Penilaian skor dehidrasi klinis']
+    };
+    managementPlan = {
+      immediate: ['Evaluasi status hidrasi; rehidrasi oral dengan oralit atau cairan IV Ringer Laktat bila dehidrasi sedang-berat'],
+      pharmacological: ['PPI (Omeprazole 20 mg atau Lansoprazole 30 mg ac) & Antiemetik (Ondansetron/Domperidone) bila mual', 'Zinc 20 mg + Oralit bila diare'],
+      nonPharmacological: ['Makan porsi kecil tapi sering, hindari pedas, asam, kafein, dan tidak berbaring <2 jam pasca makan'],
+      monitoring: ['Pantau toleransi asupan oral, frekuensi muntah/BAB, dan turgor kulit']
+    };
+  }
+  // 4. Endocrine / Diabetes
+  else if (complaint.includes('diabetes') || complaint.includes('gula') || complaint.includes('kencing manis')) {
     primaryDiag = {
       code: 'E11.9',
       nameId: 'Diabetes Melitus Tipe 2 Tanpa Komplikasi',
       nameEn: 'Type 2 diabetes mellitus without complications',
-      confidence: 95,
-      reasoning: 'Gejala klinis polidipsia/polifagia/lemas yang menyokong gangguan toleransi glukosa.',
+      confidence: 94,
+      reasoning: 'Gejala klinis gangguan metabolik glukosa (polidipsia/poliuria/lemas).',
       clinicalCriteria: 'Gula Darah Sewaktu ≥ 200 mg/dL atau GDP ≥ 126 mg/dL (PERKENI).',
       category: 'Endokrin'
     };
@@ -352,10 +521,105 @@ export function generateClinicalDecisionSupportDeterministic(input: {
         differentiatingFeatures: 'Dikonfirmasi melalui profil lipid serum puasa.'
       }
     ];
+    suggestedProcedures = [
+      { code: '90.59', name: 'Panel Glukosa & HbA1c', indication: 'Evaluasi kontrol glikemik 3 bulan terakhir' },
+      { code: '89.07', name: 'Skrining Kaki Diabetik', indication: 'Deteksi dini neuropati perifer' }
+    ];
+    recommendedWorkup = {
+      laboratory: ['GDS / GDP / GD2PP', 'HbA1c', 'Profil Lipid & Fungsi Ginjal (Ureum, Kreatinin, eGFR)'],
+      radiology: ['Foto Thorax PA bila keluhan respirasi'],
+      other: ['Pemeriksaan monofilamen kaki & funduskopi berkala']
+    };
+    managementPlan = {
+      immediate: ['Cek Gula Darah Sewaktu (GDS) segera untuk singkirkan hipoglikemia atau krisis hiperglikemia (KAD/HHS)'],
+      pharmacological: ['Metformin 500 mg (sesuai fungsi ginjal) dengan evaluasi titrasi dosis sesuai panduan PERKENI'],
+      nonPharmacological: ['Edukasi terapi nutrisi medis (diet 3J) dan aktivitas fisik terukur'],
+      monitoring: ['Monitoring gula darah kapiler berkala dan evaluasi gejala neuropati']
+    };
+  }
+  // 5. Neurological / Headache / Vertigo (without high BP)
+  else if (complaint.includes('pusing') || complaint.includes('sakit kepala') || complaint.includes('nyeri kepala') || complaint.includes('vertigo') || complaint.includes('migren')) {
+    const isVertigo = complaint.includes('berputar') || complaint.includes('vertigo');
+    primaryDiag = {
+      code: isVertigo ? 'H81.1' : 'R51',
+      nameId: isVertigo ? 'Vertigo Paroksismal Jinak (BPPV / Vertigo Perifer)' : 'Cephalgia Akut / Tension Type Headache',
+      nameEn: isVertigo ? 'Benign paroxysmal vertigo' : 'Headache',
+      confidence: 89,
+      reasoning: `Keluhan neurologis (${isVertigo ? 'sensasi berputar' : 'nyeri kepala'}) dengan TD terkendali ${systolic}/${diastolic} mmHg.`,
+      clinicalCriteria: 'Penilaian neurologis fokal, tes keseimbangan/nistagmus, dan eliminasi red flags intrakranial.',
+      category: 'Neurologi'
+    };
+    diffDiagnoses = [
+      {
+        code: 'G43.9',
+        nameId: 'Migrain Tanpa Aura',
+        confidence: 70,
+        reasoning: 'Nyeri kepala berdenyut unilateral disertai fotofobia atau mual.',
+        differentiatingFeatures: 'Intensitas sedang-berat diperburuk aktivitas fisik rutin.'
+      }
+    ];
+    suggestedProcedures = [
+      { code: '89.13', name: 'Pemeriksaan Neurologis Lengkap', indication: 'Singkirkan defisit neurologis fokal & rangsang meningeal' }
+    ];
+    recommendedWorkup = {
+      laboratory: ['Darah Lengkap', 'Gula Darah Sewaktu (singkirkan hipoglikemia)'],
+      radiology: ['CT-Scan Kepala Non-Kontras hanya bila ditemukan Red Flags neurologis'],
+      other: ['Dix-Hallpike Maneuver (bila vertigo berputar)']
+    };
+    managementPlan = {
+      immediate: ['Istirahatkan pasien di ruang tenang/redup, cegah risiko jatuh bila pusing berputar'],
+      pharmacological: [isVertigo ? 'Betahistine Mesilate 3x6-12 mg & Flunarizine sesuai indikasi' : 'Paracetamol 500-1000 mg atau Ibuprofen 400 mg bila nyeri kepala tegang'],
+      nonPharmacological: ['Latihan manuver Brandt-Daroff bila BPPV, manajemen stres, dan pola tidur teratur'],
+      monitoring: ['Observasi munculnya red flags: kelemahan sesisi, bicara pelo, kejang, atau muntah proyektil']
+    };
+  }
+  // 6. Cardiovascular / Hypertension (ONLY if BP >= 140/90 or cardiac keywords)
+  else if (systolic >= 140 || diastolic >= 90 || complaint.includes('hipertensi') || complaint.includes('tensi') || complaint.includes('nyeri dada') || complaint.includes('jantung')) {
+    primaryDiag = {
+      code: complaint.includes('nyeri dada') ? 'I20.9' : 'I10',
+      nameId: complaint.includes('nyeri dada') ? 'Angina Pektoris / Evaluasi Nyeri Dada Kardiak' : 'Hipertensi Primer (Esensial)',
+      nameEn: complaint.includes('nyeri dada') ? 'Angina pectoris, unspecified' : 'Essential (primary) hypertension',
+      confidence: 94,
+      reasoning: `Berdasarkan tekanan darah ${systolic}/${diastolic} mmHg serta keluhan kardiovaskular terkait.`,
+      clinicalCriteria: 'TDS ≥ 140 mmHg dan/atau TDD ≥ 90 mmHg pada pengukuran berulang (JNC-8/PERKI) atau nyeri dada tipikal.',
+      category: 'Kardiovaskular'
+    };
+    diffDiagnoses = [
+      {
+        code: 'I11.9',
+        nameId: 'Penyakit Jantung Hipertensi Tanpa Gagal Jantung',
+        confidence: 76,
+        reasoning: 'Adanya riwayat hipertensi kronis dengan kemungkinan hipertrofi ventrikel kiri.',
+        differentiatingFeatures: 'Perlu pemeriksaan EKG (LVH criteria Sokolow-Lyon) dan rontgen thorax (CTR).'
+      },
+      {
+        code: 'R51',
+        nameId: 'Cephalgia Sekunder Vaskular',
+        confidence: 65,
+        reasoning: 'Nyeri kepala oksipital akibat peningkatan resistensi vaskular sistemik.',
+        differentiatingFeatures: 'Membaik seiring penurunan bertahap tekanan darah.'
+      }
+    ];
+    suggestedProcedures = [
+      { code: '89.52', name: 'EKG 12-Lead', indication: 'Evaluasi ritme, LVH, dan iskemia miokard' },
+      { code: '89.07', name: 'Pemeriksaan Fisik Kardiovaskular', indication: 'Asesmen auskultasi jantung dan tanda gagal jantung' },
+      { code: '90.59', name: 'Profil Metabolik & Fungsi Ginjal', indication: 'Skrining kerusakan organ target hipertensi' }
+    ];
+    recommendedWorkup = {
+      laboratory: ['Darah Lengkap (CBC)', 'Profil Lipid, GDS, Ureum, Kreatinin', 'Elektrolit Serum'],
+      radiology: ['Foto Thorax PA (Evaluasi CTR / kardiomegali)'],
+      other: ['Rekaman EKG 12-Lead']
+    };
+    managementPlan = {
+      immediate: ['Posisikan pasien rileks, ulangi pengukuran tekanan darah di kedua lengan setelah istirahat 5 menit', 'Berikan oksigen bila SpO2 < 95% atau nyeri dada'],
+      pharmacological: ['Antihipertensi lini pertama sesuai Fornas/PERKI (CCB Amlodipine 5-10 mg atau ACEi/ARB bila tanpa kontraindikasi)'],
+      nonPharmacological: ['Diet DASH rendah natrium (<2 g/hari), kelola stres, aktivitas fisik teratur'],
+      monitoring: ['Monitor tekanan darah berkala dan tanda krisis hipertensi / nyeri dada']
+    };
   }
 
   return {
-    summary: `Pasien ${patient?.name || 'terdaftar'} (${patient?.age || '45'} th, ${patient?.gender || 'L'}). Menunjukkan tanda vital TD: ${systolic}/${diastolic} mmHg, HR: ${hr} bpm, RR: ${rr} x/m, Temp: ${temp}°C, SpO2: ${spo2}%. Skor NEWS: ${newsScore}.`,
+    summary: `Pasien ${patient?.name || 'terdaftar'} (${patient?.age || 'Dewasa'} th, ${patient?.gender || '-'}). Menunjukkan tanda vital TD: ${systolic}/${diastolic} mmHg, HR: ${hr} bpm, RR: ${rr} x/m, Temp: ${temp}°C, SpO2: ${spo2}%. Skor NEWS: ${newsScore}.`,
     vitalStatus: {
       status: newsScore >= 5 ? 'CRITICAL' : (flags.length > 0 ? 'ABNORMAL' : 'NORMAL'),
       flags: flags,
@@ -373,28 +637,10 @@ export function generateClinicalDecisionSupportDeterministic(input: {
     },
     primaryDiagnosis: primaryDiag,
     differentialDiagnoses: diffDiagnoses,
-    suggestedProcedures: [
-      { code: '89.52', name: 'EKG 12-Lead', indication: 'Evaluasi ritme dan iskemia miokard' },
-      { code: '89.07', name: 'Pemeriksaan Fisik Terpadu', indication: 'Asesmen klinis komprehensif' },
-      { code: '90.59', name: 'Pemeriksaan Darah Rutin', indication: 'Evaluasi marker metabolik & inflamasi' }
-    ],
-    redFlags: newsScore >= 5 ? [
-      'Nilai Early Warning Score elevated — pantau ketat tanda syok atau gagal napas.',
-      'Segera lakukan stabilisasi oksigenasi dan akses intravena.'
-    ] : [
-      'Waspadai perubahan status mental mendadak atau nyeri dada akut.'
-    ],
-    recommendedWorkup: {
-      laboratory: ['Darah Lengkap (CBC)', 'Kimia Darah (Ureum, Kreatinin, Gula Darah)', 'Elektrolit Serum'],
-      radiology: ['Foto Thorax PA (Rontgen Dada)'],
-      other: ['Rekaman EKG 12 Lead']
-    },
-    managementPlan: {
-      immediate: ['Pemberian oksigen bila SpO2 < 95%', 'Posisikan semi-fowler 30-45 derajat'],
-      pharmacological: ['Terapi lini pertama sesuai Fornas dan PPK Kemenkes RI'],
-      nonPharmacological: ['Edukasi istirahat cukup, hindari stres fisik/psikis, hidrasi seimbang'],
-      monitoring: ['Evaluasi ulang tanda vital dan respons terapi dalam 30-60 menit']
-    },
+    suggestedProcedures,
+    redFlags,
+    recommendedWorkup,
+    managementPlan,
     clinicalDisclaimer: 'Clinical Decision Support System (CDSS) MYITARU berlisensi Kemenkes RI. Rekomendasi wajib divalidasi oleh dokter DPJP yang berwenang.'
   };
 }
@@ -540,49 +786,68 @@ export function analyzeRadiologyDeterministic(input: {
 // ═══════════════════════════════════════════════════════════════════════════
 export function auditDocumentCompletenessDeterministic(input: {
   documentType?: string;
+  patientName?: string;
   patientData?: any;
   medicalNotes?: any;
+  fields?: any;
   signatures?: any;
 }) {
-  const patient = input.patientData || {};
-  const notes = input.medicalNotes || {};
+  const patient = input.patientData || (input.patientName ? { nama: input.patientName, no_rm: input.fields?.no_rm } : {});
+  const notes = input.medicalNotes || input.fields || {};
+  const sigs = input.signatures || {};
 
   const missing: string[] = [];
   const positive: string[] = [];
 
   // 1. Identitas
-  if (patient.no_rm && patient.nama) {
-    positive.push('Identitas Pasien (No. RM, Nama Lengkap, NIK) lengkap dan terverifikasi.');
+  if (patient.no_rm || patient.nama || patient.name) {
+    positive.push('Identitas Pasien (No. RM / Nama Lengkap) lengkap dan terverifikasi.');
   } else {
-    missing.push('Identitas demografi pasien belum lengkap.');
+    missing.push('Identitas demografi pasien (Nama/No. RM) belum lengkap.');
   }
 
   // 2. Anamnesis & TTV
   if (notes.keluhan || notes.subjective || notes.anamnesis) {
-    positive.push('Keluhan utama dan riwayat perjalanan penyakit tercatat komprehensif.');
+    positive.push('Keluhan utama dan riwayat perjalanan penyakit (Subjective) tercatat komprehensif.');
   } else {
-    missing.push('Keluhan utama / anamnesis belum terdokumentasi.');
+    missing.push('Keluhan utama / anamnesis (Subjective) belum terdokumentasi.');
   }
 
-  // 3. Diagnosis & ICD
-  if (notes.diagnosis || notes.assessment || notes.icd10) {
-    positive.push('Diagnosis kerja telah dikodefikasi sesuai standar WHO ICD-10.');
+  if (notes.objective || notes.tandaVital || notes.vitals) {
+    positive.push('Pemeriksaan fisik dan Tanda Vital (Objective) tervalidasi.');
   } else {
-    missing.push('Kodefikasi diagnosis ICD-10 belum diisi.');
+    missing.push('Hasil pemeriksaan objektif & Tanda Vital belum tercatat.');
+  }
+
+  // 3. Diagnosis & ICD + Plan
+  if (notes.diagnosis || notes.assessment || notes.icd10) {
+    positive.push('Diagnosis kerja telah dikodefikasi sesuai standar WHO ICD-10 (Assessment).');
+  } else {
+    missing.push('Kodefikasi diagnosis ICD-10 (Assessment) belum diisi.');
+  }
+
+  if (notes.plan || notes.therapy) {
+    positive.push('Rencana terapi, edukasi, dan tindak lanjut (Plan) tersedia.');
+  } else {
+    missing.push('Rencana tata laksana & follow-up (Plan) belum diisi.');
   }
 
   // 4. Autentikasi TTE
-  positive.push('Tanda tangan elektronik tenaga medis (TTE) tersimpan dengan metadata waktu.');
+  if (sigs.dpjpSigned !== false) {
+    positive.push('Autentikasi tenaga medis (TTE & timestamp) memenuhi standar Permenkes No. 24/2022.');
+  } else {
+    missing.push('Tanda tangan elektronik DPJP/perawat pemeriksa belum dibubuhkan.');
+  }
 
-  const completenessScore = Math.max(70, 100 - (missing.length * 10));
+  const completenessScore = Math.max(50, 100 - (missing.length * 12));
 
   return {
-    completenessScore: completenessScore,
-    accreditationStatus: completenessScore >= 90 ? 'Paripurna' : 'Utama',
+    completenessScore,
+    accreditationStatus: completenessScore >= 90 ? 'Paripurna' : completenessScore >= 75 ? 'Utama' : 'Madya',
     isPermenkesCompliant: missing.length === 0,
     missingElements: missing,
     positiveFindings: positive,
-    correctiveRecommendations: missing.length > 0 
+    correctiveRecommendations: missing.length > 0
       ? missing.map(m => `Segera lengkapi: ${m}`)
       : ['Pertahankan kelengkapan pengisian catatan medis maksimal 1x24 jam pasca pelayanan.']
   };

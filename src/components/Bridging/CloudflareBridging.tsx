@@ -62,7 +62,7 @@ export function CloudflareBridging() {
     try {
       const saved = localStorage.getItem('simrs_cloudflare_domain_config');
       return saved ? JSON.parse(saved) : {
-        customDomain: 'simrs.klinik-myitaru.co.id',
+        customDomain: 'simk.klinik-myitaru.co.id',
         zoneId: '9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d',
         sslMode: 'Full (Strict)',
         alwaysHttps: true,
@@ -73,7 +73,7 @@ export function CloudflareBridging() {
       };
     } catch {
       return {
-        customDomain: 'simrs.klinik-myitaru.co.id',
+        customDomain: 'simk.klinik-myitaru.co.id',
         zoneId: '9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d',
         sslMode: 'Full (Strict)',
         alwaysHttps: true,
@@ -114,18 +114,18 @@ export function CloudflareBridging() {
     try {
       const saved = localStorage.getItem('simrs_cloudflare_tunnel_config');
       return saved ? JSON.parse(saved) : {
-        tunnelName: 'simrs-cloud-tunnel',
+        tunnelName: 'simk-cloud-tunnel',
         tunnelId: 'f93d18e2-5b6c-48a1-9a72-1c3e5d7a9f0b',
         localServiceUrl: 'http://localhost:3000',
-        hostname: 'simrs.klinik-myitaru.co.id',
+        hostname: 'simk.klinik-myitaru.co.id',
         status: 'CONNECTED'
       };
     } catch {
       return {
-        tunnelName: 'simrs-cloud-tunnel',
+        tunnelName: 'simk-cloud-tunnel',
         tunnelId: 'f93d18e2-5b6c-48a1-9a72-1c3e5d7a9f0b',
         localServiceUrl: 'http://localhost:3000',
-        hostname: 'simrs.klinik-myitaru.co.id',
+        hostname: 'simk.klinik-myitaru.co.id',
         status: 'CONNECTED'
       };
     }
@@ -255,8 +255,8 @@ export function CloudflareBridging() {
   };
 
   const dnsRecords: DnsRecord[] = [
-    { type: 'A', name: 'simrs', content: '104.21.58.112', ttl: 'Auto', proxied: true, status: 'ACTIVE' },
-    { type: 'CNAME', name: 'api', content: 'simrs.klinik-myitaru.co.id', ttl: 'Auto', proxied: true, status: 'ACTIVE' },
+    { type: 'A', name: 'simk', content: '104.21.58.112', ttl: 'Auto', proxied: true, status: 'ACTIVE' },
+    { type: 'CNAME', name: 'api', content: 'simk.klinik-myitaru.co.id', ttl: 'Auto', proxied: true, status: 'ACTIVE' },
     { type: 'CNAME', name: 'cdn-medis', content: 'public.r2.dev', ttl: 'Auto', proxied: true, status: 'ACTIVE' },
     { type: 'TXT', name: '@', content: 'v=spf1 include:_spf.klinik-myitaru.co.id ~all', ttl: 'Auto', proxied: false, status: 'ACTIVE' }
   ];
@@ -564,7 +564,7 @@ export function CloudflareBridging() {
                   onError={(err) => {
                     toast.error('Gagal memverifikasi Turnstile.');
                   }}
-                  action="hospital_test"
+                  action="klinik_test"
                 />
 
                 {testTurnstileToken && (
@@ -723,7 +723,7 @@ export function CloudflareBridging() {
               <div>
                 <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <Lock className="w-5 h-5 text-orange-400" />
-                  Web Application Firewall (WAF) & Hospital DDoS Guard
+                  Web Application Firewall (WAF) & Klinik DDoS Guard
                 </h2>
                 <p className="text-xs text-slate-400 mt-1">
                   Aturan proteksi aktif untuk mengamankan data rekam medis pasien dan API bridging.

@@ -42,7 +42,7 @@ export function CetakHasilModal({ isOpen, onClose, order }: CetakHasilModalProps
                       Instalasi Laboratorium Patologi Klinik & Bank Darah (LIS)
                     </p>
                     <p className="text-[10px] text-slate-500">
-                      Jl. Kesehatan No. 45 Bandung • Telp: (022) 7890-1234 • Email: lab@myitaru-simrs.co.id
+                      Jl. Kesehatan No. 45 Bandung • Telp: (022) 7890-1234 • Email: lab@myitaru-simk.co.id
                     </p>
                   </div>
                 </div>

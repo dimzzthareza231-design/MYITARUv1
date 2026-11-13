@@ -1,48 +1,281 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // User accounts
+    // 0. Global Default-Deny Catch-All Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- HARDENED ZERO-TRUST HELPERS ---
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isSuperAdminEmail() {
+      return isVerifiedUser() && request.auth.token.email == 'dimzzthareza231@gmail.com';
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSuperAdminEmail() || (
+        isVerifiedUser() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.aktif == true &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId in ['super_admin', 'admin']
+      );
+    }
+
+    function isClinicalOrAdmin() {
+      return isAdmin() || (
+        isVerifiedUser() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.aktif == true &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roleId in [
+          'direksi', 'dokter', 'perawat', 'bidan', 'apoteker', 'kasir',
+          'pendaftaran', 'rekam_medis', 'laboran', 'radiografer',
+          'manajemen_mutu', 'gizi', 'rehab_medik', 'it_support'
+        ]
+      );
+    }
+
+    // --- VALIDATION BLUEPRINTS ---
+    function isValidUser(data) {
+      return data.keys().hasAll(['nama', 'roleId']) &&
+        data.keys().hasOnly([
+          'id', 'uid', 'username', 'nama', 'email', 'photoURL',
+          'roleId', 'aktif', 'dibuatPada', 'isGoogleAuth', 'updatedAt'
+        ]) &&
+        data.nama is string && data.nama.size() >= 1 && data.nama.size() <= 120 &&
+        data.roleId is string && data.roleId.size() >= 1 && data.roleId.size() <= 40 &&
+        (!('id' in data) || (data.id is string && data.id.size() <= 128)) &&
+        (!('uid' in data) || (data.uid is string && data.uid.size() <= 128)) &&
+        (!('username' in data) || (data.username is string && data.username.size() <= 64)) &&
+        (!('email' in data) || (data.email is string && data.email.size() <= 160)) &&
+        (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+        (!('aktif' in data) || data.aktif is bool) &&
+        (!('dibuatPada' in data) || (data.dibuatPada is string && data.dibuatPada.size() <= 32)) &&
+        (!('isGoogleAuth' in data) || data.isGoogleAuth is bool) &&
+        (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    function isValidPasien(data) {
+      return data.keys().hasAll(['nama', 'no_rm']) &&
+        data.keys().hasOnly([
+          'id', 'no_rm', 'nik', 'nama', 'tanggal_lahir', 'tgl_lahir',
+          'jenis_kelamin', 'alamat', 'telepon', 'no_hp', 'golongan_darah',
+          'penjamin', 'status', 'keluhan_utama', 'diagnosa_primer',
+          'alergi', 'tanda_vital', 'resume_medis', 'soap', 'updatedAt'
+        ]) &&
+        data.nama is string && data.nama.size() >= 1 && data.nama.size() <= 160 &&
+        data.no_rm is string && data.no_rm.size() >= 1 && data.no_rm.size() <= 40 &&
+        (!('id' in data) || (data.id is string && data.id.size() <= 128)) &&
+        (!('nik' in data) || (data.nik is string && data.nik.size() <= 32)) &&
+        (!('tanggal_lahir' in data) || (data.tanggal_lahir is string && data.tanggal_lahir.size() <= 32)) &&
+        (!('tgl_lahir' in data) || (data.tgl_lahir is string && data.tgl_lahir.size() <= 32)) &&
+        (!('jenis_kelamin' in data) || (data.jenis_kelamin is string && data.jenis_kelamin.size() <= 20)) &&
+        (!('alamat' in data) || (data.alamat is string && data.alamat.size() <= 500)) &&
+        (!('telepon' in data) || (data.telepon is string && data.telepon.size() <= 40)) &&
+        (!('no_hp' in data) || (data.no_hp is string && data.no_hp.size() <= 40)) &&
+        (!('golongan_darah' in data) || (data.golongan_darah is string && data.golongan_darah.size() <= 10)) &&
+        (!('penjamin' in data) || (data.penjamin is string && data.penjamin.size() <= 80)) &&
+        (!('status' in data) || (data.status is string && data.status.size() <= 40)) &&
+        (!('keluhan_utama' in data) || (data.keluhan_utama is string && data.keluhan_utama.size() <= 1000)) &&
+        (!('diagnosa_primer' in data) || (data.diagnosa_primer is string && data.diagnosa_primer.size() <= 300)) &&
+        (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    function isValidKunjungan(data) {
+      return data.keys().hasAll(['pasien_id', 'tanggal', 'status']) &&
+        data.keys().hasOnly([
+          'id', 'pasien_id', 'tanggal', 'poli_id', 'dokter_id',
+          'penjamin_id', 'status', 'tipe', 'nomor_antrian', 'keluhan_utama', 'updatedAt'
+        ]) &&
+        data.pasien_id is string && data.pasien_id.size() >= 1 && data.pasien_id.size() <= 128 &&
+        data.tanggal is string && data.tanggal.size() >= 1 && data.tanggal.size() <= 32 &&
+        data.status is string && data.status.size() >= 1 && data.status.size() <= 40 &&
+        (!('id' in data) || (data.id is string && data.id.size() <= 128)) &&
+        (!('poli_id' in data) || (data.poli_id is string && data.poli_id.size() <= 64)) &&
+        (!('dokter_id' in data) || (data.dokter_id is string && data.dokter_id.size() <= 64)) &&
+        (!('penjamin_id' in data) || (data.penjamin_id is string && data.penjamin_id.size() <= 64)) &&
+        (!('tipe' in data) || (data.tipe is string && data.tipe.size() <= 40)) &&
+        (!('nomor_antrian' in data) || (data.nomor_antrian is string && data.nomor_antrian.size() <= 32)) &&
+        (!('keluhan_utama' in data) || (data.keluhan_utama is string && data.keluhan_utama.size() <= 1000)) &&
+        (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    function isValidDokter(data) {
+      return data.keys().hasAll(['nama']) &&
+        data.keys().hasOnly([
+          'id', 'nip', 'sip', 'str', 'nama', 'spesialisasi', 'subspesialis',
+          'poli_id', 'poli_nama', 'penempatan', 'jadwal', 'hari', 'jam',
+          'shift', 'ruangan', 'kuota', 'pasien_terlayani', 'status_jaga',
+          'kontak', 'email', 'status', 'updatedAt'
+        ]) &&
+        data.nama is string && data.nama.size() >= 1 && data.nama.size() <= 160 &&
+        (!('id' in data) || (data.id is string && data.id.size() <= 128)) &&
+        (!('spesialisasi' in data) || (data.spesialisasi is string && data.spesialisasi.size() <= 120)) &&
+        (!('poli_id' in data) || (data.poli_id is string && data.poli_id.size() <= 64)) &&
+        (!('status' in data) || (data.status is string && data.status.size() <= 40)) &&
+        (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    function isValidPerawat(data) {
+      return data.keys().hasAll(['nama']) &&
+        data.keys().hasOnly(['id', 'nip', 'nama', 'jabatan', 'unit', 'shift', 'status', 'updatedAt']) &&
+        data.nama is string && data.nama.size() >= 1 && data.nama.size() <= 160 &&
+        (!('id' in data) || (data.id is string && data.id.size() <= 128)) &&
+        (!('nip' in data) || (data.nip is string && data.nip.size() <= 64)) &&
+        (!('jabatan' in data) || (data.jabatan is string && data.jabatan.size() <= 100)) &&
+        (!('unit' in data) || (data.unit is string && data.unit.size() <= 100)) &&
+        (!('shift' in data) || (data.shift is string && data.shift.size() <= 40)) &&
+        (!('status' in data) || (data.status is string && data.status.size() <= 40)) &&
+        (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    function isValidHospitalSettings(data) {
+      return (data.keys().hasAny(['name', 'nama'])) &&
+        data.keys().hasOnly([
+          'name', 'nama', 'subname', 'address', 'alamat', 'city', 'phone',
+          'email', 'website', 'accreditation', 'licenseNumber', 'kodeRs',
+          'kodePpk', 'directorName', 'directorNip', 'hospitalType',
+          'ownership', 'emergencyHotline', 'faxNumber', 'logoUrl', 'updatedAt'
+        ]) &&
+        (!('name' in data) || (data.name is string && data.name.size() <= 160)) &&
+        (!('nama' in data) || (data.nama is string && data.nama.size() <= 160)) &&
+        (!('address' in data) || (data.address is string && data.address.size() <= 500)) &&
+        (!('alamat' in data) || (data.alamat is string && data.alamat.size() <= 500)) &&
+        (!('logoUrl' in data) || (data.logoUrl is string && data.logoUrl.size() <= 100000)) &&
+        (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    function isValidSystemData(data) {
+      return data.keys().hasAll(['key']) &&
+        data.keys().hasOnly(['key', 'data', 'updatedAt']) &&
+        data.key is string && data.key.size() >= 1 && data.key.size() <= 128 &&
+        (!('data' in data) || (data.data is string && data.data.size() <= 950000)) &&
+        (!('updatedAt' in data) || (data.updatedAt is string && data.updatedAt.size() <= 64));
+    }
+
+    function isValidActivityLog(data) {
+      return data.keys().hasAll(['id', 'category', 'action', 'target', 'status', 'timestamp', 'user', 'details']) &&
+        data.keys().hasOnly(['id', 'category', 'action', 'target', 'status', 'timestamp', 'user', 'details']) &&
+        data.id is string && data.id.size() >= 1 && data.id.size() <= 128 &&
+        data.category in ['auth', 'database', 'security', 'ai'] &&
+        data.action is string && data.action.size() >= 1 && data.action.size() <= 80 &&
+        data.target is string && data.target.size() >= 1 && data.target.size() <= 200 &&
+        data.status in ['SUCCESS', 'FAILED', 'DENIED', 'WARNING'] &&
+        data.timestamp is string && data.timestamp.size() >= 1 && data.timestamp.size() <= 64 &&
+        data.user is map &&
+        data.details is map;
+    }
+
+    // --- 1. USERS COLLECTION (Strict PII Isolation & Anti-Privilege-Escalation) ---
     match /users/{userId} {
-      allow read, write: if true;
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isSuperAdminEmail() || (isVerifiedUser() && resource.data.uid == request.auth.uid);
+
+      allow create: if isValidId(userId) && isVerifiedUser() && isValidUser(incoming()) && (
+        isAdmin() ||
+        (
+          isOwner(userId) &&
+          incoming().uid == request.auth.uid &&
+          incoming().email == request.auth.token.email &&
+          (isSuperAdminEmail() ? incoming().roleId == 'super_admin' : incoming().roleId == 'viewer')
+        )
+      );
+
+      allow update: if isValidId(userId) && isVerifiedUser() && isValidUser(incoming()) && (
+        isAdmin() ||
+        (
+          isOwner(userId) &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['nama', 'photoURL', 'username', 'updatedAt']) &&
+          incoming().roleId == existing().roleId &&
+          incoming().aktif == existing().aktif
+        )
+      );
+
+      allow delete: if isValidId(userId) && isAdmin();
     }
-    
-    // Core patient records
+
+    // --- 2. PASIEN COLLECTION ---
     match /pasien/{pasienId} {
-      allow read, write: if true;
+      allow get: if isValidId(pasienId) && (isClinicalOrAdmin() || (isVerifiedUser() && existing().no_rm is string));
+      allow list: if isVerifiedUser() && resource.data.no_rm is string;
+      allow create, update: if isValidId(pasienId) && isClinicalOrAdmin() && isValidPasien(incoming());
+      allow delete: if isValidId(pasienId) && isAdmin();
     }
-    
-    // Hospital visits and queues
+
+    // --- 3. KUNJUNGAN COLLECTION ---
     match /kunjungan/{kunjunganId} {
-      allow read, write: if true;
+      allow get: if isValidId(kunjunganId) && isVerifiedUser();
+      allow list: if isVerifiedUser() && resource.data.pasien_id is string;
+      allow create, update: if isValidId(kunjunganId) && isClinicalOrAdmin() && isValidKunjungan(incoming());
+      allow delete: if isValidId(kunjunganId) && isAdmin();
     }
-    
-    // Medical personnel
+
+    // --- 4. DOKTER & PERAWAT MASTER DATA ---
     match /dokter/{dokterId} {
-      allow read, write: if true;
+      allow get: if isValidId(dokterId) && isVerifiedUser();
+      allow list: if isVerifiedUser() && resource.data.nama is string;
+      allow create, update: if isValidId(dokterId) && isClinicalOrAdmin() && isValidDokter(incoming());
+      allow delete: if isValidId(dokterId) && isAdmin();
     }
-    
+
     match /perawat/{perawatId} {
-      allow read, write: if true;
+      allow get: if isValidId(perawatId) && isVerifiedUser();
+      allow list: if isVerifiedUser() && resource.data.nama is string;
+      allow create, update: if isValidId(perawatId) && isClinicalOrAdmin() && isValidPerawat(incoming());
+      allow delete: if isValidId(perawatId) && isAdmin();
     }
-    
-    // Hospital global configuration
+
+    // --- 5. HOSPITAL SETTINGS ---
     match /hospital_settings/{settingId} {
-      allow read, write: if true;
+      allow get: if isValidId(settingId) && isVerifiedUser();
+      allow list: if isVerifiedUser() && (resource.data.name is string || resource.data.nama is string);
+      allow create, update: if isValidId(settingId) && isAdmin() && isValidHospitalSettings(incoming());
+      allow delete: if isValidId(settingId) && isAdmin();
     }
-    
-    // Synchronized module storage
+
+    // --- 6. SYSTEM DATA (PERSISTENCE KEYS) ---
     match /system_data/{dataId} {
-      allow read, write: if true;
+      allow get: if isValidId(dataId) && isVerifiedUser();
+      allow list: if isVerifiedUser() && resource.data.key is string;
+      allow create, update: if isValidId(dataId) && isClinicalOrAdmin() && isValidSystemData(incoming());
+      allow delete: if isValidId(dataId) && isAdmin();
     }
 
-    // Real-time security and activity audit logs
+    // --- 7. ACTIVITY LOGS (APPEND-ONLY AUDIT TRAIL) ---
     match /activity_logs/{logId} {
-      allow read, write: if true;
+      allow get: if isValidId(logId) && (isAdmin() || (isVerifiedUser() && existing().user.uid == request.auth.uid));
+      allow list: if isSuperAdminEmail() || (isVerifiedUser() && resource.data.user.uid == request.auth.uid);
+      allow create: if isValidId(logId) && isVerifiedUser() && isValidActivityLog(incoming()) &&
+        (isSuperAdminEmail() || incoming().user.uid == request.auth.uid);
+      allow update, delete: if false;
     }
 
-    // Health check validation
+    // --- 8. HEALTH CHECK DOCUMENT ---
     match /test/{docId} {
-      allow read, write: if true;
+      allow get: if isValidId(docId) && isSignedIn();
+      allow list, write: if false;
     }
   }
 }

@@ -83,7 +83,7 @@ export function MedicalSearchGrounding({
       <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 p-5 text-white flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
-            <Globe className="w-6 h-6 text-cyan-200 animate-pulse" />
+            <Globe className="w-6 h-6 text-cyan-200" />
           </div>
           <div>
             <div className="flex items-center gap-2">

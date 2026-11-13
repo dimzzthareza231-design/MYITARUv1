@@ -400,7 +400,8 @@ export function SmartVoiceReport({
 
     // 2. Also persist to localStorage for full persistence
     try {
-      const savedReports = [];
+      const existingRaw = localStorage.getItem('hospital_voice_reports');
+      const savedReports: any[] = existingRaw ? JSON.parse(existingRaw) : [];
       const newReport = {
         id: Date.now(),
         patientId: patient?.id || patient?.no_rm || 'RM-UNKNOWN',
@@ -410,13 +411,18 @@ export function SmartVoiceReport({
         soap: verifiedSOAP,
         verifiedBy: 'dr. Verifikator (Sp.PD / Dokter Jaga)'
       };
-      savedReports.unshift(newReport);
+      const updatedReports = [newReport, ...(Array.isArray(savedReports) ? savedReports : [])].slice(0, 50);
+      localStorage.setItem('hospital_voice_reports', JSON.stringify(updatedReports));
 
-
-      // Update draft SOAP in localStorage
-
-
-      // Update last resume)
+      if (patient?.no_rm || patient?.id) {
+        localStorage.setItem(
+          `hospital_soap_draft_${patient?.no_rm || patient?.id}`,
+          JSON.stringify({
+            ...verifiedSOAP,
+            updatedAt: new Date().toISOString()
+          })
+        );
+      }
 
       if (onApplyToRecord) {
         onApplyToRecord(newReport);
@@ -452,13 +458,13 @@ export function SmartVoiceReport({
         <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-purple-800 text-white p-5 flex items-center justify-between shadow-md">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-inner">
-              <Mic className="w-6 h-6 text-cyan-300 animate-pulse" />
+              <Mic className={`w-6 h-6 text-cyan-300 ${isListening ? 'animate-pulse' : ''}`} />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold tracking-tight">🎙️ Laporan Suara Cerdas (Smart Voice Report)</h2>
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-cyan-400/20 text-cyan-200 border border-cyan-300/30 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-cyan-300" /> AI Scribe v2.5
+                  <Sparkles className="w-3 h-3 text-cyan-300" /> AI Scribe
                 </span>
               </div>
               <p className="text-xs text-blue-100 mt-0.5">
@@ -585,7 +591,7 @@ export function SmartVoiceReport({
                       Status Audio Input
                     </label>
                     <div className="text-lg font-bold text-slate-900 dark:text-white mt-1 flex items-center gap-2">
-                      <span className={`w-3 h-3 rounded-full ${isListening ? 'bg-rose-500 animate-ping' : 'bg-slate-400'}`}></span>
+                      <span className={`w-3 h-3 rounded-full ${isListening ? 'bg-rose-500 ring-4 ring-rose-500/30' : 'bg-slate-400'}`}></span>
                       {isListening ? 'Mendengarkan...' : 'Siap / Standby'}
                     </div>
                   </div>

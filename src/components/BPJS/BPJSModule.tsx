@@ -38,7 +38,8 @@ export function BPJSModule() {
       else if (tab.includes('surat kontrol') || tab.includes('sk')) setActiveTab('sk');
       else if (tab.includes('rujuk balik') || tab.includes('prb')) setActiveTab('prb');
       else if (tab.includes('rujukan')) setActiveTab('rujukan');
-      else if (tab.includes('klaim') || tab.includes('ina-cbg') || tab.includes('vedika') || tab.includes('validator')) setActiveTab('klaim');
+      else if (tab.includes('validator') || tab.includes('ai ')) setActiveTab('validator');
+      else if (tab.includes('klaim') || tab.includes('ina-cbg') || tab.includes('vedika')) setActiveTab('klaim');
       else if (tab.includes('antrean') || tab.includes('antrian')) setActiveTab('antrean');
       else if (tab.includes('icare') || tab.includes('i-care')) setActiveTab('icare');
       else if (tab.includes('faskes') || tab.includes('maps') || tab.includes('peta')) setActiveTab('faskes-maps');
@@ -58,6 +59,7 @@ export function BPJSModule() {
     { id: 'rujukan', label: 'Rujukan', icon: FileText },
     { id: 'faskes-maps', label: 'Peta Faskes BPJS', icon: MapPin },
     { id: 'klaim', label: 'Manajemen Klaim', icon: Receipt },
+    { id: 'validator', label: 'AI Claim Validator', icon: Bot },
     { id: 'antrean', label: 'Antrean Online', icon: Clock },
     { id: 'icare', label: 'i-Care JKN', icon: History },
     { id: 'mapping', label: 'Mapping Kode', icon: FileCode2 },
@@ -85,6 +87,7 @@ export function BPJSModule() {
         </div>
       );
       case 'klaim': return <KlaimBPJS />;
+      case 'validator': return <AIValidatorBPJS />;
       case 'antrean': return <AntreanOnlineBPJS />;
       case 'icare': return <ICareJKN />;
       case 'mapping': return <MappingKodeBPJS />;

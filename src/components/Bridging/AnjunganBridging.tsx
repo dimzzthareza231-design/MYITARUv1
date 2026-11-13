@@ -195,7 +195,7 @@ function DisplayMonitorTab() {
           <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-300">
             DISPLAY INFORMASI ANTREAN POLIKLINIK Klinik MYITARU
           </h2>
-          <p className="text-xs text-slate-400">RSUD Smart Hospital - Gedung Pelayanan Rawat Jalan Terpadu</p>
+          <p className="text-xs text-slate-400">Klinik Smart Medika - Gedung Pelayanan Rawat Jalan Terpadu</p>
         </div>
         <div className="text-right font-mono text-sm text-sky-400 font-bold">
           {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
@@ -377,7 +377,7 @@ function PengaturanAPMTab() {
         <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Model Suara Bell Pembuka</label>
         <select className="w-full p-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 font-semibold">
           <option>Airport Chime (Ting-Tong-Ting)</option>
-          <option>Modern Hospital Ding (2-Tone)</option>
+          <option>Modern Klinik Ding (2-Tone)</option>
           <option>Classic Bell</option>
         </select>
       </div>

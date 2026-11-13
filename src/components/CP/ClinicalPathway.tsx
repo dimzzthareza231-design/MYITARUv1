@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { 
   GitMerge, UserCheck, AlertCircle, BarChart3, Plus, Check, Search, Calendar, FileText
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function ClinicalPathway() {
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'builder' | 'tracking' | 'variance' | 'outcome'>('builder');
+
+  useEffect(() => {
+    const subtab = (searchParams.get('subtab') || '').toLowerCase();
+    if (subtab === 'variance' || subtab === 'tracking' || subtab === 'outcome' || subtab === 'builder') {
+      setActiveTab(subtab);
+    }
+  }, [searchParams]);
 
   const tabs = [
     { id: 'builder', label: 'Pathway Builder', icon: GitMerge },

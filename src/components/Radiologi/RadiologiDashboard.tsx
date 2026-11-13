@@ -107,7 +107,7 @@ export function RadiologiDashboard() {
         <div>
           <div className="flex items-center gap-2.5">
             <span className="p-2.5 bg-pink-600/30 text-pink-400 rounded-2xl border border-pink-500/30 backdrop-blur-md">
-              <Radio className="w-6 h-6 animate-pulse" />
+              <Radio className="w-6 h-6" />
             </span>
             <div>
               <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
@@ -123,7 +123,7 @@ export function RadiologiDashboard() {
         {/* Live Status Indicators */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <div className="px-3 py-1.5 bg-slate-900/80 border border-slate-700 rounded-xl flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
             <span className="text-slate-300 font-mono">PACS Node: 104.28.1.99 (Online)</span>
           </div>
 

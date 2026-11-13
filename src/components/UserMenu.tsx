@@ -17,7 +17,7 @@ export default function UserMenu() {
 
   const handleLogout = async () => {
     await logout();
-    toast.success('Anda telah logout dari MYITARU SIMRS');
+    toast.success('Anda telah logout dari MYITARU SIMK');
   };
 
   return (
@@ -113,7 +113,7 @@ export default function UserMenu() {
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/15 hover:text-rose-300 rounded-xl transition-colors font-semibold"
               >
                 <LogOut size={15} />
-                <span>Logout Keluar SIMRS</span>
+                <span>Logout Keluar SIMK</span>
               </button>
             </div>
           </div>

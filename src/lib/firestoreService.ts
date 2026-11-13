@@ -10,7 +10,7 @@ import {
   getDocFromServer,
   writeBatch
 } from 'firebase/firestore';
-import { db, auth } from './firebase';
+import { db, auth, isFirebaseConfigured } from './firebase';
 import { Pasien, Kunjungan, MasterDokter, MasterPerawat } from '../types';
 import { logDatabaseAccess } from './activityLogger';
 
@@ -40,7 +40,7 @@ export interface FirestoreErrorInfo {
   };
 }
 
-export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): never {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
@@ -57,12 +57,13 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path
   };
-  console.warn(`[Firestore ${operationType} at ${path}]:`, errInfo.error);
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
 }
 
 // 1. Connection Validation as mandated by Firebase Skill
 export async function testConnection(): Promise<boolean> {
-  if (!db) {
+  if (!isFirebaseConfigured || !db) {
     setCloudStatus({ isConnected: false });
     return false;
   }
@@ -159,7 +160,7 @@ export function setCloudStatus(patch: Partial<CloudStatus>) {
 const writeDebounceTimers = new Map<string, any>();
 
 export async function saveSystemDataCloud(key: string, data: any): Promise<void> {
-  if (!key) return;
+  if (!key || !isFirebaseConfigured || !db || !auth?.currentUser) return;
 
   setCloudStatus({ isSyncing: true, pendingWrites: currentCloudStatus.pendingWrites + 1 });
 
@@ -168,15 +169,15 @@ export async function saveSystemDataCloud(key: string, data: any): Promise<void>
     clearTimeout(writeDebounceTimers.get(key));
   }
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const timer = setTimeout(async () => {
       writeDebounceTimers.delete(key);
+      const path = `system_data/${key}`;
       try {
-        const path = `system_data/${key}`;
-        // Store payload as serialized string or structured object
+        const serialized = typeof data === 'string' ? data : JSON.stringify(data);
         const payload = {
-          key,
-          data: typeof data === 'string' ? data : JSON.stringify(data),
+          key: String(key).slice(0, 128),
+          data: serialized.slice(0, 900000),
           updatedAt: new Date().toISOString()
         };
         await setDoc(doc(db, 'system_data', key), payload, { merge: true });
@@ -188,12 +189,15 @@ export async function saveSystemDataCloud(key: string, data: any): Promise<void>
         });
         resolve();
       } catch (err) {
-        handleFirestoreError(err, OperationType.WRITE, `system_data/${key}`);
         setCloudStatus({
           isSyncing: false,
           pendingWrites: Math.max(0, currentCloudStatus.pendingWrites - 1)
         });
-        resolve();
+        try {
+          handleFirestoreError(err, OperationType.WRITE, path);
+        } catch (wrappedErr) {
+          reject(wrappedErr);
+        }
       }
     }, 400);
 
@@ -202,6 +206,7 @@ export async function saveSystemDataCloud(key: string, data: any): Promise<void>
 }
 
 export async function getSystemDataCloud(key: string): Promise<any | null> {
+  if (!key || !isFirebaseConfigured || !db || !auth?.currentUser) return null;
   const path = `system_data/${key}`;
   try {
     const snap = await getDoc(doc(db, 'system_data', key));
@@ -217,11 +222,11 @@ export async function getSystemDataCloud(key: string): Promise<any | null> {
     return null;
   } catch (err) {
     handleFirestoreError(err, OperationType.GET, path);
-    return null;
   }
 }
 
 export function subscribeSystemData(key: string, onData: (data: any) => void): () => void {
+  if (!key || !isFirebaseConfigured || !db || !auth?.currentUser) return () => {};
   const path = `system_data/${key}`;
   try {
     return onSnapshot(doc(db, 'system_data', key), (snap) => {
@@ -240,7 +245,6 @@ export function subscribeSystemData(key: string, onData: (data: any) => void): (
     });
   } catch (err) {
     handleFirestoreError(err, OperationType.GET, path);
-    return () => {};
   }
 }
 
@@ -248,6 +252,7 @@ export function subscribeSystemData(key: string, onData: (data: any) => void): (
 
 // PASIEN
 export async function savePasienCloud(p: Pasien): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   const path = `pasien/${p.id}`;
   try {
     await setDoc(doc(db, 'pasien', String(p.id)), {
@@ -261,6 +266,7 @@ export async function savePasienCloud(p: Pasien): Promise<void> {
 }
 
 export async function updatePasienCloud(id: string, updates: Partial<Pasien>): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   const path = `pasien/${id}`;
   try {
     await updateDoc(doc(db, 'pasien', String(id)), {
@@ -274,6 +280,7 @@ export async function updatePasienCloud(id: string, updates: Partial<Pasien>): P
 }
 
 export async function batchSeedPasienCloud(patients: Pasien[]): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   try {
     const chunks: Pasien[][] = [];
     for (let i = 0; i < patients.length; i += 100) {
@@ -295,6 +302,7 @@ export async function batchSeedPasienCloud(patients: Pasien[]): Promise<void> {
 
 // KUNJUNGAN
 export async function saveKunjunganCloud(k: Kunjungan): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   const path = `kunjungan/${k.id}`;
   try {
     await setDoc(doc(db, 'kunjungan', String(k.id)), {
@@ -308,6 +316,7 @@ export async function saveKunjunganCloud(k: Kunjungan): Promise<void> {
 }
 
 export async function updateKunjunganCloud(id: string, updates: Partial<Kunjungan>): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   const path = `kunjungan/${id}`;
   try {
     await updateDoc(doc(db, 'kunjungan', String(id)), {
@@ -321,6 +330,7 @@ export async function updateKunjunganCloud(id: string, updates: Partial<Kunjunga
 }
 
 export async function batchSeedKunjunganCloud(visits: Kunjungan[]): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   try {
     const chunks: Kunjungan[][] = [];
     for (let i = 0; i < visits.length; i += 100) {
@@ -342,6 +352,7 @@ export async function batchSeedKunjunganCloud(visits: Kunjungan[]): Promise<void
 
 // DOKTER
 export async function saveDokterCloud(d: MasterDokter): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   const path = `dokter/${d.id}`;
   try {
     await setDoc(doc(db, 'dokter', String(d.id)), {
@@ -355,6 +366,7 @@ export async function saveDokterCloud(d: MasterDokter): Promise<void> {
 }
 
 export async function batchSeedDokterCloud(doctors: MasterDokter[]): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   try {
     const batch = writeBatch(db);
     doctors.forEach(d => {
@@ -369,6 +381,7 @@ export async function batchSeedDokterCloud(doctors: MasterDokter[]): Promise<voi
 
 // PERAWAT
 export async function savePerawatCloud(n: MasterPerawat): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   const path = `perawat/${n.id}`;
   try {
     await setDoc(doc(db, 'perawat', String(n.id)), {
@@ -382,6 +395,7 @@ export async function savePerawatCloud(n: MasterPerawat): Promise<void> {
 }
 
 export async function batchSeedPerawatCloud(nurses: MasterPerawat[]): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   try {
     const batch = writeBatch(db);
     nurses.forEach(n => {
@@ -396,6 +410,7 @@ export async function batchSeedPerawatCloud(nurses: MasterPerawat[]): Promise<vo
 
 // HOSPITAL SETTINGS
 export async function saveHospitalSettingsCloud(settings: any): Promise<void> {
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   const path = 'hospital_settings/main';
   try {
     await setDoc(doc(db, 'hospital_settings', 'main'), {

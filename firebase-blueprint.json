@@ -5,14 +5,17 @@
       "description": "Hospital staff and user profiles",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "username": { "type": "string" },
-        "nama": { "type": "string" },
-        "email": { "type": "string", "format": "email" },
-        "roleId": { "type": "string" },
+        "id": { "type": "string", "maxLength": 128 },
+        "uid": { "type": "string", "maxLength": 128 },
+        "username": { "type": "string", "maxLength": 64 },
+        "nama": { "type": "string", "maxLength": 120 },
+        "email": { "type": "string", "format": "email", "maxLength": 160 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "roleId": { "type": "string", "maxLength": 40 },
         "aktif": { "type": "boolean" },
-        "dibuatPada": { "type": "string" },
-        "isGoogleAuth": { "type": "boolean" }
+        "dibuatPada": { "type": "string", "maxLength": 32 },
+        "isGoogleAuth": { "type": "boolean" },
+        "updatedAt": { "type": "string", "maxLength": 64 }
       },
       "required": ["nama", "roleId"]
     },
@@ -21,15 +24,22 @@
       "description": "Hospital patient demographic and medical records",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "no_rm": { "type": "string" },
-        "nik": { "type": "string" },
-        "nama": { "type": "string" },
-        "tanggal_lahir": { "type": "string" },
-        "jenis_kelamin": { "type": "string" },
-        "alamat": { "type": "string" },
-        "penjamin": { "type": "string" },
-        "status": { "type": "string" }
+        "id": { "type": "string", "maxLength": 128 },
+        "no_rm": { "type": "string", "maxLength": 40 },
+        "nik": { "type": "string", "maxLength": 32 },
+        "nama": { "type": "string", "maxLength": 160 },
+        "tanggal_lahir": { "type": "string", "maxLength": 32 },
+        "tgl_lahir": { "type": "string", "maxLength": 32 },
+        "jenis_kelamin": { "type": "string", "maxLength": 20 },
+        "alamat": { "type": "string", "maxLength": 500 },
+        "telepon": { "type": "string", "maxLength": 40 },
+        "no_hp": { "type": "string", "maxLength": 40 },
+        "golongan_darah": { "type": "string", "maxLength": 10 },
+        "penjamin": { "type": "string", "maxLength": 80 },
+        "status": { "type": "string", "maxLength": 40 },
+        "keluhan_utama": { "type": "string", "maxLength": 1000 },
+        "diagnosa_primer": { "type": "string", "maxLength": 300 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
       },
       "required": ["nama", "no_rm"]
     },
@@ -38,14 +48,17 @@
       "description": "Outpatient, inpatient, and emergency patient visits",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "pasien_id": { "type": "string" },
-        "tanggal": { "type": "string" },
-        "poli_id": { "type": "string" },
-        "dokter_id": { "type": "string" },
-        "status": { "type": "string" },
-        "tipe": { "type": "string" },
-        "nomor_antrian": { "type": "string" }
+        "id": { "type": "string", "maxLength": 128 },
+        "pasien_id": { "type": "string", "maxLength": 128 },
+        "tanggal": { "type": "string", "maxLength": 32 },
+        "poli_id": { "type": "string", "maxLength": 64 },
+        "dokter_id": { "type": "string", "maxLength": 64 },
+        "penjamin_id": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "maxLength": 40 },
+        "tipe": { "type": "string", "maxLength": 40 },
+        "nomor_antrian": { "type": "string", "maxLength": 32 },
+        "keluhan_utama": { "type": "string", "maxLength": 1000 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
       },
       "required": ["pasien_id", "tanggal", "status"]
     },
@@ -54,9 +67,12 @@
       "description": "Medical doctors and specialists master data",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "nama": { "type": "string" },
-        "spesialisasi": { "type": "string" }
+        "id": { "type": "string", "maxLength": 128 },
+        "nama": { "type": "string", "maxLength": 160 },
+        "spesialisasi": { "type": "string", "maxLength": 120 },
+        "poli_id": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "maxLength": 40 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
       },
       "required": ["nama"]
     },
@@ -65,8 +81,14 @@
       "description": "Nurses master data",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "nama": { "type": "string" }
+        "id": { "type": "string", "maxLength": 128 },
+        "nip": { "type": "string", "maxLength": 64 },
+        "nama": { "type": "string", "maxLength": 160 },
+        "jabatan": { "type": "string", "maxLength": 100 },
+        "unit": { "type": "string", "maxLength": 100 },
+        "shift": { "type": "string", "maxLength": 40 },
+        "status": { "type": "string", "maxLength": 40 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
       },
       "required": ["nama"]
     },
@@ -75,18 +97,27 @@
       "description": "Hospital general metadata and settings",
       "type": "object",
       "properties": {
-        "nama": { "type": "string" },
-        "alamat": { "type": "string" }
+        "name": { "type": "string", "maxLength": 160 },
+        "nama": { "type": "string", "maxLength": 160 },
+        "address": { "type": "string", "maxLength": 500 },
+        "alamat": { "type": "string", "maxLength": 500 },
+        "city": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 60 },
+        "email": { "type": "string", "maxLength": 160 },
+        "website": { "type": "string", "maxLength": 200 },
+        "logoUrl": { "type": "string", "maxLength": 100000 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
       },
-      "required": ["nama"]
+      "required": ["name"]
     },
     "SystemData": {
       "title": "SystemData",
       "description": "Module state persistence",
       "type": "object",
       "properties": {
-        "key": { "type": "string" },
-        "data": { "type": "string" }
+        "key": { "type": "string", "maxLength": 128 },
+        "data": { "type": "string", "maxLength": 950000 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
       },
       "required": ["key"]
     },
@@ -95,18 +126,16 @@
       "description": "Security audit logs for Firebase authentication and database access attempts",
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "category": { "type": "string" },
-        "action": { "type": "string" },
-        "target": { "type": "string" },
-        "status": { "type": "string" },
-        "userEmail": { "type": "string" },
-        "userName": { "type": "string" },
-        "userRole": { "type": "string" },
+        "id": { "type": "string", "maxLength": 128 },
+        "category": { "type": "string", "enum": ["auth", "database", "security", "ai"], "maxLength": 32 },
+        "action": { "type": "string", "maxLength": 80 },
+        "target": { "type": "string", "maxLength": 200 },
+        "status": { "type": "string", "enum": ["SUCCESS", "FAILED", "DENIED", "WARNING"], "maxLength": 20 },
+        "user": { "type": "object" },
         "details": { "type": "object" },
-        "timestamp": { "type": "string" }
+        "timestamp": { "type": "string", "maxLength": 64 }
       },
-      "required": ["category", "action", "status", "timestamp"]
+      "required": ["id", "category", "action", "status", "timestamp"]
     }
   },
   "firestore": {

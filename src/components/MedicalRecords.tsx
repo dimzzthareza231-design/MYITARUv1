@@ -657,7 +657,7 @@ export function MedicalRecords() {
             <User className="w-4 h-4 text-blue-500" />
           </div>
           <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{totalPasien}</p>
-          <p className="text-[11px] text-slate-400 mt-1">Aktif di SIMRS Myitaru</p>
+          <p className="text-[11px] text-slate-400 mt-1">Aktif di SIMK Myitaru</p>
         </div>
 
         <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">

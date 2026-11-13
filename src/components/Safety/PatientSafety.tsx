@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { 
   ShieldAlert, FileText, Search, Activity, GitCommit, CheckCircle, Clock, AlertTriangle,
   GitMerge, PackageSearch
@@ -10,24 +10,34 @@ import { CSSDManagement } from '../CSSD/CSSDManagement';
 
 export function PatientSafety() {
   const outletCtx = useOutletContext<{ activeTab?: string }>();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'incident' | 'investigation' | 'risk' | 'cp' | 'cssd'>('incident');
 
   useEffect(() => {
+    const subtab = (searchParams.get('subtab') || '').toLowerCase();
     if (outletCtx?.activeTab) {
       const tab = outletCtx.activeTab.toLowerCase();
       if (tab.includes('clinical pathway') || tab.includes('pathway') || tab.includes('cp')) {
         setActiveTab('cp');
+        return;
       } else if (tab.includes('cssd') || tab.includes('sterilisasi')) {
         setActiveTab('cssd');
-      } else if (tab.includes('insiden') || tab.includes('incident')) {
-        setActiveTab('incident');
-      } else if (tab.includes('investigasi') || tab.includes('rca')) {
+        return;
+      } else if (subtab === 'investigation' || tab.includes('investigasi') || tab.includes('rca')) {
         setActiveTab('investigation');
-      } else if (tab.includes('risk') || tab.includes('risiko') || tab.includes('safety')) {
+        return;
+      } else if (subtab === 'risk' || tab.includes('risk') || tab.includes('risiko')) {
         setActiveTab('risk');
+        return;
+      } else if (subtab === 'incident' || tab.includes('insiden') || tab.includes('incident')) {
+        setActiveTab('incident');
+        return;
       }
     }
-  }, [outletCtx?.activeTab]);
+    if (subtab === 'investigation') setActiveTab('investigation');
+    else if (subtab === 'risk') setActiveTab('risk');
+    else if (subtab === 'incident') setActiveTab('incident');
+  }, [outletCtx?.activeTab, searchParams]);
 
   if (activeTab === 'cp') {
     return <ClinicalPathway />;

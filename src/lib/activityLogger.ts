@@ -1,4 +1,5 @@
 import { collection, doc, setDoc, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import { db, isFirebaseConfigured, auth } from './firebase';
 
 export type ActivityCategory = 'auth' | 'database' | 'security' | 'ai';
@@ -140,9 +141,17 @@ if (localLogsBuffer.length === 0) {
 
 // Real-time Firestore synchronization listener
 let firestoreUnsubscribe: (() => void) | null = null;
+let authWatchInitialized = false;
+
+function stopFirestoreListener() {
+  if (firestoreUnsubscribe) {
+    firestoreUnsubscribe();
+    firestoreUnsubscribe = null;
+  }
+}
 
 function initFirestoreListener() {
-  if (!isFirebaseConfigured || !db) return;
+  if (!isFirebaseConfigured || !db || !auth?.currentUser) return;
   if (firestoreUnsubscribe) return;
 
   try {
@@ -156,11 +165,8 @@ function initFirestoreListener() {
         });
 
         if (cloudLogs.length > 0) {
-          // Merge cloud logs with any unique local memory logs
           const mergedMap = new Map<string, ActivityLogEntry>();
-          // 1. Put local logs first
           localLogsBuffer.forEach(l => mergedMap.set(l.id, l));
-          // 2. Put cloud logs (overriding or adding)
           cloudLogs.forEach(l => mergedMap.set(l.id, l));
 
           const sorted = Array.from(mergedMap.values()).sort(
@@ -181,11 +187,16 @@ function initFirestoreListener() {
   }
 }
 
-// Auto-run listener if DB is ready
-if (typeof window !== 'undefined') {
-  setTimeout(() => {
-    initFirestoreListener();
-  }, 1000);
+// Watch Firebase Auth state before attaching cloud activity listener
+if (typeof window !== 'undefined' && isFirebaseConfigured && auth && !authWatchInitialized) {
+  authWatchInitialized = true;
+  onAuthStateChanged(auth, (fUser) => {
+    if (fUser) {
+      initFirestoreListener();
+    } else {
+      stopFirestoreListener();
+    }
+  });
 }
 
 /**
@@ -222,10 +233,20 @@ export async function logActivity(entry: Omit<ActivityLogEntry, 'id' | 'timestam
   }
   notifyListeners();
 
-  // Asynchronously commit to Cloud Firestore
-  if (isFirebaseConfigured && db) {
+  // Asynchronously commit to Cloud Firestore only when Firebase Auth session is active
+  if (isFirebaseConfigured && db && auth?.currentUser) {
     try {
-      await setDoc(doc(db, 'activity_logs', fullEntry.id), fullEntry);
+      const sanitizedEntry: ActivityLogEntry = {
+        ...fullEntry,
+        user: {
+          uid: fullEntry.user.uid || auth.currentUser.uid,
+          email: (fullEntry.user.email || '').slice(0, 160),
+          nama: (fullEntry.user.nama || '').slice(0, 120),
+          roleId: (fullEntry.user.roleId || 'staff').slice(0, 40),
+          authProvider: (fullEntry.user.authProvider || 'firebase').slice(0, 40)
+        }
+      };
+      await setDoc(doc(db, 'activity_logs', fullEntry.id), sanitizedEntry);
     } catch (err) {
       console.warn('[ActivityLogger] Cloud persist skipped:', err);
     }
@@ -320,7 +341,7 @@ export function logAIAttempt(params: {
   return logActivity({
     category: 'ai',
     action: params.action,
-    target: `gemini-3.8-flash/${params.module}`,
+    target: `gemini-4-hydrogen/${params.module}`,
     status: params.status,
     user: {
       uid: auth?.currentUser?.uid,
@@ -371,7 +392,7 @@ export async function simulateActivityEvent(type: 'auth_success' | 'auth_failed'
       return logAuthAttempt({
         action: 'GOOGLE_SIGN_IN',
         status: 'SUCCESS',
-        email: 'doctor.andi@hospital.id',
+        email: 'doctor.andi@klinik.id',
         nama: 'Dr. Andi Pratama, Sp.PD',
         roleId: 'dokter',
         authProvider: 'google.com',
@@ -458,7 +479,7 @@ export function exportLogsToCsv(logs: ActivityLogEntry[]) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `simrs_activity_logs_${new Date().toISOString().slice(0, 10)}.csv`);
+  link.setAttribute('download', `simk_activity_logs_${new Date().toISOString().slice(0, 10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
